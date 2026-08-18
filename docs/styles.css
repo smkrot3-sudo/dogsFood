@@ -4,8 +4,8 @@
   --ink: #14202b;
   --muted: #5b6b7a;
   --line: #e2e8ee;
-  --brand: #0a7d4b;      /* pet-store green */
-  --brand-dark: #075f39;
+  --brand: #d6006e;      /* Anipet magenta */
+  --brand-dark: #a80057;
   --accent: #ff7a1a;
   --up: #d12b2b;         /* price went up */
   --down: #0a7d4b;       /* price went down */
@@ -19,8 +19,8 @@
     --ink: #eef3f7;
     --muted: #9fb0bf;
     --line: #26333f;
-    --brand: #1aa564;
-    --brand-dark: #148a52;
+    --brand: #ff2e9a;
+    --brand-dark: #d6006e;
     --shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
   }
 }
@@ -49,7 +49,14 @@ header.top .bar {
   padding: 12px 14px;
 }
 header.top .logo { font-size: 22px; }
-header.top h1 { font-size: 18px; margin: 0; font-weight: 700; flex: 1; }
+header.top .logo-img {
+  height: 30px; display: block; background: #fff;
+  padding: 5px 9px; border-radius: 10px; box-shadow: 0 1px 4px rgba(0,0,0,.15);
+}
+header.top h1 {
+  font-size: 15px; margin: 0; font-weight: 700; flex: 1;
+  opacity: .95; letter-spacing: .2px;
+}
 header.top a.navlink {
   color: #fff; text-decoration: none; font-size: 13px;
   background: rgba(255,255,255,0.16); padding: 7px 11px; border-radius: 999px;

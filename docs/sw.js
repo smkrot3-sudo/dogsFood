@@ -2,7 +2,7 @@
    with cache fallback so the scanner keeps working without a connection. */
 'use strict';
 
-var CACHE = 'anipet-scanner-v1';
+var CACHE = 'anipet-scanner-v2';
 var SHELL = [
   'index.html',
   'changes.html',
@@ -11,6 +11,7 @@ var SHELL = [
   'app.js',
   'changes.js',
   'icon.svg',
+  'anipet-logo.png',
   'manifest.webmanifest',
   'vendor-html5-qrcode.min.js',
 ];
