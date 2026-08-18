@@ -1,0 +1,45 @@
+name: Daily price check
+
+# Runs every morning: downloads the latest Anipet catalog, detects price changes
+# vs. the previous run, and commits the updated data back to the repo. Committing
+# to main automatically rebuilds the GitHub Pages site — no PC needed.
+
+on:
+  schedule:
+    # 03:00 UTC ≈ 06:00 Israel time. Adjust if you want a different hour.
+    - cron: "0 3 * * *"
+  workflow_dispatch: {}   # lets you also run it manually from the Actions tab
+
+permissions:
+  contents: write
+
+concurrency:
+  group: daily-price-check
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Fetch catalog and detect price changes
+        run: node scripts/fetch-catalog.js
+
+      - name: Commit updated data
+        run: |
+          git config user.name "anipet-price-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add docs/data
+          if git diff --cached --quiet; then
+            echo "No data changes today."
+          else
+            git commit -m "Daily price update: $(date -u +%Y-%m-%d)"
+            git push
+          fi

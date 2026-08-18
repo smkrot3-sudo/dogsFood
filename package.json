@@ -1,0 +1,14 @@
+{
+  "name": "anipet-price-scanner",
+  "version": "1.0.0",
+  "private": true,
+  "description": "סורק ברקוד להצגת המחיר העדכני של מוצרי אניפט + בדיקת שינויי מחירים יומית",
+  "scripts": {
+    "start": "node server.js",
+    "fetch": "node scripts/fetch-catalog.js",
+    "check": "node scripts/fetch-catalog.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

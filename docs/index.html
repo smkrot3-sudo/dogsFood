@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0a7d4b" />
+  <title>אניפט — סורק מחירים</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="icon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="top">
+    <div class="bar">
+      <span class="logo">🐾</span>
+      <h1>סורק מחירים · אניפט</h1>
+      <a class="navlink" href="changes.html">שינויי מחירים</a>
+    </div>
+  </header>
+
+  <div class="wrap">
+    <div id="freshness" class="freshness">טוען קטלוג…</div>
+
+    <!-- Result card -->
+    <section id="result" class="result" aria-live="polite">
+      <div class="placeholder">סרוק ברקוד או הזן מספר / שם מוצר כדי לראות את המחיר העדכני</div>
+    </section>
+
+    <!-- Scanner -->
+    <div id="reader"></div>
+    <div class="scan-controls">
+      <button id="startBtn" class="btn">📷 התחל סריקה</button>
+      <button id="stopBtn" class="btn stop" style="display:none">■ עצור</button>
+    </div>
+    <div id="scanStatus" class="status"></div>
+
+    <!-- Manual entry / name search -->
+    <div class="panel">
+      <h2>הזנה ידנית — ברקוד או שם מוצר</h2>
+      <form id="searchForm" class="searchbar" autocomplete="off">
+        <input id="searchInput" type="search" inputmode="text" enterkeyhint="search"
+               placeholder="לדוגמה: 7290113309708 או ״פרו פלאן״" />
+        <button type="submit" class="btn">חפש</button>
+      </form>
+      <div id="hits" class="hits"></div>
+    </div>
+
+    <p class="note">הנתונים נמשכים מ‑anipet.co.il ומתעדכנים אוטומטית פעם ביום.<br />
+      המחיר המוצג הוא המחיר העדכני באתר.</p>
+  </div>
+
+  <script src="vendor-html5-qrcode.min.js"></script>
+  <script src="catalog-loader.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+# Local TLS certificate (private — never push to a public repo)
+certs/
+
+# Node
+node_modules/
+npm-debug.log*
+
+# OS junk
+Thumbs.db
+.DS_Store
