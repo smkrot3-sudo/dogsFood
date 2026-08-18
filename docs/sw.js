@@ -1,8 +1,14 @@
-/* sw.js — offline support. App shell is cache-first; data JSON is network-first
-   with cache fallback so the scanner keeps working without a connection. */
+/* sw.js — offline support.
+   Strategy:
+   - App shell (HTML/CSS/small JS/manifest): NETWORK-FIRST with cache fallback,
+     so when online the user always gets the latest UI; when offline, the cached
+     copy is served. This avoids stale-design problems after a deploy.
+   - Heavy/rarely-changing static assets (the scanner library, images):
+     CACHE-FIRST for speed (they are effectively immutable).
+   - Data JSON (catalog / price changes): NETWORK-FIRST with cache fallback. */
 'use strict';
 
-var CACHE = 'anipet-scanner-v2';
+var CACHE = 'anipet-scanner-v3';
 var SHELL = [
   'index.html',
   'changes.html',
@@ -15,6 +21,9 @@ var SHELL = [
   'manifest.webmanifest',
   'vendor-html5-qrcode.min.js',
 ];
+
+// Assets that basically never change — safe (and fast) to serve cache-first.
+var CACHE_FIRST = /(vendor-html5-qrcode\.min\.js|\.png|\.svg|\.ico)(\?|$)/;
 
 self.addEventListener('install', function (e) {
   e.waitUntil(
@@ -36,31 +45,31 @@ self.addEventListener('activate', function (e) {
   );
 });
 
+function cachePut(req, res) {
+  var copy = res.clone();
+  caches.open(CACHE).then(function (c) { c.put(req, copy); });
+  return res;
+}
+
 self.addEventListener('fetch', function (e) {
   var req = e.request;
   if (req.method !== 'GET') return;
   var url = new URL(req.url);
 
-  // Data JSON: network-first, fall back to cache.
-  if (url.pathname.indexOf('/data/') !== -1) {
+  // Cache-first for heavy, immutable assets.
+  if (CACHE_FIRST.test(url.pathname)) {
     e.respondWith(
-      fetch(req).then(function (res) {
-        var copy = res.clone();
-        caches.open(CACHE).then(function (c) { c.put(req, copy); });
-        return res;
-      }).catch(function () { return caches.match(req); })
+      caches.match(req).then(function (cached) {
+        return cached || fetch(req).then(function (res) { return cachePut(req, res); });
+      })
     );
     return;
   }
 
-  // App shell: cache-first.
+  // Everything else (shell + data): network-first, cache fallback.
   e.respondWith(
-    caches.match(req).then(function (cached) {
-      return cached || fetch(req).then(function (res) {
-        var copy = res.clone();
-        caches.open(CACHE).then(function (c) { c.put(req, copy); });
-        return res;
-      });
-    })
+    fetch(req)
+      .then(function (res) { return cachePut(req, res); })
+      .catch(function () { return caches.match(req); })
   );
 });

@@ -6,8 +6,9 @@ name: Daily price check
 
 on:
   schedule:
-    # 03:00 UTC ≈ 06:00 Israel time. Adjust if you want a different hour.
-    - cron: "0 3 * * *"
+    # 05:00 UTC = 08:00 Israel time (summer / IDT). In winter (IST) this becomes
+    # 07:00 Israel, since GitHub cron is always UTC and has no DST.
+    - cron: "0 5 * * *"
   workflow_dispatch: {}   # lets you also run it manually from the Actions tab
 
 permissions:
