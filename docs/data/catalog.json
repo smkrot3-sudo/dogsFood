@@ -1,10 +1,10 @@
 {
-  "updatedAt": "18.8.2026, 21:02",
-  "date": "2026-08-18",
+  "updatedAt": "19.8.2026, 8:23",
+  "date": "2026-08-19",
   "stats": {
-    "withBarcode": 2022,
+    "withBarcode": 2019,
     "withoutBarcode": 0,
-    "total": 2022
+    "total": 2019
   },
   "byBarcode": {
     "174": {
@@ -10329,45 +10329,6 @@
       "productId": 9846298902768,
       "variantId": 48818688491760
     },
-    "850017655409": {
-      "barcode": "850017655409",
-      "title": "באדי מיטה אורטופדית לכלב",
-      "variant": "M",
-      "price": "379.00",
-      "compareAtPrice": null,
-      "available": true,
-      "vendor": "Toby&Ace",
-      "handle": "באדי-מיטה-אורטופדית-לכלב",
-      "url": "https://www.anipet.co.il/products/באדי-מיטה-אורטופדית-לכלב",
-      "productId": 9837523927280,
-      "variantId": 48787141361904
-    },
-    "850017655416": {
-      "barcode": "850017655416",
-      "title": "באדי מיטה אורטופדית לכלב",
-      "variant": "L",
-      "price": "439.00",
-      "compareAtPrice": null,
-      "available": false,
-      "vendor": "Toby&Ace",
-      "handle": "באדי-מיטה-אורטופדית-לכלב",
-      "url": "https://www.anipet.co.il/products/באדי-מיטה-אורטופדית-לכלב",
-      "productId": 9837523927280,
-      "variantId": 48787141394672
-    },
-    "850017655423": {
-      "barcode": "850017655423",
-      "title": "באדי מיטה אורטופדית לכלב",
-      "variant": "XL",
-      "price": "529.00",
-      "compareAtPrice": null,
-      "available": false,
-      "vendor": "Toby&Ace",
-      "handle": "באדי-מיטה-אורטופדית-לכלב",
-      "url": "https://www.anipet.co.il/products/באדי-מיטה-אורטופדית-לכלב",
-      "productId": 9837523927280,
-      "variantId": 48787141427440
-    },
     "64992510237": {
       "barcode": "64992510237",
       "title": "אקאנה מזון לכלב סניור",
@@ -13507,7 +13468,7 @@
       "variant": "",
       "price": "55.00",
       "compareAtPrice": null,
-      "available": true,
+      "available": false,
       "vendor": "KONG",
       "handle": "קונג-גומז-עצם-דנטלית-m-l-pfd11",
       "url": "https://www.anipet.co.il/products/קונג-גומז-עצם-דנטלית-m-l-pfd11",
@@ -13793,7 +13754,7 @@
       "variant": "7 ק\"ג",
       "price": "295.00",
       "compareAtPrice": null,
-      "available": true,
+      "available": false,
       "vendor": "ND",
       "handle": "nd-כלב-גור-מיני-אושן-קוד-דלעת-מלון",
       "url": "https://www.anipet.co.il/products/nd-כלב-גור-מיני-אושן-קוד-דלעת-מלון",
@@ -32406,45 +32367,6 @@
       "variantId": 48818688491760
     },
     {
-      "barcode": "850017655409",
-      "title": "באדי מיטה אורטופדית לכלב",
-      "variant": "M",
-      "price": "379.00",
-      "compareAtPrice": null,
-      "available": true,
-      "vendor": "Toby&Ace",
-      "handle": "באדי-מיטה-אורטופדית-לכלב",
-      "url": "https://www.anipet.co.il/products/באדי-מיטה-אורטופדית-לכלב",
-      "productId": 9837523927280,
-      "variantId": 48787141361904
-    },
-    {
-      "barcode": "850017655416",
-      "title": "באדי מיטה אורטופדית לכלב",
-      "variant": "L",
-      "price": "439.00",
-      "compareAtPrice": null,
-      "available": false,
-      "vendor": "Toby&Ace",
-      "handle": "באדי-מיטה-אורטופדית-לכלב",
-      "url": "https://www.anipet.co.il/products/באדי-מיטה-אורטופדית-לכלב",
-      "productId": 9837523927280,
-      "variantId": 48787141394672
-    },
-    {
-      "barcode": "850017655423",
-      "title": "באדי מיטה אורטופדית לכלב",
-      "variant": "XL",
-      "price": "529.00",
-      "compareAtPrice": null,
-      "available": false,
-      "vendor": "Toby&Ace",
-      "handle": "באדי-מיטה-אורטופדית-לכלב",
-      "url": "https://www.anipet.co.il/products/באדי-מיטה-אורטופדית-לכלב",
-      "productId": 9837523927280,
-      "variantId": 48787141427440
-    },
-    {
       "barcode": "64992510237",
       "title": "אקאנה מזון לכלב סניור",
       "variant": "2 ק\"ג",
@@ -35882,7 +35804,7 @@
       "variant": "",
       "price": "55.00",
       "compareAtPrice": null,
-      "available": true,
+      "available": false,
       "vendor": "KONG",
       "handle": "קונג-גומז-עצם-דנטלית-m-l-pfd11",
       "url": "https://www.anipet.co.il/products/קונג-גומז-עצם-דנטלית-m-l-pfd11",
@@ -36428,7 +36350,7 @@
       "variant": "7 ק\"ג",
       "price": "295.00",
       "compareAtPrice": null,
-      "available": true,
+      "available": false,
       "vendor": "ND",
       "handle": "nd-כלב-גור-מיני-אושן-קוד-דלעת-מלון",
       "url": "https://www.anipet.co.il/products/nd-כלב-גור-מיני-אושן-קוד-דלעת-מלון",
