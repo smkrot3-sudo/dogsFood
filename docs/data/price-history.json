@@ -1,6 +1,23 @@
 {
   "runs": [
     {
+      "date": "2026-08-20",
+      "updatedAt": "20.8.2026, 8:24",
+      "count": 1,
+      "changes": [
+        {
+          "barcode": "18386675",
+          "title": "אורבן צ'ויס מעדן לחתול פילה טונה ודיונון 85 גרם",
+          "variant": "",
+          "oldPrice": "6.90",
+          "newPrice": "6.50",
+          "diff": "-0.40",
+          "direction": "down",
+          "url": "https://www.anipet.co.il/products/אורבן-צויס-מעדן-לחתול-פילה-טונה-ודיונון-85-גרם"
+        }
+      ]
+    },
+    {
       "date": "2026-08-18",
       "updatedAt": "18.8.2026, 20:37",
       "note": "baseline (first run)",
