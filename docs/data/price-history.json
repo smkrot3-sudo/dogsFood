@@ -1,6 +1,33 @@
 {
   "runs": [
     {
+      "date": "2026-08-21",
+      "updatedAt": "21.8.2026, 8:27",
+      "count": 2,
+      "changes": [
+        {
+          "barcode": "8010690056890",
+          "title": "כלוב לחמוס FURET XL",
+          "variant": "",
+          "oldPrice": "1499.90",
+          "newPrice": "1399.00",
+          "diff": "-100.90",
+          "direction": "down",
+          "url": "https://www.anipet.co.il/products/כלוב-לחמוס-furet-xl"
+        },
+        {
+          "barcode": "8010690067339",
+          "title": "כלוב ציפורים רקורד 2 לבן פרפלסט",
+          "variant": "",
+          "oldPrice": "214.90",
+          "newPrice": "199.00",
+          "diff": "-15.90",
+          "direction": "down",
+          "url": "https://www.anipet.co.il/products/כלוב-ציפורים-רקורד-2-לבן-ferplast"
+        }
+      ]
+    },
+    {
       "date": "2026-08-20",
       "updatedAt": "20.8.2026, 8:24",
       "count": 1,

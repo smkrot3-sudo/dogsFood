@@ -1,10 +1,10 @@
 {
-  "updatedAt": "20.8.2026, 8:24",
-  "date": "2026-08-20",
+  "updatedAt": "21.8.2026, 8:27",
+  "date": "2026-08-21",
   "stats": {
-    "withBarcode": 2014,
-    "withoutBarcode": 1,
-    "total": 2015
+    "withBarcode": 2010,
+    "withoutBarcode": 2,
+    "total": 2012
   },
   "byBarcode": {
     "174": {
@@ -1956,19 +1956,6 @@
       "url": "https://www.anipet.co.il/products/הילס-i-d-רפואי-lowfat-לכלב-12-קילו",
       "productId": 9787309424880,
       "variantId": 48816389849328
-    },
-    "2392": {
-      "barcode": "2392",
-      "title": "הילס I/D רפואי לכלב סנסטיב 4 ק\"ג",
-      "variant": "",
-      "price": "275.00",
-      "compareAtPrice": null,
-      "available": true,
-      "vendor": "הילס",
-      "handle": "הילס-i-d-רפואי-לכלב-סנסטיב-4-קילו",
-      "url": "https://www.anipet.co.il/products/הילס-i-d-רפואי-לכלב-סנסטיב-4-קילו",
-      "productId": 9787318173936,
-      "variantId": 48622432125168
     },
     "2395": {
       "barcode": "2395",
@@ -5649,6 +5636,19 @@
       "productId": 9787421622512,
       "variantId": 48622546649328
     },
+    "22517507025": {
+      "barcode": "22517507025",
+      "title": "שירותים הייטק לחתול Catit",
+      "variant": "",
+      "price": "210.00",
+      "compareAtPrice": null,
+      "available": true,
+      "vendor": "קט איט",
+      "handle": "שירותים-הייטק-לחתול-cat-it",
+      "url": "https://www.anipet.co.il/products/שירותים-הייטק-לחתול-cat-it",
+      "productId": 9787317027056,
+      "variantId": 48622430978288
+    },
     "7290000417578": {
       "barcode": "7290000417578",
       "title": "אורבן צ'ויס סקוויז ברווז צלוי ודלעת לחתול 100 גרם",
@@ -7498,7 +7498,7 @@
     "7290113309012": {
       "barcode": "7290113309012",
       "title": "בובו רצועה קומפורט לכלב",
-      "variant": "שחור",
+      "variant": "Black",
       "price": "49.00",
       "compareAtPrice": null,
       "available": true,
@@ -7511,7 +7511,7 @@
     "7290113309029": {
       "barcode": "7290113309029",
       "title": "בובו רצועה קומפורט לכלב",
-      "variant": "ורוד",
+      "variant": "Pink",
       "price": "49.00",
       "compareAtPrice": null,
       "available": true,
@@ -7524,7 +7524,7 @@
     "7290113309036": {
       "barcode": "7290113309036",
       "title": "בובו רצועה קומפורט לכלב",
-      "variant": "טורקיז",
+      "variant": "turqoise",
       "price": "49.00",
       "compareAtPrice": null,
       "available": true,
@@ -7537,7 +7537,7 @@
     "7290113309043": {
       "barcode": "7290113309043",
       "title": "בובו רצועה קומפורט לכלב",
-      "variant": "חום",
+      "variant": "Brown",
       "price": "49.00",
       "compareAtPrice": null,
       "available": true,
@@ -7550,7 +7550,7 @@
     "7290113309050": {
       "barcode": "7290113309050",
       "title": "בובו רצועה קומפורט לכלב",
-      "variant": "סגול",
+      "variant": "Purple",
       "price": "49.00",
       "compareAtPrice": null,
       "available": true,
@@ -7563,7 +7563,7 @@
     "7290113309067": {
       "barcode": "7290113309067",
       "title": "בובו רצועה קומפורט לכלב",
-      "variant": "אפרסק",
+      "variant": "Peach",
       "price": "49.00",
       "compareAtPrice": null,
       "available": true,
@@ -9332,7 +9332,7 @@
       "barcode": "8010690067339",
       "title": "כלוב ציפורים רקורד 2 לבן פרפלסט",
       "variant": "",
-      "price": "214.90",
+      "price": "199.00",
       "compareAtPrice": null,
       "available": true,
       "vendor": "Ferplast",
@@ -9912,19 +9912,6 @@
       "url": "https://www.anipet.co.il/products/דנטדקס-משחת-שיניים-לחיית-המחמד-100-גרם",
       "productId": 9789584867568,
       "variantId": 48630460711152
-    },
-    "64992530174": {
-      "barcode": "64992530174",
-      "title": "אקאנה מזון לכלבי ספורט ועבודה 17 ק\"ג",
-      "variant": "",
-      "price": "455.00",
-      "compareAtPrice": null,
-      "available": true,
-      "vendor": "אקאנה",
-      "handle": "אקאנה-מזון-לכלבי-ספורט-ועבודה-17-קילו",
-      "url": "https://www.anipet.co.il/products/אקאנה-מזון-לכלבי-ספורט-ועבודה-17-קילו",
-      "productId": 9787356446960,
-      "variantId": 48622472954096
     },
     "7290000805597": {
       "barcode": "7290000805597",
@@ -10527,7 +10514,7 @@
     "7290113309296": {
       "barcode": "7290113309296",
       "title": "בובו קולר לכלב",
-      "variant": "שחור / XS",
+      "variant": "Black / XS",
       "price": "15.00",
       "compareAtPrice": null,
       "available": false,
@@ -10540,7 +10527,7 @@
     "7290113309302": {
       "barcode": "7290113309302",
       "title": "בובו קולר לכלב",
-      "variant": "ורוד / XS",
+      "variant": "Pink / XS",
       "price": "15.00",
       "compareAtPrice": null,
       "available": true,
@@ -10553,7 +10540,7 @@
     "7290113309319": {
       "barcode": "7290113309319",
       "title": "בובו קולר לכלב",
-      "variant": "טורקיז / XS",
+      "variant": "turqoise / XS",
       "price": "15.00",
       "compareAtPrice": null,
       "available": true,
@@ -10566,7 +10553,7 @@
     "7290113309326": {
       "barcode": "7290113309326",
       "title": "בובו קולר לכלב",
-      "variant": "חום / XS",
+      "variant": "Brown / XS",
       "price": "15.00",
       "compareAtPrice": null,
       "available": false,
@@ -10579,7 +10566,7 @@
     "7290113309340": {
       "barcode": "7290113309340",
       "title": "בובו קולר לכלב",
-      "variant": "אפרסק / XS",
+      "variant": "Peach / XS",
       "price": "15.00",
       "compareAtPrice": null,
       "available": true,
@@ -10592,7 +10579,7 @@
     "7290113309388": {
       "barcode": "7290113309388",
       "title": "בובו קולר לכלב",
-      "variant": "שחור / S",
+      "variant": "Black / S",
       "price": "19.00",
       "compareAtPrice": null,
       "available": true,
@@ -10605,7 +10592,7 @@
     "7290113309395": {
       "barcode": "7290113309395",
       "title": "בובו קולר לכלב",
-      "variant": "ורוד / S",
+      "variant": "Pink / S",
       "price": "19.00",
       "compareAtPrice": null,
       "available": true,
@@ -10618,7 +10605,7 @@
     "7290113309401": {
       "barcode": "7290113309401",
       "title": "בובו קולר לכלב",
-      "variant": "טורקיז / S",
+      "variant": "turqoise / S",
       "price": "19.00",
       "compareAtPrice": null,
       "available": true,
@@ -10631,7 +10618,7 @@
     "7290113309418": {
       "barcode": "7290113309418",
       "title": "בובו קולר לכלב",
-      "variant": "חום / S",
+      "variant": "Brown / S",
       "price": "19.00",
       "compareAtPrice": null,
       "available": true,
@@ -10644,7 +10631,7 @@
     "7290113309432": {
       "barcode": "7290113309432",
       "title": "בובו קולר לכלב",
-      "variant": "אפרסק / S",
+      "variant": "Peach / S",
       "price": "19.00",
       "compareAtPrice": null,
       "available": true,
@@ -10657,7 +10644,7 @@
     "7290113309470": {
       "barcode": "7290113309470",
       "title": "בובו קולר לכלב",
-      "variant": "שחור / M",
+      "variant": "Black / M",
       "price": "24.00",
       "compareAtPrice": null,
       "available": true,
@@ -10670,7 +10657,7 @@
     "7290113309487": {
       "barcode": "7290113309487",
       "title": "בובו קולר לכלב",
-      "variant": "ורוד / M",
+      "variant": "Pink / M",
       "price": "24.00",
       "compareAtPrice": null,
       "available": false,
@@ -10683,7 +10670,7 @@
     "7290113309494": {
       "barcode": "7290113309494",
       "title": "בובו קולר לכלב",
-      "variant": "טורקיז / M",
+      "variant": "turqoise / M",
       "price": "24.00",
       "compareAtPrice": null,
       "available": true,
@@ -10696,7 +10683,7 @@
     "7290113309500": {
       "barcode": "7290113309500",
       "title": "בובו קולר לכלב",
-      "variant": "חום / M",
+      "variant": "Brown / M",
       "price": "24.00",
       "compareAtPrice": null,
       "available": true,
@@ -10709,7 +10696,7 @@
     "7290113309524": {
       "barcode": "7290113309524",
       "title": "בובו קולר לכלב",
-      "variant": "אפרסק / M",
+      "variant": "Peach / M",
       "price": "24.00",
       "compareAtPrice": null,
       "available": false,
@@ -10722,7 +10709,7 @@
     "7290113309562": {
       "barcode": "7290113309562",
       "title": "בובו קולר לכלב",
-      "variant": "שחור / L",
+      "variant": "Black / L",
       "price": "29.00",
       "compareAtPrice": null,
       "available": true,
@@ -10735,7 +10722,7 @@
     "7290113309579": {
       "barcode": "7290113309579",
       "title": "בובו קולר לכלב",
-      "variant": "ורוד / L",
+      "variant": "Pink / L",
       "price": "29.00",
       "compareAtPrice": null,
       "available": true,
@@ -10748,7 +10735,7 @@
     "7290113309586": {
       "barcode": "7290113309586",
       "title": "בובו קולר לכלב",
-      "variant": "טורקיז / L",
+      "variant": "turqoise / L",
       "price": "29.00",
       "compareAtPrice": null,
       "available": false,
@@ -10761,7 +10748,7 @@
     "7290113309593": {
       "barcode": "7290113309593",
       "title": "בובו קולר לכלב",
-      "variant": "חום / L",
+      "variant": "Brown / L",
       "price": "29.00",
       "compareAtPrice": null,
       "available": true,
@@ -10774,7 +10761,7 @@
     "7290113309616": {
       "barcode": "7290113309616",
       "title": "בובו קולר לכלב",
-      "variant": "אפרסק / L",
+      "variant": "Peach / L",
       "price": "29.00",
       "compareAtPrice": null,
       "available": true,
@@ -10790,7 +10777,7 @@
       "variant": "L",
       "price": "65.00",
       "compareAtPrice": null,
-      "available": true,
+      "available": false,
       "vendor": "DEER ANTLER",
       "handle": "d-a-קרן-אייל-אדום-l",
       "url": "https://www.anipet.co.il/products/d-a-קרן-אייל-אדום-l",
@@ -12045,32 +12032,6 @@
       "productId": 9787322302704,
       "variantId": 48622437368048
     },
-    "3182550716857": {
-      "barcode": "3182550716857",
-      "title": "רויאל קנין כלב יורקשייר",
-      "variant": "1.5 ק\"ג",
-      "price": "125.00",
-      "compareAtPrice": null,
-      "available": false,
-      "vendor": "רויאל קנין",
-      "handle": "רויאל-קנין-כלב-יורקשייר-1-5-קג",
-      "url": "https://www.anipet.co.il/products/רויאל-קנין-כלב-יורקשייר-1-5-קג",
-      "productId": 9787320860912,
-      "variantId": 48622434877680
-    },
-    "3182550799768": {
-      "barcode": "3182550799768",
-      "title": "רויאל קנין כלב יורקשייר",
-      "variant": "3 ק\"ג",
-      "price": "190.00",
-      "compareAtPrice": null,
-      "available": true,
-      "vendor": "רויאל קנין",
-      "handle": "רויאל-קנין-כלב-יורקשייר-1-5-קג",
-      "url": "https://www.anipet.co.il/products/רויאל-קנין-כלב-יורקשייר-1-5-קג",
-      "productId": 9787320860912,
-      "variantId": 48845591937264
-    },
     "3182550702331": {
       "barcode": "3182550702331",
       "title": "רויאל קנין לחתול סנסיבל",
@@ -12129,7 +12090,7 @@
       "variant": "13.6 ק\"ג",
       "price": "259.00",
       "compareAtPrice": null,
-      "available": true,
+      "available": false,
       "vendor": "פריסקיז",
       "handle": "פריסקיז-מעדני-הים-1-42-קילו-כחול",
       "url": "https://www.anipet.co.il/products/פריסקיז-מעדני-הים-1-42-קילו-כחול",
@@ -12194,7 +12155,7 @@
       "variant": "92 ס\"מ",
       "price": "299.00",
       "compareAtPrice": null,
-      "available": true,
+      "available": false,
       "vendor": "כלובים וגדרות פנורמה",
       "handle": "כלוב-אילוף-107-סמ-פנורמה",
       "url": "https://www.anipet.co.il/products/כלוב-אילוף-107-סמ-פנורמה",
@@ -12272,7 +12233,7 @@
       "variant": "2.8-6.25 ק\"ג",
       "price": "239.00",
       "compareAtPrice": null,
-      "available": true,
+      "available": false,
       "vendor": "ברבקטו",
       "handle": "ברבקטו-חתול-ספוט-און",
       "url": "https://www.anipet.co.il/products/ברבקטו-חתול-ספוט-און",
@@ -12363,7 +12324,7 @@
       "variant": "2-4.5 ק\"ג",
       "price": "229.00",
       "compareAtPrice": null,
-      "available": true,
+      "available": false,
       "vendor": "ברבקטו",
       "handle": "ברבקטו-כלב",
       "url": "https://www.anipet.co.il/products/ברבקטו-כלב",
@@ -12738,7 +12699,7 @@
       "barcode": "8010690056890",
       "title": "כלוב לחמוס FURET XL",
       "variant": "",
-      "price": "1499.90",
+      "price": "1399.00",
       "compareAtPrice": null,
       "available": true,
       "vendor": "Ferplast",
@@ -19357,7 +19318,7 @@
       "variant": "M",
       "price": "59.00",
       "compareAtPrice": null,
-      "available": true,
+      "available": false,
       "vendor": "ארם אנד האמר",
       "handle": "חיתולים-לכלבים-זכרים-12-יח-מידה-xs",
       "url": "https://www.anipet.co.il/products/חיתולים-לכלבים-זכרים-12-יח-מידה-xs",
@@ -19922,19 +19883,6 @@
       "url": "https://www.anipet.co.il/products/פנסי-פיסט-גורמה-גולד-פטה-בקר-85-גרם",
       "productId": 9787414806768,
       "variantId": 48622537801968
-    },
-    "7290118940791": {
-      "barcode": "7290118940791",
-      "title": "לקרס מעדן לחתול עוף וחלב עיזים 85 גרם",
-      "variant": "",
-      "price": "6.90",
-      "compareAtPrice": null,
-      "available": true,
-      "vendor": "LEKKERS",
-      "handle": "לקרס-מעדן-לחתול-עוף-וחלב-עיזים-85-גרם",
-      "url": "https://www.anipet.co.il/products/לקרס-מעדן-לחתול-עוף-וחלב-עיזים-85-גרם",
-      "productId": 9787395539184,
-      "variantId": 48622514176240
     },
     "7290118940777": {
       "barcode": "7290118940777",
@@ -24206,7 +24154,7 @@
       "variant": "8 ק\"ג",
       "price": "515.00",
       "compareAtPrice": null,
-      "available": true,
+      "available": false,
       "vendor": "הילס",
       "handle": "הילס-רפואי-לחתול-gi-biome-גסטרואינטסטינל-1-5-קילו",
       "url": "https://www.anipet.co.il/products/הילס-רפואי-לחתול-gi-biome-גסטרואינטסטינל-1-5-קילו",
@@ -24414,7 +24362,7 @@
       "variant": "7.5 ק\"ג",
       "price": "350.00",
       "compareAtPrice": null,
-      "available": true,
+      "available": false,
       "vendor": "רויאל קנין",
       "handle": "רויאל-קנין-רפואי-לכלב-יורינרי-2-קילו",
       "url": "https://www.anipet.co.il/products/רויאל-קנין-רפואי-לכלב-יורינרי-2-קילו",
@@ -24453,7 +24401,7 @@
       "variant": "4 ק\"ג",
       "price": "255.00",
       "compareAtPrice": null,
-      "available": false,
+      "available": true,
       "vendor": "רויאל קנין",
       "handle": "רויאל-קנין-מזון-רפואי-לחתול-רנל-4-קילו",
       "url": "https://www.anipet.co.il/products/רויאל-קנין-מזון-רפואי-לחתול-רנל-4-קילו",
@@ -24713,7 +24661,7 @@
       "variant": "4 ק\"ג",
       "price": "210.00",
       "compareAtPrice": null,
-      "available": false,
+      "available": true,
       "vendor": "רויאל קנין",
       "handle": "רויאל-קנין-חתול-פרסי-4-קילו",
       "url": "https://www.anipet.co.il/products/רויאל-קנין-חתול-פרסי-4-קילו",
@@ -26152,6 +26100,32 @@
     }
   },
   "items": [
+    {
+      "barcode": "22517507025",
+      "title": "שירותים הייטק לחתול Catit",
+      "variant": "",
+      "price": "210.00",
+      "compareAtPrice": null,
+      "available": true,
+      "vendor": "קט איט",
+      "handle": "שירותים-הייטק-לחתול-cat-it",
+      "url": "https://www.anipet.co.il/products/שירותים-הייטק-לחתול-cat-it",
+      "productId": 9787317027056,
+      "variantId": 48622430978288
+    },
+    {
+      "barcode": "",
+      "title": "test - tal (Copy)",
+      "variant": "",
+      "price": "1200.00",
+      "compareAtPrice": null,
+      "available": true,
+      "vendor": "Anipet",
+      "handle": "test-tal-copy",
+      "url": "https://www.anipet.co.il/products/test-tal-copy",
+      "productId": 10215401160944,
+      "variantId": 50283059871984
+    },
     {
       "barcode": "7290000417578",
       "title": "אורבן צ'ויס סקוויז ברווז צלוי ודלעת לחתול 100 גרם",
@@ -28677,7 +28651,7 @@
     {
       "barcode": "7290113309012",
       "title": "בובו רצועה קומפורט לכלב",
-      "variant": "שחור",
+      "variant": "Black",
       "price": "49.00",
       "compareAtPrice": null,
       "available": true,
@@ -28690,7 +28664,7 @@
     {
       "barcode": "7290113309029",
       "title": "בובו רצועה קומפורט לכלב",
-      "variant": "ורוד",
+      "variant": "Pink",
       "price": "49.00",
       "compareAtPrice": null,
       "available": true,
@@ -28703,7 +28677,7 @@
     {
       "barcode": "7290113309036",
       "title": "בובו רצועה קומפורט לכלב",
-      "variant": "טורקיז",
+      "variant": "turqoise",
       "price": "49.00",
       "compareAtPrice": null,
       "available": true,
@@ -28716,7 +28690,7 @@
     {
       "barcode": "7290113309043",
       "title": "בובו רצועה קומפורט לכלב",
-      "variant": "חום",
+      "variant": "Brown",
       "price": "49.00",
       "compareAtPrice": null,
       "available": true,
@@ -28729,7 +28703,7 @@
     {
       "barcode": "7290113309050",
       "title": "בובו רצועה קומפורט לכלב",
-      "variant": "סגול",
+      "variant": "Purple",
       "price": "49.00",
       "compareAtPrice": null,
       "available": true,
@@ -28742,7 +28716,7 @@
     {
       "barcode": "7290113309067",
       "title": "בובו רצועה קומפורט לכלב",
-      "variant": "אפרסק",
+      "variant": "Peach",
       "price": "49.00",
       "compareAtPrice": null,
       "available": true,
@@ -30797,7 +30771,7 @@
       "barcode": "8010690067339",
       "title": "כלוב ציפורים רקורד 2 לבן פרפלסט",
       "variant": "",
-      "price": "214.90",
+      "price": "199.00",
       "compareAtPrice": null,
       "available": true,
       "vendor": "Ferplast",
@@ -31520,19 +31494,6 @@
       "url": "https://www.anipet.co.il/products/דנטדקס-משחת-שיניים-לחיית-המחמד-100-גרם",
       "productId": 9789584867568,
       "variantId": 48630460711152
-    },
-    {
-      "barcode": "64992530174",
-      "title": "אקאנה מזון לכלבי ספורט ועבודה 17 ק\"ג",
-      "variant": "",
-      "price": "455.00",
-      "compareAtPrice": null,
-      "available": true,
-      "vendor": "אקאנה",
-      "handle": "אקאנה-מזון-לכלבי-ספורט-ועבודה-17-קילו",
-      "url": "https://www.anipet.co.il/products/אקאנה-מזון-לכלבי-ספורט-ועבודה-17-קילו",
-      "productId": 9787356446960,
-      "variantId": 48622472954096
     },
     {
       "barcode": "7290000805597",
@@ -32564,7 +32525,7 @@
     {
       "barcode": "7290113309296",
       "title": "בובו קולר לכלב",
-      "variant": "שחור / XS",
+      "variant": "Black / XS",
       "price": "15.00",
       "compareAtPrice": null,
       "available": false,
@@ -32577,7 +32538,7 @@
     {
       "barcode": "7290113309302",
       "title": "בובו קולר לכלב",
-      "variant": "ורוד / XS",
+      "variant": "Pink / XS",
       "price": "15.00",
       "compareAtPrice": null,
       "available": true,
@@ -32590,7 +32551,7 @@
     {
       "barcode": "7290113309319",
       "title": "בובו קולר לכלב",
-      "variant": "טורקיז / XS",
+      "variant": "turqoise / XS",
       "price": "15.00",
       "compareAtPrice": null,
       "available": true,
@@ -32603,7 +32564,7 @@
     {
       "barcode": "7290113309326",
       "title": "בובו קולר לכלב",
-      "variant": "חום / XS",
+      "variant": "Brown / XS",
       "price": "15.00",
       "compareAtPrice": null,
       "available": false,
@@ -32616,7 +32577,7 @@
     {
       "barcode": "7290113309340",
       "title": "בובו קולר לכלב",
-      "variant": "אפרסק / XS",
+      "variant": "Peach / XS",
       "price": "15.00",
       "compareAtPrice": null,
       "available": true,
@@ -32629,7 +32590,7 @@
     {
       "barcode": "7290113309388",
       "title": "בובו קולר לכלב",
-      "variant": "שחור / S",
+      "variant": "Black / S",
       "price": "19.00",
       "compareAtPrice": null,
       "available": true,
@@ -32642,7 +32603,7 @@
     {
       "barcode": "7290113309395",
       "title": "בובו קולר לכלב",
-      "variant": "ורוד / S",
+      "variant": "Pink / S",
       "price": "19.00",
       "compareAtPrice": null,
       "available": true,
@@ -32655,7 +32616,7 @@
     {
       "barcode": "7290113309401",
       "title": "בובו קולר לכלב",
-      "variant": "טורקיז / S",
+      "variant": "turqoise / S",
       "price": "19.00",
       "compareAtPrice": null,
       "available": true,
@@ -32668,7 +32629,7 @@
     {
       "barcode": "7290113309418",
       "title": "בובו קולר לכלב",
-      "variant": "חום / S",
+      "variant": "Brown / S",
       "price": "19.00",
       "compareAtPrice": null,
       "available": true,
@@ -32681,7 +32642,7 @@
     {
       "barcode": "7290113309432",
       "title": "בובו קולר לכלב",
-      "variant": "אפרסק / S",
+      "variant": "Peach / S",
       "price": "19.00",
       "compareAtPrice": null,
       "available": true,
@@ -32694,7 +32655,7 @@
     {
       "barcode": "7290113309470",
       "title": "בובו קולר לכלב",
-      "variant": "שחור / M",
+      "variant": "Black / M",
       "price": "24.00",
       "compareAtPrice": null,
       "available": true,
@@ -32707,7 +32668,7 @@
     {
       "barcode": "7290113309487",
       "title": "בובו קולר לכלב",
-      "variant": "ורוד / M",
+      "variant": "Pink / M",
       "price": "24.00",
       "compareAtPrice": null,
       "available": false,
@@ -32720,7 +32681,7 @@
     {
       "barcode": "7290113309494",
       "title": "בובו קולר לכלב",
-      "variant": "טורקיז / M",
+      "variant": "turqoise / M",
       "price": "24.00",
       "compareAtPrice": null,
       "available": true,
@@ -32733,7 +32694,7 @@
     {
       "barcode": "7290113309500",
       "title": "בובו קולר לכלב",
-      "variant": "חום / M",
+      "variant": "Brown / M",
       "price": "24.00",
       "compareAtPrice": null,
       "available": true,
@@ -32746,7 +32707,7 @@
     {
       "barcode": "7290113309524",
       "title": "בובו קולר לכלב",
-      "variant": "אפרסק / M",
+      "variant": "Peach / M",
       "price": "24.00",
       "compareAtPrice": null,
       "available": false,
@@ -32759,7 +32720,7 @@
     {
       "barcode": "7290113309562",
       "title": "בובו קולר לכלב",
-      "variant": "שחור / L",
+      "variant": "Black / L",
       "price": "29.00",
       "compareAtPrice": null,
       "available": true,
@@ -32772,7 +32733,7 @@
     {
       "barcode": "7290113309579",
       "title": "בובו קולר לכלב",
-      "variant": "ורוד / L",
+      "variant": "Pink / L",
       "price": "29.00",
       "compareAtPrice": null,
       "available": true,
@@ -32785,7 +32746,7 @@
     {
       "barcode": "7290113309586",
       "title": "בובו קולר לכלב",
-      "variant": "טורקיז / L",
+      "variant": "turqoise / L",
       "price": "29.00",
       "compareAtPrice": null,
       "available": false,
@@ -32798,7 +32759,7 @@
     {
       "barcode": "7290113309593",
       "title": "בובו קולר לכלב",
-      "variant": "חום / L",
+      "variant": "Brown / L",
       "price": "29.00",
       "compareAtPrice": null,
       "available": true,
@@ -32811,7 +32772,7 @@
     {
       "barcode": "7290113309616",
       "title": "בובו קולר לכלב",
-      "variant": "אפרסק / L",
+      "variant": "Peach / L",
       "price": "29.00",
       "compareAtPrice": null,
       "available": true,
@@ -32827,7 +32788,7 @@
       "variant": "L",
       "price": "65.00",
       "compareAtPrice": null,
-      "available": true,
+      "available": false,
       "vendor": "DEER ANTLER",
       "handle": "d-a-קרן-אייל-אדום-l",
       "url": "https://www.anipet.co.il/products/d-a-קרן-אייל-אדום-l",
@@ -34174,32 +34135,6 @@
       "variantId": 48845592264944
     },
     {
-      "barcode": "3182550716857",
-      "title": "רויאל קנין כלב יורקשייר",
-      "variant": "1.5 ק\"ג",
-      "price": "125.00",
-      "compareAtPrice": null,
-      "available": false,
-      "vendor": "רויאל קנין",
-      "handle": "רויאל-קנין-כלב-יורקשייר-1-5-קג",
-      "url": "https://www.anipet.co.il/products/רויאל-קנין-כלב-יורקשייר-1-5-קג",
-      "productId": 9787320860912,
-      "variantId": 48622434877680
-    },
-    {
-      "barcode": "3182550799768",
-      "title": "רויאל קנין כלב יורקשייר",
-      "variant": "3 ק\"ג",
-      "price": "190.00",
-      "compareAtPrice": null,
-      "available": true,
-      "vendor": "רויאל קנין",
-      "handle": "רויאל-קנין-כלב-יורקשייר-1-5-קג",
-      "url": "https://www.anipet.co.il/products/רויאל-קנין-כלב-יורקשייר-1-5-קג",
-      "productId": 9787320860912,
-      "variantId": 48845591937264
-    },
-    {
       "barcode": "3182550702331",
       "title": "רויאל קנין לחתול סנסיבל",
       "variant": "4 ק\"ג",
@@ -34270,7 +34205,7 @@
       "variant": "13.6 ק\"ג",
       "price": "259.00",
       "compareAtPrice": null,
-      "available": true,
+      "available": false,
       "vendor": "פריסקיז",
       "handle": "פריסקיז-מעדני-הים-1-42-קילו-כחול",
       "url": "https://www.anipet.co.il/products/פריסקיז-מעדני-הים-1-42-קילו-כחול",
@@ -34348,7 +34283,7 @@
       "variant": "92 ס\"מ",
       "price": "299.00",
       "compareAtPrice": null,
-      "available": true,
+      "available": false,
       "vendor": "כלובים וגדרות פנורמה",
       "handle": "כלוב-אילוף-107-סמ-פנורמה",
       "url": "https://www.anipet.co.il/products/כלוב-אילוף-107-סמ-פנורמה",
@@ -34530,7 +34465,7 @@
       "variant": "2.8-6.25 ק\"ג",
       "price": "239.00",
       "compareAtPrice": null,
-      "available": true,
+      "available": false,
       "vendor": "ברבקטו",
       "handle": "ברבקטו-חתול-ספוט-און",
       "url": "https://www.anipet.co.il/products/ברבקטו-חתול-ספוט-און",
@@ -34621,7 +34556,7 @@
       "variant": "2-4.5 ק\"ג",
       "price": "229.00",
       "compareAtPrice": null,
-      "available": true,
+      "available": false,
       "vendor": "ברבקטו",
       "handle": "ברבקטו-כלב",
       "url": "https://www.anipet.co.il/products/ברבקטו-כלב",
@@ -34996,7 +34931,7 @@
       "barcode": "8010690056890",
       "title": "כלוב לחמוס FURET XL",
       "variant": "",
-      "price": "1499.90",
+      "price": "1399.00",
       "compareAtPrice": null,
       "available": true,
       "vendor": "Ferplast",
@@ -42824,7 +42759,7 @@
       "variant": "M",
       "price": "59.00",
       "compareAtPrice": null,
-      "available": true,
+      "available": false,
       "vendor": "ארם אנד האמר",
       "handle": "חיתולים-לכלבים-זכרים-12-יח-מידה-xs",
       "url": "https://www.anipet.co.il/products/חיתולים-לכלבים-זכרים-12-יח-מידה-xs",
@@ -43389,19 +43324,6 @@
       "url": "https://www.anipet.co.il/products/פנסי-פיסט-גורמה-גולד-פטה-בקר-85-גרם",
       "productId": 9787414806768,
       "variantId": 48622537801968
-    },
-    {
-      "barcode": "7290118940791",
-      "title": "לקרס מעדן לחתול עוף וחלב עיזים 85 גרם",
-      "variant": "",
-      "price": "6.90",
-      "compareAtPrice": null,
-      "available": true,
-      "vendor": "LEKKERS",
-      "handle": "לקרס-מעדן-לחתול-עוף-וחלב-עיזים-85-גרם",
-      "url": "https://www.anipet.co.il/products/לקרס-מעדן-לחתול-עוף-וחלב-עיזים-85-גרם",
-      "productId": 9787395539184,
-      "variantId": 48622514176240
     },
     {
       "barcode": "7290118940777",
@@ -48609,7 +48531,7 @@
       "variant": "8 ק\"ג",
       "price": "515.00",
       "compareAtPrice": null,
-      "available": true,
+      "available": false,
       "vendor": "הילס",
       "handle": "הילס-רפואי-לחתול-gi-biome-גסטרואינטסטינל-1-5-קילו",
       "url": "https://www.anipet.co.il/products/הילס-רפואי-לחתול-gi-biome-גסטרואינטסטינל-1-5-קילו",
@@ -48882,7 +48804,7 @@
       "variant": "7.5 ק\"ג",
       "price": "350.00",
       "compareAtPrice": null,
-      "available": true,
+      "available": false,
       "vendor": "רויאל קנין",
       "handle": "רויאל-קנין-רפואי-לכלב-יורינרי-2-קילו",
       "url": "https://www.anipet.co.il/products/רויאל-קנין-רפואי-לכלב-יורינרי-2-קילו",
@@ -48921,7 +48843,7 @@
       "variant": "4 ק\"ג",
       "price": "255.00",
       "compareAtPrice": null,
-      "available": false,
+      "available": true,
       "vendor": "רויאל קנין",
       "handle": "רויאל-קנין-מזון-רפואי-לחתול-רנל-4-קילו",
       "url": "https://www.anipet.co.il/products/רויאל-קנין-מזון-רפואי-לחתול-רנל-4-קילו",
@@ -49363,7 +49285,7 @@
       "variant": "4 ק\"ג",
       "price": "210.00",
       "compareAtPrice": null,
-      "available": false,
+      "available": true,
       "vendor": "רויאל קנין",
       "handle": "רויאל-קנין-חתול-פרסי-4-קילו",
       "url": "https://www.anipet.co.il/products/רויאל-קנין-חתול-פרסי-4-קילו",
@@ -50838,19 +50760,6 @@
       "url": "https://www.anipet.co.il/products/הילס-i-d-רפואי-לכלב-1-5-קילו",
       "productId": 9787326955760,
       "variantId": 48816390504688
-    },
-    {
-      "barcode": "2392",
-      "title": "הילס I/D רפואי לכלב סנסטיב 4 ק\"ג",
-      "variant": "",
-      "price": "275.00",
-      "compareAtPrice": null,
-      "available": true,
-      "vendor": "הילס",
-      "handle": "הילס-i-d-רפואי-לכלב-סנסטיב-4-קילו",
-      "url": "https://www.anipet.co.il/products/הילס-i-d-רפואי-לכלב-סנסטיב-4-קילו",
-      "productId": 9787318173936,
-      "variantId": 48622432125168
     },
     {
       "barcode": "1544",

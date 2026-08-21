@@ -1,10 +1,10 @@
 {
-  "updatedAt": "19.8.2026, 8:23",
-  "date": "2026-08-19",
+  "updatedAt": "20.8.2026, 8:24",
+  "date": "2026-08-20",
   "stats": {
-    "withBarcode": 2019,
-    "withoutBarcode": 0,
-    "total": 2019
+    "withBarcode": 2014,
+    "withoutBarcode": 1,
+    "total": 2015
   },
   "byBarcode": {
     "174": {
@@ -2035,6 +2035,19 @@
       "productId": 9787318436080,
       "variantId": 48622432420080
     },
+    "2415": {
+      "barcode": "2415",
+      "title": "הילס J/D K/D קידני מוביליטי רפואי לחתול 3 ק\"ג",
+      "variant": "",
+      "price": "255.00",
+      "compareAtPrice": null,
+      "available": true,
+      "vendor": "הילס",
+      "handle": "הילס-j-d-k-d-קידני-מוביליטי-רפואי-לחתול-3-קילו",
+      "url": "https://www.anipet.co.il/products/הילס-j-d-k-d-קידני-מוביליטי-רפואי-לחתול-3-קילו",
+      "productId": 9787318468848,
+      "variantId": 48622432452848
+    },
     "2426": {
       "barcode": "2426",
       "title": "קונג כדור ספורט בינוני ABS‏2",
@@ -3183,7 +3196,7 @@
       "barcode": "18386675",
       "title": "אורבן צ'ויס מעדן לחתול פילה טונה ודיונון 85 גרם",
       "variant": "",
-      "price": "6.90",
+      "price": "6.50",
       "compareAtPrice": null,
       "available": true,
       "vendor": "אורבן צ'ויס Urban choice",
@@ -5064,6 +5077,19 @@
       "productId": 9787307196656,
       "variantId": 48622420984048
     },
+    "115129045": {
+      "barcode": "115129045",
+      "title": "באדי סנאק חטיף צמחוני לכלב עם גזר וסלרי 650 גרם",
+      "variant": "",
+      "price": "79.00",
+      "compareAtPrice": null,
+      "available": true,
+      "vendor": "PetEx",
+      "handle": "באדי-סנאק-חטיף-צמחוני-לכלב-עם-גזר-וסלרי-650-גרם",
+      "url": "https://www.anipet.co.il/products/באדי-סנאק-חטיף-צמחוני-לכלב-עם-גזר-וסלרי-650-גרם",
+      "productId": 9787307229424,
+      "variantId": 48622421016816
+    },
     "117440308": {
       "barcode": "117440308",
       "title": "פטקס כדור משחק לכלב בצבע אדום מידה 3אינץ",
@@ -5180,19 +5206,6 @@
       "url": "https://www.anipet.co.il/products/פטקס-עצם-עוף-ריבס-1-קג",
       "productId": 10066494652656,
       "variantId": 49864193605872
-    },
-    "117440971": {
-      "barcode": "117440971",
-      "title": "פטקס שמן בושם 15 מ\"ל TEL AVIV",
-      "variant": "",
-      "price": "49.00",
-      "compareAtPrice": null,
-      "available": true,
-      "vendor": "PetEx",
-      "handle": "פטקס-שמן-בושם-15-מל-tel-aviv",
-      "url": "https://www.anipet.co.il/products/פטקס-שמן-בושם-15-מל-tel-aviv",
-      "productId": 10066494849264,
-      "variantId": 49864193802480
     },
     "117440988": {
       "barcode": "117440988",
@@ -5635,6 +5648,97 @@
       "url": "https://www.anipet.co.il/products/מונג-פרש-לכלב-פטה-עם-נתחי-כבש-100-גרם",
       "productId": 9787421622512,
       "variantId": 48622546649328
+    },
+    "7290000417578": {
+      "barcode": "7290000417578",
+      "title": "אורבן צ'ויס סקוויז ברווז צלוי ודלעת לחתול 100 גרם",
+      "variant": "",
+      "price": "6.00",
+      "compareAtPrice": null,
+      "available": true,
+      "vendor": "אורבן צ'ויס",
+      "handle": "אורבן-צויס-סקוויז-ברווז-צלוי-ודלעת-לחתול-100-גרם",
+      "url": "https://www.anipet.co.il/products/אורבן-צויס-סקוויז-ברווז-צלוי-ודלעת-לחתול-100-גרם",
+      "productId": 10066498715888,
+      "variantId": 49864206057712
+    },
+    "8010276036568": {
+      "barcode": "8010276036568",
+      "title": "ND כלב בוגר M/L אושן קוד דלעת תפוז 12 ק\"ג",
+      "variant": "",
+      "price": "380.00",
+      "compareAtPrice": null,
+      "available": true,
+      "vendor": "ND",
+      "handle": "nd-אושן-קוד-דלעת-תפוז-כלב-מד-12-קילו",
+      "url": "https://www.anipet.co.il/products/nd-אושן-קוד-דלעת-תפוז-כלב-מד-12-קילו",
+      "productId": 9787430699248,
+      "variantId": 48622559363312
+    },
+    "815260007504": {
+      "barcode": "815260007504",
+      "title": "נאו לחתול בוגר דגים 3.7 ק\"ג",
+      "variant": "",
+      "price": "225.00",
+      "compareAtPrice": null,
+      "available": true,
+      "vendor": "NOW",
+      "handle": "נאו-לחתול-בוגר-דגים-3-7-קילו",
+      "url": "https://www.anipet.co.il/products/נאו-לחתול-בוגר-דגים-3-7-קילו",
+      "productId": 9787428372720,
+      "variantId": 48622555234544
+    },
+    "8429037016242": {
+      "barcode": "8429037016242",
+      "title": "אוונט קלאסיק חתול דגים 4 ק\"ג",
+      "variant": "",
+      "price": "119.00",
+      "compareAtPrice": null,
+      "available": true,
+      "vendor": "אוונט",
+      "handle": "אוונט-קלאסיק-חתול-דגים-4-קילו",
+      "url": "https://www.anipet.co.il/products/אוונט-קלאסיק-חתול-דגים-4-קילו",
+      "productId": 9787425915120,
+      "variantId": 48622552678640
+    },
+    "4008239216441": {
+      "barcode": "4008239216441",
+      "title": "ויטה קראפט מזון פרימיום לקוקטיל אוסטרלי 750 גרם",
+      "variant": "",
+      "price": "40.90",
+      "compareAtPrice": null,
+      "available": true,
+      "vendor": "ויטה קראפט",
+      "handle": "ויטה-קראפט-מזון-פרימיום-לקוקטיל-אוסטרלי-750-גרם",
+      "url": "https://www.anipet.co.il/products/ויטה-קראפט-מזון-פרימיום-לקוקטיל-אוסטרלי-750-גרם",
+      "productId": 9787340128496,
+      "variantId": 48622456176880
+    },
+    "52742078748": {
+      "barcode": "52742078748",
+      "title": "הילס מזון לחתול בוגר סלמון",
+      "variant": "3 ק\"ג",
+      "price": "149.00",
+      "compareAtPrice": null,
+      "available": false,
+      "vendor": "הילס",
+      "handle": "הילס-מזון-לחתול-בוגר-סלמון",
+      "url": "https://www.anipet.co.il/products/הילס-מזון-לחתול-בוגר-סלמון",
+      "productId": 10066492850416,
+      "variantId": 49864188854512
+    },
+    "52742078793": {
+      "barcode": "52742078793",
+      "title": "הילס מזון לחתול בוגר סלמון",
+      "variant": "10 ק\"ג",
+      "price": "370.00",
+      "compareAtPrice": null,
+      "available": true,
+      "vendor": "הילס",
+      "handle": "הילס-מזון-לחתול-בוגר-סלמון",
+      "url": "https://www.anipet.co.il/products/הילס-מזון-לחתול-בוגר-סלמון",
+      "productId": 10066492850416,
+      "variantId": 49864188887280
     },
     "4001967166149": {
       "barcode": "4001967166149",
@@ -7469,32 +7573,6 @@
       "productId": 10191540289776,
       "variantId": 50203864989936
     },
-    "815260007634": {
-      "barcode": "815260007634",
-      "title": "נאו כלב מגזע קטן גוד גרייבי סלמון",
-      "variant": "1.6 ק\"ג",
-      "price": "105.00",
-      "compareAtPrice": null,
-      "available": false,
-      "vendor": "NOW",
-      "handle": "נאו-כלב-מגזע-קטן-גוד-גרייבי-סלמון",
-      "url": "https://www.anipet.co.il/products/נאו-כלב-מגזע-קטן-גוד-גרייבי-סלמון",
-      "productId": 10066505040112,
-      "variantId": 49864217362672
-    },
-    "815260007658": {
-      "barcode": "815260007658",
-      "title": "נאו כלב מגזע קטן גוד גרייבי סלמון",
-      "variant": "5.4 ק\"ג",
-      "price": "239.00",
-      "compareAtPrice": null,
-      "available": true,
-      "vendor": "NOW",
-      "handle": "נאו-כלב-מגזע-קטן-גוד-גרייבי-סלמון",
-      "url": "https://www.anipet.co.il/products/נאו-כלב-מגזע-קטן-גוד-גרייבי-סלמון",
-      "productId": 10066505040112,
-      "variantId": 49864217395440
-    },
     "840134696447": {
       "barcode": "840134696447",
       "title": "בארק בובת אירית השפירית לכלב ALL SIZE",
@@ -8157,19 +8235,6 @@
       "url": "https://www.anipet.co.il/products/מיטת-דנדי-80-סמ-ferplast",
       "productId": 9787468611824,
       "variantId": 48834953314544
-    },
-    "8010276030344": {
-      "barcode": "8010276030344",
-      "title": "וט לייף כלב קרדיאק 2 ק\"ג",
-      "variant": "",
-      "price": "145.00",
-      "compareAtPrice": null,
-      "available": true,
-      "vendor": "וט לייף",
-      "handle": "וט-לייף-כלב-קרדיאק-2-קילו",
-      "url": "https://www.anipet.co.il/products/וט-לייף-כלב-קרדיאק-2-קילו",
-      "productId": 9787454095600,
-      "variantId": 48622602256624
     },
     "7290105474056": {
       "barcode": "7290105474056",
@@ -9185,19 +9250,6 @@
       "productId": 9787385774320,
       "variantId": 48622504116464
     },
-    "7290008726030": {
-      "barcode": "7290008726030",
-      "title": "ריבוס תערובת ליונים 1 ק\"ג",
-      "variant": "",
-      "price": "16.90",
-      "compareAtPrice": null,
-      "available": true,
-      "vendor": "ריבוס",
-      "handle": "תערובת-יונים-1-קג-ribos",
-      "url": "https://www.anipet.co.il/products/תערובת-יונים-1-קג-ribos",
-      "productId": 9787450589424,
-      "variantId": 48622592393456
-    },
     "854871008951": {
       "barcode": "854871008951",
       "title": "אינאבה חטיף בייטס לחתול עוף 3 יח 30 גרם",
@@ -9301,19 +9353,6 @@
       "url": "https://www.anipet.co.il/products/מונג-גריל-פאוץ-לכלב-סלמון-100-גרם",
       "productId": 10066500976880,
       "variantId": 49864209367280
-    },
-    "815260007573": {
-      "barcode": "815260007573",
-      "title": "נאו לכלב גוד גרייבי סלמון 10 קילו",
-      "variant": "",
-      "price": "339.00",
-      "compareAtPrice": null,
-      "available": true,
-      "vendor": "NOW",
-      "handle": "נאו-לכלב-גוד-גרייבי-סלמון-10-קילו",
-      "url": "https://www.anipet.co.il/products/נאו-לכלב-גוד-גרייבי-סלמון-10-קילו",
-      "productId": 10066501861616,
-      "variantId": 49864210252016
     },
     "9003579000458": {
       "barcode": "9003579000458",
@@ -13228,19 +13267,6 @@
       "productId": 10066498846960,
       "variantId": 49864206188784
     },
-    "7290000417578": {
-      "barcode": "7290000417578",
-      "title": "אורבן צ'ויס סקוויז ברווז צלוי ודלעת לחתול 100 גרם",
-      "variant": "",
-      "price": "6.00",
-      "compareAtPrice": null,
-      "available": true,
-      "vendor": "אורבן צ'ויס",
-      "handle": "אורבן-צויס-סקוויז-ברווז-צלוי-ודלעת-לחתול-100-גרם",
-      "url": "https://www.anipet.co.il/products/אורבן-צויס-סקוויז-ברווז-צלוי-ודלעת-לחתול-100-גרם",
-      "productId": 10066498715888,
-      "variantId": 49864206057712
-    },
     "7290000417554": {
       "barcode": "7290000417554",
       "title": "אורבן צ'ויס סקוויז פירות ים וכורכום לחתול 100 גרם",
@@ -13461,19 +13487,6 @@
       "url": "https://www.anipet.co.il/products/פריסקיז-צנצנת-חטיפי-party-mix-לחתול-מעדני-הים-567-גרם",
       "productId": 10066496979184,
       "variantId": 49864204124400
-    },
-    "35585506241": {
-      "barcode": "35585506241",
-      "title": "קונג גומז עצם דנטלית M/L PFD11",
-      "variant": "",
-      "price": "55.00",
-      "compareAtPrice": null,
-      "available": false,
-      "vendor": "KONG",
-      "handle": "קונג-גומז-עצם-דנטלית-m-l-pfd11",
-      "url": "https://www.anipet.co.il/products/קונג-גומז-עצם-דנטלית-m-l-pfd11",
-      "productId": 10066496749808,
-      "variantId": 49864203895024
     },
     "35585506234": {
       "barcode": "35585506234",
@@ -14105,7 +14118,7 @@
       "variant": "7 ק\"ג",
       "price": "235.00",
       "compareAtPrice": null,
-      "available": true,
+      "available": false,
       "vendor": "ND",
       "handle": "nd-כלב-בוגר-מיני-אנסס-עוף-רימון",
       "url": "https://www.anipet.co.il/products/nd-כלב-בוגר-מיני-אנסס-עוף-רימון",
@@ -15197,7 +15210,7 @@
       "variant": "6 ק\"ג",
       "price": "310.00",
       "compareAtPrice": null,
-      "available": true,
+      "available": false,
       "vendor": "אקאנה",
       "handle": "אקאנה-מזון-לכלב-סינגלס-ברווז",
       "url": "https://www.anipet.co.il/products/אקאנה-מזון-לכלב-סינגלס-ברווז",
@@ -16263,7 +16276,7 @@
       "variant": "3 ק\"ג",
       "price": "135.00",
       "compareAtPrice": null,
-      "available": false,
+      "available": true,
       "vendor": "אדוונס",
       "handle": "אדוונס-לכלב-סלמון-3-קילו",
       "url": "https://www.anipet.co.il/products/אדוונס-לכלב-סלמון-3-קילו",
@@ -17069,7 +17082,7 @@
       "variant": "18 ס\"מ",
       "price": "35.00",
       "compareAtPrice": null,
-      "available": false,
+      "available": true,
       "vendor": "ריינטק",
       "handle": "ריבוס-כלי-אוכל-נירוסטה-עם-גומי-12-סמ",
       "url": "https://www.anipet.co.il/products/ריבוס-כלי-אוכל-נירוסטה-עם-גומי-12-סמ",
@@ -18519,19 +18532,6 @@
       "productId": 9787369849072,
       "variantId": 48622487404784
     },
-    "8010276036568": {
-      "barcode": "8010276036568",
-      "title": "ND כלב בוגר M/L אושן קוד דלעת תפוז 12 ק\"ג",
-      "variant": "",
-      "price": "380.00",
-      "compareAtPrice": null,
-      "available": true,
-      "vendor": "ND",
-      "handle": "nd-אושן-קוד-דלעת-תפוז-כלב-מד-12-קילו",
-      "url": "https://www.anipet.co.il/products/nd-אושן-קוד-דלעת-תפוז-כלב-מד-12-קילו",
-      "productId": 9787430699248,
-      "variantId": 48622559363312
-    },
     "742797884042": {
       "barcode": "742797884042",
       "title": "חיתולים לכלבים",
@@ -18596,19 +18596,6 @@
       "url": "https://www.anipet.co.il/products/nd-נטורל-מעדן-טונה-וסלמון-חתול-70ג",
       "productId": 9787417362672,
       "variantId": 48622540357872
-    },
-    "8010690178820": {
-      "barcode": "8010690178820",
-      "title": "שרותים לחתול קליר קט 20 פרפלסט",
-      "variant": "",
-      "price": "109.90",
-      "compareAtPrice": null,
-      "available": true,
-      "vendor": "Ferplast",
-      "handle": "שרותים-לחתול-קליר-קט-20",
-      "url": "https://www.anipet.co.il/products/שרותים-לחתול-קליר-קט-20",
-      "productId": 9787409301744,
-      "variantId": 48622531641584
     },
     "8010690176420": {
       "barcode": "8010690176420",
@@ -19142,19 +19129,6 @@
       "url": "https://www.anipet.co.il/products/קיווי-חטיף-מיובש-בהקפאה-לכלב-בשר-ארנב-75-גרם",
       "productId": 9787416576240,
       "variantId": 48622539538672
-    },
-    "8010690016887": {
-      "barcode": "8010690016887",
-      "title": "פילטר לארגז צרכים FERPLAST",
-      "variant": "",
-      "price": "21.90",
-      "compareAtPrice": null,
-      "available": true,
-      "vendor": "ביו פט",
-      "handle": "פילטר-לארגז-צרכים-ferplast",
-      "url": "https://www.anipet.co.il/products/פילטר-לארגז-צרכים-ferplast",
-      "productId": 9787408056560,
-      "variantId": 48622528200944
     },
     "7294034321030": {
       "barcode": "7294034321030",
@@ -22601,19 +22575,6 @@
       "productId": 9787340030192,
       "variantId": 48622456078576
     },
-    "3428460051597": {
-      "barcode": "3428460051597",
-      "title": "מעדן חתול פלזיר סלמון 100 גרם",
-      "variant": "",
-      "price": "5.50",
-      "compareAtPrice": null,
-      "available": true,
-      "vendor": "פלזיר",
-      "handle": "מעדן-חתול-פלזיר-סלמון-100-גרם",
-      "url": "https://www.anipet.co.il/products/מעדן-חתול-פלזיר-סלמון-100-גרם",
-      "productId": 9787323711728,
-      "variantId": 48622438842608
-    },
     "3428460051580": {
       "barcode": "3428460051580",
       "title": "מעדן חתול פלזיר הודו 100 גרם",
@@ -22964,19 +22925,6 @@
       "url": "https://www.anipet.co.il/products/הילס-j-d-רפואי-לכלב-מטבוליק-מוביליטי-4-קילו",
       "productId": 9787349696752,
       "variantId": 48816390602992
-    },
-    "4008239110077": {
-      "barcode": "4008239110077",
-      "title": "ויטה קראפט חול לציפורים 2.5 ק\"ג",
-      "variant": "",
-      "price": "21.90",
-      "compareAtPrice": null,
-      "available": true,
-      "vendor": "ויטה קראפט",
-      "handle": "תוכון-6-חול-לציפור-2-5-קג",
-      "url": "https://www.anipet.co.il/products/תוכון-6-חול-לציפור-2-5-קג",
-      "productId": 9787338064112,
-      "variantId": 48622454112496
     },
     "3182551066098": {
       "barcode": "3182551066098",
@@ -24212,19 +24160,6 @@
       "url": "https://www.anipet.co.il/products/פנסי-פיסט-עם-דג-ושרימפס-85-גרם",
       "productId": 9787347796208,
       "variantId": 48622464073968
-    },
-    "50000426942": {
-      "barcode": "50000426942",
-      "title": "פנסי פיסט נתחי עוף 85 גרם",
-      "variant": "",
-      "price": "6.90",
-      "compareAtPrice": null,
-      "available": true,
-      "vendor": "פנסי פיסט",
-      "handle": "פנסי-פיסט-נתחי-עוף-85-גרם",
-      "url": "https://www.anipet.co.il/products/פנסי-פיסט-נתחי-עוף-85-גרם",
-      "productId": 9787347763440,
-      "variantId": 48622464008432
     },
     "4002973202142": {
       "barcode": "4002973202142",
@@ -26217,6 +26152,136 @@
     }
   },
   "items": [
+    {
+      "barcode": "7290000417578",
+      "title": "אורבן צ'ויס סקוויז ברווז צלוי ודלעת לחתול 100 גרם",
+      "variant": "",
+      "price": "6.00",
+      "compareAtPrice": null,
+      "available": true,
+      "vendor": "אורבן צ'ויס",
+      "handle": "אורבן-צויס-סקוויז-ברווז-צלוי-ודלעת-לחתול-100-גרם",
+      "url": "https://www.anipet.co.il/products/אורבן-צויס-סקוויז-ברווז-צלוי-ודלעת-לחתול-100-גרם",
+      "productId": 10066498715888,
+      "variantId": 49864206057712
+    },
+    {
+      "barcode": "8010276036568",
+      "title": "ND כלב בוגר M/L אושן קוד דלעת תפוז 12 ק\"ג",
+      "variant": "",
+      "price": "380.00",
+      "compareAtPrice": null,
+      "available": true,
+      "vendor": "ND",
+      "handle": "nd-אושן-קוד-דלעת-תפוז-כלב-מד-12-קילו",
+      "url": "https://www.anipet.co.il/products/nd-אושן-קוד-דלעת-תפוז-כלב-מד-12-קילו",
+      "productId": 9787430699248,
+      "variantId": 48622559363312
+    },
+    {
+      "barcode": "815260007504",
+      "title": "נאו לחתול בוגר דגים 3.7 ק\"ג",
+      "variant": "",
+      "price": "225.00",
+      "compareAtPrice": null,
+      "available": true,
+      "vendor": "NOW",
+      "handle": "נאו-לחתול-בוגר-דגים-3-7-קילו",
+      "url": "https://www.anipet.co.il/products/נאו-לחתול-בוגר-דגים-3-7-קילו",
+      "productId": 9787428372720,
+      "variantId": 48622555234544
+    },
+    {
+      "barcode": "8429037016242",
+      "title": "אוונט קלאסיק חתול דגים 4 ק\"ג",
+      "variant": "",
+      "price": "119.00",
+      "compareAtPrice": null,
+      "available": true,
+      "vendor": "אוונט",
+      "handle": "אוונט-קלאסיק-חתול-דגים-4-קילו",
+      "url": "https://www.anipet.co.il/products/אוונט-קלאסיק-חתול-דגים-4-קילו",
+      "productId": 9787425915120,
+      "variantId": 48622552678640
+    },
+    {
+      "barcode": "4008239216441",
+      "title": "ויטה קראפט מזון פרימיום לקוקטיל אוסטרלי 750 גרם",
+      "variant": "",
+      "price": "40.90",
+      "compareAtPrice": null,
+      "available": true,
+      "vendor": "ויטה קראפט",
+      "handle": "ויטה-קראפט-מזון-פרימיום-לקוקטיל-אוסטרלי-750-גרם",
+      "url": "https://www.anipet.co.il/products/ויטה-קראפט-מזון-פרימיום-לקוקטיל-אוסטרלי-750-גרם",
+      "productId": 9787340128496,
+      "variantId": 48622456176880
+    },
+    {
+      "barcode": "",
+      "title": "test - tal",
+      "variant": "",
+      "price": "1200.00",
+      "compareAtPrice": null,
+      "available": true,
+      "vendor": "Anipet",
+      "handle": "test-tal",
+      "url": "https://www.anipet.co.il/products/test-tal",
+      "productId": 10211668984048,
+      "variantId": 50268760768752
+    },
+    {
+      "barcode": "115129045",
+      "title": "באדי סנאק חטיף צמחוני לכלב עם גזר וסלרי 650 גרם",
+      "variant": "",
+      "price": "79.00",
+      "compareAtPrice": null,
+      "available": true,
+      "vendor": "PetEx",
+      "handle": "באדי-סנאק-חטיף-צמחוני-לכלב-עם-גזר-וסלרי-650-גרם",
+      "url": "https://www.anipet.co.il/products/באדי-סנאק-חטיף-צמחוני-לכלב-עם-גזר-וסלרי-650-גרם",
+      "productId": 9787307229424,
+      "variantId": 48622421016816
+    },
+    {
+      "barcode": "52742078748",
+      "title": "הילס מזון לחתול בוגר סלמון",
+      "variant": "3 ק\"ג",
+      "price": "149.00",
+      "compareAtPrice": null,
+      "available": false,
+      "vendor": "הילס",
+      "handle": "הילס-מזון-לחתול-בוגר-סלמון",
+      "url": "https://www.anipet.co.il/products/הילס-מזון-לחתול-בוגר-סלמון",
+      "productId": 10066492850416,
+      "variantId": 49864188854512
+    },
+    {
+      "barcode": "52742078793",
+      "title": "הילס מזון לחתול בוגר סלמון",
+      "variant": "10 ק\"ג",
+      "price": "370.00",
+      "compareAtPrice": null,
+      "available": true,
+      "vendor": "הילס",
+      "handle": "הילס-מזון-לחתול-בוגר-סלמון",
+      "url": "https://www.anipet.co.il/products/הילס-מזון-לחתול-בוגר-סלמון",
+      "productId": 10066492850416,
+      "variantId": 49864188887280
+    },
+    {
+      "barcode": "2415",
+      "title": "הילס J/D K/D קידני מוביליטי רפואי לחתול 3 ק\"ג",
+      "variant": "",
+      "price": "255.00",
+      "compareAtPrice": null,
+      "available": true,
+      "vendor": "הילס",
+      "handle": "הילס-j-d-k-d-קידני-מוביליטי-רפואי-לחתול-3-קילו",
+      "url": "https://www.anipet.co.il/products/הילס-j-d-k-d-קידני-מוביליטי-רפואי-לחתול-3-קילו",
+      "productId": 9787318468848,
+      "variantId": 48622432452848
+    },
     {
       "barcode": "4001967166149",
       "title": "הפי דוג כלב אירלנד סלמון ארנבת גזע קטן 4 ק\"ג",
@@ -28701,32 +28766,6 @@
       "variantId": 50050946695408
     },
     {
-      "barcode": "815260007634",
-      "title": "נאו כלב מגזע קטן גוד גרייבי סלמון",
-      "variant": "1.6 ק\"ג",
-      "price": "105.00",
-      "compareAtPrice": null,
-      "available": false,
-      "vendor": "NOW",
-      "handle": "נאו-כלב-מגזע-קטן-גוד-גרייבי-סלמון",
-      "url": "https://www.anipet.co.il/products/נאו-כלב-מגזע-קטן-גוד-גרייבי-סלמון",
-      "productId": 10066505040112,
-      "variantId": 49864217362672
-    },
-    {
-      "barcode": "815260007658",
-      "title": "נאו כלב מגזע קטן גוד גרייבי סלמון",
-      "variant": "5.4 ק\"ג",
-      "price": "239.00",
-      "compareAtPrice": null,
-      "available": true,
-      "vendor": "NOW",
-      "handle": "נאו-כלב-מגזע-קטן-גוד-גרייבי-סלמון",
-      "url": "https://www.anipet.co.il/products/נאו-כלב-מגזע-קטן-גוד-גרייבי-סלמון",
-      "productId": 10066505040112,
-      "variantId": 49864217395440
-    },
-    {
       "barcode": "840134696447",
       "title": "בארק בובת אירית השפירית לכלב ALL SIZE",
       "variant": "",
@@ -29440,19 +29479,6 @@
       "url": "https://www.anipet.co.il/products/מיטת-דנדי-80-סמ-ferplast",
       "productId": 9787468611824,
       "variantId": 48834953314544
-    },
-    {
-      "barcode": "8010276030344",
-      "title": "וט לייף כלב קרדיאק 2 ק\"ג",
-      "variant": "",
-      "price": "145.00",
-      "compareAtPrice": null,
-      "available": true,
-      "vendor": "וט לייף",
-      "handle": "וט-לייף-כלב-קרדיאק-2-קילו",
-      "url": "https://www.anipet.co.il/products/וט-לייף-כלב-קרדיאק-2-קילו",
-      "productId": 9787454095600,
-      "variantId": 48622602256624
     },
     {
       "barcode": "7290105474056",
@@ -30677,19 +30703,6 @@
       "variantId": 48622470234352
     },
     {
-      "barcode": "7290008726030",
-      "title": "ריבוס תערובת ליונים 1 ק\"ג",
-      "variant": "",
-      "price": "16.90",
-      "compareAtPrice": null,
-      "available": true,
-      "vendor": "ריבוס",
-      "handle": "תערובת-יונים-1-קג-ribos",
-      "url": "https://www.anipet.co.il/products/תערובת-יונים-1-קג-ribos",
-      "productId": 9787450589424,
-      "variantId": 48622592393456
-    },
-    {
       "barcode": "854871008951",
       "title": "אינאבה חטיף בייטס לחתול עוף 3 יח 30 גרם",
       "variant": "",
@@ -30805,19 +30818,6 @@
       "url": "https://www.anipet.co.il/products/מונג-גריל-פאוץ-לכלב-סלמון-100-גרם",
       "productId": 10066500976880,
       "variantId": 49864209367280
-    },
-    {
-      "barcode": "815260007573",
-      "title": "נאו לכלב גוד גרייבי סלמון 10 קילו",
-      "variant": "",
-      "price": "339.00",
-      "compareAtPrice": null,
-      "available": true,
-      "vendor": "NOW",
-      "handle": "נאו-לכלב-גוד-גרייבי-סלמון-10-קילו",
-      "url": "https://www.anipet.co.il/products/נאו-לכלב-גוד-גרייבי-סלמון-10-קילו",
-      "productId": 10066501861616,
-      "variantId": 49864210252016
     },
     {
       "barcode": "9003579000458",
@@ -35526,19 +35526,6 @@
       "variantId": 49864206188784
     },
     {
-      "barcode": "7290000417578",
-      "title": "אורבן צ'ויס סקוויז ברווז צלוי ודלעת לחתול 100 גרם",
-      "variant": "",
-      "price": "6.00",
-      "compareAtPrice": null,
-      "available": true,
-      "vendor": "אורבן צ'ויס",
-      "handle": "אורבן-צויס-סקוויז-ברווז-צלוי-ודלעת-לחתול-100-גרם",
-      "url": "https://www.anipet.co.il/products/אורבן-צויס-סקוויז-ברווז-צלוי-ודלעת-לחתול-100-גרם",
-      "productId": 10066498715888,
-      "variantId": 49864206057712
-    },
-    {
       "barcode": "7290000417554",
       "title": "אורבן צ'ויס סקוויז פירות ים וכורכום לחתול 100 גרם",
       "variant": "",
@@ -35799,19 +35786,6 @@
       "variantId": 49864203993328
     },
     {
-      "barcode": "35585506241",
-      "title": "קונג גומז עצם דנטלית M/L PFD11",
-      "variant": "",
-      "price": "55.00",
-      "compareAtPrice": null,
-      "available": false,
-      "vendor": "KONG",
-      "handle": "קונג-גומז-עצם-דנטלית-m-l-pfd11",
-      "url": "https://www.anipet.co.il/products/קונג-גומז-עצם-דנטלית-m-l-pfd11",
-      "productId": 10066496749808,
-      "variantId": 49864203895024
-    },
-    {
       "barcode": "35585506234",
       "title": "קונג גומז סטיק דנטלי S PFD31",
       "variant": "",
@@ -35992,19 +35966,6 @@
       "url": "https://www.anipet.co.il/products/פטקס-שמן-בושם-15-מל-monaco",
       "productId": 10066494882032,
       "variantId": 49864193835248
-    },
-    {
-      "barcode": "117440971",
-      "title": "פטקס שמן בושם 15 מ\"ל TEL AVIV",
-      "variant": "",
-      "price": "49.00",
-      "compareAtPrice": null,
-      "available": true,
-      "vendor": "PetEx",
-      "handle": "פטקס-שמן-בושם-15-מל-tel-aviv",
-      "url": "https://www.anipet.co.il/products/פטקס-שמן-בושם-15-מל-tel-aviv",
-      "productId": 10066494849264,
-      "variantId": 49864193802480
     },
     {
       "barcode": "117440711",
@@ -36857,7 +36818,7 @@
       "variant": "7 ק\"ג",
       "price": "235.00",
       "compareAtPrice": null,
-      "available": true,
+      "available": false,
       "vendor": "ND",
       "handle": "nd-כלב-בוגר-מיני-אנסס-עוף-רימון",
       "url": "https://www.anipet.co.il/products/nd-כלב-בוגר-מיני-אנסס-עוף-רימון",
@@ -38105,7 +38066,7 @@
       "variant": "6 ק\"ג",
       "price": "310.00",
       "compareAtPrice": null,
-      "available": true,
+      "available": false,
       "vendor": "אקאנה",
       "handle": "אקאנה-מזון-לכלב-סינגלס-ברווז",
       "url": "https://www.anipet.co.il/products/אקאנה-מזון-לכלב-סינגלס-ברווז",
@@ -39561,7 +39522,7 @@
       "variant": "3 ק\"ג",
       "price": "135.00",
       "compareAtPrice": null,
-      "available": false,
+      "available": true,
       "vendor": "אדוונס",
       "handle": "אדוונס-לכלב-סלמון-3-קילו",
       "url": "https://www.anipet.co.il/products/אדוונס-לכלב-סלמון-3-קילו",
@@ -40510,7 +40471,7 @@
       "variant": "18 ס\"מ",
       "price": "35.00",
       "compareAtPrice": null,
-      "available": false,
+      "available": true,
       "vendor": "ריינטק",
       "handle": "ריבוס-כלי-אוכל-נירוסטה-עם-גומי-12-סמ",
       "url": "https://www.anipet.co.il/products/ריבוס-כלי-אוכל-נירוסטה-עם-גומי-12-סמ",
@@ -42039,19 +42000,6 @@
       "variantId": 48622487404784
     },
     {
-      "barcode": "8010276036568",
-      "title": "ND כלב בוגר M/L אושן קוד דלעת תפוז 12 ק\"ג",
-      "variant": "",
-      "price": "380.00",
-      "compareAtPrice": null,
-      "available": true,
-      "vendor": "ND",
-      "handle": "nd-אושן-קוד-דלעת-תפוז-כלב-מד-12-קילו",
-      "url": "https://www.anipet.co.il/products/nd-אושן-קוד-דלעת-תפוז-כלב-מד-12-קילו",
-      "productId": 9787430699248,
-      "variantId": 48622559363312
-    },
-    {
       "barcode": "742797884042",
       "title": "חיתולים לכלבים",
       "variant": "XS",
@@ -42115,19 +42063,6 @@
       "url": "https://www.anipet.co.il/products/nd-נטורל-מעדן-טונה-וסלמון-חתול-70ג",
       "productId": 9787417362672,
       "variantId": 48622540357872
-    },
-    {
-      "barcode": "8010690178820",
-      "title": "שרותים לחתול קליר קט 20 פרפלסט",
-      "variant": "",
-      "price": "109.90",
-      "compareAtPrice": null,
-      "available": true,
-      "vendor": "Ferplast",
-      "handle": "שרותים-לחתול-קליר-קט-20",
-      "url": "https://www.anipet.co.il/products/שרותים-לחתול-קליר-קט-20",
-      "productId": 9787409301744,
-      "variantId": 48622531641584
     },
     {
       "barcode": "8010690176420",
@@ -42661,19 +42596,6 @@
       "url": "https://www.anipet.co.il/products/קיווי-חטיף-מיובש-בהקפאה-לכלב-בשר-ארנב-75-גרם",
       "productId": 9787416576240,
       "variantId": 48622539538672
-    },
-    {
-      "barcode": "8010690016887",
-      "title": "פילטר לארגז צרכים FERPLAST",
-      "variant": "",
-      "price": "21.90",
-      "compareAtPrice": null,
-      "available": true,
-      "vendor": "ביו פט",
-      "handle": "פילטר-לארגז-צרכים-ferplast",
-      "url": "https://www.anipet.co.il/products/פילטר-לארגז-צרכים-ferplast",
-      "productId": 9787408056560,
-      "variantId": 48622528200944
     },
     {
       "barcode": "7294034321030",
@@ -46368,19 +46290,6 @@
       "variantId": 48622456078576
     },
     {
-      "barcode": "3428460051597",
-      "title": "מעדן חתול פלזיר סלמון 100 גרם",
-      "variant": "",
-      "price": "5.50",
-      "compareAtPrice": null,
-      "available": true,
-      "vendor": "פלזיר",
-      "handle": "מעדן-חתול-פלזיר-סלמון-100-גרם",
-      "url": "https://www.anipet.co.il/products/מעדן-חתול-פלזיר-סלמון-100-גרם",
-      "productId": 9787323711728,
-      "variantId": 48622438842608
-    },
-    {
       "barcode": "3428460051580",
       "title": "מעדן חתול פלזיר הודו 100 גרם",
       "variant": "",
@@ -46899,19 +46808,6 @@
       "url": "https://www.anipet.co.il/products/הילס-j-d-רפואי-לכלב-מטבוליק-מוביליטי-4-קילו",
       "productId": 9787349696752,
       "variantId": 48816390602992
-    },
-    {
-      "barcode": "4008239110077",
-      "title": "ויטה קראפט חול לציפורים 2.5 ק\"ג",
-      "variant": "",
-      "price": "21.90",
-      "compareAtPrice": null,
-      "available": true,
-      "vendor": "ויטה קראפט",
-      "handle": "תוכון-6-חול-לציפור-2-5-קג",
-      "url": "https://www.anipet.co.il/products/תוכון-6-חול-לציפור-2-5-קג",
-      "productId": 9787338064112,
-      "variantId": 48622454112496
     },
     {
       "barcode": "320005084",
@@ -48615,19 +48511,6 @@
       "url": "https://www.anipet.co.il/products/פנסי-פיסט-עם-דג-ושרימפס-85-גרם",
       "productId": 9787347796208,
       "variantId": 48622464073968
-    },
-    {
-      "barcode": "50000426942",
-      "title": "פנסי פיסט נתחי עוף 85 גרם",
-      "variant": "",
-      "price": "6.90",
-      "compareAtPrice": null,
-      "available": true,
-      "vendor": "פנסי פיסט",
-      "handle": "פנסי-פיסט-נתחי-עוף-85-גרם",
-      "url": "https://www.anipet.co.il/products/פנסי-פיסט-נתחי-עוף-85-גרם",
-      "productId": 9787347763440,
-      "variantId": 48622464008432
     },
     {
       "barcode": "4002973202142",
@@ -51727,7 +51610,7 @@
       "barcode": "18386675",
       "title": "אורבן צ'ויס מעדן לחתול פילה טונה ודיונון 85 גרם",
       "variant": "",
-      "price": "6.90",
+      "price": "6.50",
       "compareAtPrice": null,
       "available": true,
       "vendor": "אורבן צ'ויס Urban choice",
