@@ -1,10 +1,10 @@
 {
-  "updatedAt": "21.8.2026, 8:27",
-  "date": "2026-08-21",
+  "updatedAt": "22.8.2026, 8:21",
+  "date": "2026-08-22",
   "stats": {
-    "withBarcode": 2010,
+    "withBarcode": 2004,
     "withoutBarcode": 2,
-    "total": 2012
+    "total": 2006
   },
   "byBarcode": {
     "174": {
@@ -188,19 +188,6 @@
       "url": "https://www.anipet.co.il/products/ברידרס-סניור-15-קג",
       "productId": 9787411464432,
       "variantId": 48622534066416
-    },
-    "836": {
-      "barcode": "836",
-      "title": "רויאל קנין כלב גיאנט ג'וניור 15 ק\"ג",
-      "variant": "",
-      "price": "379.00",
-      "compareAtPrice": null,
-      "available": true,
-      "vendor": "רויאל קנין",
-      "handle": "רויאל-קנין-כלב-גיאנט-גוניור-15-קילו",
-      "url": "https://www.anipet.co.il/products/רויאל-קנין-כלב-גיאנט-גוניור-15-קילו",
-      "productId": 9787411529968,
-      "variantId": 48622534131952
     },
     "853": {
       "barcode": "853",
@@ -923,7 +910,7 @@
       "variant": "1.42 ק\"ג",
       "price": "43.00",
       "compareAtPrice": null,
-      "available": true,
+      "available": false,
       "vendor": "פריסקיז",
       "handle": "פריסקיז-מעדני-החתול-1-42-קילו-סגול",
       "url": "https://www.anipet.co.il/products/פריסקיז-מעדני-החתול-1-42-קילו-סגול",
@@ -4323,19 +4310,6 @@
       "productId": 9787300446448,
       "variantId": 48622414201072
     },
-    "113302273": {
-      "barcode": "113302273",
-      "title": "חטיף בונזו עצם קלציום עם עוף 80 גרם",
-      "variant": "",
-      "price": "16.90",
-      "compareAtPrice": null,
-      "available": true,
-      "vendor": "בונזו",
-      "handle": "חטיף-בונזו-עצם-קלציום-עם-עוף-80-גרם",
-      "url": "https://www.anipet.co.il/products/חטיף-בונזו-עצם-קלציום-עם-עוף-80-גרם",
-      "productId": 9787300774128,
-      "variantId": 48622414528752
-    },
     "113302280": {
       "barcode": "113302280",
       "title": "חטיף בונזו בצורת קניקיות 80 גרם",
@@ -7650,19 +7624,6 @@
       "url": "https://www.anipet.co.il/products/בארק-צעצוע-לעיס-פלפל-צילי-לכלב-m-l",
       "productId": 10066502615280,
       "variantId": 49864211071216
-    },
-    "8410650221625": {
-      "barcode": "8410650221625",
-      "title": "אדוונס לכלב גור מדיום עוף 12 ק\"ג",
-      "variant": "",
-      "price": "310.00",
-      "compareAtPrice": null,
-      "available": true,
-      "vendor": "אדוונס",
-      "handle": "אדוונס-לכלב-גור-מדיום-12-קילו",
-      "url": "https://www.anipet.co.il/products/אדוונס-לכלב-גור-מדיום-12-קילו",
-      "productId": 9787424899312,
-      "variantId": 48622551662832
     },
     "8606014106404": {
       "barcode": "8606014106404",
@@ -12038,7 +11999,7 @@
       "variant": "4 ק\"ג",
       "price": "205.00",
       "compareAtPrice": null,
-      "available": true,
+      "available": false,
       "vendor": "רויאל קנין",
       "handle": "רויאל-קנין-לחתול-סנסיבל-4-קילו",
       "url": "https://www.anipet.co.il/products/רויאל-קנין-לחתול-סנסיבל-4-קילו",
@@ -18571,19 +18532,6 @@
       "productId": 9787409236208,
       "variantId": 48622531576048
     },
-    "6942133308223": {
-      "barcode": "6942133308223",
-      "title": "חטיף דנט פרש מועשר בגלוקוזמין למפרקים 150 גרם",
-      "variant": "",
-      "price": "27.90",
-      "compareAtPrice": null,
-      "available": true,
-      "vendor": "DentaLight",
-      "handle": "חטיף-דנט-פרש-מועשר-בגלוקוזמין-למפרקים-150-גר",
-      "url": "https://www.anipet.co.il/products/חטיף-דנט-פרש-מועשר-בגלוקוזמין-למפרקים-150-גר",
-      "productId": 9787369488624,
-      "variantId": 48622487044336
-    },
     "9003579029879": {
       "barcode": "9003579029879",
       "title": "רויאל קנין שימור לכלב מקסי אדולט 410 גרם",
@@ -20000,19 +19948,6 @@
       "url": "https://www.anipet.co.il/products/פרו-פלאן-כלב-בוגר-גזע-קטן-סלמון-3-קילו",
       "productId": 9787428307184,
       "variantId": 48622555169008
-    },
-    "8429037016204": {
-      "barcode": "8429037016204",
-      "title": "אוונט קלאסיק חתול לייט 4 ק\"ג",
-      "variant": "",
-      "price": "119.00",
-      "compareAtPrice": null,
-      "available": true,
-      "vendor": "אוונט",
-      "handle": "אוונט-קלאסיק-חתול-לייט-4-קילו",
-      "url": "https://www.anipet.co.il/products/אוונט-קלאסיק-חתול-לייט-4-קילו",
-      "productId": 9787414282480,
-      "variantId": 48622537212144
     },
     "8429037016150": {
       "barcode": "8429037016150",
@@ -22223,19 +22158,6 @@
       "url": "https://www.anipet.co.il/products/מקל-דבש-מולטי-ויטמין-לארנב",
       "productId": 9787340488944,
       "variantId": 48622456570096
-    },
-    "4008239255846": {
-      "barcode": "4008239255846",
-      "title": "ויטה קראפט מזון פרימיום לאוגר",
-      "variant": "1 ק\"ג",
-      "price": "31.00",
-      "compareAtPrice": null,
-      "available": true,
-      "vendor": "ויטה קראפט",
-      "handle": "ויטקרפט-מזון-פרימיום-לאוגר-1-קג",
-      "url": "https://www.anipet.co.il/products/ויטקרפט-מזון-פרימיום-לאוגר-1-קג",
-      "productId": 9787340456176,
-      "variantId": 48622456537328
     },
     "35585125008": {
       "barcode": "35585125008",
@@ -24531,7 +24453,7 @@
       "variant": "1.42 ק\"ג",
       "price": "43.00",
       "compareAtPrice": null,
-      "available": true,
+      "available": false,
       "vendor": "פריסקיז",
       "handle": "פריסקיז-אקסטרה-קראנץ-1-42-קילו-ורוד",
       "url": "https://www.anipet.co.il/products/פריסקיז-אקסטרה-קראנץ-1-42-קילו-ורוד",
@@ -28818,19 +28740,6 @@
       "variantId": 49864211071216
     },
     {
-      "barcode": "8410650221625",
-      "title": "אדוונס לכלב גור מדיום עוף 12 ק\"ג",
-      "variant": "",
-      "price": "310.00",
-      "compareAtPrice": null,
-      "available": true,
-      "vendor": "אדוונס",
-      "handle": "אדוונס-לכלב-גור-מדיום-12-קילו",
-      "url": "https://www.anipet.co.il/products/אדוונס-לכלב-גור-מדיום-12-קילו",
-      "productId": 9787424899312,
-      "variantId": 48622551662832
-    },
-    {
       "barcode": "8606014106404",
       "title": "וט לייף שימור לכלב אולטרה היפו 300 גרם",
       "variant": "",
@@ -31613,19 +31522,6 @@
       "variantId": 48622544453872
     },
     {
-      "barcode": "836",
-      "title": "רויאל קנין כלב גיאנט ג'וניור 15 ק\"ג",
-      "variant": "",
-      "price": "379.00",
-      "compareAtPrice": null,
-      "available": true,
-      "vendor": "רויאל קנין",
-      "handle": "רויאל-קנין-כלב-גיאנט-גוניור-15-קילו",
-      "url": "https://www.anipet.co.il/products/רויאל-קנין-כלב-גיאנט-גוניור-15-קילו",
-      "productId": 9787411529968,
-      "variantId": 48622534131952
-    },
-    {
       "barcode": "7290013083999",
       "title": "חול קריסטל יורו קיטי",
       "variant": "3.6 ליטר",
@@ -34140,7 +34036,7 @@
       "variant": "4 ק\"ג",
       "price": "205.00",
       "compareAtPrice": null,
-      "available": true,
+      "available": false,
       "vendor": "רויאל קנין",
       "handle": "רויאל-קנין-לחתול-סנסיבל-4-קילו",
       "url": "https://www.anipet.co.il/products/רויאל-קנין-לחתול-סנסיבל-4-קילו",
@@ -42013,19 +41909,6 @@
       "variantId": 48622531576048
     },
     {
-      "barcode": "6942133308223",
-      "title": "חטיף דנט פרש מועשר בגלוקוזמין למפרקים 150 גרם",
-      "variant": "",
-      "price": "27.90",
-      "compareAtPrice": null,
-      "available": true,
-      "vendor": "DentaLight",
-      "handle": "חטיף-דנט-פרש-מועשר-בגלוקוזמין-למפרקים-150-גר",
-      "url": "https://www.anipet.co.il/products/חטיף-דנט-פרש-מועשר-בגלוקוזמין-למפרקים-150-גר",
-      "productId": 9787369488624,
-      "variantId": 48622487044336
-    },
-    {
       "barcode": "9003579029879",
       "title": "רויאל קנין שימור לכלב מקסי אדולט 410 גרם",
       "variant": "",
@@ -43454,19 +43337,6 @@
       "url": "https://www.anipet.co.il/products/פרו-פלאן-כלב-בוגר-גזע-קטן-סלמון-3-קילו",
       "productId": 9787428307184,
       "variantId": 48622555169008
-    },
-    {
-      "barcode": "8429037016204",
-      "title": "אוונט קלאסיק חתול לייט 4 ק\"ג",
-      "variant": "",
-      "price": "119.00",
-      "compareAtPrice": null,
-      "available": true,
-      "vendor": "אוונט",
-      "handle": "אוונט-קלאסיק-חתול-לייט-4-קילו",
-      "url": "https://www.anipet.co.il/products/אוונט-קלאסיק-חתול-לייט-4-קילו",
-      "productId": 9787414282480,
-      "variantId": 48622537212144
     },
     {
       "barcode": "8429037016150",
@@ -45768,19 +45638,6 @@
       "url": "https://www.anipet.co.il/products/מקל-דבש-מולטי-ויטמין-לארנב",
       "productId": 9787340488944,
       "variantId": 48622456570096
-    },
-    {
-      "barcode": "4008239255846",
-      "title": "ויטה קראפט מזון פרימיום לאוגר",
-      "variant": "1 ק\"ג",
-      "price": "31.00",
-      "compareAtPrice": null,
-      "available": true,
-      "vendor": "ויטה קראפט",
-      "handle": "ויטקרפט-מזון-פרימיום-לאוגר-1-קג",
-      "url": "https://www.anipet.co.il/products/ויטקרפט-מזון-פרימיום-לאוגר-1-קג",
-      "productId": 9787340456176,
-      "variantId": 48622456537328
     },
     {
       "barcode": "35585125008",
@@ -48747,19 +48604,6 @@
       "variantId": 48622414627056
     },
     {
-      "barcode": "113302273",
-      "title": "חטיף בונזו עצם קלציום עם עוף 80 גרם",
-      "variant": "",
-      "price": "16.90",
-      "compareAtPrice": null,
-      "available": true,
-      "vendor": "בונזו",
-      "handle": "חטיף-בונזו-עצם-קלציום-עם-עוף-80-גרם",
-      "url": "https://www.anipet.co.il/products/חטיף-בונזו-עצם-קלציום-עם-עוף-80-גרם",
-      "productId": 9787300774128,
-      "variantId": 48622414528752
-    },
-    {
       "barcode": "50000238910",
       "title": "פריסקיז חטיפי Party Mix לחתול בטעם כבד והודו 60 גרם",
       "variant": "",
@@ -49116,7 +48960,7 @@
       "variant": "1.42 ק\"ג",
       "price": "43.00",
       "compareAtPrice": null,
-      "available": true,
+      "available": false,
       "vendor": "פריסקיז",
       "handle": "פריסקיז-אקסטרה-קראנץ-1-42-קילו-ורוד",
       "url": "https://www.anipet.co.il/products/פריסקיז-אקסטרה-קראנץ-1-42-קילו-ורוד",
@@ -49740,7 +49584,7 @@
       "variant": "1.42 ק\"ג",
       "price": "43.00",
       "compareAtPrice": null,
-      "available": true,
+      "available": false,
       "vendor": "פריסקיז",
       "handle": "פריסקיז-מעדני-החתול-1-42-קילו-סגול",
       "url": "https://www.anipet.co.il/products/פריסקיז-מעדני-החתול-1-42-קילו-סגול",
