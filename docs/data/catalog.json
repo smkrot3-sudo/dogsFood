@@ -1,10 +1,10 @@
 {
-  "updatedAt": "22.8.2026, 8:21",
-  "date": "2026-08-22",
+  "updatedAt": "23.8.2026, 8:23",
+  "date": "2026-08-23",
   "stats": {
-    "withBarcode": 2004,
+    "withBarcode": 2003,
     "withoutBarcode": 2,
-    "total": 2006
+    "total": 2005
   },
   "byBarcode": {
     "174": {
@@ -6172,7 +6172,7 @@
     "748960162566": {
       "barcode": "748960162566",
       "title": "ראפוור רתמה לכלב פרונט ראנג'",
-      "variant": "ירוק / M",
+      "variant": "ירוק-אפור / M",
       "price": "249.00",
       "compareAtPrice": null,
       "available": true,
@@ -6185,7 +6185,7 @@
     "748960290207": {
       "barcode": "748960290207",
       "title": "ראפוור רתמה לכלב פרונט ראנג'",
-      "variant": "ירוק / XS",
+      "variant": "ירוק-אפור / XS",
       "price": "249.00",
       "compareAtPrice": null,
       "available": true,
@@ -6237,7 +6237,7 @@
     "748960504854": {
       "barcode": "748960504854",
       "title": "ראפוור רתמה לכלב פרונט ראנג'",
-      "variant": "ירוק / L-XL",
+      "variant": "ירוק-אפור / L-XL",
       "price": "249.00",
       "compareAtPrice": null,
       "available": true,
@@ -6302,7 +6302,7 @@
     "748960599072": {
       "barcode": "748960599072",
       "title": "ראפוור רתמה לכלב פרונט ראנג'",
-      "variant": "ירוק / S",
+      "variant": "ירוק-אפור / S",
       "price": "249.00",
       "compareAtPrice": null,
       "available": true,
@@ -7472,7 +7472,7 @@
     "7290113309012": {
       "barcode": "7290113309012",
       "title": "בובו רצועה קומפורט לכלב",
-      "variant": "Black",
+      "variant": "שחור",
       "price": "49.00",
       "compareAtPrice": null,
       "available": true,
@@ -7485,7 +7485,7 @@
     "7290113309029": {
       "barcode": "7290113309029",
       "title": "בובו רצועה קומפורט לכלב",
-      "variant": "Pink",
+      "variant": "ורוד",
       "price": "49.00",
       "compareAtPrice": null,
       "available": true,
@@ -7498,7 +7498,7 @@
     "7290113309036": {
       "barcode": "7290113309036",
       "title": "בובו רצועה קומפורט לכלב",
-      "variant": "turqoise",
+      "variant": "טורקיז",
       "price": "49.00",
       "compareAtPrice": null,
       "available": true,
@@ -7511,7 +7511,7 @@
     "7290113309043": {
       "barcode": "7290113309043",
       "title": "בובו רצועה קומפורט לכלב",
-      "variant": "Brown",
+      "variant": "חום",
       "price": "49.00",
       "compareAtPrice": null,
       "available": true,
@@ -7524,7 +7524,7 @@
     "7290113309050": {
       "barcode": "7290113309050",
       "title": "בובו רצועה קומפורט לכלב",
-      "variant": "Purple",
+      "variant": "סגול",
       "price": "49.00",
       "compareAtPrice": null,
       "available": true,
@@ -7537,7 +7537,7 @@
     "7290113309067": {
       "barcode": "7290113309067",
       "title": "בובו רצועה קומפורט לכלב",
-      "variant": "Peach",
+      "variant": "אפרסק",
       "price": "49.00",
       "compareAtPrice": null,
       "available": true,
@@ -7719,7 +7719,7 @@
     "748960155889": {
       "barcode": "748960155889",
       "title": "ראפוור קולר לכלב פרונט ראנג'",
-      "variant": "ירוק / L",
+      "variant": "ירוק-אפור / L",
       "price": "99.00",
       "compareAtPrice": null,
       "available": true,
@@ -7745,7 +7745,7 @@
     "748960356118": {
       "barcode": "748960356118",
       "title": "ראפוור קולר לכלב פרונט ראנג'",
-      "variant": "ירוק / S",
+      "variant": "ירוק-אפור / S",
       "price": "99.00",
       "compareAtPrice": null,
       "available": true,
@@ -7784,7 +7784,7 @@
     "748960815325": {
       "barcode": "748960815325",
       "title": "ראפוור קולר לכלב פרונט ראנג'",
-      "variant": "ירוק / M",
+      "variant": "ירוק-אפור / M",
       "price": "99.00",
       "compareAtPrice": null,
       "available": true,
@@ -7966,7 +7966,7 @@
     "748960986643": {
       "barcode": "748960986643",
       "title": "ראפוור מחזיק שקיות",
-      "variant": "ירוק",
+      "variant": "טורקיז",
       "price": "139.00",
       "compareAtPrice": null,
       "available": true,
@@ -7992,7 +7992,7 @@
     "748960411718": {
       "barcode": "748960411718",
       "title": "ראפוור קולר חצי חנק CHAIN REACTION",
-      "variant": "ירוק / M",
+      "variant": "ירוק-אפור / M",
       "price": "149.00",
       "compareAtPrice": null,
       "available": false,
@@ -8005,7 +8005,7 @@
     "748960295448": {
       "barcode": "748960295448",
       "title": "ראפוור קולר חצי חנק CHAIN REACTION",
-      "variant": "ירוק / S",
+      "variant": "ירוק-אפור / S",
       "price": "149.00",
       "compareAtPrice": null,
       "available": false,
@@ -8044,7 +8044,7 @@
     "748960790264": {
       "barcode": "748960790264",
       "title": "ראפוור קולר חצי חנק CHAIN REACTION",
-      "variant": "ירוק / L",
+      "variant": "ירוק-אפור / L",
       "price": "149.00",
       "compareAtPrice": null,
       "available": false,
@@ -10475,7 +10475,7 @@
     "7290113309296": {
       "barcode": "7290113309296",
       "title": "בובו קולר לכלב",
-      "variant": "Black / XS",
+      "variant": "שחור / XS",
       "price": "15.00",
       "compareAtPrice": null,
       "available": false,
@@ -10488,7 +10488,7 @@
     "7290113309302": {
       "barcode": "7290113309302",
       "title": "בובו קולר לכלב",
-      "variant": "Pink / XS",
+      "variant": "ורוד / XS",
       "price": "15.00",
       "compareAtPrice": null,
       "available": true,
@@ -10501,7 +10501,7 @@
     "7290113309319": {
       "barcode": "7290113309319",
       "title": "בובו קולר לכלב",
-      "variant": "turqoise / XS",
+      "variant": "טורקיז / XS",
       "price": "15.00",
       "compareAtPrice": null,
       "available": true,
@@ -10514,7 +10514,7 @@
     "7290113309326": {
       "barcode": "7290113309326",
       "title": "בובו קולר לכלב",
-      "variant": "Brown / XS",
+      "variant": "חום / XS",
       "price": "15.00",
       "compareAtPrice": null,
       "available": false,
@@ -10527,7 +10527,7 @@
     "7290113309340": {
       "barcode": "7290113309340",
       "title": "בובו קולר לכלב",
-      "variant": "Peach / XS",
+      "variant": "אפרסק / XS",
       "price": "15.00",
       "compareAtPrice": null,
       "available": true,
@@ -10540,7 +10540,7 @@
     "7290113309388": {
       "barcode": "7290113309388",
       "title": "בובו קולר לכלב",
-      "variant": "Black / S",
+      "variant": "שחור / S",
       "price": "19.00",
       "compareAtPrice": null,
       "available": true,
@@ -10553,7 +10553,7 @@
     "7290113309395": {
       "barcode": "7290113309395",
       "title": "בובו קולר לכלב",
-      "variant": "Pink / S",
+      "variant": "ורוד / S",
       "price": "19.00",
       "compareAtPrice": null,
       "available": true,
@@ -10566,7 +10566,7 @@
     "7290113309401": {
       "barcode": "7290113309401",
       "title": "בובו קולר לכלב",
-      "variant": "turqoise / S",
+      "variant": "טורקיז / S",
       "price": "19.00",
       "compareAtPrice": null,
       "available": true,
@@ -10579,7 +10579,7 @@
     "7290113309418": {
       "barcode": "7290113309418",
       "title": "בובו קולר לכלב",
-      "variant": "Brown / S",
+      "variant": "חום / S",
       "price": "19.00",
       "compareAtPrice": null,
       "available": true,
@@ -10592,7 +10592,7 @@
     "7290113309432": {
       "barcode": "7290113309432",
       "title": "בובו קולר לכלב",
-      "variant": "Peach / S",
+      "variant": "אפרסק / S",
       "price": "19.00",
       "compareAtPrice": null,
       "available": true,
@@ -10605,7 +10605,7 @@
     "7290113309470": {
       "barcode": "7290113309470",
       "title": "בובו קולר לכלב",
-      "variant": "Black / M",
+      "variant": "שחור / M",
       "price": "24.00",
       "compareAtPrice": null,
       "available": true,
@@ -10618,7 +10618,7 @@
     "7290113309487": {
       "barcode": "7290113309487",
       "title": "בובו קולר לכלב",
-      "variant": "Pink / M",
+      "variant": "ורוד / M",
       "price": "24.00",
       "compareAtPrice": null,
       "available": false,
@@ -10631,7 +10631,7 @@
     "7290113309494": {
       "barcode": "7290113309494",
       "title": "בובו קולר לכלב",
-      "variant": "turqoise / M",
+      "variant": "טורקיז / M",
       "price": "24.00",
       "compareAtPrice": null,
       "available": true,
@@ -10644,7 +10644,7 @@
     "7290113309500": {
       "barcode": "7290113309500",
       "title": "בובו קולר לכלב",
-      "variant": "Brown / M",
+      "variant": "חום / M",
       "price": "24.00",
       "compareAtPrice": null,
       "available": true,
@@ -10657,7 +10657,7 @@
     "7290113309524": {
       "barcode": "7290113309524",
       "title": "בובו קולר לכלב",
-      "variant": "Peach / M",
+      "variant": "אפרסק / M",
       "price": "24.00",
       "compareAtPrice": null,
       "available": false,
@@ -10670,7 +10670,7 @@
     "7290113309562": {
       "barcode": "7290113309562",
       "title": "בובו קולר לכלב",
-      "variant": "Black / L",
+      "variant": "שחור / L",
       "price": "29.00",
       "compareAtPrice": null,
       "available": true,
@@ -10683,7 +10683,7 @@
     "7290113309579": {
       "barcode": "7290113309579",
       "title": "בובו קולר לכלב",
-      "variant": "Pink / L",
+      "variant": "ורוד / L",
       "price": "29.00",
       "compareAtPrice": null,
       "available": true,
@@ -10696,7 +10696,7 @@
     "7290113309586": {
       "barcode": "7290113309586",
       "title": "בובו קולר לכלב",
-      "variant": "turqoise / L",
+      "variant": "טורקיז / L",
       "price": "29.00",
       "compareAtPrice": null,
       "available": false,
@@ -10709,7 +10709,7 @@
     "7290113309593": {
       "barcode": "7290113309593",
       "title": "בובו קולר לכלב",
-      "variant": "Brown / L",
+      "variant": "חום / L",
       "price": "29.00",
       "compareAtPrice": null,
       "available": true,
@@ -10722,7 +10722,7 @@
     "7290113309616": {
       "barcode": "7290113309616",
       "title": "בובו קולר לכלב",
-      "variant": "Peach / L",
+      "variant": "אפרסק / L",
       "price": "29.00",
       "compareAtPrice": null,
       "available": true,
@@ -10891,7 +10891,7 @@
     "8010690179162": {
       "barcode": "8010690179162",
       "title": "מיטת פלסטיק דלוקס לכלב",
-      "variant": "כסוף / מידה 6",
+      "variant": "אפור / מידה 6",
       "price": "109.00",
       "compareAtPrice": null,
       "available": true,
@@ -10904,7 +10904,7 @@
     "8010690179186": {
       "barcode": "8010690179186",
       "title": "מיטת פלסטיק דלוקס לכלב",
-      "variant": "כסוף / מידה 4",
+      "variant": "אפור / מידה 4",
       "price": "79.00",
       "compareAtPrice": null,
       "available": false,
@@ -10917,7 +10917,7 @@
     "8010690179193": {
       "barcode": "8010690179193",
       "title": "מיטת פלסטיק דלוקס לכלב",
-      "variant": "כסוף / מידה 8",
+      "variant": "אפור / מידה 8",
       "price": "129.00",
       "compareAtPrice": null,
       "available": false,
@@ -10930,7 +10930,7 @@
     "8010690179209": {
       "barcode": "8010690179209",
       "title": "מיטת פלסטיק דלוקס לכלב",
-      "variant": "כסוף / מידה 10",
+      "variant": "אפור / מידה 10",
       "price": "169.00",
       "compareAtPrice": null,
       "available": false,
@@ -11193,7 +11193,7 @@
       "variant": "טורקיז / עובי 1.5 ס\"מ",
       "price": "25.00",
       "compareAtPrice": null,
-      "available": false,
+      "available": true,
       "vendor": "BOBO",
       "handle": "בובו-רצועה-סטנדרט-160-2-5-שחור",
       "url": "https://www.anipet.co.il/products/בובו-רצועה-סטנדרט-160-2-5-שחור",
@@ -14449,19 +14449,6 @@
       "url": "https://www.anipet.co.il/products/סופרים-פרוסות-סלמון-עם-עור-סלמון-500-גרם",
       "productId": 9846298411248,
       "variantId": 48818688000240
-    },
-    "7290113306981": {
-      "barcode": "7290113306981",
-      "title": "סופרים פרוסות סטייק כבש 600 גרם",
-      "variant": "",
-      "price": "71.90",
-      "compareAtPrice": null,
-      "available": true,
-      "vendor": "סופרים ביופט",
-      "handle": "סופרים-פרוסות-סטייק-כבש-600-גרם",
-      "url": "https://www.anipet.co.il/products/סופרים-פרוסות-סטייק-כבש-600-גרם",
-      "productId": 9846298378480,
-      "variantId": 48818687967472
     },
     "7290113306974": {
       "barcode": "7290113306974",
@@ -19266,7 +19253,7 @@
       "variant": "M",
       "price": "59.00",
       "compareAtPrice": null,
-      "available": false,
+      "available": true,
       "vendor": "ארם אנד האמר",
       "handle": "חיתולים-לכלבים-זכרים-12-יח-מידה-xs",
       "url": "https://www.anipet.co.il/products/חיתולים-לכלבים-זכרים-12-יח-מידה-xs",
@@ -26844,7 +26831,7 @@
     {
       "barcode": "748960162566",
       "title": "ראפוור רתמה לכלב פרונט ראנג'",
-      "variant": "ירוק / M",
+      "variant": "ירוק-אפור / M",
       "price": "249.00",
       "compareAtPrice": null,
       "available": true,
@@ -26857,7 +26844,7 @@
     {
       "barcode": "748960290207",
       "title": "ראפוור רתמה לכלב פרונט ראנג'",
-      "variant": "ירוק / XS",
+      "variant": "ירוק-אפור / XS",
       "price": "249.00",
       "compareAtPrice": null,
       "available": true,
@@ -26909,7 +26896,7 @@
     {
       "barcode": "748960504854",
       "title": "ראפוור רתמה לכלב פרונט ראנג'",
-      "variant": "ירוק / L-XL",
+      "variant": "ירוק-אפור / L-XL",
       "price": "249.00",
       "compareAtPrice": null,
       "available": true,
@@ -26974,7 +26961,7 @@
     {
       "barcode": "748960599072",
       "title": "ראפוור רתמה לכלב פרונט ראנג'",
-      "variant": "ירוק / S",
+      "variant": "ירוק-אפור / S",
       "price": "249.00",
       "compareAtPrice": null,
       "available": true,
@@ -28573,7 +28560,7 @@
     {
       "barcode": "7290113309012",
       "title": "בובו רצועה קומפורט לכלב",
-      "variant": "Black",
+      "variant": "שחור",
       "price": "49.00",
       "compareAtPrice": null,
       "available": true,
@@ -28586,7 +28573,7 @@
     {
       "barcode": "7290113309029",
       "title": "בובו רצועה קומפורט לכלב",
-      "variant": "Pink",
+      "variant": "ורוד",
       "price": "49.00",
       "compareAtPrice": null,
       "available": true,
@@ -28599,7 +28586,7 @@
     {
       "barcode": "7290113309036",
       "title": "בובו רצועה קומפורט לכלב",
-      "variant": "turqoise",
+      "variant": "טורקיז",
       "price": "49.00",
       "compareAtPrice": null,
       "available": true,
@@ -28612,7 +28599,7 @@
     {
       "barcode": "7290113309043",
       "title": "בובו רצועה קומפורט לכלב",
-      "variant": "Brown",
+      "variant": "חום",
       "price": "49.00",
       "compareAtPrice": null,
       "available": true,
@@ -28625,7 +28612,7 @@
     {
       "barcode": "7290113309050",
       "title": "בובו רצועה קומפורט לכלב",
-      "variant": "Purple",
+      "variant": "סגול",
       "price": "49.00",
       "compareAtPrice": null,
       "available": true,
@@ -28638,7 +28625,7 @@
     {
       "barcode": "7290113309067",
       "title": "בובו רצועה קומפורט לכלב",
-      "variant": "Peach",
+      "variant": "אפרסק",
       "price": "49.00",
       "compareAtPrice": null,
       "available": true,
@@ -28872,7 +28859,7 @@
     {
       "barcode": "748960155889",
       "title": "ראפוור קולר לכלב פרונט ראנג'",
-      "variant": "ירוק / L",
+      "variant": "ירוק-אפור / L",
       "price": "99.00",
       "compareAtPrice": null,
       "available": true,
@@ -28898,7 +28885,7 @@
     {
       "barcode": "748960356118",
       "title": "ראפוור קולר לכלב פרונט ראנג'",
-      "variant": "ירוק / S",
+      "variant": "ירוק-אפור / S",
       "price": "99.00",
       "compareAtPrice": null,
       "available": true,
@@ -28937,7 +28924,7 @@
     {
       "barcode": "748960815325",
       "title": "ראפוור קולר לכלב פרונט ראנג'",
-      "variant": "ירוק / M",
+      "variant": "ירוק-אפור / M",
       "price": "99.00",
       "compareAtPrice": null,
       "available": true,
@@ -29119,7 +29106,7 @@
     {
       "barcode": "748960986643",
       "title": "ראפוור מחזיק שקיות",
-      "variant": "ירוק",
+      "variant": "טורקיז",
       "price": "139.00",
       "compareAtPrice": null,
       "available": true,
@@ -29145,7 +29132,7 @@
     {
       "barcode": "748960411718",
       "title": "ראפוור קולר חצי חנק CHAIN REACTION",
-      "variant": "ירוק / M",
+      "variant": "ירוק-אפור / M",
       "price": "149.00",
       "compareAtPrice": null,
       "available": false,
@@ -29158,7 +29145,7 @@
     {
       "barcode": "748960295448",
       "title": "ראפוור קולר חצי חנק CHAIN REACTION",
-      "variant": "ירוק / S",
+      "variant": "ירוק-אפור / S",
       "price": "149.00",
       "compareAtPrice": null,
       "available": false,
@@ -29197,7 +29184,7 @@
     {
       "barcode": "748960790264",
       "title": "ראפוור קולר חצי חנק CHAIN REACTION",
-      "variant": "ירוק / L",
+      "variant": "ירוק-אפור / L",
       "price": "149.00",
       "compareAtPrice": null,
       "available": false,
@@ -32421,7 +32408,7 @@
     {
       "barcode": "7290113309296",
       "title": "בובו קולר לכלב",
-      "variant": "Black / XS",
+      "variant": "שחור / XS",
       "price": "15.00",
       "compareAtPrice": null,
       "available": false,
@@ -32434,7 +32421,7 @@
     {
       "barcode": "7290113309302",
       "title": "בובו קולר לכלב",
-      "variant": "Pink / XS",
+      "variant": "ורוד / XS",
       "price": "15.00",
       "compareAtPrice": null,
       "available": true,
@@ -32447,7 +32434,7 @@
     {
       "barcode": "7290113309319",
       "title": "בובו קולר לכלב",
-      "variant": "turqoise / XS",
+      "variant": "טורקיז / XS",
       "price": "15.00",
       "compareAtPrice": null,
       "available": true,
@@ -32460,7 +32447,7 @@
     {
       "barcode": "7290113309326",
       "title": "בובו קולר לכלב",
-      "variant": "Brown / XS",
+      "variant": "חום / XS",
       "price": "15.00",
       "compareAtPrice": null,
       "available": false,
@@ -32473,7 +32460,7 @@
     {
       "barcode": "7290113309340",
       "title": "בובו קולר לכלב",
-      "variant": "Peach / XS",
+      "variant": "אפרסק / XS",
       "price": "15.00",
       "compareAtPrice": null,
       "available": true,
@@ -32486,7 +32473,7 @@
     {
       "barcode": "7290113309388",
       "title": "בובו קולר לכלב",
-      "variant": "Black / S",
+      "variant": "שחור / S",
       "price": "19.00",
       "compareAtPrice": null,
       "available": true,
@@ -32499,7 +32486,7 @@
     {
       "barcode": "7290113309395",
       "title": "בובו קולר לכלב",
-      "variant": "Pink / S",
+      "variant": "ורוד / S",
       "price": "19.00",
       "compareAtPrice": null,
       "available": true,
@@ -32512,7 +32499,7 @@
     {
       "barcode": "7290113309401",
       "title": "בובו קולר לכלב",
-      "variant": "turqoise / S",
+      "variant": "טורקיז / S",
       "price": "19.00",
       "compareAtPrice": null,
       "available": true,
@@ -32525,7 +32512,7 @@
     {
       "barcode": "7290113309418",
       "title": "בובו קולר לכלב",
-      "variant": "Brown / S",
+      "variant": "חום / S",
       "price": "19.00",
       "compareAtPrice": null,
       "available": true,
@@ -32538,7 +32525,7 @@
     {
       "barcode": "7290113309432",
       "title": "בובו קולר לכלב",
-      "variant": "Peach / S",
+      "variant": "אפרסק / S",
       "price": "19.00",
       "compareAtPrice": null,
       "available": true,
@@ -32551,7 +32538,7 @@
     {
       "barcode": "7290113309470",
       "title": "בובו קולר לכלב",
-      "variant": "Black / M",
+      "variant": "שחור / M",
       "price": "24.00",
       "compareAtPrice": null,
       "available": true,
@@ -32564,7 +32551,7 @@
     {
       "barcode": "7290113309487",
       "title": "בובו קולר לכלב",
-      "variant": "Pink / M",
+      "variant": "ורוד / M",
       "price": "24.00",
       "compareAtPrice": null,
       "available": false,
@@ -32577,7 +32564,7 @@
     {
       "barcode": "7290113309494",
       "title": "בובו קולר לכלב",
-      "variant": "turqoise / M",
+      "variant": "טורקיז / M",
       "price": "24.00",
       "compareAtPrice": null,
       "available": true,
@@ -32590,7 +32577,7 @@
     {
       "barcode": "7290113309500",
       "title": "בובו קולר לכלב",
-      "variant": "Brown / M",
+      "variant": "חום / M",
       "price": "24.00",
       "compareAtPrice": null,
       "available": true,
@@ -32603,7 +32590,7 @@
     {
       "barcode": "7290113309524",
       "title": "בובו קולר לכלב",
-      "variant": "Peach / M",
+      "variant": "אפרסק / M",
       "price": "24.00",
       "compareAtPrice": null,
       "available": false,
@@ -32616,7 +32603,7 @@
     {
       "barcode": "7290113309562",
       "title": "בובו קולר לכלב",
-      "variant": "Black / L",
+      "variant": "שחור / L",
       "price": "29.00",
       "compareAtPrice": null,
       "available": true,
@@ -32629,7 +32616,7 @@
     {
       "barcode": "7290113309579",
       "title": "בובו קולר לכלב",
-      "variant": "Pink / L",
+      "variant": "ורוד / L",
       "price": "29.00",
       "compareAtPrice": null,
       "available": true,
@@ -32642,7 +32629,7 @@
     {
       "barcode": "7290113309586",
       "title": "בובו קולר לכלב",
-      "variant": "turqoise / L",
+      "variant": "טורקיז / L",
       "price": "29.00",
       "compareAtPrice": null,
       "available": false,
@@ -32655,7 +32642,7 @@
     {
       "barcode": "7290113309593",
       "title": "בובו קולר לכלב",
-      "variant": "Brown / L",
+      "variant": "חום / L",
       "price": "29.00",
       "compareAtPrice": null,
       "available": true,
@@ -32668,7 +32655,7 @@
     {
       "barcode": "7290113309616",
       "title": "בובו קולר לכלב",
-      "variant": "Peach / L",
+      "variant": "אפרסק / L",
       "price": "29.00",
       "compareAtPrice": null,
       "available": true,
@@ -32837,7 +32824,7 @@
     {
       "barcode": "8010690179162",
       "title": "מיטת פלסטיק דלוקס לכלב",
-      "variant": "כסוף / מידה 6",
+      "variant": "אפור / מידה 6",
       "price": "109.00",
       "compareAtPrice": null,
       "available": true,
@@ -32850,7 +32837,7 @@
     {
       "barcode": "8010690179186",
       "title": "מיטת פלסטיק דלוקס לכלב",
-      "variant": "כסוף / מידה 4",
+      "variant": "אפור / מידה 4",
       "price": "79.00",
       "compareAtPrice": null,
       "available": false,
@@ -32863,7 +32850,7 @@
     {
       "barcode": "8010690179193",
       "title": "מיטת פלסטיק דלוקס לכלב",
-      "variant": "כסוף / מידה 8",
+      "variant": "אפור / מידה 8",
       "price": "129.00",
       "compareAtPrice": null,
       "available": false,
@@ -32876,7 +32863,7 @@
     {
       "barcode": "8010690179209",
       "title": "מיטת פלסטיק דלוקס לכלב",
-      "variant": "כסוף / מידה 10",
+      "variant": "אפור / מידה 10",
       "price": "169.00",
       "compareAtPrice": null,
       "available": false,
@@ -33204,7 +33191,7 @@
       "variant": "טורקיז / עובי 1.5 ס\"מ",
       "price": "25.00",
       "compareAtPrice": null,
-      "available": false,
+      "available": true,
       "vendor": "BOBO",
       "handle": "בובו-רצועה-סטנדרט-160-2-5-שחור",
       "url": "https://www.anipet.co.il/products/בובו-רצועה-סטנדרט-160-2-5-שחור",
@@ -37201,19 +37188,6 @@
       "url": "https://www.anipet.co.il/products/סופרים-פרוסות-סלמון-עם-עור-סלמון-500-גרם",
       "productId": 9846298411248,
       "variantId": 48818688000240
-    },
-    {
-      "barcode": "7290113306981",
-      "title": "סופרים פרוסות סטייק כבש 600 גרם",
-      "variant": "",
-      "price": "71.90",
-      "compareAtPrice": null,
-      "available": true,
-      "vendor": "סופרים ביופט",
-      "handle": "סופרים-פרוסות-סטייק-כבש-600-גרם",
-      "url": "https://www.anipet.co.il/products/סופרים-פרוסות-סטייק-כבש-600-גרם",
-      "productId": 9846298378480,
-      "variantId": 48818687967472
     },
     {
       "barcode": "7290113306974",
@@ -42642,7 +42616,7 @@
       "variant": "M",
       "price": "59.00",
       "compareAtPrice": null,
-      "available": false,
+      "available": true,
       "vendor": "ארם אנד האמר",
       "handle": "חיתולים-לכלבים-זכרים-12-יח-מידה-xs",
       "url": "https://www.anipet.co.il/products/חיתולים-לכלבים-זכרים-12-יח-מידה-xs",
