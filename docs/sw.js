@@ -8,7 +8,7 @@
    - Data JSON (catalog / price changes): NETWORK-FIRST with cache fallback. */
 'use strict';
 
-var CACHE = 'anipet-scanner-v3';
+var CACHE = 'dogsfood-scanner-v4';
 var SHELL = [
   'index.html',
   'changes.html',
