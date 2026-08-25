@@ -1,6 +1,17 @@
 {
-  "date": "2026-08-24",
-  "updatedAt": "24.8.2026, 8:33",
-  "count": 0,
-  "changes": []
+  "date": "2026-08-25",
+  "updatedAt": "25.8.2026, 8:26",
+  "count": 1,
+  "changes": [
+    {
+      "barcode": "7290113308411",
+      "title": "בובו מברשת גומי",
+      "variant": "",
+      "oldPrice": "45.00",
+      "newPrice": "44.90",
+      "diff": "-0.10",
+      "direction": "down",
+      "url": "https://www.anipet.co.il/products/בובו-מברשת-גומי"
+    }
+  ]
 }
