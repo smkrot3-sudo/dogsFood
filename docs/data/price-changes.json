@@ -1,6 +1,17 @@
 {
-  "date": "2026-08-29",
-  "updatedAt": "29.8.2026, 14:26",
-  "count": 0,
-  "changes": []
+  "date": "2026-08-30",
+  "updatedAt": "30.8.2026, 13:13",
+  "count": 1,
+  "changes": [
+    {
+      "barcode": "8010276040961",
+      "title": "וט לייף כלב היפואלרגני חזיר ותפו\"א 2 ק\"ג",
+      "variant": "12 ק\"ג",
+      "oldPrice": "299.00",
+      "newPrice": "449.00",
+      "diff": "150.00",
+      "direction": "up",
+      "url": "https://www.anipet.co.il/products/וט-לייף-כלב-היפואלרגני-חזיר-ותפוא-2-קילו"
+    }
+  ]
 }

@@ -1,6 +1,6 @@
 {
-  "updatedAt": "28.8.2026, 20:06",
-  "date": "2026-08-28",
+  "updatedAt": "29.8.2026, 14:26",
+  "date": "2026-08-29",
   "stats": {
     "withBarcode": 2225,
     "withoutBarcode": 0,
@@ -9425,7 +9425,7 @@
       "variant": "",
       "price": "235.00",
       "compareAtPrice": null,
-      "available": true,
+      "available": false,
       "vendor": "ND",
       "handle": "nd-אושן-קוד-דגנים-תפוז-כלב-מיני-7-קילו",
       "url": "https://www.anipet.co.il/products/nd-אושן-קוד-דגנים-תפוז-כלב-מיני-7-קילו",
@@ -32970,7 +32970,7 @@
       "variant": "",
       "price": "235.00",
       "compareAtPrice": null,
-      "available": true,
+      "available": false,
       "vendor": "ND",
       "handle": "nd-אושן-קוד-דגנים-תפוז-כלב-מיני-7-קילו",
       "url": "https://www.anipet.co.il/products/nd-אושן-קוד-דגנים-תפוז-כלב-מיני-7-קילו",
