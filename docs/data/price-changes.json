@@ -1,17 +1,47 @@
 {
-  "date": "2026-08-30",
-  "updatedAt": "30.8.2026, 13:13",
-  "count": 1,
+  "date": "2026-08-31",
+  "updatedAt": "31.8.2026, 14:18",
+  "count": 4,
   "changes": [
     {
-      "barcode": "8010276040961",
-      "title": "וט לייף כלב היפואלרגני חזיר ותפו\"א 2 ק\"ג",
-      "variant": "12 ק\"ג",
-      "oldPrice": "299.00",
-      "newPrice": "449.00",
-      "diff": "150.00",
-      "direction": "up",
-      "url": "https://www.anipet.co.il/products/וט-לייף-כלב-היפואלרגני-חזיר-ותפוא-2-קילו"
+      "barcode": "7290005651366",
+      "title": "בונזו בקר וכבד",
+      "variant": "3 ק\"ג",
+      "oldPrice": "65.00",
+      "newPrice": "50.00",
+      "diff": "-15.00",
+      "direction": "down",
+      "url": "https://www.anipet.co.il/products/בונזו-בקר-וכבד-17-קג"
+    },
+    {
+      "barcode": "7290005111761",
+      "title": "בונזו בשר",
+      "variant": "3 ק\"ג",
+      "oldPrice": "65.00",
+      "newPrice": "50.00",
+      "diff": "-15.00",
+      "direction": "down",
+      "url": "https://www.anipet.co.il/products/בונזו-בשר-17-קילו"
+    },
+    {
+      "barcode": "7290008975780",
+      "title": "בונזו גזע קטן",
+      "variant": "3 ק\"ג",
+      "oldPrice": "65.00",
+      "newPrice": "55.00",
+      "diff": "-10.00",
+      "direction": "down",
+      "url": "https://www.anipet.co.il/products/בונזו-כלב-גזע-קטן-7-קילו"
+    },
+    {
+      "barcode": "7290000805368",
+      "title": "בונזו גורים",
+      "variant": "3 ק\"ג",
+      "oldPrice": "65.00",
+      "newPrice": "59.00",
+      "diff": "-6.00",
+      "direction": "down",
+      "url": "https://www.anipet.co.il/products/בונזו-גורים-15-קג"
     }
   ]
 }
