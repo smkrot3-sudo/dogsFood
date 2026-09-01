@@ -1,47 +1,6 @@
 {
-  "date": "2026-08-31",
-  "updatedAt": "31.8.2026, 14:18",
-  "count": 4,
-  "changes": [
-    {
-      "barcode": "7290005651366",
-      "title": "בונזו בקר וכבד",
-      "variant": "3 ק\"ג",
-      "oldPrice": "65.00",
-      "newPrice": "50.00",
-      "diff": "-15.00",
-      "direction": "down",
-      "url": "https://www.anipet.co.il/products/בונזו-בקר-וכבד-17-קג"
-    },
-    {
-      "barcode": "7290005111761",
-      "title": "בונזו בשר",
-      "variant": "3 ק\"ג",
-      "oldPrice": "65.00",
-      "newPrice": "50.00",
-      "diff": "-15.00",
-      "direction": "down",
-      "url": "https://www.anipet.co.il/products/בונזו-בשר-17-קילו"
-    },
-    {
-      "barcode": "7290008975780",
-      "title": "בונזו גזע קטן",
-      "variant": "3 ק\"ג",
-      "oldPrice": "65.00",
-      "newPrice": "55.00",
-      "diff": "-10.00",
-      "direction": "down",
-      "url": "https://www.anipet.co.il/products/בונזו-כלב-גזע-קטן-7-קילו"
-    },
-    {
-      "barcode": "7290000805368",
-      "title": "בונזו גורים",
-      "variant": "3 ק\"ג",
-      "oldPrice": "65.00",
-      "newPrice": "59.00",
-      "diff": "-6.00",
-      "direction": "down",
-      "url": "https://www.anipet.co.il/products/בונזו-גורים-15-קג"
-    }
-  ]
+  "date": "2026-09-01",
+  "updatedAt": "1.9.2026, 12:42",
+  "count": 0,
+  "changes": []
 }
