@@ -1,6 +1,23 @@
 {
   "runs": [
     {
+      "date": "2026-09-02",
+      "updatedAt": "2.9.2026, 12:15",
+      "count": 1,
+      "changes": [
+        {
+          "barcode": "2363",
+          "title": "הילס מטבוליק רפואי לחתול",
+          "variant": "3 ק\"ג",
+          "oldPrice": "245.00",
+          "newPrice": "219.00",
+          "diff": "-26.00",
+          "direction": "down",
+          "url": "https://www.anipet.co.il/products/הילס-מטבוליק-רפואי-לחתול-3-קילו"
+        }
+      ]
+    },
+    {
       "date": "2026-08-31",
       "updatedAt": "31.8.2026, 14:18",
       "count": 4,
