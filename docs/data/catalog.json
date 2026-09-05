@@ -1,6 +1,6 @@
 {
-  "updatedAt": "4.9.2026, 12:16",
-  "date": "2026-09-04",
+  "updatedAt": "5.9.2026, 11:45",
+  "date": "2026-09-05",
   "stats": {
     "withBarcode": 2282,
     "withoutBarcode": 0,
@@ -16419,7 +16419,7 @@
       "variant": "",
       "price": "349.00",
       "compareAtPrice": null,
-      "available": true,
+      "available": false,
       "vendor": "GO!",
       "handle": "גו-לכלב-בקרת-משקל-ומפרקים-עוף-9-98-קג",
       "url": "https://www.anipet.co.il/products/גו-לכלב-בקרת-משקל-ומפרקים-עוף-9-98-קג",
@@ -42174,7 +42174,7 @@
       "variant": "",
       "price": "349.00",
       "compareAtPrice": null,
-      "available": true,
+      "available": false,
       "vendor": "GO!",
       "handle": "גו-לכלב-בקרת-משקל-ומפרקים-עוף-9-98-קג",
       "url": "https://www.anipet.co.il/products/גו-לכלב-בקרת-משקל-ומפרקים-עוף-9-98-קג",
