@@ -1,6 +1,127 @@
 {
-  "date": "2026-09-05",
-  "updatedAt": "5.9.2026, 11:45",
-  "count": 0,
-  "changes": []
+  "date": "2026-09-06",
+  "updatedAt": "6.9.2026, 12:06",
+  "count": 12,
+  "changes": [
+    {
+      "barcode": "8010690053752",
+      "title": "מיטת דנדי לכלב",
+      "variant": "95 ס\"מ",
+      "oldPrice": "387.90",
+      "newPrice": "349.00",
+      "diff": "-38.90",
+      "direction": "down",
+      "url": "https://www.anipet.co.il/products/מיטת-דנדי-80-סמ-ferplast"
+    },
+    {
+      "barcode": "8010690058191",
+      "title": "אטלס 70 כלוב הטסה לכלב",
+      "variant": "",
+      "oldPrice": "1383.90",
+      "newPrice": "1349.00",
+      "diff": "-34.90",
+      "direction": "down",
+      "url": "https://www.anipet.co.il/products/אטלס-70"
+    },
+    {
+      "barcode": "8010690052793",
+      "title": "שירותים לחתול מג'יקס פרפלסט",
+      "variant": "",
+      "oldPrice": "339.00",
+      "newPrice": "309.00",
+      "diff": "-30.00",
+      "direction": "down",
+      "url": "https://www.anipet.co.il/products/שירותים-לחתול-מגיקס-ferplast"
+    },
+    {
+      "barcode": "8010690165349",
+      "title": "מזרון רילקס לכלב",
+      "variant": "100 ס\"מ",
+      "oldPrice": "199.00",
+      "newPrice": "175.00",
+      "diff": "-24.00",
+      "direction": "down",
+      "url": "https://www.anipet.co.il/products/מזרון-רילקס-45-סמ-ferplast"
+    },
+    {
+      "barcode": "8010690218335",
+      "title": "סהרה שירותים לחתול פרפלסט",
+      "variant": "",
+      "oldPrice": "339.00",
+      "newPrice": "319.00",
+      "diff": "-20.00",
+      "direction": "down",
+      "url": "https://www.anipet.co.il/products/סהרה-שירותים-לחתול-פרפלסט"
+    },
+    {
+      "barcode": "8010690045597",
+      "title": "כלוב קויה 80 פרפלסט",
+      "variant": "",
+      "oldPrice": "359.00",
+      "newPrice": "339.00",
+      "diff": "-20.00",
+      "direction": "down",
+      "url": "https://www.anipet.co.il/products/כלוב-קויה-80-ferplast"
+    },
+    {
+      "barcode": "8010690010601",
+      "title": "כלוב ציפורים איביזה Ferplast",
+      "variant": "",
+      "oldPrice": "535.90",
+      "newPrice": "519.00",
+      "diff": "-16.90",
+      "direction": "down",
+      "url": "https://www.anipet.co.il/products/כלוב-ציפורים-איביזה-ferplast"
+    },
+    {
+      "barcode": "8010690053691",
+      "title": "מיטת דנדי לכלב",
+      "variant": "55 ס\"מ",
+      "oldPrice": "163.90",
+      "newPrice": "149.00",
+      "diff": "-14.90",
+      "direction": "down",
+      "url": "https://www.anipet.co.il/products/מיטת-דנדי-80-סמ-ferplast"
+    },
+    {
+      "barcode": "8010690053714",
+      "title": "מיטת דנדי לכלב",
+      "variant": "65 ס\"מ",
+      "oldPrice": "193.90",
+      "newPrice": "189.00",
+      "diff": "-4.90",
+      "direction": "down",
+      "url": "https://www.anipet.co.il/products/מיטת-דנדי-80-סמ-ferplast"
+    },
+    {
+      "barcode": "8010690165233",
+      "title": "מיטת דנדי לכלב",
+      "variant": "45 ס\"מ",
+      "oldPrice": "122.90",
+      "newPrice": "119.00",
+      "diff": "-3.90",
+      "direction": "down",
+      "url": "https://www.anipet.co.il/products/מיטת-דנדי-80-סמ-ferplast"
+    },
+    {
+      "barcode": "8010690067704",
+      "title": "ארגז צרכים פתוח ניפ פלוס",
+      "variant": "",
+      "oldPrice": "58.50",
+      "newPrice": "55.00",
+      "diff": "-3.50",
+      "direction": "down",
+      "url": "https://www.anipet.co.il/products/ארגז-צרכים-פתוח-ניפ-פלוס"
+    },
+    {
+      "barcode": "8010690016887",
+      "title": "פילטר לארגז צרכים FERPLAST",
+      "variant": "",
+      "oldPrice": "21.90",
+      "newPrice": "19.90",
+      "diff": "-2.00",
+      "direction": "down",
+      "url": "https://www.anipet.co.il/products/פילטר-לארגז-צרכים-ferplast"
+    }
+  ]
 }
