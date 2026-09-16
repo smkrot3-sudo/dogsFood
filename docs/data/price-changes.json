@@ -1,27 +1,6 @@
 {
-  "date": "2026-09-15",
-  "updatedAt": "15.9.2026, 12:44",
-  "count": 2,
-  "changes": [
-    {
-      "barcode": "7290100345948",
-      "title": "זוג עצמות מעושנות לחוצות 20 ס\"מ ריבוס",
-      "variant": "",
-      "oldPrice": "32.90",
-      "newPrice": "24.00",
-      "diff": "-8.90",
-      "direction": "down",
-      "url": "https://www.anipet.co.il/products/זוג-עצמות-מעושנות-לחוצות-20סמ-ריבוס"
-    },
-    {
-      "barcode": "7290100344996",
-      "title": "ריבוס עצם דחוסה גדולה 30 ס\"מ",
-      "variant": "",
-      "oldPrice": "27.50",
-      "newPrice": "19.90",
-      "diff": "-7.60",
-      "direction": "down",
-      "url": "https://www.anipet.co.il/products/עצם-גדולה-ריבוס"
-    }
-  ]
+  "date": "2026-09-16",
+  "updatedAt": "16.9.2026, 12:38",
+  "count": 0,
+  "changes": []
 }
