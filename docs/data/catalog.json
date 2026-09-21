@@ -1,6 +1,6 @@
 {
-  "updatedAt": "20.9.2026, 12:33",
-  "date": "2026-09-20",
+  "updatedAt": "21.9.2026, 13:21",
+  "date": "2026-09-21",
   "stats": {
     "withBarcode": 2342,
     "withoutBarcode": 0,
@@ -10322,7 +10322,7 @@
       "variant": "",
       "price": "6.00",
       "compareAtPrice": null,
-      "available": true,
+      "available": false,
       "vendor": "אורבן צ'ויס",
       "handle": "אורבן-צויס-סקוויז-ברווז-צלוי-ודלעת-לחתול-100-גרם",
       "url": "https://www.anipet.co.il/products/אורבן-צויס-סקוויז-ברווז-צלוי-ודלעת-לחתול-100-גרם",
@@ -35128,7 +35128,7 @@
       "variant": "",
       "price": "6.00",
       "compareAtPrice": null,
-      "available": true,
+      "available": false,
       "vendor": "אורבן צ'ויס",
       "handle": "אורבן-צויס-סקוויז-ברווז-צלוי-ודלעת-לחתול-100-גרם",
       "url": "https://www.anipet.co.il/products/אורבן-צויס-סקוויז-ברווז-צלוי-ודלעת-לחתול-100-גרם",
