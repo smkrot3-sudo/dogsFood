@@ -39,6 +39,7 @@
   --must: #95a5b8; --danger: #ff8a80; --danger-soft: #3d1f1d; color-scheme: dark;
 }
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 body {
   background: var(--bg); color: var(--fg);
   font-family: var(--font-body); font-size: 16px; line-height: 1.5;
@@ -111,19 +112,78 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
   .split { grid-template-columns: 1fr; }
 }
 @media (prefers-reduced-motion: reduce) { .bar span { transition: none; } }
+
+/* Accounts */
+.auth { max-width: 400px; margin: 0 auto; padding-block: 48px; display: grid; gap: 20px; }
+.auth h1 { text-align: center; }
+.auth .sub { text-align: center; }
+.auth form { display: grid; gap: 12px; }
+.auth label { display: grid; gap: 4px; font-weight: 600; font-size: 15px; }
+.auth input[type="email"], .auth input[type="password"] {
+  font: inherit; color: var(--fg); background: var(--bg); border: 1px solid var(--line);
+  border-radius: 8px; padding: 10px 12px; width: 100%; direction: ltr; text-align: right;
+}
+.btn.block { width: 100%; padding: 11px 14px; }
+.google { display: flex; align-items: center; justify-content: center; gap: 10px; }
+.google svg { width: 18px; height: 18px; flex: none; }
+.or { display: flex; align-items: center; gap: 12px; color: var(--muted); font-size: 14px; }
+.or::before, .or::after { content: ""; flex: 1; border-top: 1px solid var(--line); }
+.linkbtn { background: none; border: 0; color: var(--accent); font-weight: 600; padding: 0; text-decoration: underline; text-underline-offset: 3px; }
+.switch { text-align: center; font-size: 15px; color: var(--muted); margin: 0; }
+.err { background: var(--danger-soft); color: var(--danger); border-radius: 8px; padding: 10px 12px; font-size: 14px; font-weight: 600; }
+.ok { background: var(--accent-soft); color: var(--accent); border-radius: 8px; padding: 10px 12px; font-size: 14px; font-weight: 600; }
+.userbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; font-size: 14px; color: var(--muted); }
+.userbar img { width: 28px; height: 28px; border-radius: 50%; }
+.userbar .who { color: var(--fg); font-weight: 600; max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.head-side { display: grid; gap: 10px; justify-items: end; }
+.saving { font-size: 13px; color: var(--muted); min-height: 1.2em; }
+.loading { text-align: center; color: var(--muted); padding-block: 80px; }
 </style>
 </head>
 <body>
 
-<div class="wrap" dir="rtl" lang="he">
+<div class="loading" id="loading">טוען…</div>
+
+<div class="auth" id="authScreen" hidden>
+  <div>
+    <h1>התקציב החודשי שלי</h1>
+    <p class="sub">התחברו כדי לשמור את התקציב שלכם ולראות אותו מכל מכשיר.</p>
+  </div>
+  <section class="panel">
+    <button class="btn block google" type="button" id="googleBtn">
+      <svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>
+      המשך עם Google
+    </button>
+    <div class="or" id="orLine">או עם מייל וסיסמה</div>
+    <form id="emailForm" novalidate>
+      <label for="email" id="emailLabel">מייל<input type="email" id="email" autocomplete="email" required></label>
+      <label for="password" id="passLabel">סיסמה<input type="password" id="password" autocomplete="current-password" minlength="6" required></label>
+      <div class="err" id="authErr" role="alert" hidden></div>
+      <div class="ok" id="authOk" role="status" hidden></div>
+      <button class="btn primary block" type="submit" id="emailSubmit">התחברות</button>
+    </form>
+    <p class="switch" id="forgotRow"><button class="linkbtn" type="button" id="forgotBtn">שכחתי סיסמה</button></p>
+    <p class="switch" id="switchRow"><span id="switchText">אין לכם חשבון?</span> <button class="linkbtn" type="button" id="switchMode">הרשמה</button></p>
+  </section>
+</div>
+
+<div class="wrap" id="app" dir="rtl" lang="he" hidden>
   <header>
     <div>
       <h1>התקציב החודשי שלי</h1>
       <p class="sub">רושמים הכנסה נטו והוצאות חובה, ומקבלים כמה להשאיר בעו״ש וכמה להעביר לפיקדון.</p>
     </div>
-    <div class="month">
-      <label for="month">חודש</label>
-      <input type="month" id="month">
+    <div class="head-side">
+      <div class="userbar" id="userbar" hidden>
+        <img id="userPhoto" alt="" referrerpolicy="no-referrer" hidden>
+        <span class="who" id="userName"></span>
+        <button class="btn" type="button" id="logoutBtn">התנתקות</button>
+      </div>
+      <div class="month">
+        <label for="month">חודש</label>
+        <input type="month" id="month">
+      </div>
+      <div class="saving" id="saving" role="status"></div>
     </div>
   </header>
 
@@ -203,9 +263,16 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.js"></script>
+<script>
+// Supabase project (Project settings > API). The anon key is public by design; row-level security protects the data.
+// While these are empty the site runs without accounts and keeps data in the browser only.
+const SUPABASE_URL = "https://iteswfqwzbtpsjfwcptr.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml0ZXN3ZnF3emJ0cHNqZndjcHRyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA3MDcwMTQsImV4cCI6MjEwNjI4MzAxNH0.7pjYPBQzvl54BCthc0iY4AT7yW0MfO0pUvPN0s1iirs";
+</script>
 <script>
 (function () {
-  const KEY = "budget-app-v1";
+  const LOCAL_KEY = "budget-app-v1";
   const $ = (id) => document.getElementById(id);
   const fmt = (n) => "₪" + Math.round(n).toLocaleString("he-IL");
 
@@ -222,12 +289,51 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
     ]
   };
 
-  function load() {
-    try { return JSON.parse(localStorage.getItem(KEY)) || { months: {} }; } catch (e) { return { months: {} }; }
+  let store = null;
+  let month = null;
+  let user = null;
+  let saveT = null;
+  let pendingSave = null;
+
+  function show(which) {
+    $("loading").hidden = which !== "loading";
+    $("authScreen").hidden = which !== "auth";
+    $("app").hidden = which !== "app";
   }
+
+  function readLocal() {
+    try { return JSON.parse(localStorage.getItem(LOCAL_KEY)); } catch (e) { return null; }
+  }
+  function writeLocal(s) {
+    try { localStorage.setItem(LOCAL_KEY, JSON.stringify(s)); } catch (e) {}
+  }
+  function removeLocal() {
+    try { localStorage.removeItem(LOCAL_KEY); } catch (e) {}
+  }
+  // Data typed in before accounts existed; the example alone doesn't count
+  function hasOwnData(s) {
+    return !!(s && s.months && Object.values(s.months).some((m) => !m.example));
+  }
+
+  let persistRemote = null;
   function persist() {
-    try { localStorage.setItem(KEY, JSON.stringify(store)); } catch (e) {}
+    if (!user) { writeLocal(store); return; }
+    $("saving").textContent = "שומר…";
+    clearTimeout(saveT);
+    const snapshot = JSON.parse(JSON.stringify(store));
+    pendingSave = () => persistRemote(snapshot);
+    saveT = setTimeout(flushSave, 700);
   }
+  function flushSave() {
+    clearTimeout(saveT);
+    const run = pendingSave;
+    pendingSave = null;
+    if (!run) return Promise.resolve();
+    return run()
+      .then(() => { $("saving").textContent = "נשמר"; })
+      .catch(() => { $("saving").textContent = "השמירה נכשלה. בדקו את החיבור לאינטרנט."; });
+  }
+
   function thisMonth() {
     const d = new Date();
     return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0");
@@ -238,10 +344,17 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
     return y + "-" + String(mo).padStart(2, "0");
   }
   function daysIn(m) { const [y, mo] = m.split("-").map(Number); return new Date(y, mo, 0).getDate(); }
+  const clone = (a) => a.map((x) => ({ name: x.name, amount: x.amount }));
 
-  const store = load();
-  let month = store.last || thisMonth();
-  if (!Object.keys(store.months).length) store.months[month] = JSON.parse(JSON.stringify(EXAMPLE));
+  function start(s) {
+    store = s && s.months ? s : { months: {} };
+    month = store.last || thisMonth();
+    if (!Object.keys(store.months).length) store.months[month] = JSON.parse(JSON.stringify(EXAMPLE));
+    store.last = month;
+    $("saving").textContent = "";
+    render();
+    show("app");
+  }
 
   function data() {
     if (!store.months[month]) {
@@ -253,7 +366,6 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
     }
     return store.months[month];
   }
-  const clone = (a) => a.map((x) => ({ name: x.name, amount: x.amount }));
 
   function rowEl(list, i, kind) {
     const item = list[i];
@@ -360,8 +472,159 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
     persist(); render();
   });
 
-  store.last = month;
-  render();
+  // ---- Accounts ----
+
+  if (!SUPABASE_URL || !SUPABASE_KEY || !window.supabase) {
+    start(readLocal());
+    return;
+  }
+
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  const here = () => location.origin + location.pathname;
+
+  function errText(e) {
+    const m = ((e && e.message) || "").toLowerCase();
+    if (m.includes("invalid login credentials")) return "המייל או הסיסמה לא נכונים.";
+    if (m.includes("already registered")) return "כבר יש חשבון עם המייל הזה. נסו להתחבר במקום להירשם.";
+    if (m.includes("email not confirmed")) return "צריך לאשר את המייל קודם. חפשו אצלכם בתיבה את המייל מאיתנו.";
+    if (m.includes("at least 6") || m.includes("password should")) return "הסיסמה קצרה מדי. צריך לפחות 6 תווים.";
+    if (m.includes("invalid") && m.includes("email")) return "כתובת המייל לא תקינה.";
+    if (m.includes("rate limit") || m.includes("security purposes")) return "היו יותר מדי ניסיונות. נסו שוב בעוד כמה דקות.";
+    if (m.includes("provider is not enabled")) return "ההתחברות עם Google עוד לא הופעלה.";
+    if (m.includes("failed to fetch") || m.includes("network")) return "אין חיבור לאינטרנט. בדקו את החיבור ונסו שוב.";
+    return "משהו השתבש. נסו שוב.";
+  }
+  function showErr(e) {
+    $("authOk").hidden = true;
+    $("authErr").textContent = typeof e === "string" ? e : errText(e);
+    $("authErr").hidden = false;
+  }
+  function showOk(msg) {
+    $("authErr").hidden = true;
+    $("authOk").textContent = msg;
+    $("authOk").hidden = false;
+  }
+  function clearMsgs() { $("authErr").hidden = true; $("authOk").hidden = true; }
+
+  // "login", "signup" or "reset" (choosing a new password after the reset email)
+  let mode = "login";
+  function setMode(m) {
+    mode = m;
+    clearMsgs();
+    const reset = m === "reset";
+    $("emailSubmit").textContent = m === "signup" ? "יצירת חשבון" : reset ? "שמירת הסיסמה החדשה" : "התחברות";
+    $("switchText").textContent = m === "signup" ? "כבר יש לכם חשבון?" : "אין לכם חשבון?";
+    $("switchMode").textContent = m === "signup" ? "התחברות" : "הרשמה";
+    $("password").autocomplete = m === "login" ? "current-password" : "new-password";
+    $("passLabel").firstChild.textContent = reset ? "סיסמה חדשה" : "סיסמה";
+    $("emailLabel").hidden = reset;
+    $("forgotRow").hidden = m !== "login";
+    $("switchRow").hidden = reset;
+    $("googleBtn").hidden = reset;
+    $("orLine").hidden = reset;
+  }
+  $("switchMode").addEventListener("click", () => setMode(mode === "signup" ? "login" : "signup"));
+
+  $("googleBtn").addEventListener("click", async () => {
+    clearMsgs();
+    const { error } = await sb.auth.signInWithOAuth({ provider: "google", options: { redirectTo: here() } });
+    if (error) showErr(error);
+  });
+
+  $("emailForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    clearMsgs();
+    const email = $("email").value.trim();
+    const pass = $("password").value;
+    if (mode !== "reset" && !email) { showErr("כתובת המייל לא תקינה."); return; }
+    if (!pass) { showErr("צריך להזין סיסמה."); return; }
+    $("emailSubmit").disabled = true;
+    try {
+      if (mode === "signup") {
+        const { data, error } = await sb.auth.signUp({ email, password: pass, options: { emailRedirectTo: here() } });
+        if (error) throw error;
+        if (data.user && data.user.identities && !data.user.identities.length) {
+          showErr("כבר יש חשבון עם המייל הזה. נסו להתחבר במקום להירשם.");
+        } else if (!data.session) {
+          showOk("שלחנו מייל אישור אל " + email + ". לחצו על הקישור שבו ותחזרו לכאן מחוברים.");
+        }
+      } else if (mode === "reset") {
+        const { error } = await sb.auth.updateUser({ password: pass });
+        if (error) throw error;
+        $("password").value = "";
+        await enter((await sb.auth.getSession()).data.session);
+      } else {
+        const { error } = await sb.auth.signInWithPassword({ email, password: pass });
+        if (error) throw error;
+      }
+    } catch (err) {
+      showErr(err);
+    } finally {
+      $("emailSubmit").disabled = false;
+    }
+  });
+
+  $("forgotBtn").addEventListener("click", async () => {
+    const email = $("email").value.trim();
+    if (!email) { showErr("כתבו את המייל שלכם בשדה למעלה ולחצו שוב."); $("email").focus(); return; }
+    const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: here() });
+    if (error) showErr(error); else showOk("שלחנו מייל לאיפוס הסיסמה אל " + email + ".");
+  });
+
+  $("logoutBtn").addEventListener("click", () => {
+    flushSave().finally(() => sb.auth.signOut());
+  });
+
+  persistRemote = (s) => sb.from("budgets").upsert({ user_id: user.id, data: s, updated_at: new Date().toISOString() })
+    .then(({ error }) => { if (error) throw error; });
+
+  let enteredAs = null;
+  async function enter(session) {
+    const u = session && session.user;
+    if (!u) {
+      user = null; enteredAs = null; store = null;
+      $("password").value = "";
+      if (mode === "reset") setMode("login");
+      show("auth");
+      return;
+    }
+    if (enteredAs === u.id) return;
+    enteredAs = u.id;
+    user = u;
+    show("loading");
+    const meta = u.user_metadata || {};
+    $("userName").textContent = meta.full_name || meta.name || u.email || "";
+    $("userPhoto").hidden = !meta.avatar_url;
+    if (meta.avatar_url) $("userPhoto").src = meta.avatar_url;
+    $("userbar").hidden = false;
+    const { data, error } = await sb.from("budgets").select("data").eq("user_id", u.id).maybeSingle();
+    if (error) { enteredAs = null; await sb.auth.signOut(); showErr(error); return; }
+    if (!data) {
+      // First sign-in: bring over what was typed in this browser before accounts existed
+      const local = readLocal();
+      if (hasOwnData(local)) {
+        start(local);
+        persist();
+        removeLocal();
+        return;
+      }
+    }
+    start(data && data.data);
+  }
+
+  sb.auth.onAuthStateChange((event, session) => {
+    // Supabase asks not to await its own calls inside this callback
+    setTimeout(() => {
+      if (event === "PASSWORD_RECOVERY") {
+        setMode("reset");
+        show("auth");
+        showOk("בחרו סיסמה חדשה.");
+        return;
+      }
+      if (mode === "reset" && session) return;
+      enter(session);
+    }, 0);
+  });
 })();
 </script>
 </body>
