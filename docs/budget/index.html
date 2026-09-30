@@ -6,6 +6,7 @@
 <title>התקציב החודשי שלי</title>
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#1f6b4f">
+<script>try { var t = localStorage.getItem("budget-theme"); if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t); } catch (e) {}</script>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="התקציב שלי">
 <link rel="apple-touch-icon" href="icon-180.png">
@@ -328,6 +329,10 @@ dialog.sheet::backdrop { background: rgba(10, 20, 15, .45); }
 .userbar img { width: 28px; height: 28px; border-radius: 50%; }
 .userbar .who { color: var(--fg); font-weight: 600; max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .head-side { display: grid; gap: 10px; justify-items: end; }
+.themes { display: inline-flex; gap: 2px; background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 3px; justify-self: end; }
+.themes button { border: 0; background: transparent; color: var(--muted); font: inherit; font-size: 14px; font-weight: 700; padding: 5px 12px; border-radius: 999px; cursor: pointer; }
+.themes button[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); }
+.themes button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .saving { font-size: 13px; color: var(--muted); min-height: 1.2em; }
 .loading { text-align: center; color: var(--muted); padding-block: 80px; display: grid; gap: 12px; justify-items: center; }
 </style>
@@ -337,6 +342,7 @@ dialog.sheet::backdrop { background: rgba(10, 20, 15, .45); }
 <div class="loading" id="loading"><span id="loadingText">טוען…</span><button class="btn" type="button" id="retryBtn" hidden>נסו שוב</button></div>
 
 <div class="auth" id="authScreen" hidden>
+  <div class="themes" role="group" aria-label="מצב תצוגה"><button type="button" data-theme-pick="light" aria-pressed="false">☀ בהיר</button><button type="button" data-theme-pick="dark" aria-pressed="false">☾ כהה</button></div>
   <div>
     <h1>התקציב החודשי שלי</h1>
     <p class="sub">התחברו כדי לשמור את התקציב שלכם ולראות אותו מכל מכשיר.</p>
@@ -366,6 +372,7 @@ dialog.sheet::backdrop { background: rgba(10, 20, 15, .45); }
       <p class="sub">כל שקל שיוצא נרשם כאן. בלי תירוצים.</p>
     </div>
     <div class="head-side">
+      <div class="themes" role="group" aria-label="מצב תצוגה"><button type="button" data-theme-pick="light" aria-pressed="false">☀ בהיר</button><button type="button" data-theme-pick="dark" aria-pressed="false">☾ כהה</button></div>
       <div class="userbar" id="userbar" hidden>
         <img id="userPhoto" alt="" referrerpolicy="no-referrer" hidden>
         <span class="who" id="userName"></span>
@@ -711,6 +718,22 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   }
 
   // ---- Browser storage (never trusted to exist) ----
+  // ---- Light / dark mode: follows the device until the user picks one ----
+  const darkQuery = matchMedia("(prefers-color-scheme: dark)");
+  function currentTheme() { return document.documentElement.getAttribute("data-theme") || (darkQuery.matches ? "dark" : "light"); }
+  function paintTheme() {
+    const t = currentTheme();
+    document.querySelectorAll("[data-theme-pick]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.themePick === t)));
+    const meta = document.querySelector('meta[name="theme-color"]'); if (meta) meta.content = t === "dark" ? "#141a17" : "#1f6b4f";
+  }
+  document.querySelectorAll("[data-theme-pick]").forEach((b) => b.addEventListener("click", () => {
+    document.documentElement.setAttribute("data-theme", b.dataset.themePick);
+    try { localStorage.setItem("budget-theme", b.dataset.themePick); } catch (e) {}
+    paintTheme();
+  }));
+  darkQuery.addEventListener("change", paintTheme);
+  paintTheme();
+
   function lsGet(k) { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } }
   function lsSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
   function lsDel(k) { try { localStorage.removeItem(k); } catch (e) {} }
