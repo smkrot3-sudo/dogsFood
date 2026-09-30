@@ -2554,6 +2554,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 
   sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
   const here = () => location.origin + location.pathname;
+  const APP_RETURN = "io.github.smkrot3sudo.budget://auth";
 
   // The Google button appears only once Google sign-in is switched on in Supabase
   let googleOn = false;
@@ -2611,6 +2612,14 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 
   $("googleBtn").addEventListener("click", async () => {
     clearMsgs();
+    // Google refuses sign-in inside an app's embedded browser, so the Android app opens it in the phone's browser
+    // and Google's answer comes back to the app through its own link (the app then loads the page with the session)
+    if (window.BudgetApp && BudgetApp.openExternal) {
+      const { data, error } = await sb.auth.signInWithOAuth({ provider: "google", options: { redirectTo: APP_RETURN, skipBrowserRedirect: true } });
+      if (error) { showErr(error); return; }
+      BudgetApp.openExternal(data.url);
+      return;
+    }
     const { error } = await sb.auth.signInWithOAuth({ provider: "google", options: { redirectTo: here() } });
     if (error) showErr(error);
   });

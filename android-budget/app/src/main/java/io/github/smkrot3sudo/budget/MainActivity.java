@@ -78,8 +78,26 @@ public class MainActivity extends Activity {
             }
         });
 
-        if (state != null) web.restoreState(state);
-        else web.loadUrl(HOME);
+        if (!openSignIn(getIntent())) {
+            if (state != null) web.restoreState(state);
+            else web.loadUrl(HOME);
+        }
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        openSignIn(intent);
+    }
+
+    /** The browser hands back Google sign-in as io.github.smkrot3sudo.budget://auth#access_token=...; the page reads the session from its address. */
+    private boolean openSignIn(Intent intent) {
+        Uri u = intent == null ? null : intent.getData();
+        if (u == null || !"io.github.smkrot3sudo.budget".equals(u.getScheme())) return false;
+        String query = u.getEncodedQuery(), fragment = u.getEncodedFragment();
+        web.loadUrl(HOME + (query != null ? "?" + query : "") + (fragment != null ? "#" + fragment : ""));
+        return true;
     }
 
     @Override
@@ -139,6 +157,16 @@ public class MainActivity extends Activity {
 
         @JavascriptInterface
         public String version() { return BuildConfigVersion.NAME; }
+
+        /** Opens a page (Google sign-in) in the phone's browser, since Google blocks it inside apps. */
+        @JavascriptInterface
+        public void openExternal(String url) {
+            if (url == null || !url.startsWith("https://")) return;
+            runOnUiThread(() -> {
+                try { startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url))); }
+                catch (ActivityNotFoundException e) { toast("אין דפדפן לפתוח בו את ההתחברות"); }
+            });
+        }
     }
 
     private void toast(String msg) {
