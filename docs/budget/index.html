@@ -340,6 +340,8 @@ dialog.sheet::backdrop { background: rgba(10, 20, 15, .45); }
 .userbar img { width: 28px; height: 28px; border-radius: 50%; }
 .userbar .who { color: var(--fg); font-weight: 600; max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .head-side { display: grid; gap: 10px; justify-items: end; }
+.getapp { justify-self: end; align-self: center; font-size: 14px; font-weight: 700; color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+.auth .getapp:not([hidden]) { display: inline-block; margin-inline-end: 12px; }
 .themes { display: inline-flex; gap: 2px; background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 3px; justify-self: end; }
 .themes button { border: 0; background: transparent; color: var(--muted); font: inherit; font-size: 14px; font-weight: 700; padding: 5px 12px; border-radius: 999px; cursor: pointer; }
 .themes button[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); }
@@ -353,7 +355,7 @@ dialog.sheet::backdrop { background: rgba(10, 20, 15, .45); }
 <div class="loading" id="loading"><span id="loadingText">טוען…</span><button class="btn" type="button" id="retryBtn" hidden>נסו שוב</button></div>
 
 <div class="auth" id="authScreen" hidden>
-  <div class="themes" role="group" aria-label="מצב תצוגה"><button type="button" data-theme-pick="light" aria-pressed="false">☀ בהיר</button><button type="button" data-theme-pick="dark" aria-pressed="false">☾ כהה</button></div>
+  <a class="getapp" href="budget.apk" download hidden>הורדת האפליקציה לאנדרואיד</a><div class="themes" role="group" aria-label="מצב תצוגה"><button type="button" data-theme-pick="light" aria-pressed="false">☀ בהיר</button><button type="button" data-theme-pick="dark" aria-pressed="false">☾ כהה</button></div>
   <div>
     <h1>התקציב החודשי שלי</h1>
     <p class="sub">התחברו כדי לשמור את התקציב שלכם ולראות אותו מכל מכשיר.</p>
@@ -383,7 +385,7 @@ dialog.sheet::backdrop { background: rgba(10, 20, 15, .45); }
       <p class="sub">כל שקל שיוצא נרשם כאן. בלי תירוצים.</p>
     </div>
     <div class="head-side">
-      <div class="themes" role="group" aria-label="מצב תצוגה"><button type="button" data-theme-pick="light" aria-pressed="false">☀ בהיר</button><button type="button" data-theme-pick="dark" aria-pressed="false">☾ כהה</button></div>
+      <a class="getapp" href="budget.apk" download hidden>הורדת האפליקציה לאנדרואיד</a><div class="themes" role="group" aria-label="מצב תצוגה"><button type="button" data-theme-pick="light" aria-pressed="false">☀ בהיר</button><button type="button" data-theme-pick="dark" aria-pressed="false">☾ כהה</button></div>
       <div class="userbar" id="userbar" hidden>
         <img id="userPhoto" alt="" referrerpolicy="no-referrer" hidden>
         <span class="who" id="userName"></span>
@@ -776,6 +778,9 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     paintTheme();
   }));
   darkQuery.addEventListener("change", paintTheme);
+  // Android phones in a regular browser get a link to the app; inside the app it stays hidden
+  if (/Android/i.test(navigator.userAgent) && !/BudgetApp/.test(navigator.userAgent))
+    document.querySelectorAll(".getapp").forEach((a) => (a.hidden = false));
   paintTheme();
 
   function lsGet(k) { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } }
@@ -1734,6 +1739,8 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     }).join(",")).join("\r\n");
   }
   function download(name, text) {
+    // Inside the Android app a blob link can't download, so the app saves the file itself
+    if (window.BudgetApp && BudgetApp.saveFile) { BudgetApp.saveFile(name, text); return; }
     const url = URL.createObjectURL(new Blob([text], { type: "text/csv;charset=utf-8" }));
     const a = document.createElement("a"); a.href = url; a.download = name;
     document.body.append(a); a.click(); a.remove();
