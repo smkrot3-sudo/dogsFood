@@ -1,6 +1,10 @@
 package io.github.smkrot3sudo.budget;
 
 import android.app.Activity;
+import android.app.DownloadManager;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.IntentFilter;
 import android.content.ActivityNotFoundException;
 import android.content.ContentValues;
 import android.content.Intent;
@@ -182,6 +186,16 @@ public class MainActivity extends Activity {
         @JavascriptInterface
         public String version() { return BuildConfigVersion.NAME; }
 
+        @JavascriptInterface
+        public int versionCode() { return BuildConfigVersion.CODE; }
+
+        /** Downloads a newer APK and opens the Android installer for it when the download finishes. */
+        @JavascriptInterface
+        public void installUpdate(String url) {
+            if (url == null || !url.startsWith("https://smkrot3-sudo.github.io/")) return;
+            runOnUiThread(() -> startUpdate(url));
+        }
+
         /** Opens a page (Google sign-in) in the phone's browser, since Google blocks it inside apps. */
         @JavascriptInterface
         public void openExternal(String url) {
@@ -193,12 +207,47 @@ public class MainActivity extends Activity {
         }
     }
 
+    private long updateId = -1;
+    private BroadcastReceiver updateDone;
+
+    private void startUpdate(String url) {
+        DownloadManager dm = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
+        File old = new File(getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS), "budget-update.apk");
+        if (old.exists()) old.delete();
+        DownloadManager.Request req = new DownloadManager.Request(Uri.parse(url))
+            .setTitle("עדכון התקציב שלי")
+            .setMimeType("application/vnd.android.package-archive")
+            .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+            .setDestinationInExternalFilesDir(this, Environment.DIRECTORY_DOWNLOADS, "budget-update.apk");
+        updateId = dm.enqueue(req);
+        if (updateDone == null) {
+            updateDone = new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context c, Intent i) {
+                    long id = i.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1);
+                    if (id != updateId) return;
+                    Uri apk = dm.getUriForDownloadedFile(id);
+                    if (apk == null) { toast("ההורדה נכשלה. נסה שוב."); return; }
+                    Intent install = new Intent(Intent.ACTION_VIEW)
+                        .setDataAndType(apk, "application/vnd.android.package-archive")
+                        .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    try { startActivity(install); } catch (ActivityNotFoundException e) { toast("לא נמצא מתקין אפליקציות בטלפון"); }
+                }
+            };
+            IntentFilter f = new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
+            if (Build.VERSION.SDK_INT >= 33) registerReceiver(updateDone, f, Context.RECEIVER_EXPORTED);
+            else registerReceiver(updateDone, f);
+        }
+        toast("מוריד את העדכון…");
+    }
+
     private void toast(String msg) {
         runOnUiThread(() -> Toast.makeText(MainActivity.this, msg, Toast.LENGTH_LONG).show());
     }
 
     @Override
     protected void onDestroy() {
+        if (updateDone != null) { unregisterReceiver(updateDone); updateDone = null; }
         if (web != null) { web.setVisibility(View.GONE); web.destroy(); }
         super.onDestroy();
     }
