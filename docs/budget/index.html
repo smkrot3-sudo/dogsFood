@@ -130,6 +130,18 @@ button.what:hover { background: var(--bg); }
 .wish:last-child { border-bottom: 0; }
 .wish .what b { display: block; font-weight: 700; }
 .wish .what span { font-size: 13px; color: var(--muted); }
+.pay { gap: 10px; }
+.pay h2 .btn { font-size: 16px; }
+.paybody { display: grid; gap: 6px; }
+.paybody .lbl { color: var(--muted); font-weight: 600; font-size: 15px; }
+.big2 { font-family: var(--font-display); font-weight: 700; font-size: clamp(40px, 9vw, 56px); line-height: 1; color: var(--accent); font-variant-numeric: tabular-nums; }
+.paybody .line { color: var(--muted); font-size: 15px; }
+.paysettings summary { cursor: pointer; font-weight: 700; color: var(--accent); padding-block: 4px; }
+.paysettings .rows { margin-top: 10px; }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+input[type="time"] { font: inherit; color: var(--fg); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; width: 100%; min-width: 0; }
+.preview { margin: 0; white-space: pre-line; background: var(--accent-soft); color: var(--accent); border-radius: 8px; padding: 8px 12px; font-weight: 700; }
+.preview:empty { display: none; }
 .hours { margin: -8px 0 0; color: var(--spend); font-weight: 700; min-height: 1.4em; }
 .check { display: flex !important; align-items: center; gap: 10px; font-weight: 600; }
 .check input { width: 18px; height: 18px; accent-color: var(--accent); margin: 0; }
@@ -339,6 +351,37 @@ dialog.sheet::backdrop { background: rgba(10, 20, 15, .45); }
         <div class="verdict" id="verdict" role="status"></div>
       </section>
 
+      <section class="panel pay" aria-labelledby="payH">
+        <h2 id="payH">המשכורת שלי <button class="btn primary" type="button" id="addShift">+ משמרת</button></h2>
+        <div class="paybody" id="payBody">
+          <span class="lbl" id="payLbl">המשכורת המשוערת עד עכשיו (נטו)</span>
+          <span class="big2" id="payNet">₪0</span>
+          <span class="line" id="payLine"></span>
+          <div class="verdict" id="payVerdict" role="status" hidden></div>
+          <p class="hint">הערכה בלבד. בונוסים, תוספות וניכויים אמיתיים יופיעו רק בתלוש.</p>
+        </div>
+        <div class="empty" id="payEmpty">
+          עובדים בשכר שעתי? רושמים כאן כל משמרת ומקבלים את השכר של כל יום לפי החוק: שעות נוספות, לילה, שבת וחגים.
+          <div class="actions" style="margin-top:8px"><button class="btn" type="button" id="addShift2">רישום משמרת ראשונה</button></div>
+        </div>
+        <div class="log" id="shiftList"></div>
+        <details class="paysettings" id="paySet">
+          <summary>הגדרות שכר</summary>
+          <div class="rows">
+            <label class="field" for="wage">שכר לשעה (ברוטו)<input type="number" id="wage" min="0" step="0.01" inputmode="decimal" placeholder="₪"></label>
+            <label class="field" for="otAfter">שעות נוספות מתחילות אחרי
+              <select id="otAfter">
+                <option value="8.6">8.6 שעות ביום (שבוע עבודה של 5 ימים)</option>
+                <option value="8.5">8.5 שעות ביום</option>
+                <option value="8">8 שעות ביום (שבוע עבודה של 6 ימים)</option>
+              </select></label>
+            <label class="field" for="deduct">ניכויים משוערים באחוזים (מס, ביטוח לאומי, פנסיה)<input type="number" id="deduct" min="0" max="90" step="0.5" inputmode="decimal"></label>
+            <label class="field" for="travel">החזר נסיעות למשמרת<input type="number" id="travel" min="0" step="1" inputmode="decimal" placeholder="₪0"></label>
+            <p class="hint">החישוב לפי חוק שעות עבודה ומנוחה: שעתיים נוספות ראשונות ב־125% ואחריהן 150%. במשמרת עם שעתיים לפחות בין 22:00 ל־06:00 השעות הנוספות מתחילות אחרי 7 שעות. שבת וחגים ב־150%, ושעות נוספות בהם ב־175% וב־200%. השבת והחג מתחילים 18 דקות לפני השקיעה ונגמרים 40 דקות אחריה, לפי שעון תל אביב.</p>
+          </div>
+        </details>
+      </section>
+
       <section class="panel" aria-labelledby="catsH">
         <h2 id="catsH">לפי קטגוריות <span class="sum" id="spentSum">₪0</span></h2>
         <div class="cats" id="catList"></div>
@@ -446,8 +489,6 @@ dialog.sheet::backdrop { background: rgba(10, 20, 15, .45); }
           <h2 id="setH">הגדרות</h2>
           <label class="field" for="startDay">החודש שלי מתחיל ב־<select id="startDay"></select></label>
           <p class="hint">למשל ביום שהמשכורת נכנסת או שהאשראי יורד. ״כמה מותר היום״ והגרף יחושבו לפי זה.</p>
-          <label class="field" for="wage">כמה אתה מרוויח נטו לשעת עבודה?<input type="number" id="wage" min="0" step="1" inputmode="decimal"></label>
-          <p class="hint">בשביל להראות כל מחיר בשעות עבודה. אם תשאיר ריק, החישוב הוא ההכנסה החודשית חלקי 186 שעות.</p>
           <div class="actions">
             <button class="btn" type="button" id="expTx">ייצוא ההוצאות לאקסל</button>
             <button class="btn" type="button" id="expPlan">ייצוא התוכנית לאקסל</button>
@@ -475,6 +516,25 @@ dialog.sheet::backdrop { background: rgba(10, 20, 15, .45); }
       <button class="btn" type="button" id="txCancel">ביטול</button>
     </div>
     <button class="btn wishbtn" type="button" id="txWish">אולי אקנה. אחליט בעוד 48 שעות</button>
+  </form>
+</dialog>
+
+<dialog class="sheet" id="shiftSheet" aria-labelledby="shiftH">
+  <form id="shiftForm" method="dialog" novalidate>
+    <h2 id="shiftH">משמרת חדשה</h2>
+    <label for="shDate">תאריך<input type="date" id="shDate"></label>
+    <div class="two">
+      <label for="shStart">כניסה<input type="time" id="shStart"></label>
+      <label for="shEnd">יציאה<input type="time" id="shEnd"></label>
+    </div>
+    <label for="shBreak">הפסקה שלא משולמת (דקות)<input type="number" id="shBreak" min="0" max="600" step="5" inputmode="numeric"></label>
+    <label for="shNote">הערה (לא חובה)<input type="text" id="shNote" maxlength="200" placeholder="למשל: החלפתי את דני"></label>
+    <p class="preview" id="shPreview" aria-live="polite"></p>
+    <div class="err" id="shErr" role="alert" hidden></div>
+    <div class="foot">
+      <button class="btn primary" type="submit" id="shSave">שמירה</button>
+      <button class="btn" type="button" id="shCancel">ביטול</button>
+    </div>
   </form>
 </dialog>
 
@@ -533,6 +593,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   let draft = null, draftFor = null;
   let saveT = null, pendingSave = null;
   const tx = {};          // month -> [{ id, spent_on, amount, category, note, created_at, pending }]
+  const shifts = {};      // month -> [{ id, work_date, start_time, end_time, break_min, wage, note, created_at, pending }]
   let sb = null;
 
   function show(which) {
@@ -572,6 +633,93 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   const periodOf = (s) => (+s.slice(8) >= startDay() ? s.slice(0, 7) : shiftMonth(s.slice(0, 7), -1));
   const thisMonth = () => periodOf(todayStr());
   const shortDate = (s) => +s.slice(8) + "." + +s.slice(5, 7);
+  // ---- Pay rules (Israeli Hours of Work and Rest Law) ----
+  // Regular day: settings.otAfter hours (8.6 in a 5-day week, 8 in a 6-day week); a shift with 2+ hours
+  // between 22:00 and 06:00 is a night shift with a 7-hour day. The first 2 overtime hours pay 125%, the rest 150%.
+  // Hours inside Shabbat or a holiday pay 150%, and overtime inside them 175% / 200%.
+  // Shabbat and holidays run from 18 minutes before sunset on the eve to 40 minutes after sunset on the day (Tel Aviv).
+  const HOLIDAYS = { "Tishri-1": "ראש השנה", "Tishri-2": "ראש השנה", "Tishri-10": "יום כיפור", "Tishri-15": "סוכות",
+    "Tishri-22": "שמחת תורה", "Nisan-15": "פסח", "Nisan-21": "שביעי של פסח", "Sivan-6": "שבועות" };
+  let hebFmt = null;
+  function restName(s) {
+    const [y, m, d] = s.split("-").map(Number);
+    const wd = new Date(Date.UTC(y, m - 1, d)).getUTCDay();
+    try {
+      hebFmt = hebFmt || new Intl.DateTimeFormat("en-u-ca-hebrew", { day: "numeric", month: "long", timeZone: "UTC" });
+      const p = hebFmt.formatToParts(Date.UTC(y, m - 1, d));
+      const hm = (p.find((x) => x.type === "month") || {}).value;
+      const hd = +(p.find((x) => x.type === "day") || {}).value;
+      if (HOLIDAYS[hm + "-" + hd]) return HOLIDAYS[hm + "-" + hd];
+      // Independence Day moves off Friday, Saturday and Monday
+      if (hm === "Iyar" && ((hd === 5 && ![1, 5, 6].includes(wd)) || ((hd === 4 || hd === 3) && wd === 4) || (hd === 6 && wd === 2))) return "יום העצמאות";
+    } catch (e) { /* no Hebrew calendar in this browser: Shabbat only */ }
+    return wd === 6 ? "שבת" : "";
+  }
+  // Sunset in Tel Aviv, in minutes after local midnight (Israel time)
+  const sunsetCache = {};
+  function sunset(s) {
+    if (s in sunsetCache) return sunsetCache[s];
+    const [y, m, d] = s.split("-").map(Number);
+    const rad = Math.PI / 180, lat = 32.08, lng = 34.78;
+    const N = Math.round((Date.UTC(y, m - 1, d) - Date.UTC(y, 0, 0)) / 864e5);
+    const t = N + (18 - lng / 15) / 24;
+    const M = 0.9856 * t - 3.289;
+    let L = (M + 1.916 * Math.sin(M * rad) + 0.020 * Math.sin(2 * M * rad) + 282.634) % 360;
+    if (L < 0) L += 360;
+    let RA = (Math.atan(0.91764 * Math.tan(L * rad)) / rad + 360) % 360;
+    RA = (RA + Math.floor(L / 90) * 90 - Math.floor(RA / 90) * 90) / 15;
+    const sinDec = 0.39782 * Math.sin(L * rad), cosDec = Math.cos(Math.asin(sinDec));
+    const cosH = (Math.cos(90.833 * rad) - sinDec * Math.sin(lat * rad)) / (cosDec * Math.cos(lat * rad));
+    const H = Math.acos(cosH) / rad / 15;
+    let UT = (H + RA - 0.06571 * t - 6.622 - lng / 15) % 24;
+    if (UT < 0) UT += 24;
+    const when = new Date(Date.UTC(y, m - 1, d, 0, Math.round(UT * 60)));
+    let hh = 18, mm = 0;
+    try {
+      const parts = new Intl.DateTimeFormat("en-GB", { timeZone: "Asia/Jerusalem", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).formatToParts(when);
+      hh = +parts.find((x) => x.type === "hour").value; mm = +parts.find((x) => x.type === "minute").value;
+    } catch (e) {}
+    return (sunsetCache[s] = hh * 60 + mm);
+  }
+  const restCache = {};
+  function isRestMinute(day, min) {
+    const key = (d) => (d in restCache ? restCache[d] : (restCache[d] = restName(d)));
+    if (key(day) && min < sunset(day) + 40) return key(day);
+    const next = dateAdd(day, 1);
+    if (key(next) && min >= sunset(day) - 18) return key(next);
+    return "";
+  }
+  const toMin = (t) => { const [h, m] = t.split(":").map(Number); return h * 60 + m; };
+
+  function shiftPay(r, settings) {
+    const st = settings || {};
+    const s = toMin(r.start_time);
+    let len = toMin(r.end_time) - s;
+    if (len <= 0) len += 1440;                     // ends after midnight
+    const brk = Math.min(+r.break_min || 0, len);
+    const breakFrom = Math.floor((len - brk) / 2); // unpaid break taken from the middle
+    const mins = { 100: 0, 125: 0, 150: 0, 175: 0, 200: 0 };
+    let night = 0, rest = "";
+    const minutes = [];
+    for (let i = 0; i < len; i++) {
+      if (i >= breakFrom && i < breakFrom + brk) continue;
+      const abs = s + i, day = dateAdd(r.work_date, Math.floor(abs / 1440)), mod = abs % 1440;
+      if (mod >= 1320 || mod < 360) night++;
+      const rn = isRestMinute(day, mod);
+      if (rn) rest = rest || rn;
+      minutes.push(!!rn);
+    }
+    const base = st.otAfter > 0 ? +st.otAfter : 8.6;
+    const dayLen = (night >= 120 ? Math.min(7, base) : base) * 60;
+    minutes.forEach((isRest, i) => {
+      const tier = i < dayLen ? 0 : i < dayLen + 120 ? 1 : 2;
+      mins[(isRest ? [150, 175, 200] : [100, 125, 150])[tier]]++;
+    });
+    const wage = +r.wage || 0;
+    const gross = Object.entries(mins).reduce((sum, [rate, n]) => sum + (wage / 60) * n * rate / 100, 0);
+    return { paidMin: minutes.length, mins, gross, night: night >= 120, rest };
+  }
+
   function shiftMonth(m, by) {
     let [y, mo] = m.split("-").map(Number);
     mo += by;
@@ -663,7 +811,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   function cacheTx() {
     if (!user) return;
     const c = lsGet(cacheKey()) || {};
-    c.store = store; c.version = version; c.tx = tx;
+    c.store = store; c.version = version; c.tx = tx; c.shifts = shifts;
     lsSet(cacheKey(), c);
   }
 
@@ -681,6 +829,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     if (error) throw error;
     let list = rows.map((r) => ({ ...r, amount: +r.amount }));
     outbox().forEach((op) => {
+      if (op.t) return;
       if (op.op === "add") {
         list = list.filter((r) => r.id !== op.row.id);
         if (periodOf(op.row.spent_on) === m) list.unshift({ ...op.row, pending: true });
@@ -702,9 +851,10 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       let list = outbox();
       while (list.length) {
         const op = list[0];
+        const table = op.t || "expenses";
         const res = op.op === "add"
-          ? await sb.from("expenses").upsert({ ...op.row, user_id: user.id })
-          : await sb.from("expenses").delete().eq("id", op.id);
+          ? await sb.from(table).upsert({ ...op.row, user_id: user.id })
+          : await sb.from(table).delete().eq("id", op.id);
         if (res.error) {
           // A row the server refuses (bad data) is dropped so it can't block everything behind it
           if (res.error.code && /^(22|23)/.test(res.error.code)) { list.shift(); setOutbox(list); continue; }
@@ -712,13 +862,14 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
         }
         list.shift();
         setOutbox(list);
-        if (op.op === "add") Object.values(tx).forEach((l) => l.forEach((r) => { if (r.id === op.row.id) r.pending = false; }));
+        if (op.op === "add") [tx, shifts].forEach((c) => Object.values(c).forEach((l) => l.forEach((r) => { if (r.id === op.row.id) r.pending = false; })));
       }
     } catch (e) { /* offline: try again later */ }
     flushing = false;
     cacheTx();
     setSaving();
     renderTx();
+    renderPay();
   }
 
   function addTx(row) {
@@ -991,6 +1142,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     if (!rows.length) { const e = document.createElement("p"); e.className = "empty"; e.textContent = "אין קטגוריות. הוסיפו אותן בתוכנית של החודש."; cl.append(e); }
     renderTx();
     renderHist();
+    renderPay();
   }
 
   function catNames() {
@@ -1004,7 +1156,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   // ---- Work hours ----
   function wage() {
     const w = store.settings && +store.settings.wage;
-    if (w > 0) return w;
+    if (w > 0) return w * (1 - deductRate());
     const inc = plan().inc;
     return inc > 0 ? inc / 186 : 0;
   }
@@ -1414,32 +1566,271 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   })();
   function renderSettings() {
     $("startDay").value = startDay();
-    const w = store.settings && +store.settings.wage;
-    if (document.activeElement !== $("wage")) $("wage").value = w > 0 ? w : "";
-    const auto = plan().inc / 186;
-    $("wage").placeholder = auto > 0 ? "אוטומטי: " + fmt(auto) : "₪";
+    renderPaySettings();
   }
   $("startDay").addEventListener("change", () => {
     store.settings = { ...(store.settings || {}), startDay: +$("startDay").value };
     persist();
     Object.keys(tx).forEach((k) => delete tx[k]);
+    Object.keys(shifts).forEach((k) => delete shifts[k]);
     Object.keys(hist).forEach((k) => delete hist[k]);
     goMonth(thisMonth());
     snack("מעכשיו החודש שלך מתחיל ב־" + startDay() + " לחודש.");
   });
-  $("wage").addEventListener("input", () => {
-    const w = parseFloat($("wage").value);
-    store.settings = { ...(store.settings || {}), wage: w > 0 ? w : 0 };
-    persist();
-    renderTx(); renderWish();
+
+  // ---- Shifts: data ----
+  function sortShifts(list) {
+    return list.sort((a, b) => b.work_date.localeCompare(a.work_date) || b.start_time.localeCompare(a.start_time));
+  }
+  async function loadShifts(m) {
+    if (!sb || !user) {
+      shifts[m] = sortShifts((store.shifts || []).filter((r) => periodOf(r.work_date) === m));
+      return;
+    }
+    const { data: rows, error } = await sb.from("shifts")
+      .select("id, work_date, start_time, end_time, break_min, wage, note, created_at")
+      .gte("work_date", periodStart(m)).lte("work_date", periodEnd(m));
+    if (error) throw error;
+    let list = rows.map((r) => ({ ...r, wage: +r.wage }));
+    outbox().forEach((op) => {
+      if (op.t !== "shifts") return;
+      if (op.op === "add") {
+        list = list.filter((r) => r.id !== op.row.id);
+        if (periodOf(op.row.work_date) === m) list.push({ ...op.row, pending: true });
+      }
+      if (op.op === "del") list = list.filter((r) => r.id !== op.id);
+    });
+    shifts[m] = sortShifts(list);
+    cacheTx();
+  }
+  function saveShift(row) {
+    if (!sb || !user) {
+      store.shifts = (store.shifts || []).filter((r) => r.id !== row.id).concat([row]);
+      lsSet(LOCAL_KEY, store);
+    } else {
+      const list = outbox();
+      const i = list.findIndex((op) => op.t === "shifts" && op.op === "add" && op.row.id === row.id);
+      if (i >= 0) list[i] = { t: "shifts", op: "add", row }; else list.push({ t: "shifts", op: "add", row });
+      setOutbox(list);
+    }
+    Object.keys(shifts).forEach((m) => { shifts[m] = shifts[m].filter((r) => r.id !== row.id); });
+    const m = periodOf(row.work_date);
+    if (shifts[m]) shifts[m] = sortShifts(shifts[m].concat([{ ...row, pending: !!(sb && user) }]));
+    cacheTx();
+    flushOutbox();
+  }
+  function delShift(id) {
+    if (!sb || !user) {
+      store.shifts = (store.shifts || []).filter((r) => r.id !== id);
+      lsSet(LOCAL_KEY, store);
+    } else {
+      const list = outbox();
+      const i = list.findIndex((op) => op.t === "shifts" && op.op === "add" && op.row.id === id);
+      if (i >= 0) { list.splice(i, 1); setOutbox(list); }
+      else setOutbox(list.concat([{ t: "shifts", op: "del", id }]));
+    }
+    Object.keys(shifts).forEach((m) => { shifts[m] = shifts[m].filter((r) => r.id !== id); });
+    cacheTx();
+    flushOutbox();
+  }
+
+  // ---- Shifts: pay summary ----
+  const settings = () => store.settings || {};
+  const deductRate = () => { const d = settings().deduct; return d === 0 || d > 0 ? Math.min(+d, 90) / 100 : 0.12; };
+  const hrs = (min) => (Math.round(min / 6) / 10).toLocaleString("he-IL");
+  function payParts(p) {
+    const out = [];
+    const names = { 100: "רגילות", 125: "ב־125%", 150: "ב־150%", 175: "ב־175%", 200: "ב־200%" };
+    [100, 125, 150, 175, 200].forEach((k) => { if (p.mins[k]) out.push(hrs(p.mins[k]) + " ש׳ " + names[k]); });
+    if (p.rest) out.push(p.rest);
+    if (p.night) out.push("משמרת לילה");
+    return out.join(" · ");
+  }
+  function periodPay(m) {
+    const list = shifts[m] || [];
+    const today = todayStr();
+    let done = 0, doneMin = 0, doneCount = 0, planned = 0;
+    const travel = +settings().travel || 0;
+    list.forEach((r) => {
+      const p = shiftPay(r, settings());
+      const net = p.gross * (1 - deductRate()) + travel;
+      if (r.work_date <= today) { done += p.gross; doneMin += p.paidMin; doneCount++; }
+      else planned += net;
+      r._p = p;
+    });
+    const doneNet = done * (1 - deductRate()) + travel * doneCount;
+    return { gross: done, net: doneNet, min: doneMin, count: doneCount, plannedNet: planned, total: list.length };
+  }
+
+  function renderPay() {
+    if (!store) return;
+    const w = +settings().wage || 0;
+    const pp = periodPay(month);
+    const list = shifts[month] || [];
+    const cur = thisMonth(), isCur = month === cur, isPast = month < cur;
+    $("payBody").hidden = !w && !list.length;
+    $("payEmpty").hidden = !$("payBody").hidden;
+    $("paySet").open = $("paySet").open || !w;
+    $("payLbl").textContent = isPast ? "המשכורת המשוערת על " + monthName(month) + " (נטו)" : "המשכורת המשוערת עד עכשיו (נטו)";
+    $("payNet").textContent = fmt(pp.net);
+    $("payLine").textContent = pp.count
+      ? "ברוטו " + fmt(pp.gross) + " · " + pp.count + (pp.count === 1 ? " משמרת" : " משמרות") + " · " + hrs(pp.min) + " שעות" + (pp.plannedNet ? " · עוד " + fmt(pp.plannedNet) + " ממשמרות שכבר קבעת" : "")
+      : (pp.plannedNet ? "עוד " + fmt(pp.plannedNet) + " ממשמרות שכבר קבעת" : "");
+
+    // Will this month's work cover this month's spending?
+    const { exp, catTotal, spend } = plan();
+    const spent = monthTx().reduce((s, r) => s + r.amount, 0);
+    const need = exp + Math.max(catTotal || spend, spent);
+    const netHour = w * (1 - deductRate());
+    const v = $("payVerdict");
+    const setV = (cls, text) => { v.className = "verdict " + cls; v.textContent = text; v.hidden = false; };
+    v.hidden = true;
+    if (isCur && netHour > 0 && need > 0) {
+      const days = periodDays(month);
+      const dayNum = daysBetween(periodStart(month), todayStr()) + 1;
+      const pace = pp.net / dayNum * days;
+      const projected = Math.max(pace, pp.net + pp.plannedNet);
+      const gap = need - projected;
+      const avgShift = pp.count ? pp.min / pp.count / 60 : 8;
+      const needTxt = "הוצאות החובה ותקציב הבזבוזים שלך הם " + fmt(need) + ". ";
+      if (!pp.count && !pp.plannedNet) {
+        const h = Math.ceil(need / netHour);
+        setV("warn", "עוד לא רשמת אף משמרת החודש. " + needTxt + "כדי לכסות אותם צריך בערך " + h + " שעות עבודה, כלומר " + Math.ceil(h / avgShift) + " משמרות.");
+      } else if (gap > 0) {
+        const h = Math.ceil(gap / netHour);
+        setV("bad", "בקצב הזה תרוויח בערך " + fmt(projected) + " החודש. " + needTxt + "חסרים " + fmt(gap) + ": צריך עוד בערך " + h + " שעות, כלומר " + Math.ceil(h / avgShift) + " משמרות, עד " + shortDate(periodEnd(month)) + ".");
+      } else {
+        setV("good", "בקצב הזה תרוויח בערך " + fmt(projected) + " החודש, " + fmt(-gap) + " יותר מההוצאות שתכננת. אל תוריד משמרות, את העודף תעביר לחיסכון.");
+      }
+    } else if (isPast && pp.count) {
+      const left = pp.net - need;
+      setV(left >= 0 ? "good" : "bad", left >= 0
+        ? "המשמרות של " + monthName(month) + " כיסו את ההוצאות ונשאר עודף של " + fmt(left) + "."
+        : "המשמרות של " + monthName(month) + " לא כיסו את ההוצאות. חסרו " + fmt(-left) + ".");
+    }
+
+    // Shift list, grouped by day with each day's pay beside it
+    const box = $("shiftList"); box.innerHTML = "";
+    const groups = [];
+    list.forEach((r) => {
+      const g = groups[groups.length - 1];
+      if (g && g.day === r.work_date) g.rows.push(r); else groups.push({ day: r.work_date, rows: [r] });
+    });
+    groups.forEach((g) => {
+      const day = document.createElement("div"); day.className = "day";
+      const dh = document.createElement("div"); dh.className = "dh";
+      const a = document.createElement("span"); a.textContent = dayLabel(g.day) + (g.day > todayStr() ? " (מתוכנן)" : "");
+      const b = document.createElement("span"); b.textContent = "ברוטו " + fmt(g.rows.reduce((s, r) => s + r._p.gross, 0));
+      dh.append(a, b); day.append(dh);
+      g.rows.forEach((r) => {
+        const row = document.createElement("div"); row.className = "tx" + (r.pending ? " pending" : "");
+        const what = document.createElement("button"); what.type = "button"; what.className = "what";
+        const t = document.createElement("b"); t.textContent = "\u2066" + r.start_time + "–" + r.end_time + "\u2069 · " + hrs(r._p.paidMin) + " שעות" + (r.note ? " · " + r.note : "");
+        const c = document.createElement("span"); c.textContent = payParts(r._p) + (r.pending ? " · ממתין לחיבור" : "");
+        what.append(t, c);
+        what.setAttribute("aria-label", "עריכת המשמרת " + t.textContent);
+        what.addEventListener("click", () => openShift(r));
+        const amt = document.createElement("span"); amt.className = "amt"; amt.textContent = fmt(r._p.gross);
+        const del = document.createElement("button"); del.type = "button"; del.className = "del"; del.textContent = "×";
+        del.setAttribute("aria-label", "מחיקת המשמרת " + t.textContent);
+        del.addEventListener("click", () => {
+          const copy = { ...r }; delete copy.pending; delete copy._p;
+          delShift(r.id); renderPay();
+          snack("המשמרת נמחקה", () => { saveShift({ ...copy, id: uid() }); renderPay(); });
+        });
+        row.append(what, amt, del);
+        day.append(row);
+      });
+      box.append(day);
+    });
+    if (!list.length && !$("payBody").hidden) {
+      const e = document.createElement("p"); e.className = "empty";
+      e.textContent = "עוד אין משמרות ב" + monthName(month) + ". לחצו ״+ משמרת״ אחרי כל יום עבודה.";
+      box.append(e);
+    }
+  }
+
+  // ---- Shift sheet ----
+  let editingShift = null;
+  function openShift(edit) {
+    if (!(+settings().wage > 0)) { $("paySet").open = true; $("wage").focus(); snack("קודם תרשום כמה אתה מרוויח לשעה."); return; }
+    editingShift = edit || null;
+    const last = (shifts[month] || [])[0];
+    $("shiftH").textContent = edit ? "עריכת משמרת" : "משמרת חדשה";
+    const cur = thisMonth();
+    $("shDate").value = edit ? edit.work_date : month === cur ? todayStr() : month < cur ? periodEnd(month) : periodStart(month);
+    $("shStart").value = edit ? edit.start_time : last ? last.start_time : "09:00";
+    $("shEnd").value = edit ? edit.end_time : last ? last.end_time : "17:00";
+    $("shBreak").value = edit ? edit.break_min : last ? last.break_min : 0;
+    $("shNote").value = edit ? edit.note || "" : "";
+    $("shErr").hidden = true;
+    previewShift();
+    const dlg = $("shiftSheet");
+    if (dlg.showModal) dlg.showModal(); else dlg.setAttribute("open", "");
+  }
+  function readShift() {
+    const date = $("shDate").value, a = $("shStart").value, b = $("shEnd").value;
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !/^\d\d:\d\d$/.test(a) || !/^\d\d:\d\d$/.test(b)) return null;
+    return {
+      work_date: date, start_time: a, end_time: b,
+      break_min: Math.max(0, Math.min(600, Math.round(+$("shBreak").value || 0))),
+      wage: editingShift ? editingShift.wage : +settings().wage,
+      note: $("shNote").value.trim().slice(0, 200)
+    };
+  }
+  function previewShift() {
+    const r = readShift();
+    if (!r) { $("shPreview").textContent = ""; return; }
+    const p = shiftPay(r, settings());
+    $("shPreview").textContent = hrs(p.paidMin) + " שעות · " + fmt(p.gross) + " ברוטו · בערך " + fmt(p.gross * (1 - deductRate())) + " נטו\n" + payParts(p);
+  }
+  ["shDate", "shStart", "shEnd", "shBreak"].forEach((id) => $(id).addEventListener("input", previewShift));
+  function closeShift() { const d = $("shiftSheet"); if (d.close) d.close(); else d.removeAttribute("open"); editingShift = null; }
+  $("shCancel").addEventListener("click", closeShift);
+  $("addShift").addEventListener("click", () => openShift());
+  $("addShift2").addEventListener("click", () => openShift());
+  $("shiftForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const v = readShift();
+    if (!v) { $("shErr").textContent = "מלאו תאריך, שעת כניסה ושעת יציאה."; $("shErr").hidden = false; return; }
+    if (v.start_time === v.end_time) { $("shErr").textContent = "שעת היציאה זהה לשעת הכניסה."; $("shErr").hidden = false; return; }
+    const before = editingShift ? (() => { const c = { ...editingShift }; delete c.pending; delete c._p; return c; })() : null;
+    const row = before ? { ...before, ...v } : { id: uid(), ...v, created_at: new Date().toISOString() };
+    saveShift(row);
+    closeShift();
+    const m = periodOf(row.work_date);
+    if (m !== month) goMonth(m); else renderPay();
+    const p = shiftPay(row, settings());
+    snack((before ? "המשמרת עודכנה: " : "נרשמה משמרת: ") + hrs(p.paidMin) + " שעות, " + fmt(p.gross) + " ברוטו",
+      () => { if (before) saveShift(before); else delShift(row.id); renderPay(); });
   });
 
+  // ---- Pay settings ----
+  function renderPaySettings() {
+    const st = settings();
+    const set = (id, v) => { if (document.activeElement !== $(id)) $(id).value = v; };
+    set("wage", +st.wage > 0 ? st.wage : "");
+    $("otAfter").value = String(st.otAfter || 8.6);
+    set("deduct", st.deduct === 0 || st.deduct > 0 ? st.deduct : 12);
+    set("travel", +st.travel > 0 ? st.travel : "");
+  }
+  function setSetting(k, v) {
+    store.settings = { ...settings(), [k]: v };
+    persist();
+    renderPay(); renderTx(); renderWish();
+  }
+  $("wage").addEventListener("input", () => { const w = parseFloat($("wage").value); setSetting("wage", w > 0 ? w : 0); });
+  $("otAfter").addEventListener("change", () => setSetting("otAfter", +$("otAfter").value));
+  $("deduct").addEventListener("input", () => { const d = parseFloat($("deduct").value); setSetting("deduct", d >= 0 ? Math.min(d, 90) : 12); });
+  $("travel").addEventListener("input", () => { const t = parseFloat($("travel").value); setSetting("travel", t > 0 ? t : 0); });
+
   async function ensureTx(m) {
-    if (tx[m] && !(sb && user)) return;
-    try { await loadTx(m); $("netNote").hidden = true; }
+    if (tx[m] && shifts[m] && !(sb && user)) return;
+    try { await loadTx(m); await loadShifts(m); $("netNote").hidden = true; }
     catch (e) {
       const c = lsGet(cacheKey());
       if (!tx[m]) tx[m] = (c && c.tx && c.tx[m]) || [];
+      if (!shifts[m]) shifts[m] = (c && c.shifts && c.shifts[m]) || [];
       $("netNote").textContent = "אין חיבור לאינטרנט. מוצגים הנתונים האחרונים שנשמרו במכשיר הזה.";
       $("netNote").hidden = false;
     }
@@ -1658,6 +2049,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     if (!u) {
       user = null; enteredAs = null; store = null;
       Object.keys(tx).forEach((k) => delete tx[k]);
+      Object.keys(shifts).forEach((k) => delete shifts[k]);
       $("password").value = "";
       if (mode === "reset") setMode("login");
       show("auth");
@@ -1678,6 +2070,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       const cached = lsGet(cacheKey());
       if (cached && cached.store) {
         if (cached.tx) Object.assign(tx, cached.tx);
+        if (cached.shifts) Object.assign(shifts, cached.shifts);
         start(cached.store, cached.version);
         $("netNote").textContent = "אין חיבור לאינטרנט. מוצגים הנתונים האחרונים שנשמרו במכשיר הזה.";
         $("netNote").hidden = false;
