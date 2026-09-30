@@ -1,0 +1,24 @@
+plugins { id "com.android.application" }
+
+android {
+    namespace "io.github.smkrot3sudo.budget"
+    compileSdk 34
+    defaultConfig {
+        applicationId "io.github.smkrot3sudo.budget"
+        minSdk 24
+        targetSdk 34
+        versionCode 1
+        versionName "1.0"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            // Signed afterwards with the project's own key (kept out of the repo)
+            signingConfig null
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}

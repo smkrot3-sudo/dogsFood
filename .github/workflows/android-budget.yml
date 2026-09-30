@@ -1,0 +1,41 @@
+name: Build budget Android app
+
+on:
+  push:
+    branches: [main]
+    paths: ["android-budget/**", ".github/workflows/android-budget.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.7"
+      - name: Build unsigned release APK
+        run: gradle -p android-budget --no-daemon assembleRelease
+      # The APK is signed afterwards with a key kept outside the repo, so only the unsigned build is published here
+      - name: Publish unsigned APK to the android-apk branch
+        run: |
+          APK=android-budget/app/build/outputs/apk/release/app-release-unsigned.apk
+          mkdir /tmp/out && cp "$APK" /tmp/out/budget-unsigned.apk
+          echo "$GITHUB_SHA" > /tmp/out/SOURCE_COMMIT
+          cd /tmp/out
+          git init -q -b android-apk
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add . && git commit -qm "Unsigned budget APK from $GITHUB_SHA"
+          git push -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" android-apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: budget-unsigned-apk
+          path: android-budget/app/build/outputs/apk/release/app-release-unsigned.apk
