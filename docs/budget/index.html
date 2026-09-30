@@ -130,6 +130,55 @@ button.what:hover { background: var(--bg); }
 .wish:last-child { border-bottom: 0; }
 .wish .what b { display: block; font-weight: 700; }
 .wish .what span { font-size: 13px; color: var(--muted); }
+.tabs { display: flex; gap: 4px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 4px; position: sticky; top: env(safe-area-inset-top, 0px); z-index: 4; }
+.tabs a { flex: 1; text-align: center; padding: 8px 6px; border-radius: 9px; color: var(--muted); font-weight: 700; text-decoration: none; }
+.tabs a[aria-current="true"] { background: var(--accent); color: var(--on-accent); }
+.tabs a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.viewcol { display: grid; gap: 24px; max-width: 760px; width: 100%; margin: 0 auto; }
+.pos { color: var(--accent) !important; }
+.neg { color: var(--danger) !important; }
+.mode { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; background: var(--bg); border-radius: 10px; padding: 4px; }
+.mode button { border: 0; background: transparent; color: var(--muted); font-weight: 700; padding: 8px; }
+.mode button[aria-pressed="true"] { background: var(--surface); color: var(--fg); box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+.mode button#modeInc[aria-pressed="true"] { color: var(--accent); }
+/* Shift type colors: a fixed categorical order, always shown with the type's name */
+:root { --t-blue: #2a78d6; --t-orange: #eb6834; --t-violet: #4a3aa7; --t-magenta: #d55181; --t-yellow: #c98500; --t-aqua: #1baf7a; --t-gray: #8a8f8c; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --t-blue: #3987e5; --t-orange: #d95926; --t-violet: #9085e9; --t-magenta: #d55181; --t-yellow: #c98500; --t-aqua: #199e70; --t-gray: #7d8580; } }
+:root[data-theme="dark"] { --t-blue: #3987e5; --t-orange: #d95926; --t-violet: #9085e9; --t-magenta: #d55181; --t-yellow: #c98500; --t-aqua: #199e70; --t-gray: #7d8580; }
+.c-blue { --tc: var(--t-blue); } .c-orange { --tc: var(--t-orange); } .c-violet { --tc: var(--t-violet); }
+.c-magenta { --tc: var(--t-magenta); } .c-yellow { --tc: var(--t-yellow); } .c-aqua { --tc: var(--t-aqua); } .c-gray { --tc: var(--t-gray); }
+.shifts { display: grid; gap: 8px; }
+.shift { display: grid; grid-template-columns: minmax(0, 1fr) auto 36px; gap: 8px; align-items: center; padding: 8px 10px; border-radius: 10px; background: var(--bg); border-inline-start: 5px solid var(--must); }
+.shift[class*="c-"] { border-inline-start-color: var(--tc); background: color-mix(in srgb, var(--tc) 12%, var(--surface)); }
+.shift .what { display: grid; gap: 1px; }
+.shift .sdate { font-size: 13px; color: var(--muted); font-weight: 600; }
+.shift .what b { font-weight: 700; }
+.shift .what span:last-child { font-size: 13px; color: var(--muted); }
+.shift .amt { font-weight: 700; font-variant-numeric: tabular-nums; }
+.shift.pending .amt::after { content: " ⋯"; color: var(--muted); }
+.chip[class*="c-"] input:checked + span { background: var(--tc); border-color: var(--tc); color: #fff; }
+.chip[class*="c-"] span { border-color: var(--tc); }
+.row.typerow { grid-template-columns: 14px minmax(0, 1fr) 96px 36px; }
+.amt.pos, .amt.neg, .cday .pos, .cday .neg, .ctile .n, #calDayTotal b { direction: ltr; unicode-bidi: isolate; }
+.ctile .n { text-align: right; }
+.swatch { width: 14px; height: 14px; border-radius: 4px; background: var(--tc); }
+.ratebox { display: flex; align-items: center; gap: 4px; }
+.ratebox .pct { color: var(--muted); font-weight: 700; }
+.tx.income .what b { color: var(--accent); }
+.caltiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.ctile { background: var(--bg); border-radius: 10px; padding: 10px 12px; display: grid; gap: 2px; min-width: 0; }
+.ctile .t { font-size: 14px; color: var(--muted); font-weight: 600; }
+.ctile .n { font-family: var(--font-display); font-weight: 700; font-size: clamp(20px, 5vw, 28px); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.calhead, .calgrid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
+.calhead span { text-align: center; font-size: 13px; color: var(--muted); font-weight: 700; }
+.cday { display: flex; flex-direction: column; align-items: stretch; gap: 1px; min-height: 64px; padding: 4px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--fg); font-variant-numeric: tabular-nums; text-align: center; }
+.cday.blank { border: 0; background: transparent; }
+.cday .dn { font-weight: 700; font-size: 14px; }
+.cday .pos, .cday .neg { font-size: 11px; font-weight: 700; line-height: 1.25; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cday.rest { background: var(--bg); }
+.cday.today .dn { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+.cday.sel { border: 2px solid var(--accent); padding: 3px; }
+@media (min-width: 700px) { .cday { min-height: 84px; } .cday .pos, .cday .neg { font-size: 13px; } }
 .pay { gap: 10px; }
 .pay h2 .btn { font-size: 16px; }
 .paybody { display: grid; gap: 6px; }
@@ -338,7 +387,13 @@ dialog.sheet::backdrop { background: rgba(10, 20, 15, .45); }
     <button class="btn" id="clearExample" type="button">ניקוי הדוגמה</button>
   </div>
 
-  <div class="grid">
+  <nav class="tabs" aria-label="עמודים">
+    <a href="#" data-view="main" aria-current="true">ראשי</a>
+    <a href="#shifts" data-view="shifts">משמרות</a>
+    <a href="#calendar" data-view="calendar">לוח שנה</a>
+  </nav>
+
+  <div class="grid" id="viewMain">
     <div class="col">
       <section class="panel today" aria-labelledby="todayLbl">
         <span class="lbl" id="todayLbl">מותר לך לבזבז היום</span>
@@ -364,22 +419,7 @@ dialog.sheet::backdrop { background: rgba(10, 20, 15, .45); }
           עובדים בשכר שעתי? רושמים כאן כל משמרת ומקבלים את השכר של כל יום לפי החוק: שעות נוספות, לילה, שבת וחגים.
           <div class="actions" style="margin-top:8px"><button class="btn" type="button" id="addShift2">רישום משמרת ראשונה</button></div>
         </div>
-        <div class="log" id="shiftList"></div>
-        <details class="paysettings" id="paySet">
-          <summary>הגדרות שכר</summary>
-          <div class="rows">
-            <label class="field" for="wage">שכר לשעה (ברוטו)<input type="number" id="wage" min="0" step="0.01" inputmode="decimal" placeholder="₪"></label>
-            <label class="field" for="otAfter">שעות נוספות מתחילות אחרי
-              <select id="otAfter">
-                <option value="8.6">8.6 שעות ביום (שבוע עבודה של 5 ימים)</option>
-                <option value="8.5">8.5 שעות ביום</option>
-                <option value="8">8 שעות ביום (שבוע עבודה של 6 ימים)</option>
-              </select></label>
-            <label class="field" for="deduct">ניכויים משוערים באחוזים (מס, ביטוח לאומי, פנסיה)<input type="number" id="deduct" min="0" max="90" step="0.5" inputmode="decimal"></label>
-            <label class="field" for="travel">החזר נסיעות למשמרת<input type="number" id="travel" min="0" step="1" inputmode="decimal" placeholder="₪0"></label>
-            <p class="hint">החישוב לפי חוק שעות עבודה ומנוחה: שעתיים נוספות ראשונות ב־125% ואחריהן 150%. במשמרת עם שעתיים לפחות בין 22:00 ל־06:00 השעות הנוספות מתחילות אחרי 7 שעות. שבת וחגים ב־150%, ושעות נוספות בהם ב־175% וב־200%. השבת והחג מתחילים 18 דקות לפני השקיעה ונגמרים 40 דקות אחריה, לפי שעון תל אביב.</p>
-          </div>
-        </details>
+        <div class="actions"><button class="btn" type="button" id="toShifts">לכל המשמרות</button></div>
       </section>
 
       <section class="panel" aria-labelledby="catsH">
@@ -388,8 +428,9 @@ dialog.sheet::backdrop { background: rgba(10, 20, 15, .45); }
       </section>
 
       <section class="panel" aria-labelledby="logH">
-        <h2 id="logH">ההוצאות של החודש</h2>
-        <p class="hint">לחצו על הוצאה כדי לתקן אותה.</p>
+        <h2 id="logH">הוצאות והכנסות של החודש</h2>
+        <p class="hint">לחצו על שורה כדי לתקן אותה. קיבלת כסף מתנה או החזר מחבר? רשמו אותו כהכנסה.</p>
+        <div class="actions"><button class="btn" type="button" id="addIncome">+ הכנסה חד־פעמית</button></div>
         <div class="log" id="txList"></div>
       </section>
 
@@ -497,17 +538,81 @@ dialog.sheet::backdrop { background: rgba(10, 20, 15, .45); }
       </div>
     </details>
   </div>
+
+  <div class="viewcol" id="viewShifts" hidden>
+    <section class="panel pay" aria-labelledby="shTitle">
+      <h2><span id="shTitle">המשמרות</span> <button class="btn primary" type="button" id="addShift3">+ משמרת</button></h2>
+      <div class="paybody">
+        <span class="lbl">משכורת משוערת עד עכשיו (נטו)</span>
+        <span class="big2" id="shNet">₪0</span>
+        <span class="line" id="shLine"></span>
+      </div>
+      <div class="shifts" id="shiftList"></div>
+      <p class="hint">משמרת רגילה מסומנת באפור. משמרת מסוג מיוחד מסומנת בצבע של הסוג שלה.</p>
+    </section>
+
+    <section class="panel" aria-labelledby="typesH">
+      <h2 id="typesH">סוגי משמרות</h2>
+      <p class="hint">סוג משמרת קובע אחוז מינימלי לכל שעה בה. למשל ״מוצ״ש״ ב־150%. אם החוק נותן יותר (שעות נוספות, שבת), מקבלים את הגבוה מביניהם.</p>
+      <div class="rows" id="typeRows"></div>
+      <div class="actions"><button class="btn" type="button" id="addType">+ סוג משמרת</button></div>
+    </section>
+
+    <section class="panel" id="paySet" aria-labelledby="paySetH">
+      <h2 id="paySetH">הגדרות שכר</h2>
+          
+          <div class="rows">
+            <label class="field" for="wage">שכר לשעה (ברוטו)<input type="number" id="wage" min="0" step="0.01" inputmode="decimal" placeholder="₪"></label>
+            <label class="field" for="otAfter">שעות נוספות מתחילות אחרי
+              <select id="otAfter">
+                <option value="8.6">8.6 שעות ביום (שבוע עבודה של 5 ימים)</option>
+                <option value="8.5">8.5 שעות ביום</option>
+                <option value="8">8 שעות ביום (שבוע עבודה של 6 ימים)</option>
+              </select></label>
+            <label class="field" for="deduct">ניכויים משוערים באחוזים (מס, ביטוח לאומי, פנסיה)<input type="number" id="deduct" min="0" max="90" step="0.5" inputmode="decimal"></label>
+            <label class="field" for="travel">החזר נסיעות למשמרת<input type="number" id="travel" min="0" step="1" inputmode="decimal" placeholder="₪0"></label>
+            <p class="hint">החישוב לפי חוק שעות עבודה ומנוחה: שעתיים נוספות ראשונות ב־125% ואחריהן 150%. במשמרת עם שעתיים לפחות בין 22:00 ל־06:00 השעות הנוספות מתחילות אחרי 7 שעות. שבת וחגים ב־150%, ושעות נוספות בהם ב־175% וב־200%. השבת והחג מתחילים 18 דקות לפני השקיעה ונגמרים 40 דקות אחריה, לפי שעון תל אביב.</p>
+          </div>
+        
+    </section>
+  </div>
+
+  <div class="viewcol" id="viewCal" hidden>
+    <section class="panel" aria-labelledby="calTitle">
+      <h2 id="calTitle">החודש</h2>
+      <div class="caltiles">
+        <div class="ctile"><span class="t">הכנסת</span><span class="n pos" id="calIn">+₪0</span></div>
+        <div class="ctile"><span class="t">הוצאת</span><span class="n neg" id="calOut">−₪0</span></div>
+        <div class="ctile"><span class="t">מאזן</span><span class="n" id="calNet">₪0</span></div>
+      </div>
+      <p class="hint" id="calNote"></p>
+    </section>
+    <section class="panel" aria-label="לוח החודש">
+      <div class="calhead" aria-hidden="true"><span>א׳</span><span>ב׳</span><span>ג׳</span><span>ד׳</span><span>ה׳</span><span>ו׳</span><span>ש׳</span></div>
+      <div class="calgrid" id="calGrid"></div>
+    </section>
+    <section class="panel" aria-labelledby="calDayH">
+      <h2 id="calDayH">היום</h2>
+      <div class="log" id="calDayList"></div>
+      <div class="verdict" id="calDayTotal" role="status" hidden></div>
+    </section>
+  </div>
 </div>
 
 <button class="fab" type="button" id="fab" hidden>+ הוצאה</button>
 
 <dialog class="sheet" id="sheet" aria-labelledby="sheetH">
   <form id="txForm" method="dialog" novalidate>
+    <div class="mode" id="modeRow" role="group" aria-label="סוג הרישום">
+      <button type="button" id="modeExp" aria-pressed="true">הוצאה</button>
+      <button type="button" id="modeInc" aria-pressed="false">הכנסה</button>
+    </div>
     <h2 id="sheetH">הוצאה חדשה</h2>
     <label for="txAmount">כמה?<input type="number" id="txAmount" class="amount-in" inputmode="decimal" min="0" step="0.01" placeholder="₪0"></label>
     <p class="hours" id="txHours" aria-live="polite"></p>
     <fieldset class="chips" id="txCats"><legend>על מה?</legend></fieldset>
-    <label for="txNote">פירוט (לא חובה)<input type="text" id="txNote" maxlength="200" placeholder="למשל: שווארמה עם חברים"></label>
+    <fieldset class="chips" id="incKinds" hidden><legend>מה זה?</legend></fieldset>
+    <label for="txNote" id="txNoteLbl">פירוט (לא חובה)<input type="text" id="txNote" maxlength="200" placeholder="למשל: שווארמה עם חברים"></label>
     <label for="txDate">מתי?<input type="date" id="txDate"></label>
     <label class="check" id="repeatRow" for="txRepeat"><input type="checkbox" id="txRepeat"> חוזר כל חודש (ייכנס לבד מעכשיו)</label>
     <div class="err" id="txErr" role="alert" hidden></div>
@@ -528,6 +633,7 @@ dialog.sheet::backdrop { background: rgba(10, 20, 15, .45); }
       <label for="shEnd">יציאה<input type="time" id="shEnd"></label>
     </div>
     <label for="shBreak">הפסקה שלא משולמת (דקות)<input type="number" id="shBreak" min="0" max="600" step="5" inputmode="numeric"></label>
+    <fieldset class="chips" id="shKinds"><legend>סוג משמרת</legend></fieldset>
     <label for="shNote">הערה (לא חובה)<input type="text" id="shNote" maxlength="200" placeholder="למשל: החלפתי את דני"></label>
     <p class="preview" id="shPreview" aria-live="polite"></p>
     <div class="err" id="shErr" role="alert" hidden></div>
@@ -593,6 +699,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   let draft = null, draftFor = null;
   let saveT = null, pendingSave = null;
   const tx = {};          // month -> [{ id, spent_on, amount, category, note, created_at, pending }]
+  const incomes = {};     // month -> [{ id, received_on, amount, kind, note, created_at, pending }]
   const shifts = {};      // month -> [{ id, work_date, start_time, end_time, break_min, wage, note, created_at, pending }]
   let sb = null;
 
@@ -637,6 +744,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   // Regular day: settings.otAfter hours (8.6 in a 5-day week, 8 in a 6-day week); a shift with 2+ hours
   // between 22:00 and 06:00 is a night shift with a 7-hour day. The first 2 overtime hours pay 125%, the rest 150%.
   // Hours inside Shabbat or a holiday pay 150%, and overtime inside them 175% / 200%.
+  // A user-defined shift type pays at least its own rate for every hour.
   // Shabbat and holidays run from 18 minutes before sunset on the eve to 40 minutes after sunset on the day (Tel Aviv).
   const HOLIDAYS = { "Tishri-1": "ראש השנה", "Tishri-2": "ראש השנה", "Tishri-10": "יום כיפור", "Tishri-15": "סוכות",
     "Tishri-22": "שמחת תורה", "Nisan-15": "פסח", "Nisan-21": "שביעי של פסח", "Sivan-6": "שבועות" };
@@ -698,7 +806,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     if (len <= 0) len += 1440;                     // ends after midnight
     const brk = Math.min(+r.break_min || 0, len);
     const breakFrom = Math.floor((len - brk) / 2); // unpaid break taken from the middle
-    const mins = { 100: 0, 125: 0, 150: 0, 175: 0, 200: 0 };
+    const mins = { 100: 0 };
     let night = 0, rest = "";
     const minutes = [];
     for (let i = 0; i < len; i++) {
@@ -713,7 +821,9 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     const dayLen = (night >= 120 ? Math.min(7, base) : base) * 60;
     minutes.forEach((isRest, i) => {
       const tier = i < dayLen ? 0 : i < dayLen + 120 ? 1 : 2;
-      mins[(isRest ? [150, 175, 200] : [100, 125, 150])[tier]]++;
+      const legal = (isRest ? [150, 175, 200] : [100, 125, 150])[tier];
+      const rate = Math.max(legal, +r.kind_rate || 100);  // a shift type (e.g. Motzash 150%) sets a minimum
+      mins[rate] = (mins[rate] || 0) + 1;
     });
     const wage = +r.wage || 0;
     const gross = Object.entries(mins).reduce((sum, [rate, n]) => sum + (wage / 60) * n * rate / 100, 0);
@@ -811,7 +921,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   function cacheTx() {
     if (!user) return;
     const c = lsGet(cacheKey()) || {};
-    c.store = store; c.version = version; c.tx = tx; c.shifts = shifts;
+    c.store = store; c.version = version; c.tx = tx; c.shifts = shifts; c.incomes = incomes;
     lsSet(cacheKey(), c);
   }
 
@@ -862,7 +972,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
         }
         list.shift();
         setOutbox(list);
-        if (op.op === "add") [tx, shifts].forEach((c) => Object.values(c).forEach((l) => l.forEach((r) => { if (r.id === op.row.id) r.pending = false; })));
+        if (op.op === "add") [tx, shifts, incomes].forEach((c) => Object.values(c).forEach((l) => l.forEach((r) => { if (r.id === op.row.id) r.pending = false; })));
       }
     } catch (e) { /* offline: try again later */ }
     flushing = false;
@@ -927,6 +1037,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     $("saving").textContent = "";
     render();
     show("app");
+    setView(location.hash.slice(1), true);
   }
 
   function rowEl(list, i, kind) {
@@ -1038,7 +1149,8 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   }
 
   function renderTracking() {
-    const { d, spend } = plan();
+    const { d, spend: planned } = plan();
+    const spend = planned + incTotal();   // one-off incomes join the month's spending money
     const list = monthTx();
     const cur = thisMonth();
     const isCur = month === cur, isPast = month < cur;
@@ -1143,6 +1255,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     renderTx();
     renderHist();
     renderPay();
+    renderCal();
   }
 
   function catNames() {
@@ -1172,7 +1285,8 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     if (!store) return;
     const names = catNames();
     const box = $("txList"); box.innerHTML = "";
-    const list = monthTx();
+    const list = monthTx().concat(monthInc().map((r) => ({ ...r, spent_on: r.received_on, _inc: r })))
+      .sort((a, b) => b.spent_on.localeCompare(a.spent_on) || String(b.created_at).localeCompare(String(a.created_at)));
     if (!list.length) {
       const e = document.createElement("p"); e.className = "empty";
       e.textContent = "עוד אין הוצאות רשומות ב" + monthName(month) + ". לחצו על ״+ הוצאה״ ורשמו כל קנייה ברגע שהיא קורית.";
@@ -1188,9 +1302,10 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       const day = document.createElement("div"); day.className = "day";
       const dh = document.createElement("div"); dh.className = "dh";
       const a = document.createElement("span"); a.textContent = dayLabel(g.day);
-      const b = document.createElement("span"); b.textContent = fmt(g.rows.reduce((s, r) => s + r.amount, 0));
+      const b = document.createElement("span"); b.textContent = fmt(g.rows.reduce((s, r) => s + (r._inc ? 0 : r.amount), 0));
       dh.append(a, b); day.append(dh);
       g.rows.forEach((r) => {
+        if (r._inc) { day.append(incomeRow(r._inc)); return; }
         const row = document.createElement("div"); row.className = "tx" + (r.pending ? " pending" : "");
         const what = document.createElement("button"); what.type = "button"; what.className = "what";
         const t = document.createElement("b"); t.textContent = r.note || names[r.category] || "הוצאה";
@@ -1215,6 +1330,26 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     });
   }
 
+  function incomeRow(r) {
+    const row = document.createElement("div"); row.className = "tx income" + (r.pending ? " pending" : "");
+    const what = document.createElement("button"); what.type = "button"; what.className = "what";
+    const t = document.createElement("b"); t.textContent = r.note || r.kind || "הכנסה";
+    const c = document.createElement("span"); c.textContent = "הכנסה · " + (r.kind || "אחר") + (r.pending ? " · ממתין לחיבור" : "");
+    what.append(t, c);
+    what.setAttribute("aria-label", "עריכת ההכנסה " + t.textContent + " " + fmt(r.amount));
+    what.addEventListener("click", () => openIncome(r));
+    const amt = document.createElement("span"); amt.className = "amt pos"; amt.textContent = "+" + fmt(r.amount);
+    const del = document.createElement("button"); del.type = "button"; del.className = "del"; del.textContent = "×";
+    del.setAttribute("aria-label", "מחיקת ההכנסה " + t.textContent);
+    del.addEventListener("click", () => {
+      const copy = clean(r);
+      INC.del(r.id); renderTracking();
+      snack("נמחקה הכנסה של " + fmt(r.amount), () => { INC.save({ ...copy, id: uid() }); renderTracking(); });
+    });
+    row.append(what, amt, del);
+    return row;
+  }
+
   // ---- Snackbar with undo ----
   let snackT;
   function snack(text, undo) {
@@ -1233,6 +1368,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     const d = data();
     if (!d.cats.length) { snack("אין קטגוריות. הוסיפו קטגוריה בתוכנית של החודש."); $("planBox").open = true; return; }
     editing = edit || null;
+    editingInc = null;
     $("sheetH").textContent = edit ? "עריכת הוצאה" : "הוצאה חדשה";
     $("txSave").textContent = edit ? "שמירה" : "רישום";
     $("txWish").hidden = !!edit;
@@ -1253,8 +1389,10 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     $("txDate").value = edit ? edit.spent_on : month === cur ? todayStr() : month < cur ? periodEnd(month) : periodStart(month);
     $("txErr").hidden = true;
     showHours();
+    if (!edit && view === "calendar" && calDay) $("txDate").value = calDay;
+    setSheetMode("exp");
     const dlg = $("sheet");
-    if (dlg.showModal) dlg.showModal(); else dlg.setAttribute("open", "");
+    if (!dlg.open) { if (dlg.showModal) dlg.showModal(); else dlg.setAttribute("open", ""); }
     setTimeout(() => $("txAmount").focus(), 30);
   }
   function showHours() {
@@ -1262,8 +1400,9 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     $("txHours").textContent = h ? "זה " + h + "." : "";
   }
   $("txAmount").addEventListener("input", showHours);
-  function closeSheet() { const dlg = $("sheet"); if (dlg.close) dlg.close(); else dlg.removeAttribute("open"); editing = null; }
-  $("fab").addEventListener("click", () => openSheet());
+  function closeSheet() { const dlg = $("sheet"); if (dlg.close) dlg.close(); else dlg.removeAttribute("open"); editing = null; editingInc = null; }
+  $("fab").addEventListener("click", () => (view === "shifts" ? openShift() : openSheet()));
+  $("addIncome").addEventListener("click", () => openIncome());
   $("txCancel").addEventListener("click", closeSheet);
 
   function readSheet() {
@@ -1285,6 +1424,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 
   $("txForm").addEventListener("submit", (e) => {
     e.preventDefault();
+    if (sheetMode === "inc") { submitIncome(); return; }
     const v = readSheet();
     if (!v) return;
     lastCat = v.category;
@@ -1573,75 +1713,130 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     persist();
     Object.keys(tx).forEach((k) => delete tx[k]);
     Object.keys(shifts).forEach((k) => delete shifts[k]);
+    Object.keys(incomes).forEach((k) => delete incomes[k]);
     Object.keys(hist).forEach((k) => delete hist[k]);
     goMonth(thisMonth());
     snack("מעכשיו החודש שלך מתחיל ב־" + startDay() + " לחודש.");
   });
 
-  // ---- Shifts: data ----
-  function sortShifts(list) {
-    return list.sort((a, b) => b.work_date.localeCompare(a.work_date) || b.start_time.localeCompare(a.start_time));
-  }
-  async function loadShifts(m) {
-    if (!sb || !user) {
-      shifts[m] = sortShifts((store.shifts || []).filter((r) => periodOf(r.work_date) === m));
-      return;
-    }
-    const { data: rows, error } = await sb.from("shifts")
-      .select("id, work_date, start_time, end_time, break_min, wage, note, created_at")
-      .gte("work_date", periodStart(m)).lte("work_date", periodEnd(m));
-    if (error) throw error;
-    let list = rows.map((r) => ({ ...r, wage: +r.wage }));
-    outbox().forEach((op) => {
-      if (op.t !== "shifts") return;
-      if (op.op === "add") {
-        list = list.filter((r) => r.id !== op.row.id);
-        if (periodOf(op.row.work_date) === m) list.push({ ...op.row, pending: true });
+  // ---- Dated records kept in their own tables (shifts, one-off incomes) ----
+  // Each keeps a per-month cache, goes through the offline outbox, and falls back to the browser without accounts.
+  function dated(table, dateKey, cache, cols, nums, sortFn) {
+    const tidy = (r) => { const o = { ...r }; nums.forEach((k) => { if (k in o) o[k] = +o[k]; }); return o; };
+    return {
+      async load(m) {
+        if (!sb || !user) {
+          cache[m] = sortFn((store[table] || []).filter((r) => periodOf(r[dateKey]) === m));
+          return;
+        }
+        const { data: rows, error } = await sb.from(table).select(cols).gte(dateKey, periodStart(m)).lte(dateKey, periodEnd(m));
+        if (error) throw error;
+        let list = rows.map(tidy);
+        outbox().forEach((op) => {
+          if (op.t !== table) return;
+          if (op.op === "add") {
+            list = list.filter((r) => r.id !== op.row.id);
+            if (periodOf(op.row[dateKey]) === m) list.push({ ...op.row, pending: true });
+          }
+          if (op.op === "del") list = list.filter((r) => r.id !== op.id);
+        });
+        cache[m] = sortFn(list);
+        cacheTx();
+      },
+      save(row) {
+        if (!sb || !user) {
+          store[table] = (store[table] || []).filter((r) => r.id !== row.id).concat([row]);
+          lsSet(LOCAL_KEY, store);
+        } else {
+          const list = outbox();
+          const i = list.findIndex((op) => op.t === table && op.op === "add" && op.row.id === row.id);
+          if (i >= 0) list[i] = { t: table, op: "add", row }; else list.push({ t: table, op: "add", row });
+          setOutbox(list);
+        }
+        Object.keys(cache).forEach((m) => { cache[m] = cache[m].filter((r) => r.id !== row.id); });
+        const m = periodOf(row[dateKey]);
+        if (cache[m]) cache[m] = sortFn(cache[m].concat([{ ...row, pending: !!(sb && user) }]));
+        cacheTx();
+        flushOutbox();
+      },
+      del(id) {
+        if (!sb || !user) {
+          store[table] = (store[table] || []).filter((r) => r.id !== id);
+          lsSet(LOCAL_KEY, store);
+        } else {
+          const list = outbox();
+          const i = list.findIndex((op) => op.t === table && op.op === "add" && op.row.id === id);
+          if (i >= 0) { list.splice(i, 1); setOutbox(list); }
+          else setOutbox(list.concat([{ t: table, op: "del", id }]));
+        }
+        Object.keys(cache).forEach((m) => { cache[m] = cache[m].filter((r) => r.id !== id); });
+        cacheTx();
+        flushOutbox();
       }
-      if (op.op === "del") list = list.filter((r) => r.id !== op.id);
+    };
+  }
+  const SH = dated("shifts", "work_date", shifts, "id, work_date, start_time, end_time, break_min, wage, kind, kind_rate, note, created_at", ["wage", "kind_rate", "break_min"],
+    (l) => l.sort((a, b) => b.work_date.localeCompare(a.work_date) || b.start_time.localeCompare(a.start_time)));
+  const INC = dated("incomes", "received_on", incomes, "id, received_on, amount, kind, note, created_at", ["amount"],
+    (l) => l.sort((a, b) => b.received_on.localeCompare(a.received_on) || String(b.created_at).localeCompare(String(a.created_at))));
+  const loadShifts = (m) => SH.load(m), saveShift = (r) => SH.save(r), delShift = (id) => SH.del(id);
+  const clean = (r) => { const c = { ...r }; delete c.pending; delete c._p; return c; };
+
+  // ---- Shift types (e.g. Motzash at 150%) ----
+  const TYPE_COLORS = ["blue", "orange", "violet", "magenta", "yellow", "aqua"];
+  const shiftTypes = () => store.shiftTypes || [];
+  const typeOf = (r) => (r.kind ? shiftTypes().find((t) => t.id === r.kind) : null);
+  function typeLabel(r) {
+    if (!r.kind) return "";
+    const t = typeOf(r);
+    return (t ? t.name || "סוג בלי שם" : "סוג שנמחק") + " " + (+r.kind_rate || 100) + "%";
+  }
+  function typeColor(r) { const t = typeOf(r); return r.kind ? "c-" + (t ? t.color : "gray") : ""; }
+  function renderTypes() {
+    const box = $("typeRows"); box.innerHTML = "";
+    shiftTypes().forEach((t, i) => {
+      const row = document.createElement("div"); row.className = "row typerow";
+      const sw = document.createElement("span"); sw.className = "swatch c-" + t.color; sw.setAttribute("aria-hidden", "true");
+      const name = document.createElement("input"); name.type = "text"; name.value = t.name; name.id = "type-name-" + i;
+      name.placeholder = "שם, למשל מוצ״ש"; name.setAttribute("aria-label", "שם סוג המשמרת"); name.maxLength = 40;
+      name.addEventListener("input", () => { t.name = name.value; persist(); renderShifts(); });
+      const rate = document.createElement("input"); rate.type = "number"; rate.min = "100"; rate.max = "500"; rate.step = "5"; rate.id = "type-rate-" + i;
+      rate.value = t.rate; rate.setAttribute("aria-label", "אחוז תשלום"); rate.inputMode = "decimal";
+      rate.addEventListener("input", () => { const v = parseFloat(rate.value); t.rate = v >= 100 && v <= 500 ? v : 100; persist(); });
+      const pct = document.createElement("span"); pct.className = "pct"; pct.textContent = "%";
+      const del = document.createElement("button"); del.type = "button"; del.className = "del"; del.textContent = "×";
+      del.setAttribute("aria-label", "מחיקת סוג המשמרת " + (t.name || ""));
+      del.addEventListener("click", () => {
+        store.shiftTypes.splice(i, 1); persist(); renderTypes(); renderShifts();
+        snack("הסוג נמחק. משמרות שכבר נרשמו איתו שומרות את האחוז שלהן.", () => { store.shiftTypes.splice(i, 0, t); persist(); renderTypes(); renderShifts(); });
+      });
+      const wrap = document.createElement("div"); wrap.className = "ratebox"; wrap.append(rate, pct);
+      row.append(sw, name, wrap, del);
+      box.append(row);
     });
-    shifts[m] = sortShifts(list);
-    cacheTx();
-  }
-  function saveShift(row) {
-    if (!sb || !user) {
-      store.shifts = (store.shifts || []).filter((r) => r.id !== row.id).concat([row]);
-      lsSet(LOCAL_KEY, store);
-    } else {
-      const list = outbox();
-      const i = list.findIndex((op) => op.t === "shifts" && op.op === "add" && op.row.id === row.id);
-      if (i >= 0) list[i] = { t: "shifts", op: "add", row }; else list.push({ t: "shifts", op: "add", row });
-      setOutbox(list);
+    if (!shiftTypes().length) {
+      const e = document.createElement("p"); e.className = "empty";
+      e.textContent = "אין סוגים מיוחדים. כל משמרת מחושבת כרגילה, לפי החוק.";
+      box.append(e);
     }
-    Object.keys(shifts).forEach((m) => { shifts[m] = shifts[m].filter((r) => r.id !== row.id); });
-    const m = periodOf(row.work_date);
-    if (shifts[m]) shifts[m] = sortShifts(shifts[m].concat([{ ...row, pending: !!(sb && user) }]));
-    cacheTx();
-    flushOutbox();
   }
-  function delShift(id) {
-    if (!sb || !user) {
-      store.shifts = (store.shifts || []).filter((r) => r.id !== id);
-      lsSet(LOCAL_KEY, store);
-    } else {
-      const list = outbox();
-      const i = list.findIndex((op) => op.t === "shifts" && op.op === "add" && op.row.id === id);
-      if (i >= 0) { list.splice(i, 1); setOutbox(list); }
-      else setOutbox(list.concat([{ t: "shifts", op: "del", id }]));
-    }
-    Object.keys(shifts).forEach((m) => { shifts[m] = shifts[m].filter((r) => r.id !== id); });
-    cacheTx();
-    flushOutbox();
-  }
+  $("addType").addEventListener("click", () => {
+    const used = shiftTypes().map((t) => t.color);
+    const color = TYPE_COLORS.find((c) => !used.includes(c)) || TYPE_COLORS[shiftTypes().length % TYPE_COLORS.length];
+    store.shiftTypes = shiftTypes().concat([{ id: catId(), name: "", rate: 150, color }]);
+    persist(); renderTypes();
+    const r = $("typeRows").lastElementChild; if (r) r.querySelector("input[type=text]").focus();
+  });
 
   // ---- Shifts: pay summary ----
   const settings = () => store.settings || {};
   const deductRate = () => { const d = settings().deduct; return d === 0 || d > 0 ? Math.min(+d, 90) / 100 : 0.12; };
   const hrs = (min) => (Math.round(min / 6) / 10).toLocaleString("he-IL");
+  const netOf = (p) => p.gross * (1 - deductRate()) + (+settings().travel || 0);
   function payParts(p) {
     const out = [];
-    const names = { 100: "רגילות", 125: "ב־125%", 150: "ב־150%", 175: "ב־175%", 200: "ב־200%" };
-    [100, 125, 150, 175, 200].forEach((k) => { if (p.mins[k]) out.push(hrs(p.mins[k]) + " ש׳ " + names[k]); });
+    const keys = Object.keys(p.mins).map(Number).sort((a, b) => a - b);
+    keys.forEach((k) => { if (p.mins[k]) out.push(hrs(p.mins[k]) + " ש׳ " + (k === 100 ? "רגילות" : "ב־" + k + "%")); });
     if (p.rest) out.push(p.rest);
     if (p.night) out.push("משמרת לילה");
     return out.join(" · ");
@@ -1649,19 +1844,23 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   function periodPay(m) {
     const list = shifts[m] || [];
     const today = todayStr();
-    let done = 0, doneMin = 0, doneCount = 0, planned = 0;
-    const travel = +settings().travel || 0;
+    let gross = 0, net = 0, min = 0, count = 0, plannedNet = 0;
     list.forEach((r) => {
       const p = shiftPay(r, settings());
-      const net = p.gross * (1 - deductRate()) + travel;
-      if (r.work_date <= today) { done += p.gross; doneMin += p.paidMin; doneCount++; }
-      else planned += net;
       r._p = p;
+      if (r.work_date <= today) { gross += p.gross; net += netOf(p); min += p.paidMin; count++; }
+      else plannedNet += netOf(p);
     });
-    const doneNet = done * (1 - deductRate()) + travel * doneCount;
-    return { gross: done, net: doneNet, min: doneMin, count: doneCount, plannedNet: planned, total: list.length };
+    return { gross, net, min, count, plannedNet };
   }
+  const monthInc = () => incomes[month] || [];
+  const incTotal = () => monthInc().reduce((s, r) => s + r.amount, 0);
 
+  function payLine(pp) {
+    return pp.count
+      ? "ברוטו " + fmt(pp.gross) + " · " + pp.count + (pp.count === 1 ? " משמרת" : " משמרות") + " · " + hrs(pp.min) + " שעות" + (pp.plannedNet ? " · עוד " + fmt(pp.plannedNet) + " ממשמרות שכבר קבעת" : "")
+      : (pp.plannedNet ? "עוד " + fmt(pp.plannedNet) + " ממשמרות שכבר קבעת" : "עוד אין משמרות החודש");
+  }
   function renderPay() {
     if (!store) return;
     const w = +settings().wage || 0;
@@ -1670,12 +1869,9 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     const cur = thisMonth(), isCur = month === cur, isPast = month < cur;
     $("payBody").hidden = !w && !list.length;
     $("payEmpty").hidden = !$("payBody").hidden;
-    $("paySet").open = $("paySet").open || !w;
     $("payLbl").textContent = isPast ? "המשכורת המשוערת על " + monthName(month) + " (נטו)" : "המשכורת המשוערת עד עכשיו (נטו)";
     $("payNet").textContent = fmt(pp.net);
-    $("payLine").textContent = pp.count
-      ? "ברוטו " + fmt(pp.gross) + " · " + pp.count + (pp.count === 1 ? " משמרת" : " משמרות") + " · " + hrs(pp.min) + " שעות" + (pp.plannedNet ? " · עוד " + fmt(pp.plannedNet) + " ממשמרות שכבר קבעת" : "")
-      : (pp.plannedNet ? "עוד " + fmt(pp.plannedNet) + " ממשמרות שכבר קבעת" : "");
+    $("payLine").textContent = payLine(pp);
 
     // Will this month's work cover this month's spending?
     const { exp, catTotal, spend } = plan();
@@ -1685,16 +1881,16 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     const v = $("payVerdict");
     const setV = (cls, text) => { v.className = "verdict " + cls; v.textContent = text; v.hidden = false; };
     v.hidden = true;
+    const extra = incTotal();
     if (isCur && netHour > 0 && need > 0) {
       const days = periodDays(month);
       const dayNum = daysBetween(periodStart(month), todayStr()) + 1;
-      const pace = pp.net / dayNum * days;
-      const projected = Math.max(pace, pp.net + pp.plannedNet);
+      const projected = Math.max(pp.net / dayNum * days, pp.net + pp.plannedNet) + extra;
       const gap = need - projected;
       const avgShift = pp.count ? pp.min / pp.count / 60 : 8;
       const needTxt = "הוצאות החובה ותקציב הבזבוזים שלך הם " + fmt(need) + ". ";
       if (!pp.count && !pp.plannedNet) {
-        const h = Math.ceil(need / netHour);
+        const h = Math.ceil(Math.max(need - extra, 0) / netHour);
         setV("warn", "עוד לא רשמת אף משמרת החודש. " + needTxt + "כדי לכסות אותם צריך בערך " + h + " שעות עבודה, כלומר " + Math.ceil(h / avgShift) + " משמרות.");
       } else if (gap > 0) {
         const h = Math.ceil(gap / netHour);
@@ -1703,66 +1899,89 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
         setV("good", "בקצב הזה תרוויח בערך " + fmt(projected) + " החודש, " + fmt(-gap) + " יותר מההוצאות שתכננת. אל תוריד משמרות, את העודף תעביר לחיסכון.");
       }
     } else if (isPast && pp.count) {
-      const left = pp.net - need;
+      const left = pp.net + extra - need;
       setV(left >= 0 ? "good" : "bad", left >= 0
         ? "המשמרות של " + monthName(month) + " כיסו את ההוצאות ונשאר עודף של " + fmt(left) + "."
         : "המשמרות של " + monthName(month) + " לא כיסו את ההוצאות. חסרו " + fmt(-left) + ".");
     }
+    renderShifts();
+  }
 
-    // Shift list, grouped by day with each day's pay beside it
+  // The shifts page: summary, the list with type colors, types and pay settings
+  function renderShifts() {
+    if (!store) return;
+    const pp = periodPay(month);
+    const list = shifts[month] || [];
+    $("shTitle").textContent = "המשמרות של " + monthName(month);
+    $("shNet").textContent = fmt(pp.net);
+    $("shLine").textContent = payLine(pp);
     const box = $("shiftList"); box.innerHTML = "";
-    const groups = [];
-    list.forEach((r) => {
-      const g = groups[groups.length - 1];
-      if (g && g.day === r.work_date) g.rows.push(r); else groups.push({ day: r.work_date, rows: [r] });
-    });
-    groups.forEach((g) => {
-      const day = document.createElement("div"); day.className = "day";
-      const dh = document.createElement("div"); dh.className = "dh";
-      const a = document.createElement("span"); a.textContent = dayLabel(g.day) + (g.day > todayStr() ? " (מתוכנן)" : "");
-      const b = document.createElement("span"); b.textContent = "ברוטו " + fmt(g.rows.reduce((s, r) => s + r._p.gross, 0));
-      dh.append(a, b); day.append(dh);
-      g.rows.forEach((r) => {
-        const row = document.createElement("div"); row.className = "tx" + (r.pending ? " pending" : "");
-        const what = document.createElement("button"); what.type = "button"; what.className = "what";
-        const t = document.createElement("b"); t.textContent = "\u2066" + r.start_time + "–" + r.end_time + "\u2069 · " + hrs(r._p.paidMin) + " שעות" + (r.note ? " · " + r.note : "");
-        const c = document.createElement("span"); c.textContent = payParts(r._p) + (r.pending ? " · ממתין לחיבור" : "");
-        what.append(t, c);
-        what.setAttribute("aria-label", "עריכת המשמרת " + t.textContent);
-        what.addEventListener("click", () => openShift(r));
-        const amt = document.createElement("span"); amt.className = "amt"; amt.textContent = fmt(r._p.gross);
-        const del = document.createElement("button"); del.type = "button"; del.className = "del"; del.textContent = "×";
-        del.setAttribute("aria-label", "מחיקת המשמרת " + t.textContent);
-        del.addEventListener("click", () => {
-          const copy = { ...r }; delete copy.pending; delete copy._p;
-          delShift(r.id); renderPay();
-          snack("המשמרת נמחקה", () => { saveShift({ ...copy, id: uid() }); renderPay(); });
-        });
-        row.append(what, amt, del);
-        day.append(row);
-      });
-      box.append(day);
-    });
-    if (!list.length && !$("payBody").hidden) {
+    if (!list.length) {
       const e = document.createElement("p"); e.className = "empty";
-      e.textContent = "עוד אין משמרות ב" + monthName(month) + ". לחצו ״+ משמרת״ אחרי כל יום עבודה.";
+      e.textContent = +settings().wage > 0
+        ? "עוד אין משמרות ב" + monthName(month) + ". לחצו ״+ משמרת״ אחרי כל יום עבודה."
+        : "קודם רשמו שכר לשעה בהגדרות השכר למטה, ואז את המשמרת הראשונה.";
       box.append(e);
+      return;
     }
+    list.slice().reverse().forEach((r) => {
+      const p = r._p || shiftPay(r, settings());
+      const row = document.createElement("div");
+      row.className = "shift " + (typeColor(r) || "regular") + (r.pending ? " pending" : "");
+      const what = document.createElement("button"); what.type = "button"; what.className = "what";
+      const d = document.createElement("span"); d.className = "sdate"; d.textContent = dayLabel(r.work_date) + (r.work_date > todayStr() ? " · מתוכנן" : "");
+      const t = document.createElement("b"); t.textContent = "\u2066" + r.start_time + "–" + r.end_time + "\u2069 · " + hrs(p.paidMin) + " שעות" + (r.note ? " · " + r.note : "");
+      const c = document.createElement("span");
+      const tl = typeLabel(r);
+      c.textContent = (tl ? tl + " · " : "") + payParts(p) + (r.pending ? " · ממתין לחיבור" : "");
+      what.append(d, t, c);
+      what.setAttribute("aria-label", "עריכת המשמרת של " + dayLabel(r.work_date));
+      what.addEventListener("click", () => openShift(r));
+      const amt = document.createElement("span"); amt.className = "amt";
+      amt.textContent = fmt(p.gross);
+      const del = document.createElement("button"); del.type = "button"; del.className = "del"; del.textContent = "×";
+      del.setAttribute("aria-label", "מחיקת המשמרת של " + dayLabel(r.work_date));
+      del.addEventListener("click", () => {
+        const copy = clean(r);
+        delShift(r.id); renderPay(); renderCal();
+        snack("המשמרת נמחקה", () => { saveShift({ ...copy, id: uid() }); renderPay(); renderCal(); });
+      });
+      row.append(what, amt, del);
+      box.append(row);
+    });
+    const tot = document.createElement("div"); tot.className = "dh";
+    const a = document.createElement("span"); a.textContent = "סה״כ ברוטו";
+    const b = document.createElement("span"); b.textContent = fmt(list.reduce((s, r) => s + (r._p || shiftPay(r, settings())).gross, 0));
+    tot.append(a, b); box.append(tot);
   }
 
   // ---- Shift sheet ----
   let editingShift = null;
   function openShift(edit) {
-    if (!(+settings().wage > 0)) { $("paySet").open = true; $("wage").focus(); snack("קודם תרשום כמה אתה מרוויח לשעה."); return; }
+    if (!(+settings().wage > 0)) { setView("shifts"); $("wage").focus(); snack("קודם תרשום כמה אתה מרוויח לשעה."); return; }
     editingShift = edit || null;
     const last = (shifts[month] || [])[0];
     $("shiftH").textContent = edit ? "עריכת משמרת" : "משמרת חדשה";
     const cur = thisMonth();
-    $("shDate").value = edit ? edit.work_date : month === cur ? todayStr() : month < cur ? periodEnd(month) : periodStart(month);
+    $("shDate").value = edit ? edit.work_date : calDay && view === "calendar" ? calDay : month === cur ? todayStr() : month < cur ? periodEnd(month) : periodStart(month);
     $("shStart").value = edit ? edit.start_time : last ? last.start_time : "09:00";
     $("shEnd").value = edit ? edit.end_time : last ? last.end_time : "17:00";
     $("shBreak").value = edit ? edit.break_min : last ? last.break_min : 0;
     $("shNote").value = edit ? edit.note || "" : "";
+    // Type chips: regular plus every defined type; a deleted type stays selectable while editing its shift
+    const box = $("shKinds");
+    box.querySelectorAll(".chip").forEach((n) => n.remove());
+    const opts = [{ id: "", name: "רגילה", rate: 100, color: "" }].concat(shiftTypes());
+    if (edit && edit.kind && !typeOf(edit)) opts.push({ id: edit.kind, name: "סוג שנמחק", rate: edit.kind_rate, color: "gray" });
+    const pick = edit ? edit.kind || "" : "";
+    opts.forEach((t, i) => {
+      const lab = document.createElement("label"); lab.className = "chip" + (t.color ? " c-" + t.color : "");
+      const inp = document.createElement("input"); inp.type = "radio"; inp.name = "shKind"; inp.value = t.id; inp.id = "shKind-" + i;
+      inp.checked = t.id === pick;
+      inp.addEventListener("change", previewShift);
+      const sp = document.createElement("span"); sp.textContent = (t.name || "סוג בלי שם") + (t.id ? " " + t.rate + "%" : "");
+      lab.append(inp, sp); box.append(lab);
+    });
     $("shErr").hidden = true;
     previewShift();
     const dlg = $("shiftSheet");
@@ -1771,10 +1990,15 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   function readShift() {
     const date = $("shDate").value, a = $("shStart").value, b = $("shEnd").value;
     if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !/^\d\d:\d\d$/.test(a) || !/^\d\d:\d\d$/.test(b)) return null;
+    const k = (document.querySelector('input[name="shKind"]:checked') || {}).value || "";
+    const t = shiftTypes().find((x) => x.id === k);
+    const keepOld = editingShift && editingShift.kind === k && !t;
     return {
       work_date: date, start_time: a, end_time: b,
       break_min: Math.max(0, Math.min(600, Math.round(+$("shBreak").value || 0))),
       wage: editingShift ? editingShift.wage : +settings().wage,
+      kind: k,
+      kind_rate: k ? (keepOld ? +editingShift.kind_rate : t ? +t.rate || 100 : 100) : 100,
       note: $("shNote").value.trim().slice(0, 200)
     };
   }
@@ -1787,22 +2011,22 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   ["shDate", "shStart", "shEnd", "shBreak"].forEach((id) => $(id).addEventListener("input", previewShift));
   function closeShift() { const d = $("shiftSheet"); if (d.close) d.close(); else d.removeAttribute("open"); editingShift = null; }
   $("shCancel").addEventListener("click", closeShift);
-  $("addShift").addEventListener("click", () => openShift());
-  $("addShift2").addEventListener("click", () => openShift());
+  ["addShift", "addShift2", "addShift3"].forEach((id) => $(id).addEventListener("click", () => openShift()));
+  $("toShifts").addEventListener("click", () => setView("shifts"));
   $("shiftForm").addEventListener("submit", (e) => {
     e.preventDefault();
     const v = readShift();
     if (!v) { $("shErr").textContent = "מלאו תאריך, שעת כניסה ושעת יציאה."; $("shErr").hidden = false; return; }
     if (v.start_time === v.end_time) { $("shErr").textContent = "שעת היציאה זהה לשעת הכניסה."; $("shErr").hidden = false; return; }
-    const before = editingShift ? (() => { const c = { ...editingShift }; delete c.pending; delete c._p; return c; })() : null;
+    const before = editingShift ? clean(editingShift) : null;
     const row = before ? { ...before, ...v } : { id: uid(), ...v, created_at: new Date().toISOString() };
     saveShift(row);
     closeShift();
     const m = periodOf(row.work_date);
-    if (m !== month) goMonth(m); else renderPay();
+    if (m !== month) goMonth(m); else { renderPay(); renderCal(); }
     const p = shiftPay(row, settings());
     snack((before ? "המשמרת עודכנה: " : "נרשמה משמרת: ") + hrs(p.paidMin) + " שעות, " + fmt(p.gross) + " ברוטו",
-      () => { if (before) saveShift(before); else delShift(row.id); renderPay(); });
+      () => { if (before) saveShift(before); else delShift(row.id); renderPay(); renderCal(); });
   });
 
   // ---- Pay settings ----
@@ -1813,24 +2037,181 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     $("otAfter").value = String(st.otAfter || 8.6);
     set("deduct", st.deduct === 0 || st.deduct > 0 ? st.deduct : 12);
     set("travel", +st.travel > 0 ? st.travel : "");
+    renderTypes();
   }
   function setSetting(k, v) {
     store.settings = { ...settings(), [k]: v };
     persist();
-    renderPay(); renderTx(); renderWish();
+    renderPay(); renderTx(); renderWish(); renderCal();
   }
   $("wage").addEventListener("input", () => { const w = parseFloat($("wage").value); setSetting("wage", w > 0 ? w : 0); });
   $("otAfter").addEventListener("change", () => setSetting("otAfter", +$("otAfter").value));
   $("deduct").addEventListener("input", () => { const d = parseFloat($("deduct").value); setSetting("deduct", d >= 0 ? Math.min(d, 90) : 12); });
   $("travel").addEventListener("input", () => { const t = parseFloat($("travel").value); setSetting("travel", t > 0 ? t : 0); });
 
+  // ---- One-off incomes: a gift, a friend paying back, a sale ----
+  const INC_KINDS = ["מתנה", "החזר מחבר", "מכירה", "אחר"];
+  let sheetMode = "exp", editingInc = null;
+  function setSheetMode(mode) {
+    sheetMode = mode;
+    const inc = mode === "inc";
+    $("modeExp").setAttribute("aria-pressed", String(!inc));
+    $("modeInc").setAttribute("aria-pressed", String(inc));
+    $("txCats").hidden = inc; $("incKinds").hidden = !inc;
+    $("txHours").hidden = inc;
+    $("repeatRow").hidden = inc || !!editing;
+    $("txWish").hidden = inc || !!editing;
+    $("sheetH").textContent = inc ? (editingInc ? "עריכת הכנסה" : "הכנסה חד־פעמית") : editing ? "עריכת הוצאה" : "הוצאה חדשה";
+    $("txNoteLbl").firstChild.textContent = inc ? "ממי או על מה? (לא חובה)" : "פירוט (לא חובה)";
+    $("txNote").placeholder = inc ? "למשל: דני החזיר על ארוחת הצהריים" : "למשל: שווארמה עם חברים";
+    $("modeRow").hidden = !!(editing || editingInc);
+  }
+  $("modeExp").addEventListener("click", () => setSheetMode("exp"));
+  $("modeInc").addEventListener("click", () => setSheetMode("inc"));
+  (function () {
+    const box = $("incKinds");
+    INC_KINDS.forEach((k, i) => {
+      const lab = document.createElement("label"); lab.className = "chip";
+      const inp = document.createElement("input"); inp.type = "radio"; inp.name = "incKind"; inp.value = k; inp.id = "incKind-" + i;
+      inp.checked = i === 0;
+      const sp = document.createElement("span"); sp.textContent = k;
+      lab.append(inp, sp); box.append(lab);
+    });
+  })();
+  function openIncome(edit) {
+    openSheet(null, null);
+    editingInc = edit || null;
+    if (edit) {
+      $("txAmount").value = edit.amount; $("txNote").value = edit.note || ""; $("txDate").value = edit.received_on;
+      const k = document.querySelector('input[name="incKind"][value="' + (INC_KINDS.includes(edit.kind) ? edit.kind : "אחר") + '"]');
+      if (k) k.checked = true;
+      $("txSave").textContent = "שמירה";
+    }
+    setSheetMode("inc");
+  }
+  function submitIncome() {
+    const amount = Math.round((parseFloat($("txAmount").value) || 0) * 100) / 100;
+    const date = $("txDate").value;
+    const err = (t) => { $("txErr").textContent = t; $("txErr").hidden = false; };
+    if (!(amount > 0)) { $("txAmount").focus(); err("כמה קיבלת? רשמו סכום גדול מאפס."); return; }
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) { err("בחרו תאריך."); return; }
+    const kind = (document.querySelector('input[name="incKind"]:checked') || {}).value || "אחר";
+    const v = { received_on: date, amount, kind, note: $("txNote").value.trim().slice(0, 200) };
+    const before = editingInc ? clean(editingInc) : null;
+    const row = before ? { ...before, ...v } : { id: uid(), ...v, created_at: new Date().toISOString() };
+    INC.save(row);
+    closeSheet();
+    showPeriodOf(row.received_on);
+    renderPay(); renderCal();
+    snack(before ? "ההכנסה עודכנה"
+      : "נרשמה הכנסה של " + fmt(amount) + (kind === "מתנה" ? ". מתנה זה לא תקציב, תעביר אותה לחיסכון." : ". היא נוספה לתקציב הבזבוזים של החודש."),
+      () => { if (before) INC.save(before); else INC.del(row.id); renderTracking(); renderPay(); renderCal(); });
+  }
+
+  // ---- Calendar ----
+  let calDay = null;
+  function dayTotals(m) {
+    const by = {};
+    const get = (d) => (by[d] = by[d] || { spent: 0, earned: 0, tx: [], shifts: [], inc: [] });
+    (tx[m] || []).forEach((r) => { const o = get(r.spent_on); o.spent += r.amount; o.tx.push(r); });
+    (shifts[m] || []).forEach((r) => { const o = get(r.work_date); const p = r._p || shiftPay(r, settings()); r._p = p; o.earned += netOf(p); o.shifts.push(r); });
+    (incomes[m] || []).forEach((r) => { const o = get(r.received_on); o.earned += r.amount; o.inc.push(r); });
+    return by;
+  }
+  const plus = (n) => "+" + fmt(n), minus = (n) => "−" + fmt(n);
+  const compact = (n) => Math.round(n).toLocaleString("he-IL");
+  function renderCal() {
+    if (!store || view !== "calendar") return;
+    const by = dayTotals(month);
+    const all = Object.values(by);
+    const inSum = all.reduce((s, o) => s + o.earned, 0), outSum = all.reduce((s, o) => s + o.spent, 0);
+    $("calTitle").textContent = monthName(month) + (startDay() > 1 ? " (" + shortDate(periodStart(month)) + "–" + shortDate(periodEnd(month)) + ")" : "");
+    $("calIn").textContent = plus(inSum);
+    $("calOut").textContent = minus(outSum);
+    const net = inSum - outSum;
+    $("calNet").textContent = (net >= 0 ? "+" : "−") + fmt(Math.abs(net));
+    $("calNet").className = "n " + (net >= 0 ? "pos" : "neg");
+    $("calNote").textContent = "הכנסות: משמרות (נטו משוער) והכנסות חד־פעמיות. הוצאות: מה שרשמת, בלי הוצאות החובה של " + fmt(plan().exp) + ".";
+
+    const grid = $("calGrid"); grid.innerHTML = "";
+    const first = periodStart(month), last = periodEnd(month);
+    const [fy, fm, fd] = first.split("-").map(Number);
+    const lead = new Date(fy, fm - 1, fd).getDay();
+    for (let i = 0; i < lead; i++) { const e = document.createElement("span"); e.className = "cday blank"; grid.append(e); }
+    const today = todayStr();
+    if (!calDay || periodOf(calDay) !== month) calDay = today >= first && today <= last ? today : first;
+    for (let d = first; d <= last; d = dateAdd(d, 1)) {
+      const o = by[d];
+      const b = document.createElement("button"); b.type = "button"; b.className = "cday";
+      if (d === today) b.classList.add("today");
+      if (d === calDay) b.classList.add("sel");
+      if (restName(d)) b.classList.add("rest");
+      b.setAttribute("aria-pressed", String(d === calDay));
+      const n = document.createElement("span"); n.className = "dn"; n.textContent = +d.slice(8);
+      b.append(n);
+      if (o && o.earned) { const s = document.createElement("span"); s.className = "pos"; s.textContent = "+" + compact(o.earned); b.append(s); }
+      if (o && o.spent) { const s = document.createElement("span"); s.className = "neg"; s.textContent = "−" + compact(o.spent); b.append(s); }
+      b.setAttribute("aria-label", dayLabel(d) + (o ? ": הכנסת " + fmt(o.earned) + ", הוצאת " + fmt(o.spent) : ": אין תנועות"));
+      b.addEventListener("click", () => { calDay = d; renderCal(); });
+      grid.append(b);
+    }
+
+    // The selected day
+    const o = by[calDay] || { spent: 0, earned: 0, tx: [], shifts: [], inc: [] };
+    const dt = new Date(calDay.slice(0, 4), +calDay.slice(5, 7) - 1, +calDay.slice(8));
+    $("calDayH").textContent = dt.toLocaleDateString("he-IL", { weekday: "long", day: "numeric", month: "long" }) + (restName(calDay) ? " · " + restName(calDay) : "");
+    const box = $("calDayList"); box.innerHTML = "";
+    const names = catNames();
+    const line = (cls, label, sub, amount, onClick) => {
+      const row = document.createElement("div"); row.className = "tx";
+      const what = document.createElement(onClick ? "button" : "div"); what.className = "what";
+      if (onClick) { what.type = "button"; what.addEventListener("click", onClick); }
+      const t = document.createElement("b"); t.textContent = label;
+      const c = document.createElement("span"); c.textContent = sub;
+      what.append(t, c);
+      const a = document.createElement("span"); a.className = "amt " + cls; a.textContent = amount;
+      row.append(what, a);
+      box.append(row);
+    };
+    o.shifts.forEach((r) => line("pos", "משמרת \u2066" + r.start_time + "–" + r.end_time + "\u2069", (typeLabel(r) ? typeLabel(r) + " · " : "") + hrs(r._p.paidMin) + " שעות · נטו משוער", plus(netOf(r._p)), () => openShift(r)));
+    o.inc.forEach((r) => line("pos", r.note || r.kind || "הכנסה", r.kind || "הכנסה חד־פעמית", plus(r.amount), () => openIncome(r)));
+    o.tx.forEach((r) => line("neg", r.note || names[r.category] || "הוצאה", names[r.category] || "קטגוריה שנמחקה", minus(r.amount), () => openSheet(null, r)));
+    if (!o.shifts.length && !o.inc.length && !o.tx.length) {
+      const e = document.createElement("p"); e.className = "empty"; e.textContent = "לא נרשם כלום ביום הזה.";
+      box.append(e);
+    }
+    const dn = o.earned - o.spent;
+    const tot = $("calDayTotal");
+    tot.hidden = !(o.earned || o.spent);
+    tot.className = "verdict " + (dn >= 0 ? "good" : "bad");
+    tot.textContent = dn >= 0 ? "ביום הזה הרווחת " + fmt(dn) + " יותר ממה שהוצאת." : "ביום הזה הוצאת " + fmt(-dn) + " יותר ממה שהרווחת.";
+  }
+
+  // ---- Pages ----
+  let view = "main";
+  function setView(v, fromHash) {
+    view = ["shifts", "calendar"].includes(v) ? v : "main";
+    $("viewMain").hidden = view !== "main";
+    $("viewShifts").hidden = view !== "shifts";
+    $("viewCal").hidden = view !== "calendar";
+    document.querySelectorAll(".tabs a").forEach((a) => a.setAttribute("aria-current", String(a.dataset.view === view)));
+    $("fab").textContent = view === "shifts" ? "+ משמרת" : "+ הוצאה";
+    if (!fromHash) { const h = view === "main" ? "" : "#" + view; if (location.hash !== h) history.replaceState(null, "", location.pathname + h); }
+    if (view === "calendar") renderCal();
+    if (view === "shifts") renderShifts();
+    window.scrollTo(0, 0);
+  }
+  window.addEventListener("hashchange", () => setView(location.hash.slice(1), true));
+  document.querySelectorAll(".tabs a").forEach((a) => a.addEventListener("click", (e) => { e.preventDefault(); setView(a.dataset.view); }));
+
   async function ensureTx(m) {
-    if (tx[m] && shifts[m] && !(sb && user)) return;
-    try { await loadTx(m); await loadShifts(m); $("netNote").hidden = true; }
+    if (tx[m] && shifts[m] && incomes[m] && !(sb && user)) return;
+    try { await loadTx(m); await loadShifts(m); await INC.load(m); $("netNote").hidden = true; }
     catch (e) {
       const c = lsGet(cacheKey());
       if (!tx[m]) tx[m] = (c && c.tx && c.tx[m]) || [];
       if (!shifts[m]) shifts[m] = (c && c.shifts && c.shifts[m]) || [];
+      if (!incomes[m]) incomes[m] = (c && c.incomes && c.incomes[m]) || [];
       $("netNote").textContent = "אין חיבור לאינטרנט. מוצגים הנתונים האחרונים שנשמרו במכשיר הזה.";
       $("netNote").hidden = false;
     }
@@ -2050,6 +2431,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       user = null; enteredAs = null; store = null;
       Object.keys(tx).forEach((k) => delete tx[k]);
       Object.keys(shifts).forEach((k) => delete shifts[k]);
+      Object.keys(incomes).forEach((k) => delete incomes[k]);
       $("password").value = "";
       if (mode === "reset") setMode("login");
       show("auth");
@@ -2071,6 +2453,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       if (cached && cached.store) {
         if (cached.tx) Object.assign(tx, cached.tx);
         if (cached.shifts) Object.assign(shifts, cached.shifts);
+        if (cached.incomes) Object.assign(incomes, cached.incomes);
         start(cached.store, cached.version);
         $("netNote").textContent = "אין חיבור לאינטרנט. מוצגים הנתונים האחרונים שנשמרו במכשיר הזה.";
         $("netNote").hidden = false;
