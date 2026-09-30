@@ -290,6 +290,17 @@ dialog.sheet::backdrop { background: rgba(10, 20, 15, .45); }
 .chip input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 2px; }
 .sheet .err { background: var(--danger-soft); color: var(--danger); border-radius: 8px; padding: 8px 12px; font-size: 14px; font-weight: 600; }
 .sheet .foot { display: flex; gap: 8px; }
+.sheet textarea { font: inherit; font-size: 15px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); color: var(--fg); resize: vertical; }
+.sheet input[type=file] { font: inherit; font-size: 14px; }
+.implist { display: grid; gap: 6px; max-height: 34vh; overflow-y: auto; }
+.implist .improw { display: grid; grid-template-columns: 22px minmax(0, 1fr) auto; gap: 8px; align-items: center; padding: 6px 10px; border-radius: 8px; background: var(--bg); font-weight: 600; }
+.implist .improw input { width: 18px; height: 18px; accent-color: var(--accent); }
+.implist .improw small { display: block; color: var(--muted); font-weight: 500; font-size: 13px; }
+.implist .improw.dup { opacity: .65; }
+.implist .sum { font-weight: 700; padding: 2px 4px; }
+.pickdays .cday { min-height: 44px; cursor: pointer; }
+.pickdays .cday[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.pickdays .cday.has .dn::after { content: " •"; color: var(--spend); }
 .sheet .foot .primary { flex: 1; padding: 11px; font-size: 17px; }
 
 .snack {
@@ -554,6 +565,7 @@ dialog.sheet::backdrop { background: rgba(10, 20, 15, .45); }
         <span class="big2" id="shNet">₪0</span>
         <span class="line" id="shLine"></span>
       </div>
+      <div class="actions"><button class="btn" type="button" id="importShifts">ייבוא מהיר: מחילן או כמה ימים ביחד</button></div>
       <div class="shifts" id="shiftList"></div>
       <p class="hint">משמרת רגילה מסומנת באפור. משמרת מסוג מיוחד מסומנת בצבע של הסוג שלה.</p>
     </section>
@@ -647,6 +659,38 @@ dialog.sheet::backdrop { background: rgba(10, 20, 15, .45); }
     <div class="foot">
       <button class="btn primary" type="submit" id="shSave">שמירה</button>
       <button class="btn" type="button" id="shCancel">ביטול</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog class="sheet" id="importSheet" aria-labelledby="importH">
+  <form id="importForm" method="dialog" novalidate>
+    <div class="mode" role="group" aria-label="איך לייבא">
+      <button type="button" id="impModePaste" aria-pressed="true">הדבקה מחילן</button>
+      <button type="button" id="impModeDays" aria-pressed="false">כמה ימים ביחד</button>
+    </div>
+    <h2 id="importH">ייבוא משמרות</h2>
+    <div id="impPaste">
+      <p class="hint">בחילן נט (באתר, לא באפליקציה) פותחים את דוח הנוכחות של החודש, מסמנים את הטבלה עם העכבר, מעתיקים ומדביקים כאן. אם יש כפתור ייצוא לאקסל, אפשר גם להעלות את הקובץ. כל שורה עם תאריך ושתי שעות הופכת למשמרת.</p>
+      <label for="impText">הדבקה<textarea id="impText" rows="5" placeholder="01/09 ב׳ 08:00 16:30&#10;02/09 ג׳ 14:00 22:15"></textarea></label>
+      <label for="impFile">או קובץ (אקסל, CSV או טקסט)<input type="file" id="impFile" accept=".xlsx,.xls,.csv,.txt,text/plain,text/csv"></label>
+    </div>
+    <div id="impDaysBox" hidden>
+      <p class="hint">מסמנים את כל הימים שעבדת באותן שעות. נקודה מסמנת יום שכבר יש בו משמרת.</p>
+      <div class="calhead" aria-hidden="true"><span>א׳</span><span>ב׳</span><span>ג׳</span><span>ד׳</span><span>ה׳</span><span>ו׳</span><span>ש׳</span></div>
+      <div class="calgrid pickdays" id="impDays" role="group" aria-label="ימי עבודה"></div>
+      <div class="two">
+        <label for="impStart">כניסה<input type="time" id="impStart" value="09:00"></label>
+        <label for="impEnd">יציאה<input type="time" id="impEnd" value="17:00"></label>
+      </div>
+    </div>
+    <label for="impBreak">הפסקה שלא משולמת בכל משמרת (דקות)<input type="number" id="impBreak" min="0" max="600" step="5" inputmode="numeric" value="0"></label>
+    <fieldset class="chips" id="impKinds"><legend>סוג המשמרות</legend></fieldset>
+    <div class="implist" id="impList" aria-live="polite"></div>
+    <div class="err" id="impErr" role="alert" hidden></div>
+    <div class="foot">
+      <button class="btn primary" type="submit" id="impSave">הוספה</button>
+      <button class="btn" type="button" id="impCancel">ביטול</button>
     </div>
   </form>
 </dialog>
@@ -2050,6 +2094,205 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     const p = shiftPay(row, settings());
     snack((before ? "המשמרת עודכנה: " : "נרשמה משמרת: ") + hrs(p.paidMin) + " שעות, " + fmt(p.gross) + " ברוטו",
       () => { if (before) saveShift(before); else delShift(row.id); renderPay(); renderCal(); });
+  });
+
+
+  // ---- Quick import: paste a Hilan attendance report, a file, or pick many days with the same hours ----
+  let impMode = "paste", impRows = [], impPicked = new Set();
+  const XLSX_URL = "https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js";
+  // Finds the first date on a line (dd/mm, dd.mm.yy, dd-mm-yyyy or yyyy-mm-dd) and the first two clock times after it.
+  // Hilan rows list entry and exit first; later times on the row are totals, so they are ignored.
+  function parseShiftText(text, refMonth) {
+    const out = [], seen = new Set();
+    const [ry, rm] = refMonth.split("-").map(Number);
+    text.split(/\r?\n/).forEach((line) => {
+      const dm = line.match(/(\d{4})-(\d{1,2})-(\d{1,2})|(?:^|[^\d:.])(\d{1,2})[\/.\-](\d{1,2})(?:[\/.\-](\d{2,4}))?(?![\d:])/);
+      if (!dm) return;
+      let y, mo, d;
+      if (dm[1]) { y = +dm[1]; mo = +dm[2]; d = +dm[3]; }
+      else {
+        d = +dm[4]; mo = +dm[5];
+        if (dm[6]) y = dm[6].length === 2 ? 2000 + +dm[6] : +dm[6];
+        else { y = ry; if (mo - rm > 6) y--; else if (rm - mo > 6) y++; }
+      }
+      if (!(mo >= 1 && mo <= 12 && d >= 1 && d <= 31)) return;
+      const dt = new Date(y, mo - 1, d);
+      if (dt.getMonth() !== mo - 1) return;
+      const rest = line.slice(dm.index + dm[0].length);
+      const times = [...rest.matchAll(/(?:^|[^\d:])([01]?\d|2[0-3]):([0-5]\d)(?![\d])/g)].map((t) => pad(+t[1]) + ":" + t[2]);
+      if (times.length < 2 || times[0] === times[1]) return;
+      const date = y + "-" + pad(mo) + "-" + pad(d), key = date + " " + times[0];
+      if (seen.has(key)) return;
+      seen.add(key);
+      out.push({ work_date: date, start_time: times[0], end_time: times[1] });
+    });
+    return out.sort((a, b) => a.work_date.localeCompare(b.work_date) || a.start_time.localeCompare(b.start_time));
+  }
+  function loadXlsx() {
+    if (window.XLSX) return Promise.resolve(window.XLSX);
+    return new Promise((res, rej) => {
+      const sc = document.createElement("script"); sc.src = XLSX_URL;
+      sc.onload = () => (window.XLSX ? res(window.XLSX) : rej(new Error("xlsx")));
+      sc.onerror = () => rej(new Error("xlsx"));
+      document.head.append(sc);
+    });
+  }
+  // Excel cells become plain text: date serials as dd/mm/yyyy, time-of-day fractions as HH:MM.
+  // A number is only read as a date or time when its cell is formatted as one, so hour totals stay numbers.
+  function cellText(c, X) {
+    if (!c) return "";
+    if (c.t === "n" && X.SSF.is_date(c.z || "")) {
+      const d = X.SSF.parse_date_code(c.v), out = [];
+      if (c.v >= 1) out.push(pad(d.d) + "/" + pad(d.m) + "/" + d.y);
+      const min = Math.round((c.v % 1) * 1440) % 1440;
+      if (c.v % 1) out.push(pad(Math.floor(min / 60)) + ":" + pad(min % 60));
+      return out.join(" ");
+    }
+    return c.w != null ? String(c.w) : String(c.v == null ? "" : c.v);
+  }
+  async function readImportFile(f) {
+    if (/\.xlsx?$/i.test(f.name)) {
+      const X = await loadXlsx();
+      const wb = X.read(await f.arrayBuffer(), { type: "array", cellNF: true });
+      return wb.SheetNames.map((n) => {
+        const ws = wb.Sheets[n];
+        if (!ws["!ref"]) return "";
+        const r = X.utils.decode_range(ws["!ref"]), lines = [];
+        for (let y = r.s.r; y <= r.e.r; y++) {
+          const cells = [];
+          for (let x = r.s.c; x <= r.e.c; x++) cells.push(cellText(ws[X.utils.encode_cell({ r: y, c: x })], X));
+          lines.push(cells.join(" "));
+        }
+        return lines.join("\n");
+      }).join("\n");
+    }
+    return (await f.text()).replace(/[,;\t]/g, " ");
+  }
+  function impKind() {
+    const k = (document.querySelector('input[name="impKind"]:checked') || {}).value || "";
+    const t = shiftTypes().find((x) => x.id === k);
+    return { kind: t ? k : "", kind_rate: t ? +t.rate || 100 : 100 };
+  }
+  function impCandidates() {
+    if (impMode === "paste") return parseShiftText($("impText").value, month);
+    const a = $("impStart").value, b = $("impEnd").value;
+    if (!/^\d\d:\d\d$/.test(a) || !/^\d\d:\d\d$/.test(b) || a === b) return [];
+    return [...impPicked].sort().map((d) => ({ work_date: d, start_time: a, end_time: b }));
+  }
+  function renderImport() {
+    const br = Math.max(0, Math.min(600, Math.round(+$("impBreak").value || 0)));
+    const kind = impKind(), wage = +settings().wage;
+    const known = (d) => Object.values(shifts).some((l) => l.some((r) => r.work_date === d.work_date && r.start_time === d.start_time));
+    const prev = new Map(impRows.map((r) => [r.work_date + r.start_time, r.on]));
+    impRows = impCandidates().map((c) => {
+      const row = { ...c, break_min: br, wage, ...kind, note: "" };
+      const dup = known(c), k = c.work_date + c.start_time;
+      return { row, dup, on: prev.has(k) ? prev.get(k) : !dup, pay: shiftPay(row, settings()) };
+    });
+    const box = $("impList"); box.innerHTML = "";
+    impRows.forEach((r, i) => {
+      const lab = document.createElement("label"); lab.className = "improw" + (r.dup ? " dup" : "");
+      const cb = document.createElement("input"); cb.type = "checkbox"; cb.checked = r.on; cb.id = "imp-" + i;
+      cb.addEventListener("change", () => { r.on = cb.checked; impFoot(); });
+      const t = document.createElement("span");
+      t.textContent = dayLabel(r.row.work_date);
+      const sm = document.createElement("small");
+      sm.textContent = "\u2066" + r.row.start_time + "–" + r.row.end_time + "\u2069 · " + hrs(r.pay.paidMin) + " שעות" + (r.dup ? " · כבר רשומה" : "");
+      t.append(sm);
+      const g = document.createElement("span"); g.textContent = fmt(r.pay.gross);
+      lab.append(cb, t, g); box.append(lab);
+    });
+    if (!impRows.length) {
+      const e = document.createElement("p"); e.className = "empty";
+      e.textContent = impMode === "paste"
+        ? ($("impText").value.trim() ? "לא מצאתי שורות עם תאריך ושתי שעות. בדוק שהעתקת את הטבלה עם העמודות של הכניסה והיציאה." : "עוד לא הודבק כלום.")
+        : "סמן לפחות יום אחד.";
+      box.append(e);
+    }
+    impFoot();
+  }
+  function impFoot() {
+    const on = impRows.filter((r) => r.on);
+    const gross = on.reduce((s, r) => s + r.pay.gross, 0);
+    $("impSave").textContent = on.length ? "הוספת " + on.length + " משמרות · " + fmt(gross) + " ברוטו" : "הוספה";
+    $("impSave").disabled = !on.length;
+  }
+  function renderImpDays() {
+    const box = $("impDays"); box.innerHTML = "";
+    const first = periodStart(month), n = periodDays(month);
+    const [y, mo, d] = first.split("-").map(Number);
+    for (let i = 0; i < new Date(y, mo - 1, d).getDay(); i++) { const b = document.createElement("span"); b.className = "cday blank"; box.append(b); }
+    const has = new Set((shifts[month] || []).map((r) => r.work_date));
+    for (let i = 0; i < n; i++) {
+      const ds = dateAdd(first, i);
+      const b = document.createElement("button"); b.type = "button";
+      b.className = "cday" + (has.has(ds) ? " has" : "") + (restName(ds) ? " rest" : "");
+      b.setAttribute("aria-pressed", String(impPicked.has(ds)));
+      b.setAttribute("aria-label", dayLabel(ds) + (has.has(ds) ? ", יש כבר משמרת" : ""));
+      const dn = document.createElement("span"); dn.className = "dn"; dn.textContent = +ds.slice(8);
+      b.append(dn);
+      b.addEventListener("click", () => {
+        if (impPicked.has(ds)) impPicked.delete(ds); else impPicked.add(ds);
+        b.setAttribute("aria-pressed", String(impPicked.has(ds)));
+        renderImport();
+      });
+      box.append(b);
+    }
+  }
+  function setImpMode(m) {
+    impMode = m;
+    $("impModePaste").setAttribute("aria-pressed", String(m === "paste"));
+    $("impModeDays").setAttribute("aria-pressed", String(m === "days"));
+    $("impPaste").hidden = m !== "paste";
+    $("impDaysBox").hidden = m !== "days";
+    $("importH").textContent = m === "paste" ? "ייבוא מחילן" : "כמה משמרות באותן שעות";
+    if (m === "days") renderImpDays();
+    renderImport();
+  }
+  function openImport() {
+    if (!(+settings().wage > 0)) { $("wage").focus(); snack("קודם תרשום כמה אתה מרוויח לשעה."); return; }
+    impRows = []; impPicked = new Set(); $("impText").value = ""; $("impFile").value = ""; $("impErr").hidden = true;
+    const last = (shifts[month] || [])[0];
+    if (last) { $("impStart").value = last.start_time; $("impEnd").value = last.end_time; $("impBreak").value = last.break_min || 0; }
+    const box = $("impKinds");
+    box.querySelectorAll(".chip").forEach((x) => x.remove());
+    [{ id: "", name: "רגילה", color: "" }].concat(shiftTypes()).forEach((t, i) => {
+      const lab = document.createElement("label"); lab.className = "chip" + (t.color ? " c-" + t.color : "");
+      const inp = document.createElement("input"); inp.type = "radio"; inp.name = "impKind"; inp.value = t.id; inp.id = "impKind-" + i; inp.checked = !t.id;
+      inp.addEventListener("change", renderImport);
+      const sp = document.createElement("span"); sp.textContent = (t.name || "סוג בלי שם") + (t.id ? " " + t.rate + "%" : "");
+      lab.append(inp, sp); box.append(lab);
+    });
+    setImpMode("paste");
+    const dlg = $("importSheet");
+    if (dlg.showModal) dlg.showModal(); else dlg.setAttribute("open", "");
+  }
+  function closeImport() { const d = $("importSheet"); if (d.close) d.close(); else d.removeAttribute("open"); }
+  $("importShifts").addEventListener("click", openImport);
+  $("impCancel").addEventListener("click", closeImport);
+  $("impModePaste").addEventListener("click", () => setImpMode("paste"));
+  $("impModeDays").addEventListener("click", () => setImpMode("days"));
+  ["impText", "impStart", "impEnd", "impBreak"].forEach((id) => $(id).addEventListener("input", renderImport));
+  $("impFile").addEventListener("change", async () => {
+    const f = $("impFile").files[0]; if (!f) return;
+    $("impErr").hidden = true;
+    try { $("impText").value = await readImportFile(f); }
+    catch (e) { $("impErr").textContent = "לא הצלחתי לקרוא את הקובץ. נסה להעתיק את הטבלה ולהדביק אותה."; $("impErr").hidden = false; }
+    renderImport();
+  });
+  $("importForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const on = impRows.filter((r) => r.on);
+    if (!on.length) return;
+    const now = Date.now();
+    const rows = on.map((r, i) => ({ id: uid(), ...r.row, created_at: new Date(now + i).toISOString() }));
+    rows.forEach(saveShift);
+    closeImport();
+    const gross = on.reduce((s, r) => s + r.pay.gross, 0);
+    const m = periodOf(rows[rows.length - 1].work_date);
+    if (m !== month) goMonth(m); else { renderPay(); renderCal(); }
+    snack("נוספו " + rows.length + " משמרות, " + fmt(gross) + " ברוטו. עכשיו אין תירוץ לא לדעת כמה הרווחת.",
+      () => { rows.forEach((r) => delShift(r.id)); renderPay(); renderCal(); });
   });
 
   // ---- Pay settings ----
