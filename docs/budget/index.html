@@ -429,7 +429,7 @@ dialog.sheet::backdrop { background: rgba(10, 20, 15, .45); }
       <section class="panel pay" aria-labelledby="payH">
         <h2 id="payH">המשכורת שלי <button class="btn primary" type="button" id="addShift">+ משמרת</button></h2>
         <div class="paybody" id="payBody">
-          <span class="lbl" id="payLbl">המשכורת המשוערת עד עכשיו (נטו)</span>
+          <span class="lbl" id="payLbl">המשכורת עד עכשיו (ברוטו)</span>
           <span class="big2" id="payNet">₪0</span>
           <span class="line" id="payLine"></span>
           <div class="verdict" id="payVerdict" role="status" hidden></div>
@@ -563,7 +563,7 @@ dialog.sheet::backdrop { background: rgba(10, 20, 15, .45); }
     <section class="panel pay" aria-labelledby="shTitle">
       <h2><span id="shTitle">המשמרות</span> <button class="btn primary" type="button" id="addShift3">+ משמרת</button></h2>
       <div class="paybody">
-        <span class="lbl">משכורת משוערת עד עכשיו (נטו)</span>
+        <span class="lbl">משכורת עד עכשיו (ברוטו)</span>
         <span class="big2" id="shNet">₪0</span>
         <span class="line" id="shLine"></span>
       </div>
@@ -590,8 +590,8 @@ dialog.sheet::backdrop { background: rgba(10, 20, 15, .45); }
                 <option value="8.5">8.5 שעות ביום</option>
                 <option value="8">8 שעות ביום (שבוע עבודה של 6 ימים)</option>
               </select></label>
-            <label class="field" for="deduct">ניכויים משוערים באחוזים (מס, ביטוח לאומי, פנסיה)<input type="number" id="deduct" min="0" max="90" step="0.5" inputmode="decimal"></label>
-            <label class="field" for="travel">החזר נסיעות למשמרת<input type="number" id="travel" min="0" step="1" inputmode="decimal" placeholder="₪0"></label>
+            <label class="field" for="deduct" hidden>ניכויים משוערים באחוזים (מס, ביטוח לאומי, פנסיה)<input type="number" id="deduct" min="0" max="90" step="0.5" inputmode="decimal"></label>
+            <label class="field" for="travel" hidden>החזר נסיעות למשמרת<input type="number" id="travel" min="0" step="1" inputmode="decimal" placeholder="₪0"></label>
             <p class="hint">החישוב לפי חוק שעות עבודה ומנוחה: שעתיים נוספות ראשונות ב־125% ואחריהן 150%. במשמרת עם שעתיים לפחות בין 22:00 ל־06:00 השעות הנוספות מתחילות אחרי 7 שעות. שבת וחגים ב־150%, ושעות נוספות בהם ב־175% וב־200%. השבת והחג מתחילים 18 דקות לפני השקיעה ונגמרים 40 דקות אחריה, לפי שעון תל אביב.</p>
           </div>
         
@@ -1347,7 +1347,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   // ---- Work hours ----
   function wage() {
     const w = store.settings && +store.settings.wage;
-    if (w > 0) return w * (1 - deductRate());
+    if (w > 0) return w;
     const inc = plan().inc;
     return inc > 0 ? inc / 186 : 0;
   }
@@ -1910,9 +1910,10 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 
   // ---- Shifts: pay summary ----
   const settings = () => store.settings || {};
-  const deductRate = () => { const d = settings().deduct; return d === 0 || d > 0 ? Math.min(+d, 90) / 100 : 0.12; };
+  // Pay is shown gross only (the user's choice): no estimated deductions or travel refunds
+  const deductRate = () => 0;
   const hrs = (min) => (Math.round(min / 6) / 10).toLocaleString("he-IL");
-  const netOf = (p) => p.gross * (1 - deductRate()) + (+settings().travel || 0);
+  const netOf = (p) => p.gross;
   function payParts(p) {
     const out = [];
     const keys = Object.keys(p.mins).map(Number).sort((a, b) => a - b);
@@ -1938,7 +1939,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 
   function payLine(pp) {
     return pp.count
-      ? "ברוטו " + fmt(pp.gross) + " · " + pp.count + (pp.count === 1 ? " משמרת" : " משמרות") + " · " + hrs(pp.min) + " שעות" + (pp.plannedNet ? " · עוד " + fmt(pp.plannedNet) + " ממשמרות שכבר קבעת" : "")
+      ? pp.count + (pp.count === 1 ? " משמרת" : " משמרות") + " · " + hrs(pp.min) + " שעות" + (pp.plannedNet ? " · עוד " + fmt(pp.plannedNet) + " ממשמרות שכבר קבעת" : "")
       : (pp.plannedNet ? "עוד " + fmt(pp.plannedNet) + " ממשמרות שכבר קבעת" : "עוד אין משמרות החודש");
   }
   function renderPay() {
@@ -1949,7 +1950,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     const cur = thisMonth(), isCur = month === cur, isPast = month < cur;
     $("payBody").hidden = !w && !list.length;
     $("payEmpty").hidden = !$("payBody").hidden;
-    $("payLbl").textContent = isPast ? "המשכורת המשוערת על " + monthName(month) + " (נטו)" : "המשכורת המשוערת עד עכשיו (נטו)";
+    $("payLbl").textContent = isPast ? "המשכורת על " + monthName(month) + " (ברוטו)" : "המשכורת עד עכשיו (ברוטו)";
     $("payNet").textContent = fmt(pp.net);
     $("payLine").textContent = payLine(pp);
 
@@ -2086,7 +2087,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     const r = readShift();
     if (!r) { $("shPreview").textContent = ""; return; }
     const p = shiftPay(r, settings());
-    $("shPreview").textContent = hrs(p.paidMin) + " שעות · " + fmt(p.gross) + " ברוטו · בערך " + fmt(p.gross * (1 - deductRate())) + " נטו\n" + payParts(p);
+    $("shPreview").textContent = hrs(p.paidMin) + " שעות · " + fmt(p.gross) + " ברוטו\n" + payParts(p);
   }
   ["shDate", "shStart", "shEnd", "shBreak"].forEach((id) => $(id).addEventListener("input", previewShift));
   function closeShift() { const d = $("shiftSheet"); if (d.close) d.close(); else d.removeAttribute("open"); editingShift = null; }
@@ -2410,7 +2411,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     const net = inSum - outSum;
     $("calNet").textContent = (net >= 0 ? "+" : "−") + fmt(Math.abs(net));
     $("calNet").className = "n " + (net >= 0 ? "pos" : "neg");
-    $("calNote").textContent = "הכנסות: משמרות (נטו משוער) והכנסות חד־פעמיות. הוצאות: מה שרשמת, בלי הוצאות החובה של " + fmt(plan().exp) + ".";
+    $("calNote").textContent = "הכנסות: משמרות (ברוטו) והכנסות חד־פעמיות. הוצאות: מה שרשמת, בלי הוצאות החובה של " + fmt(plan().exp) + ".";
 
     const grid = $("calGrid"); grid.innerHTML = "";
     const first = periodStart(month), last = periodEnd(month);
@@ -2452,7 +2453,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       row.append(what, a);
       box.append(row);
     };
-    o.shifts.forEach((r) => line("pos", "משמרת \u2066" + r.start_time + "–" + r.end_time + "\u2069", (typeLabel(r) ? typeLabel(r) + " · " : "") + hrs(r._p.paidMin) + " שעות · נטו משוער", plus(netOf(r._p)), () => openShift(r)));
+    o.shifts.forEach((r) => line("pos", "משמרת \u2066" + r.start_time + "–" + r.end_time + "\u2069", (typeLabel(r) ? typeLabel(r) + " · " : "") + hrs(r._p.paidMin) + " שעות · ברוטו", plus(netOf(r._p)), () => openShift(r)));
     o.inc.forEach((r) => line("pos", r.note || r.kind || "הכנסה", r.kind || "הכנסה חד־פעמית", plus(r.amount), () => openIncome(r)));
     o.tx.forEach((r) => line("neg", r.note || names[r.category] || "הוצאה", names[r.category] || "קטגוריה שנמחקה", minus(r.amount), () => openSheet(null, r)));
     if (!o.shifts.length && !o.inc.length && !o.tx.length) {
