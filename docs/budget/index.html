@@ -123,7 +123,36 @@ button { font: inherit; cursor: pointer; border-radius: 8px; }
 .day { display: grid; gap: 2px; }
 .day .dh { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); font-weight: 600; border-bottom: 1px solid var(--line); padding-bottom: 4px; font-variant-numeric: tabular-nums; }
 .tx { display: grid; grid-template-columns: minmax(0, 1fr) auto 36px; gap: 8px; align-items: center; padding: 6px 0; }
-.tx .what { min-width: 0; }
+.tx .what, .wish .what { min-width: 0; }
+button.what { background: none; border: 0; padding: 4px 6px; margin-inline-start: -6px; text-align: start; color: inherit; border-radius: 8px; }
+button.what:hover { background: var(--bg); }
+.wish { display: grid; gap: 8px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.wish:last-child { border-bottom: 0; }
+.wish .what b { display: block; font-weight: 700; }
+.wish .what span { font-size: 13px; color: var(--muted); }
+.hours { margin: -8px 0 0; color: var(--spend); font-weight: 700; min-height: 1.4em; }
+.check { display: flex !important; align-items: center; gap: 10px; font-weight: 600; }
+.check input { width: 18px; height: 18px; accent-color: var(--accent); margin: 0; }
+.wishbtn { width: 100%; padding: 10px; border-style: dashed; }
+.field { display: grid; gap: 4px; font-weight: 600; }
+select { font: inherit; color: var(--fg); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; width: 100%; }
+select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.period { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.hist { overflow-x: auto; }
+.histsvg { width: 100%; height: auto; min-width: 320px; display: block; }
+.histsvg .grid { stroke: var(--line); stroke-width: 1; }
+.histsvg .axis { stroke: var(--muted); stroke-width: 1; }
+.histsvg .spent { fill: var(--accent); }
+.histsvg .over { fill: var(--danger); }
+.histsvg .cur .spent { fill: var(--spend); }
+.histsvg .budget { stroke: var(--fg); stroke-width: 2; stroke-dasharray: 5 3; }
+.histsvg text { fill: var(--muted); font-family: var(--font-body); font-size: 14px; text-anchor: middle; }
+.histsvg .val { fill: var(--fg); font-weight: 700; font-variant-numeric: tabular-nums; }
+.histsvg .val.bad { fill: var(--danger); }
+.histsvg .hit { fill: transparent; }
+.histsvg .hbar:hover .hit { fill: var(--line); fill-opacity: .35; }
+.histnote { margin: 0; font-size: 15px; }
+.histnote:empty { display: none; }
 .tx .what b { display: block; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .tx .what span { font-size: 13px; color: var(--muted); }
 .tx .amt { font-weight: 700; font-variant-numeric: tabular-nums; }
@@ -286,6 +315,7 @@ dialog.sheet::backdrop { background: rgba(10, 20, 15, .45); }
         <input type="month" id="month" aria-label="חודש">
         <button class="step" type="button" id="nextM" aria-label="החודש הבא">‹</button>
       </div>
+      <div class="period" id="periodLbl" hidden></div>
       <div class="saving" id="saving" role="status"></div>
     </div>
   </header>
@@ -316,7 +346,22 @@ dialog.sheet::backdrop { background: rgba(10, 20, 15, .45); }
 
       <section class="panel" aria-labelledby="logH">
         <h2 id="logH">ההוצאות של החודש</h2>
+        <p class="hint">לחצו על הוצאה כדי לתקן אותה.</p>
         <div class="log" id="txList"></div>
+      </section>
+
+      <section class="panel" aria-labelledby="wishH">
+        <h2 id="wishH">אולי אקנה</h2>
+        <div class="verdict good" id="wishSaved" hidden></div>
+        <div class="log" id="wishList"></div>
+      </section>
+
+      <section class="panel" aria-labelledby="histH">
+        <h2 id="histH">לאורך החודשים</h2>
+        <p class="hint">העמודה היא כמה הוצאת על בזבוזים, והקו הוא התקציב שתכננת.</p>
+        <div class="hist" id="histChart"></div>
+        <p class="histnote" id="histNote"></p>
+        <p class="histnote" id="histTop"></p>
       </section>
     </div>
 
@@ -391,6 +436,23 @@ dialog.sheet::backdrop { background: rgba(10, 20, 15, .45); }
           <div class="alloc" id="alloc"></div>
           <div class="actions"><button class="btn" type="button" id="addCat">+ הוספת קטגוריה</button></div>
         </section>
+
+        <section class="panel" aria-labelledby="recH">
+          <h2 id="recH">נרשמות לבד כל חודש <span class="sum" id="recSum">₪0</span></h2>
+          <div class="log" id="recList"></div>
+        </section>
+
+        <section class="panel" aria-labelledby="setH">
+          <h2 id="setH">הגדרות</h2>
+          <label class="field" for="startDay">החודש שלי מתחיל ב־<select id="startDay"></select></label>
+          <p class="hint">למשל ביום שהמשכורת נכנסת או שהאשראי יורד. ״כמה מותר היום״ והגרף יחושבו לפי זה.</p>
+          <label class="field" for="wage">כמה אתה מרוויח נטו לשעת עבודה?<input type="number" id="wage" min="0" step="1" inputmode="decimal"></label>
+          <p class="hint">בשביל להראות כל מחיר בשעות עבודה. אם תשאיר ריק, החישוב הוא ההכנסה החודשית חלקי 186 שעות.</p>
+          <div class="actions">
+            <button class="btn" type="button" id="expTx">ייצוא ההוצאות לאקסל</button>
+            <button class="btn" type="button" id="expPlan">ייצוא התוכנית לאקסל</button>
+          </div>
+        </section>
       </div>
     </details>
   </div>
@@ -402,14 +464,17 @@ dialog.sheet::backdrop { background: rgba(10, 20, 15, .45); }
   <form id="txForm" method="dialog" novalidate>
     <h2 id="sheetH">הוצאה חדשה</h2>
     <label for="txAmount">כמה?<input type="number" id="txAmount" class="amount-in" inputmode="decimal" min="0" step="0.01" placeholder="₪0"></label>
+    <p class="hours" id="txHours" aria-live="polite"></p>
     <fieldset class="chips" id="txCats"><legend>על מה?</legend></fieldset>
     <label for="txNote">פירוט (לא חובה)<input type="text" id="txNote" maxlength="200" placeholder="למשל: שווארמה עם חברים"></label>
     <label for="txDate">מתי?<input type="date" id="txDate"></label>
+    <label class="check" id="repeatRow" for="txRepeat"><input type="checkbox" id="txRepeat"> חוזר כל חודש (ייכנס לבד מעכשיו)</label>
     <div class="err" id="txErr" role="alert" hidden></div>
     <div class="foot">
       <button class="btn primary" type="submit" id="txSave">רישום</button>
       <button class="btn" type="button" id="txCancel">ביטול</button>
     </div>
+    <button class="btn wishbtn" type="button" id="txWish">אולי אקנה. אחליט בעוד 48 שעות</button>
   </form>
 </dialog>
 
@@ -490,7 +555,23 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   // ---- Dates ----
   const pad = (n) => String(n).padStart(2, "0");
   function todayStr() { const d = new Date(); return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()); }
-  const thisMonth = () => todayStr().slice(0, 7);
+  // A budget month ("2026-09") runs from the user's start day in that month to the day before it in the next
+  function startDay() { const v = store && store.settings && +store.settings.startDay; return v >= 1 && v <= 28 ? v : 1; }
+  function dateAdd(s, n) {
+    const [y, m, d] = s.split("-").map(Number);
+    const dt = new Date(y, m - 1, d + n);
+    return dt.getFullYear() + "-" + pad(dt.getMonth() + 1) + "-" + pad(dt.getDate());
+  }
+  function daysBetween(a, b) {
+    const t = (s) => { const [y, m, d] = s.split("-").map(Number); return Date.UTC(y, m - 1, d); };
+    return Math.round((t(b) - t(a)) / 864e5);
+  }
+  const periodStart = (m) => m + "-" + pad(startDay());
+  const periodEnd = (m) => dateAdd(periodStart(shiftMonth(m, 1)), -1);
+  const periodDays = (m) => daysBetween(periodStart(m), periodEnd(m)) + 1;
+  const periodOf = (s) => (+s.slice(8) >= startDay() ? s.slice(0, 7) : shiftMonth(s.slice(0, 7), -1));
+  const thisMonth = () => periodOf(todayStr());
+  const shortDate = (s) => +s.slice(8) + "." + +s.slice(5, 7);
   function shiftMonth(m, by) {
     let [y, mo] = m.split("-").map(Number);
     mo += by;
@@ -589,10 +670,10 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   // Expenses of month m from the server, with changes still waiting in the outbox applied on top
   async function loadTx(m) {
     if (!sb || !user) {
-      tx[m] = (store.tx || []).filter((r) => r.spent_on.slice(0, 7) === m);
+      tx[m] = sortTx((store.tx || []).filter((r) => periodOf(r.spent_on) === m));
       return;
     }
-    const start = m + "-01", end = m + "-" + pad(daysIn(m));
+    const start = periodStart(m), end = periodEnd(m);
     const { data: rows, error } = await sb.from("expenses")
       .select("id, spent_on, amount, category, note, created_at")
       .gte("spent_on", start).lte("spent_on", end)
@@ -600,7 +681,10 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     if (error) throw error;
     let list = rows.map((r) => ({ ...r, amount: +r.amount }));
     outbox().forEach((op) => {
-      if (op.op === "add" && op.row.spent_on.slice(0, 7) === m && !list.some((r) => r.id === op.row.id)) list.unshift({ ...op.row, pending: true });
+      if (op.op === "add") {
+        list = list.filter((r) => r.id !== op.row.id);
+        if (periodOf(op.row.spent_on) === m) list.unshift({ ...op.row, pending: true });
+      }
       if (op.op === "del") list = list.filter((r) => r.id !== op.id);
     });
     tx[m] = sortTx(list);
@@ -638,7 +722,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   }
 
   function addTx(row) {
-    const m = row.spent_on.slice(0, 7);
+    const m = periodOf(row.spent_on);
     if (!sb || !user) {
       store.tx = store.tx || [];
       store.tx.push(row);
@@ -647,6 +731,23 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       setOutbox(outbox().concat([{ op: "add", row }]));
     }
     if (tx[m]) tx[m] = sortTx(tx[m].concat([{ ...row, pending: !!sb }]));
+    cacheTx();
+    flushOutbox();
+  }
+  function updateTx(before, after) {
+    if (!sb || !user) {
+      store.tx = (store.tx || []).map((r) => (r.id === after.id ? after : r));
+      lsSet(LOCAL_KEY, store);
+    } else {
+      // An edit is an upsert of the same id; one still waiting to be sent is simply replaced
+      const list = outbox();
+      const i = list.findIndex((op) => op.op === "add" && op.row.id === after.id);
+      if (i >= 0) list[i] = { op: "add", row: after }; else list.push({ op: "add", row: after });
+      setOutbox(list);
+    }
+    Object.keys(tx).forEach((m) => { tx[m] = tx[m].filter((r) => r.id !== after.id); });
+    const m = periodOf(after.spent_on);
+    if (tx[m]) tx[m] = sortTx(tx[m].concat([{ ...after, pending: !!(sb && user) }]));
     cacheTx();
     flushOutbox();
   }
@@ -721,6 +822,8 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   function render() {
     const d = data();
     $("month").value = month;
+    $("periodLbl").hidden = startDay() === 1;
+    $("periodLbl").textContent = "מ־" + shortDate(periodStart(month)) + " עד " + shortDate(periodEnd(month));
     const inc = $("incRows"); inc.innerHTML = "";
     d.income.forEach((_, i) => inc.append(rowEl(d.income, i, "inc")));
     const exp = $("expRows"); exp.innerHTML = "";
@@ -731,11 +834,14 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     $("exampleNote").hidden = !d.example;
     computePlan();
     renderTracking();
+    renderWish();
+    renderRecurring();
+    renderSettings();
   }
 
   function computePlan() {
     const { d, inc, exp, remain, save, spend, catTotal } = plan();
-    const days = daysIn(month);
+    const days = periodDays(month);
     $("incSum").textContent = fmt(inc);
     $("expSum").textContent = fmt(exp);
     $("remain").textContent = signed(remain);
@@ -785,9 +891,9 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     const list = monthTx();
     const cur = thisMonth();
     const isCur = month === cur, isPast = month < cur;
-    const days = daysIn(month);
+    const days = periodDays(month);
     const today = todayStr();
-    const dayNum = isCur ? +today.slice(8) : isPast ? days : 0;
+    const dayNum = isCur ? daysBetween(periodStart(month), today) + 1 : isPast ? days : 0;
     const elapsed = isCur ? dayNum / days : isPast ? 1 : 0;
     const spent = list.reduce((s, r) => s + r.amount, 0);
     const spentToday = isCur ? list.filter((r) => r.spent_on === today).reduce((s, r) => s + r.amount, 0) : 0;
@@ -819,7 +925,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       if (spend <= 0) setV("bad", "אין לך כסף פנוי לבזבוזים החודש. כל שקל שתוציא יבוא מהחיסכון.");
       else if (spent > spend) setV("bad", "חרגת מתקציב הבזבוזים ב־" + fmt(spent - spend) + ". עד סוף החודש: אפס בזבוזים.");
       else if (left < 0) setV("bad", "חרגת היום ב־" + fmt(-left) + ". זה יורד מהתקציב של מחר.");
-      else if (runOut < days) setV("warn", "בקצב הזה הכסף נגמר ב־" + runOut + " ב" + monthName(month) + ". תאט עכשיו, לא מחר.");
+      else if (runOut < days) setV("warn", "בקצב הזה הכסף נגמר ב־" + shortDate(dateAdd(periodStart(month), runOut - 1)) + ". תאט עכשיו, לא מחר.");
       else if (overCat) setV("warn", overCat.name + " בחריגה של " + fmt(overCat.over) + ". הכסף הזה יוצא מקטגוריה אחרת, אז מעכשיו " + overCat.name + " סגורה עד סוף החודש.");
       else if (!list.length) setV("warn", "עוד לא רשמת אף הוצאה החודש. כל שקל שיוצא נרשם כאן, גם הקפה.");
       else setV("good", "אתה בתוך התקציב. זו לא סיבה להתפנק.");
@@ -884,13 +990,35 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     });
     if (!rows.length) { const e = document.createElement("p"); e.className = "empty"; e.textContent = "אין קטגוריות. הוסיפו אותן בתוכנית של החודש."; cl.append(e); }
     renderTx();
+    renderHist();
+  }
+
+  function catNames() {
+    // Names of every category ever used, the viewed month's names winning
+    const names = {};
+    Object.keys(store.months).sort().forEach((m) => (store.months[m].cats || []).forEach((c) => { if (c.name) names[c.id] = c.name; }));
+    data().cats.forEach((c) => { names[c.id] = c.name || "בלי שם"; });
+    return names;
+  }
+
+  // ---- Work hours ----
+  function wage() {
+    const w = store.settings && +store.settings.wage;
+    if (w > 0) return w;
+    const inc = plan().inc;
+    return inc > 0 ? inc / 186 : 0;
+  }
+  function hoursText(amount) {
+    const w = wage();
+    if (!(w > 0) || !(amount > 0)) return "";
+    const h = amount / w;
+    if (h < 1) return Math.max(1, Math.round(h * 60)) + " דקות עבודה";
+    return (Math.round(h * 10) / 10).toLocaleString("he-IL") + " שעות עבודה";
   }
 
   function renderTx() {
     if (!store) return;
-    const d = data();
-    const names = {};
-    d.cats.forEach((c) => { names[c.id] = c.name || "בלי שם"; });
+    const names = catNames();
     const box = $("txList"); box.innerHTML = "";
     const list = monthTx();
     if (!list.length) {
@@ -912,10 +1040,14 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       dh.append(a, b); day.append(dh);
       g.rows.forEach((r) => {
         const row = document.createElement("div"); row.className = "tx" + (r.pending ? " pending" : "");
-        const what = document.createElement("div"); what.className = "what";
+        const what = document.createElement("button"); what.type = "button"; what.className = "what";
         const t = document.createElement("b"); t.textContent = r.note || names[r.category] || "הוצאה";
-        const c = document.createElement("span"); c.textContent = (names[r.category] || "קטגוריה שנמחקה") + (r.pending ? " · ממתין לחיבור" : "");
+        const hrs = hoursText(r.amount);
+        const c = document.createElement("span");
+        c.textContent = (names[r.category] || "קטגוריה שנמחקה") + (hrs ? " · " + hrs : "") + (r.pending ? " · ממתין לחיבור" : "");
         what.append(t, c);
+        what.setAttribute("aria-label", "עריכת " + t.textContent + " " + fmt(r.amount));
+        what.addEventListener("click", () => openSheet(null, r));
         const amt = document.createElement("span"); amt.className = "amt"; amt.textContent = fmt(r.amount);
         const del = document.createElement("button"); del.type = "button"; del.className = "del"; del.textContent = "×";
         del.setAttribute("aria-label", "מחיקת " + t.textContent + " " + fmt(r.amount));
@@ -942,14 +1074,21 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     snackT = setTimeout(() => { $("snack").hidden = true; }, undo ? 6000 : 4000);
   }
 
-  // ---- Add expense sheet ----
+  // ---- Expense sheet: add, edit, or park in the "maybe" list ----
   let lastCat = null;
-  function openSheet(preset) {
+  let editing = null;
+  function openSheet(preset, edit) {
     const d = data();
     if (!d.cats.length) { snack("אין קטגוריות. הוסיפו קטגוריה בתוכנית של החודש."); $("planBox").open = true; return; }
+    editing = edit || null;
+    $("sheetH").textContent = edit ? "עריכת הוצאה" : "הוצאה חדשה";
+    $("txSave").textContent = edit ? "שמירה" : "רישום";
+    $("txWish").hidden = !!edit;
+    $("repeatRow").hidden = !!edit;
+    $("txRepeat").checked = false;
     const box = $("txCats");
     box.querySelectorAll(".chip").forEach((n) => n.remove());
-    const pick = preset || (d.cats.some((c) => c.id === lastCat) ? lastCat : d.cats[0].id);
+    const pick = edit ? edit.category : preset || (d.cats.some((c) => c.id === lastCat) ? lastCat : d.cats[0].id);
     d.cats.forEach((c, i) => {
       const lab = document.createElement("label"); lab.className = "chip";
       const inp = document.createElement("input"); inp.type = "radio"; inp.name = "txCat"; inp.value = c.id; inp.id = "txCat-" + i;
@@ -957,43 +1096,342 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       const sp = document.createElement("span"); sp.textContent = c.name || "בלי שם";
       lab.append(inp, sp); box.append(lab);
     });
-    $("txAmount").value = ""; $("txNote").value = "";
+    $("txAmount").value = edit ? edit.amount : ""; $("txNote").value = edit ? edit.note || "" : "";
     const cur = thisMonth();
-    $("txDate").value = month === cur ? todayStr() : month < cur ? month + "-" + pad(daysIn(month)) : month + "-01";
+    $("txDate").value = edit ? edit.spent_on : month === cur ? todayStr() : month < cur ? periodEnd(month) : periodStart(month);
     $("txErr").hidden = true;
+    showHours();
     const dlg = $("sheet");
     if (dlg.showModal) dlg.showModal(); else dlg.setAttribute("open", "");
     setTimeout(() => $("txAmount").focus(), 30);
   }
-  function closeSheet() { const dlg = $("sheet"); if (dlg.close) dlg.close(); else dlg.removeAttribute("open"); }
+  function showHours() {
+    const h = hoursText(parseFloat($("txAmount").value) || 0);
+    $("txHours").textContent = h ? "זה " + h + "." : "";
+  }
+  $("txAmount").addEventListener("input", showHours);
+  function closeSheet() { const dlg = $("sheet"); if (dlg.close) dlg.close(); else dlg.removeAttribute("open"); editing = null; }
   $("fab").addEventListener("click", () => openSheet());
   $("txCancel").addEventListener("click", closeSheet);
-  $("txForm").addEventListener("submit", (e) => {
-    e.preventDefault();
+
+  function readSheet() {
     const amount = Math.round((parseFloat($("txAmount").value) || 0) * 100) / 100;
     const picked = document.querySelector('input[name="txCat"]:checked');
     const date = $("txDate").value;
-    const err = (t) => { $("txErr").textContent = t; $("txErr").hidden = false; };
-    if (!(amount > 0)) { err("כמה זה עלה? רשמו סכום גדול מאפס."); $("txAmount").focus(); return; }
-    if (!picked) { err("בחרו קטגוריה."); return; }
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) { err("בחרו תאריך."); return; }
-    lastCat = picked.value;
-    const row = { id: uid(), spent_on: date, amount, category: picked.value, note: $("txNote").value.trim().slice(0, 200), created_at: new Date().toISOString() };
-    const m = date.slice(0, 7);
+    const err = (t) => { $("txErr").textContent = t; $("txErr").hidden = false; return null; };
+    if (!(amount > 0)) { $("txAmount").focus(); return err("כמה זה עלה? רשמו סכום גדול מאפס."); }
+    if (!picked) return err("בחרו קטגוריה.");
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return err("בחרו תאריך.");
+    return { amount, category: picked.value, spent_on: date, note: $("txNote").value.trim().slice(0, 200) };
+  }
+
+  function showPeriodOf(date) {
+    const m = periodOf(date);
+    if (m !== month) { month = m; draft = null; draftFor = null; ensureTx(m).then(render); }
+    else renderTracking();
+  }
+
+  $("txForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const v = readSheet();
+    if (!v) return;
+    lastCat = v.category;
+    if (editing) {
+      const before = { ...editing }; delete before.pending;
+      const after = { ...before, ...v };
+      updateTx(before, after);
+      closeSheet();
+      showPeriodOf(after.spent_on);
+      snack("ההוצאה עודכנה", () => { updateTx(after, before); showPeriodOf(before.spent_on); });
+      return;
+    }
+    const row = { id: uid(), ...v, created_at: new Date().toISOString() };
     // The expense counts toward that month's plan, so make sure the month exists
-    if (m === month) commit();
+    if (periodOf(row.spent_on) === month) commit();
+    if ($("txRepeat").checked) {
+      store.recurring = (store.recurring || []).concat([{ id: catId(), note: row.note, amount: row.amount, category: row.category, day: +row.spent_on.slice(8), last: periodOf(row.spent_on) }]);
+      persist();
+      renderRecurring();
+    }
     addTx(row);
     closeSheet();
-    if (m !== month) { month = m; ensureTx(m).then(render); }
-    else renderTracking();
-    const d = data();
-    const c = d.cats.find((x) => x.id === row.category);
+    showPeriodOf(row.spent_on);
+    const c = data().cats.find((x) => x.id === row.category);
     const spentCat = monthTx().filter((r) => r.category === row.category).reduce((s, r) => s + r.amount, 0);
     const over = c && spentCat > (+c.budget || 0);
     snack(over
       ? "נרשם. " + c.name + " בחריגה של " + fmt(spentCat - (+c.budget || 0)) + "."
-      : "נרשם: " + fmt(amount) + (c ? " על " + c.name : ""),
+      : "נרשם: " + fmt(row.amount) + (c ? " על " + c.name : ""),
       () => { delTx(row.id); renderTracking(); });
+  });
+
+  // ---- "Maybe I'll buy it": wait 48 hours before buying ----
+  const WAIT_MS = 48 * 3600 * 1000;
+  $("txWish").addEventListener("click", () => {
+    const v = readSheet();
+    if (!v) return;
+    const item = { id: catId(), note: v.note, amount: v.amount, category: v.category, addedAt: new Date().toISOString(), outcome: null };
+    store.wishlist = (store.wishlist || []).concat([item]);
+    persist();
+    closeSheet();
+    renderWish();
+    const when = new Date(Date.now() + WAIT_MS);
+    snack("נכנס לרשימת ״אולי אקנה״. תחליט ב־" + when.toLocaleDateString("he-IL", { weekday: "long" }) + " ב־" + when.toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" }) + ".");
+  });
+
+  function decideWish(item, outcome) {
+    item.outcome = outcome;
+    item.decidedAt = new Date().toISOString();
+    if (outcome === "bought") {
+      addTx({ id: uid(), spent_on: todayStr(), amount: item.amount, category: item.category, note: item.note, created_at: item.decidedAt });
+      if (periodOf(todayStr()) === month) commit();
+    }
+    persist();
+    renderWish();
+    renderTracking();
+    snack(outcome === "skipped"
+      ? "ויתרת. " + fmt(item.amount) + " נשארו אצלך, תעביר אותם לחיסכון לפני שהם נעלמים."
+      : "נרשם כהוצאה של " + fmt(item.amount) + ". לפחות חיכית 48 שעות.");
+  }
+
+  function renderWish() {
+    if (!store) return;
+    const names = catNames();
+    const list = (store.wishlist || []).filter((w) => !w.outcome);
+    const box = $("wishList"); box.innerHTML = "";
+    const cur = thisMonth();
+    const skipped = (store.wishlist || []).filter((w) => w.outcome === "skipped" && w.decidedAt && periodOf(w.decidedAt.slice(0, 10)) === cur);
+    const saved = skipped.reduce((s, w) => s + w.amount, 0);
+    $("wishSaved").hidden = !skipped.length;
+    $("wishSaved").textContent = "החודש ויתרת על " + (skipped.length === 1 ? "דבר אחד" : skipped.length + " דברים") + " בשווי " + fmt(saved) + ".";
+    if (!list.length) {
+      const e = document.createElement("p"); e.className = "empty";
+      e.textContent = "בא לך לקנות משהו? לחצו ״+ הוצאה״ ובחרו ״אולי אקנה״ במקום לקנות עכשיו. אחרי 48 שעות תחליט אם זה באמת שווה את זה.";
+      box.append(e);
+      return;
+    }
+    list.forEach((w) => {
+      const left = new Date(w.addedAt).getTime() + WAIT_MS - Date.now();
+      const row = document.createElement("div"); row.className = "wish";
+      const what = document.createElement("div"); what.className = "what";
+      const t = document.createElement("b"); t.textContent = (w.note || names[w.category] || "משהו") + " · " + fmt(w.amount);
+      const s = document.createElement("span");
+      const hrs = hoursText(w.amount);
+      s.textContent = (left > 0 ? "אפשר להחליט בעוד " + Math.ceil(left / 3600000) + " שעות" : "עברו 48 שעות. עדיין רוצה?") + (hrs ? " · " + hrs : "");
+      what.append(t, s);
+      const acts = document.createElement("div"); acts.className = "actions";
+      const skip = document.createElement("button"); skip.type = "button"; skip.className = "btn primary"; skip.textContent = "ויתרתי";
+      skip.addEventListener("click", () => decideWish(w, "skipped"));
+      acts.append(skip);
+      if (left <= 0) {
+        const buy = document.createElement("button"); buy.type = "button"; buy.className = "btn"; buy.textContent = "קניתי";
+        buy.addEventListener("click", () => decideWish(w, "bought"));
+        acts.append(buy);
+      }
+      row.append(what, acts);
+      box.append(row);
+    });
+  }
+
+  // ---- Recurring expenses: logged automatically once their day comes ----
+  // A stable id per item and month, so two devices logging it at once end up with one row
+  function stableId(s) {
+    let out = "";
+    for (let k = 0; k < 4; k++) {
+      let h = (2166136261 ^ (k * 16777619)) >>> 0;
+      for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); }
+      out += (h >>> 0).toString(16).padStart(8, "0");
+    }
+    return out.slice(0, 8) + "-" + out.slice(8, 12) + "-4" + out.slice(13, 16) + "-a" + out.slice(17, 20) + "-" + out.slice(20, 32);
+  }
+  function runRecurring() {
+    const cur = thisMonth(), today = todayStr();
+    let changed = false;
+    (store.recurring || []).forEach((r) => {
+      if (r.last && r.last >= cur) return;
+      // The date in this budget month whose day of month matches (the last day when the month is shorter)
+      let date = null;
+      for (let s = periodStart(cur); s <= periodEnd(cur); s = dateAdd(s, 1)) {
+        const [y, mo] = s.split("-").map(Number);
+        if (+s.slice(8) === Math.min(r.day, new Date(y, mo, 0).getDate())) { date = s; break; }
+      }
+      if (!date || date > today) return;
+      addTx({ id: stableId(r.id + "|" + cur), spent_on: date, amount: r.amount, category: r.category, note: r.note, created_at: new Date().toISOString() });
+      r.last = cur;
+      changed = true;
+    });
+    if (changed) { if (month === cur) commit(); persist(); }
+  }
+  function renderRecurring() {
+    if (!store) return;
+    const names = catNames();
+    const box = $("recList"); box.innerHTML = "";
+    const list = store.recurring || [];
+    $("recSum").textContent = fmt(list.reduce((s, r) => s + r.amount, 0));
+    if (!list.length) {
+      const e = document.createElement("p"); e.className = "empty";
+      e.textContent = "מנוי או תשלום שחוזר כל חודש? סמנו ״חוזר כל חודש״ כשאתם רושמים אותו, והוא יירשם לבד מעכשיו.";
+      box.append(e);
+      return;
+    }
+    list.forEach((r, i) => {
+      const row = document.createElement("div"); row.className = "tx";
+      const what = document.createElement("div"); what.className = "what";
+      const t = document.createElement("b"); t.textContent = r.note || names[r.category] || "הוצאה קבועה";
+      const c = document.createElement("span"); c.textContent = (names[r.category] || "קטגוריה שנמחקה") + " · כל " + r.day + " בחודש";
+      what.append(t, c);
+      const amt = document.createElement("span"); amt.className = "amt"; amt.textContent = fmt(r.amount);
+      const del = document.createElement("button"); del.type = "button"; del.className = "del"; del.textContent = "×";
+      del.setAttribute("aria-label", "הפסקת הרישום האוטומטי של " + t.textContent);
+      del.addEventListener("click", () => {
+        store.recurring.splice(i, 1); persist(); renderRecurring();
+        snack("הרישום האוטומטי של " + t.textContent + " הופסק. מה שכבר נרשם נשאר.", () => { store.recurring.splice(i, 0, r); persist(); renderRecurring(); });
+      });
+      row.append(what, amt, del);
+      box.append(row);
+    });
+  }
+
+  // ---- The last six months ----
+  const hist = {};   // month -> total spent, from one query per view
+  async function loadHist() {
+    const months = [];
+    for (let i = 5; i >= 0; i--) months.push(shiftMonth(month, -i));
+    const need = months.filter((m) => !tx[m]);
+    if (!need.length) return months;
+    let rows = [];
+    if (!sb || !user) rows = store.tx || [];
+    else {
+      const { data: r, error } = await sb.from("expenses").select("spent_on, amount")
+        .gte("spent_on", periodStart(months[0])).lte("spent_on", periodEnd(months[5]));
+      if (error) return months;
+      rows = r;
+    }
+    need.forEach((m) => { hist[m] = 0; });
+    rows.forEach((r) => { const m = periodOf(r.spent_on); if (m in hist && need.includes(m)) hist[m] += +r.amount; });
+    return months;
+  }
+  function spendOf(d) {
+    if (!d) return null;
+    const inc = d.income.reduce((s, x) => s + (+x.amount || 0), 0);
+    const exp = d.expenses.reduce((s, x) => s + (+x.amount || 0), 0);
+    const pos = Math.max(inc - exp, 0);
+    return pos - Math.round(pos * d.pct / 100);
+  }
+  function renderHist() {
+    if (!store) return;
+    const months = [];
+    for (let i = 5; i >= 0; i--) months.push(shiftMonth(month, -i));
+    const rows = months.map((m) => ({
+      m,
+      spent: tx[m] ? tx[m].reduce((s, r) => s + r.amount, 0) : hist[m] || 0,
+      budget: m === month ? plan().spend : spendOf(store.months[m])
+    }));
+    const W = 600, H = 230, top = 28, base = 190, slot = W / rows.length, bw = Math.min(56, slot * 0.5);
+    const max = Math.max(1, ...rows.map((r) => Math.max(r.spent, r.budget || 0)));
+    const y = (v) => base - (v / max) * (base - top);
+    const ns = "http://www.w3.org/2000/svg";
+    const el = (tag, attrs, text) => { const n = document.createElementNS(ns, tag); Object.entries(attrs).forEach(([k, v]) => n.setAttribute(k, v)); if (text != null) n.textContent = text; return n; };
+    const svg = el("svg", { viewBox: "0 0 " + W + " " + H, role: "img", class: "histsvg" });
+    svg.setAttribute("aria-label", rows.map((r) => monthName(r.m) + ": " + fmt(r.spent) + (r.budget != null ? " מתוך " + fmt(r.budget) : "")).join(". "));
+    [0.5, 1].forEach((f) => svg.append(el("line", { x1: 0, x2: W, y1: y(max * f), y2: y(max * f), class: "grid" })));
+    svg.append(el("line", { x1: 0, x2: W, y1: base, y2: base, class: "axis" }));
+    // RTL: the oldest month on the right, the current one on the left
+    rows.forEach((r, i) => {
+      const cx = W - slot * (i + 0.5);
+      const g = el("g", { class: "hbar" + (r.m === month ? " cur" : "") });
+      const over = r.budget != null && r.spent > r.budget;
+      const h = Math.max(base - y(r.spent), r.spent > 0 ? 2 : 0);
+      if (h > 0) g.append(el("path", { d: "M" + (cx - bw / 2) + "," + base + "V" + (base - h + 4) + "q0,-4 4,-4H" + (cx + bw / 2 - 4) + "q4,0 4,4V" + base + "Z", class: over ? "over" : "spent" }));
+      if (r.budget != null) g.append(el("line", { x1: cx - bw / 2 - 8, x2: cx + bw / 2 + 8, y1: y(r.budget), y2: y(r.budget), class: "budget" }));
+      g.append(el("text", { x: cx, y: Math.max(y(r.spent) - 8, 16), class: "val" + (over ? " bad" : "") }, r.spent ? fmt(r.spent) : ""));
+      g.append(el("text", { x: cx, y: base + 22, class: "lbl" }, monthName(r.m)));
+      g.append(el("rect", { x: cx - slot / 2, y: 0, width: slot, height: H, class: "hit" }));
+      g.append(el("title", {}, monthName(r.m) + ": הוצאת " + fmt(r.spent) + (r.budget != null ? " מתוך " + fmt(r.budget) + (over ? ", חריגה של " + fmt(r.spent - r.budget) : "") : "")));
+      svg.append(g);
+    });
+    const box = $("histChart"); box.innerHTML = ""; box.append(svg);
+
+    // The costliest categories of the viewed month
+    const by = {};
+    monthTx().forEach((r) => { by[r.category] = (by[r.category] || 0) + r.amount; });
+    const names = catNames();
+    const topCats = Object.entries(by).sort((a, b) => b[1] - a[1]).slice(0, 3);
+    $("histTop").textContent = topCats.length
+      ? "הכי יקר ב" + monthName(month) + ": " + topCats.map(([id, v]) => (names[id] || "קטגוריה שנמחקה") + " " + fmt(v)).join(", ") + "."
+      : "";
+    const withBudget = rows.filter((r) => r.budget != null && (r.m < thisMonth()));
+    const overCount = withBudget.filter((r) => r.spent > r.budget).length;
+    $("histNote").textContent = withBudget.length
+      ? (overCount ? "חרגת מהתקציב ב־" + overCount + " מתוך " + withBudget.length + " החודשים האחרונים." : "לא חרגת מהתקציב באף אחד מ־" + withBudget.length + " החודשים האחרונים.")
+      : "";
+  }
+
+  // ---- Export to Excel (CSV with a byte-order mark so Excel reads Hebrew) ----
+  function csv(rows) {
+    return "﻿" + rows.map((r) => r.map((v) => {
+      const s = String(v == null ? "" : v);
+      return /[",\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+    }).join(",")).join("\r\n");
+  }
+  function download(name, text) {
+    const url = URL.createObjectURL(new Blob([text], { type: "text/csv;charset=utf-8" }));
+    const a = document.createElement("a"); a.href = url; a.download = name;
+    document.body.append(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 2000);
+  }
+  $("expTx").addEventListener("click", async () => {
+    let rows;
+    if (!sb || !user) rows = store.tx || [];
+    else {
+      $("expTx").disabled = true;
+      const { data: r, error } = await sb.from("expenses").select("spent_on, amount, category, note").order("spent_on", { ascending: true }).limit(100000);
+      $("expTx").disabled = false;
+      if (error) { snack("הייצוא נכשל. בדקו את החיבור לאינטרנט."); return; }
+      rows = r;
+    }
+    const names = catNames();
+    download("הוצאות-" + todayStr() + ".csv", csv([["תאריך", "חודש תקציב", "קטגוריה", "פירוט", "סכום"]].concat(
+      rows.map((r) => [r.spent_on, periodOf(r.spent_on), names[r.category] || "קטגוריה שנמחקה", r.note || "", +r.amount]))));
+  });
+  $("expPlan").addEventListener("click", () => {
+    const out = [["חודש", "סוג", "שם", "סכום"]];
+    Object.keys(store.months).sort().forEach((m) => {
+      const d = store.months[m];
+      if (d.example) return;
+      d.income.forEach((x) => out.push([m, "הכנסה", x.name, +x.amount || 0]));
+      d.expenses.forEach((x) => out.push([m, "הוצאת חובה", x.name, +x.amount || 0]));
+      (d.cats || []).forEach((c) => out.push([m, "תקציב קטגוריה", c.name, +c.budget || 0]));
+      out.push([m, "אחוז חיסכון מהיתרה", "", d.pct]);
+    });
+    download("תוכנית-חודשית-" + todayStr() + ".csv", csv(out));
+  });
+
+  // ---- Settings ----
+  (function () {
+    const sel = $("startDay");
+    for (let i = 1; i <= 28; i++) { const o = document.createElement("option"); o.value = i; o.textContent = i === 1 ? "1 בחודש (חודש רגיל)" : i + " בחודש"; sel.append(o); }
+  })();
+  function renderSettings() {
+    $("startDay").value = startDay();
+    const w = store.settings && +store.settings.wage;
+    if (document.activeElement !== $("wage")) $("wage").value = w > 0 ? w : "";
+    const auto = plan().inc / 186;
+    $("wage").placeholder = auto > 0 ? "אוטומטי: " + fmt(auto) : "₪";
+  }
+  $("startDay").addEventListener("change", () => {
+    store.settings = { ...(store.settings || {}), startDay: +$("startDay").value };
+    persist();
+    Object.keys(tx).forEach((k) => delete tx[k]);
+    Object.keys(hist).forEach((k) => delete hist[k]);
+    goMonth(thisMonth());
+    snack("מעכשיו החודש שלך מתחיל ב־" + startDay() + " לחודש.");
+  });
+  $("wage").addEventListener("input", () => {
+    const w = parseFloat($("wage").value);
+    store.settings = { ...(store.settings || {}), wage: w > 0 ? w : 0 };
+    persist();
+    renderTx(); renderWish();
   });
 
   async function ensureTx(m) {
@@ -1012,7 +1450,16 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     if (!m) return;
     month = m; draft = null; draftFor = null;
     render();
-    ensureTx(m).then(() => { if (month === m) renderTracking(); });
+    ensureTx(m).then(loadHist).then(() => { if (month === m) renderTracking(); });
+  }
+
+  // Once the month's expenses are in: log due recurring items, then draw everything
+  async function afterLoad() {
+    runRecurring();
+    syncPlanOpen();
+    render();
+    await loadHist();
+    renderHist();
   }
   $("month").addEventListener("change", (e) => goMonth(e.target.value));
   $("prevM").addEventListener("click", () => goMonth(shiftMonth(month, -1)));
@@ -1049,7 +1496,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 
   if (!SUPABASE_URL || !SUPABASE_KEY || !window.supabase) {
     start(lsGet(LOCAL_KEY));
-    ensureTx(month).then(() => { syncPlanOpen(); renderTracking(); });
+    ensureTx(month).then(afterLoad);
     return;
   }
 
@@ -1193,6 +1640,9 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     await flushOutbox();
     if (!pendingSave) { try { await pullPlan(false); } catch (e) {} }
     await ensureTx(month);
+    Object.keys(hist).forEach((k) => delete hist[k]);
+    runRecurring();
+    await loadHist();
     renderTracking();
   }
   document.addEventListener("visibilitychange", () => {
@@ -1246,15 +1696,14 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
         start(local, null);
         persist();
         lsDel(LOCAL_KEY);
-        await ensureTx(month); syncPlanOpen(); renderTracking();
+        await ensureTx(month); await afterLoad();
         flushOutbox();
         return;
       }
     }
     start(data && data.data, data ? data.version : null);
     await ensureTx(month);
-    syncPlanOpen();
-    renderTracking();
+    await afterLoad();
     flushOutbox();
   }
   $("retryBtn").addEventListener("click", async () => { enter((await sb.auth.getSession()).data.session); });

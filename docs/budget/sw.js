@@ -2,7 +2,7 @@
    Page files: network first, cached copy when offline, so a deploy shows up on the next visit.
    Supabase calls are never cached; the page keeps its own copy of the user's data. */
 'use strict';
-var CACHE = 'budget-v2';
+var CACHE = 'budget-v3';
 var SHELL = ['./', 'index.html', 'manifest.webmanifest', 'icon-192.png', 'icon-180.png',
   'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.js'];
 
