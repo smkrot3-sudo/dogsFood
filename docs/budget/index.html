@@ -1037,13 +1037,19 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
         const res = op.op === "add"
           ? await sb.from(table).upsert({ ...op.row, user_id: user.id })
           : await sb.from(table).delete().eq("id", op.id);
+        // Re-read the outbox: saves made while this request was in flight are queued behind it and must survive
+        const done = () => {
+          const key = JSON.stringify(op);
+          list = outbox();
+          const i = list.findIndex((x) => JSON.stringify(x) === key);
+          if (i >= 0) { list.splice(i, 1); setOutbox(list); }
+        };
         if (res.error) {
           // A row the server refuses (bad data) is dropped so it can't block everything behind it
-          if (res.error.code && /^(22|23)/.test(res.error.code)) { list.shift(); setOutbox(list); continue; }
+          if (res.error.code && /^(22|23)/.test(res.error.code)) { done(); continue; }
           break;
         }
-        list.shift();
-        setOutbox(list);
+        done();
         if (op.op === "add") [tx, shifts, incomes].forEach((c) => Object.values(c).forEach((l) => l.forEach((r) => { if (r.id === op.row.id) r.pending = false; })));
       }
     } catch (e) { /* offline: try again later */ }
