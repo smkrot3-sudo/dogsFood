@@ -11,6 +11,8 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.view.View;
+import android.view.WindowInsets;
+import android.view.WindowInsetsController;
 import android.webkit.JavascriptInterface;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
@@ -39,6 +41,7 @@ public class MainActivity extends Activity {
         web = new WebView(this);
         web.setBackgroundColor(Color.TRANSPARENT);
         setContentView(web);
+        hideNavigation();
 
         WebSettings s = web.getSettings();
         s.setJavaScriptEnabled(true);
@@ -98,6 +101,27 @@ public class MainActivity extends Activity {
         String query = u.getEncodedQuery(), fragment = u.getEncodedFragment();
         web.loadUrl(HOME + (query != null ? "?" + query : "") + (fragment != null ? "#" + fragment : ""));
         return true;
+    }
+
+    /** Hides the phone's bottom navigation buttons; a swipe up from the bottom brings them back for a moment. */
+    @SuppressWarnings("deprecation")
+    private void hideNavigation() {
+        if (Build.VERSION.SDK_INT >= 30) {
+            WindowInsetsController c = getWindow().getInsetsController();
+            if (c != null) {
+                c.hide(WindowInsets.Type.navigationBars());
+                c.setSystemBarsBehavior(WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
+            }
+        } else {
+            getWindow().getDecorView().setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+        }
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        if (hasFocus) hideNavigation();
     }
 
     @Override
