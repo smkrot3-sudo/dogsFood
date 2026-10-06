@@ -624,6 +624,26 @@ html.bigtext body { zoom: 1.15; }
 .cat .state.bad::before { content: "⛔ "; }
 .pace .fill.warn { background-image: repeating-linear-gradient(135deg, rgba(255, 255, 255, .35) 0 4px, transparent 4px 10px), linear-gradient(90deg, #f97316, #fbbf24); }
 .pace .fill.bad { background-image: repeating-linear-gradient(135deg, rgba(255, 255, 255, .45) 0 6px, transparent 6px 9px), linear-gradient(90deg, #e11d48, #f43f5e); }
+
+/* One-tap logging */
+.quick { display: flex; flex-wrap: wrap; gap: 8px; }
+.qbtn { position: relative; display: inline-flex; align-items: center; gap: 8px; border: 1.5px solid var(--line); background: var(--surface-2); color: var(--fg); padding: 8px 14px; font-weight: 600; font-size: 15px; max-width: 100%; }
+.qbtn .qa { font-variant-numeric: tabular-nums; color: var(--spend); font-weight: 700; }
+.qbtn .qn { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.qbtn.fav { border-color: color-mix(in srgb, var(--pc, #f5b400) 60%, var(--line)); }
+.qbtn .qx { display: none; }
+.quick.editing .qbtn .qx { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--danger); color: #fff; font-size: 14px; }
+.sheetquick { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; }
+.sheetquick:empty { display: none; }
+.sheetquick .qbtn { flex: none; padding: 6px 12px; font-size: 14px; }
+/* Search */
+.findbar { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px; }
+.findbar input { grid-column: 1 / -1; }
+.findbar input, .findbar select { font: inherit; color: var(--fg); background: var(--bg); border: 1.5px solid var(--line); border-radius: 14px; padding: 9px 12px; width: 100%; min-width: 0; }
+/* Subscriptions */
+.tx .sub2 { display: block; font-size: 12.5px; color: var(--spend); font-weight: 600; }
+.subrow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; background: var(--surface-2); border-radius: 14px; padding: 10px 12px; }
+.subrow span { min-width: 0; }
 </style>
 </head>
 <body>
@@ -716,6 +736,11 @@ html.bigtext body { zoom: 1.15; }
         <div class="verdict" id="verdict" role="status"></div>
       </section>
 
+      <section class="panel" aria-labelledby="quickH">
+        <h2 id="quickH" class="pc-yellow" data-e="⚡">רישום בלחיצה <button class="linkbtn" type="button" id="quickEdit" hidden>עריכה</button></h2>
+        <div class="quick" id="quickList"></div>
+      </section>
+
       <section class="panel pay" aria-labelledby="payH">
         <h2 id="payH" class="pc-violet" data-e="💼">המשכורת שלי <button class="btn primary" type="button" id="addShift">⏰ משמרת</button></h2>
         <div class="paybody" id="payBody">
@@ -742,6 +767,29 @@ html.bigtext body { zoom: 1.15; }
         <p class="hint">לחצו על שורה כדי לתקן אותה. קיבלת כסף מתנה או החזר מחבר? רשמו אותו כהכנסה.</p>
         <div class="actions"><button class="btn" type="button" id="addIncome">💰 הכנסה חד־פעמית</button></div>
         <div class="log" id="txList"></div>
+      </section>
+
+      <section class="panel" aria-labelledby="findH">
+        <h2 id="findH" class="pc-blue" data-e="🔎">חיפוש הוצאות</h2>
+        <div class="findbar">
+          <input type="search" id="findText" placeholder="למשל: וולט, קפה, נעליים" aria-label="מה לחפש" autocomplete="off">
+          <select id="findRange" aria-label="תקופה">
+            <option value="month">החודש</option>
+            <option value="3">3 חודשים</option>
+            <option value="year" selected>השנה האחרונה</option>
+            <option value="all">הכול</option>
+          </select>
+          <select id="findCat" aria-label="קטגוריה"></select>
+        </div>
+        <div class="verdict good" id="findSum" hidden></div>
+        <div class="log" id="findList"></div>
+      </section>
+
+      <section class="panel" aria-labelledby="recH">
+        <h2 id="recH" class="pc-blue" data-e="🔁">מנויים וחיובים קבועים <span class="sum" id="recSum">₪0</span></h2>
+        <p class="hint" id="recYear"></p>
+        <div class="log" id="recList"></div>
+        <div class="log" id="subSuggest"></div>
       </section>
 
       <section class="panel" aria-labelledby="wishH">
@@ -829,11 +877,6 @@ html.bigtext body { zoom: 1.15; }
           <div class="rows" id="catRows"></div>
           <div class="alloc" id="alloc"></div>
           <div class="actions"><button class="btn" type="button" id="addCat">+ הוספת קטגוריה</button></div>
-        </section>
-
-        <section class="panel" aria-labelledby="recH">
-          <h2 id="recH" class="pc-blue" data-e="🔁">נרשמות לבד כל חודש <span class="sum" id="recSum">₪0</span></h2>
-          <div class="log" id="recList"></div>
         </section>
 
         <section class="panel" aria-labelledby="setH">
@@ -951,12 +994,15 @@ html.bigtext body { zoom: 1.15; }
       <button type="button" id="modeInc" aria-pressed="false">הכנסה</button>
     </div>
     <h2 id="sheetH" data-e="✍️">הוצאה חדשה</h2>
+    <div class="sheetquick" id="sheetQuick"></div>
     <label for="txAmount">כמה?<input type="number" id="txAmount" class="amount-in" inputmode="decimal" min="0" step="0.01" placeholder="₪0"></label>
     <p class="hours" id="txHours" aria-live="polite"></p>
     <fieldset class="chips" id="txCats"><legend>על מה?</legend></fieldset>
     <fieldset class="chips" id="incKinds" hidden><legend>מה זה?</legend></fieldset>
-    <label for="txNote" id="txNoteLbl">פירוט (לא חובה)<input type="text" id="txNote" maxlength="200" placeholder="למשל: שווארמה עם חברים"></label>
+    <label for="txNote" id="txNoteLbl">פירוט (לא חובה)<input type="text" id="txNote" maxlength="200" placeholder="למשל: שווארמה עם חברים" list="noteList" autocomplete="off"></label>
+    <datalist id="noteList"></datalist>
     <label for="txDate">מתי?<input type="date" id="txDate"></label>
+    <label class="check" id="favRow" for="txFav"><input type="checkbox" id="txFav"> ⭐ שמור ככפתור ״רישום בלחיצה״</label>
     <label class="check" id="repeatRow" for="txRepeat"><input type="checkbox" id="txRepeat"> חוזר כל חודש (ייכנס לבד מעכשיו)</label>
     <div class="err" id="txErr" role="alert" hidden></div>
     <div class="foot">
@@ -1724,6 +1770,9 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     renderHist();
     renderPay();
     renderCal();
+    renderQuick();
+    renderRecurring();
+    fillFindCats();
   }
 
   function catNames() {
@@ -1843,6 +1892,9 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     $("txWish").hidden = !!edit;
     $("repeatRow").hidden = !!edit;
     $("txRepeat").checked = false;
+    $("favRow").hidden = !!edit;
+    $("txFav").checked = false;
+    fillNotes();
     const box = $("txCats");
     box.querySelectorAll(".chip").forEach((n) => n.remove());
     const pick = edit ? edit.category : preset || (d.cats.some((c) => c.id === lastCat) ? lastCat : d.cats[0].id);
@@ -1910,20 +1962,16 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     // The expense counts toward that month's plan, so make sure the month exists
     if (periodOf(row.spent_on) === month) commit();
     if ($("txRepeat").checked) {
-      store.recurring = (store.recurring || []).concat([{ id: catId(), note: row.note, amount: row.amount, category: row.category, day: +row.spent_on.slice(8), last: periodOf(row.spent_on) }]);
-      persist();
+      store.recurring = (store.recurring || []).concat([{ id: catId(), note: row.note, amount: row.amount, category: row.category, day: +row.spent_on.slice(8), last: periodOf(row.spent_on), checked: todayStr() }]);
       renderRecurring();
     }
+    if ($("txFav").checked) store.favs = (store.favs || []).filter((f) => f.note !== row.note).concat([{ note: row.note, amount: row.amount, category: row.category }]);
+    remember(row);
+    persist();
     addTx(row);
     closeSheet();
     showPeriodOf(row.spent_on);
-    const c = data().cats.find((x) => x.id === row.category);
-    const spentCat = monthTx().filter((r) => r.category === row.category).reduce((s, r) => s + r.amount, 0);
-    const over = c && spentCat > (+c.budget || 0);
-    snack(over
-      ? "נרשם. " + c.name + " בחריגה של " + fmt(spentCat - (+c.budget || 0)) + "."
-      : "נרשם: " + fmt(row.amount) + (c ? " על " + c.name : ""),
-      () => { delTx(row.id); renderTracking(); });
+    afterSpend(row);
   });
 
   // ---- "Maybe I'll buy it": wait 48 hours before buying ----
@@ -2033,6 +2081,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       const e = document.createElement("p"); e.className = "empty";
       e.textContent = "מנוי או תשלום שחוזר כל חודש? סמנו ״חוזר כל חודש״ כשאתם רושמים אותו, והוא יירשם לבד מעכשיו.";
       box.append(e);
+      renderSubs();
       return;
     }
     list.forEach((r, i) => {
@@ -2051,6 +2100,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       row.append(what, amt, del);
       box.append(row);
     });
+    renderSubs();
   }
 
   // ---- The last six months ----
@@ -2941,6 +2991,8 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     $("txCats").hidden = inc; $("incKinds").hidden = !inc;
     $("txHours").hidden = inc;
     $("repeatRow").hidden = inc || !!editing;
+    $("favRow").hidden = inc || !!editing;
+    $("sheetQuick").hidden = inc || !!editing;
     $("txWish").hidden = inc || !!editing;
     $("sheetH").textContent = inc ? (editingInc ? "עריכת הכנסה" : "הכנסה חד־פעמית") : editing ? "עריכת הוצאה" : "הוצאה חדשה";
     $("txNoteLbl").firstChild.textContent = inc ? "ממי או על מה? (לא חובה)" : "פירוט (לא חובה)";
@@ -3068,6 +3120,221 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     tot.textContent = dn >= 0 ? "ביום הזה הרווחת " + fmt(dn) + " יותר ממה שהוצאת." : "ביום הזה הוצאת " + fmt(-dn) + " יותר ממה שהרווחת.";
   }
 
+
+  // ---- Remembered notes: autocomplete in the expense form and the one-tap buttons ----
+  // store.noteMem: { note: { c: category id, a: last amount, n: times used, t: last date } }
+  const memo = () => (store.noteMem = store.noteMem || {});
+  function remember(row) {
+    const k = (row.note || "").trim(); if (!k) return;
+    const m = memo(), o = m[k] || { n: 0 };
+    m[k] = { c: row.category, a: row.amount, n: o.n + 1, t: row.spent_on };
+    const keys = Object.keys(m);
+    if (keys.length > 150) keys.sort((a, b) => (m[a].t || "").localeCompare(m[b].t || "")).slice(0, keys.length - 150).forEach((x) => delete m[x]);
+  }
+  // Notes seen in loaded months count too, without being saved
+  function allNotes() {
+    const out = {};
+    Object.values(tx).forEach((l) => l.forEach((r) => {
+      const k = (r.note || "").trim(); if (!k) return;
+      const o = out[k] || { n: 0, t: "" };
+      out[k] = { c: r.spent_on >= o.t ? r.category : o.c, a: r.spent_on >= o.t ? r.amount : o.a, n: o.n + 1, t: r.spent_on > o.t ? r.spent_on : o.t };
+    }));
+    Object.entries(memo()).forEach(([k, v]) => { const o = out[k]; out[k] = !o || (v.t || "") >= o.t ? { ...v, n: Math.max(v.n, o ? o.n : 0) } : o; });
+    return out;
+  }
+  function fillNotes() {
+    const dl = $("noteList"); dl.innerHTML = "";
+    const all = allNotes();
+    Object.keys(all).sort((a, b) => all[b].n - all[a].n).slice(0, 60).forEach((k) => { const o = document.createElement("option"); o.value = k; dl.append(o); });
+  }
+  function applyNote() {
+    if (sheetMode !== "exp" || editing) return;
+    const hit = allNotes()[$("txNote").value.trim()];
+    if (!hit) return;
+    const r = document.querySelector('input[name="txCat"][value="' + hit.c + '"]');
+    if (r) r.checked = true;
+    if (!$("txAmount").value && hit.a) { $("txAmount").value = hit.a; showHours(); }
+  }
+  $("txNote").addEventListener("change", applyNote);
+  $("txNote").addEventListener("input", () => { if (allNotes()[$("txNote").value.trim()]) applyNote(); });
+
+  // Buttons: the user's starred ones first, then expenses that keep coming back (3 times or more)
+  function quickItems() {
+    const cats = new Set(data().cats.map((c) => c.id));
+    const favs = (store.favs || []).filter((f) => cats.has(f.category)).map((f) => ({ ...f, fav: true }));
+    const hide = new Set(store.favHide || []);
+    const all = allNotes();
+    const auto = Object.keys(all).filter((k) => all[k].n >= 3 && cats.has(all[k].c) && !hide.has(k) && !favs.some((f) => f.note === k))
+      .sort((a, b) => all[b].n - all[a].n).slice(0, Math.max(0, 8 - favs.length))
+      .map((k) => ({ note: k, amount: all[k].a, category: all[k].c }));
+    return favs.concat(auto).slice(0, 10);
+  }
+  function qButton(it, names) {
+    const b = document.createElement("button"); b.type = "button"; b.className = "qbtn" + (it.fav ? " fav" : "");
+    const e = document.createElement("span"); e.textContent = it.fav ? "⭐" : catEmoji(names[it.category]);
+    const n = document.createElement("span"); n.className = "qn"; n.textContent = it.note || names[it.category] || "הוצאה";
+    const a = document.createElement("span"); a.className = "qa"; a.textContent = fmt(it.amount);
+    const x = document.createElement("span"); x.className = "qx"; x.textContent = "×"; x.setAttribute("aria-hidden", "true");
+    b.append(e, n, a, x);
+    b.setAttribute("aria-label", "רישום " + n.textContent + " " + fmt(it.amount));
+    return b;
+  }
+  let quickEditing = false;
+  function renderQuick() {
+    if (!store) return;
+    const names = catNames(), items = quickItems();
+    const box = $("quickList"); box.innerHTML = ""; box.classList.toggle("editing", quickEditing);
+    $("quickEdit").hidden = !items.length;
+    $("quickEdit").textContent = quickEditing ? "סיום" : "עריכה";
+    if (!items.length) {
+      const e = document.createElement("p"); e.className = "empty";
+      e.textContent = "כאן יופיעו כפתורים להוצאות שחוזרות אצלך, כמו הקפה של הבוקר. לחיצה אחת והן נרשמות. אפשר גם לסמן ⭐ כשרושמים הוצאה.";
+      box.append(e); quickEditing = false;
+    }
+    items.forEach((it) => {
+      const b = qButton(it, names);
+      b.addEventListener("click", () => {
+        if (quickEditing) {
+          if (it.fav) store.favs = (store.favs || []).filter((f) => f.note !== it.note || f.amount !== it.amount);
+          else store.favHide = (store.favHide || []).concat([it.note]).slice(-100);
+          persist(); renderQuick(); return;
+        }
+        quickLog(it);
+      });
+      box.append(b);
+    });
+    // The same buttons at the top of the expense form fill it in instead of logging right away
+    const sq = $("sheetQuick"); sq.innerHTML = "";
+    items.forEach((it) => {
+      const b = qButton(it, names);
+      b.addEventListener("click", () => {
+        $("txAmount").value = it.amount; $("txNote").value = it.note || "";
+        const r = document.querySelector('input[name="txCat"][value="' + it.category + '"]'); if (r) r.checked = true;
+        showHours();
+      });
+      sq.append(b);
+    });
+  }
+  function quickLog(it) {
+    const row = { id: uid(), spent_on: todayStr(), amount: it.amount, category: it.category, note: it.note || "", created_at: new Date().toISOString() };
+    if (periodOf(row.spent_on) === month) commit();
+    remember(row); persist();
+    addTx(row);
+    showPeriodOf(row.spent_on);
+    afterSpend(row);
+  }
+  $("quickEdit").addEventListener("click", () => { quickEditing = !quickEditing; renderQuick(); });
+  // Snack after logging, with a warning when the category goes past 80% or 100% of its budget
+  function afterSpend(row) {
+    const c = data().cats.find((x) => x.id === row.category);
+    const spentCat = monthTx().filter((r) => r.category === row.category).reduce((s, r) => s + r.amount, 0);
+    const budget = c ? +c.budget || 0 : 0, before = spentCat - row.amount;
+    let msg = "נרשם: " + fmt(row.amount) + (c ? " על " + c.name : "");
+    if (c && budget > 0 && spentCat > budget) msg = "נרשם. " + c.name + " בחריגה של " + fmt(spentCat - budget) + ".";
+    else if (c && budget > 0 && spentCat >= budget * 0.8 && before < budget * 0.8) msg = "נרשם. ⚠️ " + c.name + ": השתמשת ב־" + Math.round(spentCat / budget * 100) + "% מהתקציב. נשארו " + fmt(budget - spentCat) + ".";
+    if (c && budget > 0 && ((spentCat > budget && before <= budget) || (spentCat >= budget * 0.8 && before < budget * 0.8))) notifyApp("⚠️ " + c.name, msg.replace(/^נרשם\. (⚠️ )?/, ""));
+    snack(msg, () => { delTx(row.id); renderTracking(); });
+  }
+  // A phone notification through the Android app (1.6 and later); elsewhere the snack is enough
+  function notifyApp(title, text) {
+    try { if (window.BudgetApp && BudgetApp.notify) BudgetApp.notify(title, text); } catch (e) {}
+  }
+
+  // ---- Search across all expenses ----
+  let findT = null, findSeq = 0;
+  function findFrom() {
+    const r = $("findRange").value, today = todayStr();
+    if (r === "month") return periodStart(month);
+    if (r === "3") return periodStart(shiftMonth(thisMonth(), -2));
+    if (r === "year") return dateAdd(today, -365);
+    return "2000-01-01";
+  }
+  function fillFindCats() {
+    const sel = $("findCat"), cur = sel.value, names = catNames();
+    sel.innerHTML = "";
+    const all = document.createElement("option"); all.value = ""; all.textContent = "כל הקטגוריות"; sel.append(all);
+    Object.entries(names).forEach(([id, n]) => { const o = document.createElement("option"); o.value = id; o.textContent = catEmoji(n) + " " + n; sel.append(o); });
+    sel.value = [...sel.options].some((o) => o.value === cur) ? cur : "";
+  }
+  async function runFind() {
+    const q = $("findText").value.trim(), cat = $("findCat").value;
+    const box = $("findList"), sum = $("findSum");
+    if (!q && !cat) { box.innerHTML = ""; sum.hidden = true; return; }
+    const seq = ++findSeq, from = findFrom(), names = catNames();
+    let rows;
+    if (!sb || !user) rows = (store.tx || []).filter((r) => r.spent_on >= from);
+    else {
+      let qq = sb.from("expenses").select("id, spent_on, amount, category, note, created_at").gte("spent_on", from).order("spent_on", { ascending: false }).limit(5000);
+      if (cat) qq = qq.eq("category", cat);
+      const { data: r, error } = await qq;
+      if (seq !== findSeq) return;
+      if (error) { sum.hidden = false; sum.className = "verdict bad"; sum.textContent = "החיפוש נכשל. בדקו את החיבור לאינטרנט."; return; }
+      rows = r.map((x) => ({ ...x, amount: +x.amount }));
+    }
+    const ql = q.toLowerCase();
+    rows = rows.filter((r) => (!cat || r.category === cat) && (!q || (r.note || "").toLowerCase().includes(ql) || (names[r.category] || "").toLowerCase().includes(ql)));
+    const total = rows.reduce((s2, r) => s2 + r.amount, 0);
+    sum.hidden = false; sum.className = "verdict " + (rows.length ? "warn" : "good");
+    sum.textContent = rows.length ? "נמצאו " + rows.length + " הוצאות, בסך " + fmt(total) + "." + (rows.length > 1 ? " בממוצע " + fmt(total / rows.length) + " לפעם." : "") : "לא נמצאו הוצאות כאלה בתקופה הזו.";
+    box.innerHTML = "";
+    rows.slice(0, 100).forEach((r) => {
+      const row = document.createElement("div"); row.className = "tx";
+      const what = document.createElement("button"); what.type = "button"; what.className = "what";
+      what.dataset.e = names[r.category] ? catEmoji(names[r.category]) : "💸";
+      const t = document.createElement("b"); t.textContent = r.note || names[r.category] || "הוצאה";
+      const c = document.createElement("span"); c.textContent = dayLabel(r.spent_on) + " · " + (names[r.category] || "קטגוריה שנמחקה");
+      what.append(t, c);
+      what.addEventListener("click", () => openSheet(null, r));
+      const amt = document.createElement("span"); amt.className = "amt"; amt.textContent = fmt(r.amount);
+      row.append(what, amt, document.createElement("span"));
+      box.append(row);
+    });
+    if (rows.length > 100) { const e = document.createElement("p"); e.className = "hint"; e.textContent = "מוצגות 100 האחרונות."; box.append(e); }
+  }
+  $("findText").addEventListener("input", () => { clearTimeout(findT); findT = setTimeout(runFind, 300); });
+  $("findRange").addEventListener("change", runFind);
+  $("findCat").addEventListener("change", runFind);
+
+  // ---- Subscriptions: yearly cost, a "still need it?" check every 3 months, and ones that look like a subscription ----
+  const SUB_RE = /נטפליקס|netflix|ספוטיפיי|spotify|יוטיוב|youtube|דיסני|disney|אפל|apple|icloud|גוגל|google|אמזון|amazon|chatgpt|openai|חדר כושר|מנוי|סלקום|פרטנר|הוט|hot|yes|בזק|גולן|פלאפון|רמי לוי תקשורת|wolt\+|וולט פלוס|xbox|playstation|פלייסטיישן|canva|dropbox|adobe/i;
+  function renderSubs() {
+    if (!store) return;
+    const list = store.recurring || [];
+    const monthly = list.reduce((s2, r) => s2 + r.amount, 0);
+    $("recYear").textContent = list.length ? "כל אלה ביחד: " + fmt(monthly * 12) + " בשנה." : "";
+    const old = dateAdd(todayStr(), -90);
+    [...$("recList").children].forEach((row, i) => {
+      const r = list[i]; if (!r || !row.querySelector(".what")) return;
+      const w = row.querySelector(".what");
+      const y = document.createElement("span"); y.className = "sub2"; y.textContent = fmt(r.amount * 12) + " בשנה";
+      w.append(y);
+      if (!r.checked || r.checked < old) {
+        const chk = document.createElement("button"); chk.type = "button"; chk.className = "linkbtn"; chk.textContent = "✓ עדיין צריך את זה?";
+        chk.title = "לחיצה מאשרת שאתה עדיין משתמש בזה (נשאל שוב בעוד 3 חודשים)";
+        chk.addEventListener("click", () => { r.checked = todayStr(); persist(); renderRecurring(); snack("מעולה. נשאל שוב בעוד 3 חודשים. לא צריך? לחץ × כדי להפסיק לרשום אותו, ותבטל גם אצל הספק."); });
+        w.append(chk);
+      }
+    });
+    // Expenses that look like a subscription and aren't on the list yet
+    const box = $("subSuggest"); box.innerHTML = "";
+    const have = new Set(list.map((r) => (r.note || "").trim()));
+    const all = allNotes();
+    Object.keys(all).filter((k) => SUB_RE.test(k) && !have.has(k) && !(store.subHide || []).includes(k)).slice(0, 4).forEach((k) => {
+      const o = all[k];
+      const row = document.createElement("div"); row.className = "subrow";
+      const t = document.createElement("span"); t.textContent = "🤔 ״" + k + "״ (" + fmt(o.a) + ") נראה כמו מנוי. לרשום אותו כל חודש?";
+      const acts = document.createElement("span"); acts.className = "actions";
+      const yes = document.createElement("button"); yes.type = "button"; yes.className = "btn"; yes.textContent = "כן, כל חודש";
+      yes.addEventListener("click", () => {
+        store.recurring = list.concat([{ id: catId(), note: k, amount: o.a, category: o.c, day: +(o.t || todayStr()).slice(8), last: periodOf(o.t || todayStr()), checked: todayStr() }]);
+        persist(); renderRecurring(); snack("״" + k + "״ יירשם לבד כל חודש.");
+      });
+      const no = document.createElement("button"); no.type = "button"; no.className = "linkbtn"; no.textContent = "לא";
+      no.addEventListener("click", () => { store.subHide = (store.subHide || []).concat([k]); persist(); renderRecurring(); });
+      acts.append(yes, no); row.append(t, acts); box.append(row);
+    });
+  }
+
   // ---- "?" help on every card, and cards that fold away (remembered on this device) ----
   const HELP = {
     todayLbl: "זה הסכום שאפשר להוציא היום בלי לפגוע בשאר החודש: הכסף החופשי שנשאר, חלקי הימים שנשארו. הוצאת פחות היום? מחר יהיה לך יותר. הפס מראה כמה מהכסף החופשי כבר יצא, והקו מראה כמה מהחודש עבר.",
@@ -3080,7 +3347,9 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     expH: "תשלומים שחייבים לשלם כל חודש ואי אפשר לוותר עליהם: שכר דירה, חשבונות, תרופות, תחבורה לעבודה.",
     resH: "מה שנשאר אחרי החשבונות הקבועים מתחלק לשניים: חיסכון (כסף שלא נוגעים בו) וכסף חופשי להוצאות היומיום. בוחרים כמה אחוז לחסוך.",
     catH: "מחלקים את הכסף החופשי לקטגוריות, למשל אוכל בחוץ או בילויים. כל הוצאה שנרשמת יורדת מהקטגוריה שלה.",
-    recH: "הוצאות שחוזרות כל חודש באותו סכום, כמו מנויים. הן נרשמות לבד ביום שלהן.",
+    recH: "מנויים ותשלומים שחוזרים כל חודש באותו סכום. הם נרשמים לבד ביום שלהם. כל 3 חודשים נשאל אם אתה עדיין צריך כל אחד מהם, כי מנוי שכוח עולה הרבה בשנה.",
+    quickH: "הוצאות שחוזרות אצלך הופכות לכפתורים. לחיצה אחת והן נרשמות להיום, בלי לפתוח טופס. ⭐ הם כפתורים ששמרת בעצמך. ״עריכה״ מאפשרת להסיר כפתור.",
+    findH: "מחפשים לפי מילה מהפירוט או שם קטגוריה, ובוחרים תקופה. מקבלים כמה הוצאות היו וכמה כסף יצא עליהן ביחד.",
     setH: "מתי החודש שלך מתחיל, איך ההודעות נשמעות, גודל הטקסט וייצוא לאקסל.",
     shH: "כל המשמרות של החודש והשכר עליהן. לחיצה על משמרת פותחת אותה לעריכה, ו־× מוחק.",
     typesH: "משמרת מיוחדת, כמו מוצ״ש, יכולה לקבל אחוז קבוע לכל שעה. אם החוק נותן יותר, מקבלים את הגבוה.",
