@@ -703,6 +703,13 @@ html.bigtext body { zoom: 1.15; }
 .paygoal .pgbar { height: 10px; border-radius: 99px; background: var(--line); overflow: hidden; }
 .paygoal .pgbar i { display: block; height: 100%; border-radius: 99px; background: linear-gradient(90deg, #8b5cf6, #db3577); }
 .paygoal span { font-size: 14.5px; font-weight: 600; }
+.incgoal { display: grid; gap: 8px; }
+.incgoal .igtop { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.incgoal .igtop b { font-size: 30px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.incgoal .igtop span { color: var(--muted); font-weight: 600; }
+.incgoal .pgbar { height: 12px; border-radius: 99px; background: var(--line); overflow: hidden; }
+.incgoal .pgbar i { display: block; height: 100%; border-radius: 99px; background: linear-gradient(90deg, #8b5cf6, #db3577); }
+.incgoal .igline { font-size: 15px; font-weight: 600; }
 .goalrow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .goalrow input { max-width: 140px; }
 
@@ -1155,6 +1162,18 @@ body.layedit #fab, body.onsettings #fab { display: none; }
       <div class="actions"><button class="linkbtn" type="button" id="missAllOff" hidden>לא עבדתי באף אחד מהם</button></div>
     </section>
 
+    <section class="panel" aria-labelledby="incGoalH">
+      <h2 id="incGoalH" class="pc-mint" data-e="🎯">יעד הכנסה לחודש</h2>
+      <label class="field" for="pgVal">כמה כסף אני רוצה להכניס החודש (ברוטו)
+        <input type="number" id="pgVal" min="0" step="50" inputmode="decimal" placeholder="למשל 6000"></label>
+      <div class="incgoal" id="incGoalBox" hidden>
+        <div class="igtop"><b id="igHave">₪0</b><span id="igOf">מתוך ₪0</span></div>
+        <div class="pgbar"><i id="igBar"></i></div>
+        <span class="igline" id="igLeft"></span>
+        <span class="igline" id="igHours"></span>
+      </div>
+    </section>
+
     <section class="panel pay" aria-labelledby="shTitle">
       <h2 id="shH" class="pc-violet" data-e="⏰"><span id="shTitle">המשמרות</span> <button class="btn primary" type="button" id="addShift3" aria-label="הוסף משמרת">+</button></h2>
       <div class="paybody">
@@ -1200,15 +1219,6 @@ body.layedit #fab, body.onsettings #fab { display: none; }
               </select></label>
             <label class="field" for="deduct" hidden>ניכויים משוערים באחוזים (מס, ביטוח לאומי, פנסיה)<input type="number" id="deduct" min="0" max="90" step="0.5" inputmode="decimal"></label>
             <label class="field" for="travel" hidden>החזר נסיעות למשמרת<input type="number" id="travel" min="0" step="1" inputmode="decimal" placeholder="₪0"></label>
-            <div class="field"><span>🎯 יעד לחודש</span>
-              <div class="goalrow">
-                <input type="number" id="pgVal" min="0" step="1" inputmode="decimal" placeholder="למשל 160" aria-label="היעד החודשי">
-                <div class="seg" id="pgKind" role="group" aria-label="סוג היעד">
-                  <button type="button" data-k="h" aria-pressed="true">שעות</button>
-                  <button type="button" data-k="m" aria-pressed="false">₪ ברוטו</button>
-                </div>
-              </div>
-            </div>
             <label class="field" for="payday">💰 המשכורת נכנסת ב־
               <select id="payday"></select></label>
             <label class="check" for="shabbatOn"><input type="checkbox" id="shabbatOn"> 🕯️ שומר שבת וחג</label>
@@ -3522,6 +3532,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
         else parts.push({ text: "💰 המשכורת הבאה ב־" + shortDate(payDate) + ". אין משמרות רשומות ב" + monthName(workCM) + "." });
       }
     }
+    renderIncGoal();
     boxes.forEach((box) => {
       box.innerHTML = ""; box.hidden = !parts.length;
       parts.forEach((pt) => {
@@ -3535,8 +3546,34 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     const o0 = document.createElement("option"); o0.value = ""; o0.textContent = "לא הוגדר"; sel.append(o0);
     for (let i = 1; i <= 31; i++) { const o = document.createElement("option"); o.value = i; o.textContent = i + " בחודש"; sel.append(o); }
   })();
-  $("pgVal").addEventListener("input", () => { const v = parseFloat($("pgVal").value); setSetting("payGoal", v > 0 ? v : 0); });
-  $("pgKind").addEventListener("click", (e) => { const b = e.target.closest("[data-k]"); if (!b) return; setSetting("payGoalKind", b.dataset.k); renderPaySettings(); });
+  $("pgVal").addEventListener("input", () => {
+    const v = parseFloat($("pgVal").value);
+    store.settings = { ...settings(), payGoal: v > 0 ? v : 0, payGoalKind: "m" };
+    persist(); renderPayExtras(); renderIncGoal();
+  });
+  // The shifts page goal card: how close this month's shifts are to the money goal, and how many hours are left
+  function renderIncGoal() {
+    if (!store) return;
+    const st = settings(), goal = st.payGoalKind === "m" ? +st.payGoal || 0 : 0;
+    if (document.activeElement !== $("pgVal")) $("pgVal").value = goal > 0 ? goal : "";
+    $("incGoalBox").hidden = !(goal > 0);
+    if (!(goal > 0)) return;
+    const list = shifts[month] || [];
+    const all = list.reduce((a, r) => { const p = r._p || shiftPay(r, st); a.min += p.paidMin; a.gross += p.gross; return a; }, { min: 0, gross: 0 });
+    const have = Math.round(all.gross), left = Math.max(goal - have, 0);
+    $("igHave").textContent = fmt(have);
+    $("igOf").textContent = "מתוך " + fmt(goal) + " (" + Math.min(Math.round(have / goal * 100), 999) + "%)";
+    $("igBar").style.width = Math.min(have / goal, 1) * 100 + "%";
+    if (!left) { $("igLeft").textContent = "🎉 הגעת ליעד של החודש!"; $("igHours").textContent = have > goal ? "ואפילו עברת אותו ב־" + fmt(have - goal) + "." : ""; return; }
+    $("igLeft").textContent = "חסרים עוד " + fmt(left) + " כדי להגיע ליעד.";
+    // Hours left at the base wage; with overtime it can be a bit less
+    const w = +st.wage || 0;
+    if (!(w > 0)) { $("igHours").textContent = "הכנס שכר לשעה בהגדרות השכר כדי לראות כמה שעות עוד צריך."; return; }
+    const h = left / w;
+    const avgShiftH = list.length ? all.min / 60 / list.length : 0;
+    $("igHours").textContent = "⏱️ עוד בערך " + (Math.ceil(h * 2) / 2).toLocaleString("he-IL") + " שעות עבודה" +
+      (avgShiftH >= 2 ? ", כ־" + Math.ceil(h / avgShiftH) + " משמרות כמו שלך" : "") + " (לפי " + fmt(w) + " לשעה).";
+  }
   $("payday").addEventListener("change", () => setSetting("payday", +$("payday").value || 0));
 
   // ---- Shabbat and holidays: no shift reminder on them, and on the eve it comes an hour before candle lighting ----
@@ -3584,11 +3621,11 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     $("otAfter").value = String(st.otAfter || 8.6);
     set("deduct", st.deduct === 0 || st.deduct > 0 ? st.deduct : 12);
     set("travel", +st.travel > 0 ? st.travel : "");
-    set("pgVal", +st.payGoal > 0 ? st.payGoal : "");
+
     $("shabbatOn").checked = st.shabbat !== false;
     $("weeklyRow").hidden = !(window.BudgetApp && BudgetApp.setNotes);
     $("weeklyOn").checked = st.weekly !== false;
-    document.querySelectorAll("#pgKind button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.k === (st.payGoalKind === "m" ? "m" : "h"))));
+
     $("payday").value = +st.payday > 0 ? String(st.payday) : "";
     renderTypes();
   }
