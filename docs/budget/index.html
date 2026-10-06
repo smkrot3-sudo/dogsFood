@@ -1212,6 +1212,7 @@ body.nosave .split { grid-template-columns: 1fr; }
         <div class="pgbar"><i id="igBar"></i></div>
         <span class="igline" id="igLeft"></span>
         <span class="igline" id="igHours"></span>
+        <label class="check" for="goalNoteOn" id="goalNoteRow" hidden><input type="checkbox" id="goalNoteOn"> 📅 התראה בכל יום חמישי ב־13:00, כשקובעים משמרות לשבוע הבא</label>
       </div>
     </section>
 
@@ -3679,6 +3680,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   function renderIncGoal() {
     if (!store) return;
     const st = settings(), goal = st.payGoalKind === "m" ? +st.payGoal || 0 : 0;
+    sendAppPlans();   // keeps the Thursday note's numbers current
     if (document.activeElement !== $("pgVal")) $("pgVal").value = goal > 0 ? goal : "";
     $("incGoalBox").hidden = !(goal > 0);
     if (!(goal > 0)) return;
@@ -3688,6 +3690,8 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     $("igHave").textContent = fmt(have);
     $("igOf").textContent = "מתוך " + fmt(goal) + " (" + Math.min(Math.round(have / goal * 100), 999) + "%)";
     $("igBar").style.width = Math.min(have / goal, 1) * 100 + "%";
+    $("goalNoteRow").hidden = !(window.BudgetApp && BudgetApp.setNotes);
+    $("goalNoteOn").checked = st.goalNote !== false;
     if (!left) { $("igLeft").textContent = "🎉 הגעת ליעד של החודש!"; $("igHours").textContent = have > goal ? "ואפילו עברת אותו ב־" + fmt(have - goal) + "." : ""; return; }
     $("igLeft").textContent = "חסרים עוד " + fmt(left) + " כדי להגיע ליעד.";
     // Hours left at the base wage; with overtime it can be a bit less
@@ -3725,15 +3729,44 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     if (at(sat) < Date.now()) sat = dateAdd(sat, 7);
     return at(sat);
   }
+  // Thursday 13:00, when next week's shifts get booked: where this month's income goal stands, in hours
+  function goalNoteAt() {
+    const today = todayStr();
+    for (let i = 0; i < 21; i++) {
+      const day = dateAdd(today, i), [y, m, d] = day.split("-").map(Number), dt = new Date(y, m - 1, d, 13, 0);
+      if (dt.getDay() !== 4 || dt.getTime() < Date.now()) continue;
+      if (keepsShabbat() && isRestMinute(day, 13 * 60)) continue;   // a holiday on Thursday: next week
+      return dt.getTime();
+    }
+    return 0;
+  }
+  function goalNoteText() {
+    const st = settings(), goal = +st.payGoal || 0, cur = thisMonth();
+    const list = shifts[cur];
+    if (!list) return "בדוק בלשונית המשמרות כמה חסר לך ליעד של " + fmt(goal) + ".";
+    const have = Math.round(list.reduce((a, r) => a + (r._p || shiftPay(r, st)).gross, 0)), left = goal - have;
+    if (left <= 0) return "כבר הגעת ליעד של " + fmt(goal) + " החודש 🎉 אפשר להוריד קצת.";
+    const w = +st.wage || 0;
+    if (!(w > 0)) return "חסרים לך עוד " + fmt(left) + " ליעד של " + fmt(goal) + " החודש.";
+    const h = Math.ceil(left / w * 2) / 2, weeks = Math.max(1, Math.ceil((daysBetween(todayStr(), periodEnd(cur)) + 1) / 7));
+    return "חסרות לך עוד " + h.toLocaleString("he-IL") + " שעות ליעד של " + fmt(goal) + " החודש" +
+      (weeks > 1 ? ", בערך " + Math.ceil(h / weeks) + " שעות בשבוע." : ". שווה לקחת אותן בשבוע הבא.");
+  }
   function sendAppPlans() {
     const app = window.BudgetApp;
     if (!app || !store) return;
     try { if (app.setReminderPlan) app.setReminderPlan(remindPlan()); } catch (e) {}
     try {
-      if (app.setNotes) app.setNotes(JSON.stringify(settings().weekly === false ? [] :
-        [{ id: "weekly", at: weeklyAt(), every: 7, title: "📆 הסיכום השבועי שלך מוכן", text: "כמה הוצאת השבוע לעומת השבוע שעבר? היכנס וראה." }]));
+      if (app.setNotes) {
+        const st = settings(), notes = [];
+        if (st.weekly !== false) notes.push({ id: "weekly", at: weeklyAt(), every: 7, title: "📆 הסיכום השבועי שלך מוכן", text: "כמה הוצאת השבוע לעומת השבוע שעבר? היכנס וראה." });
+        const at = st.payGoalKind === "m" && +st.payGoal > 0 && st.goalNote !== false ? goalNoteAt() : 0;
+        if (at) notes.push({ id: "goal", at, every: 7, title: "📅 היום קובעים משמרות לשבוע הבא", text: goalNoteText() });
+        app.setNotes(JSON.stringify(notes));
+      }
     } catch (e) {}
   }
+  $("goalNoteOn").addEventListener("change", () => { setSetting("goalNote", $("goalNoteOn").checked); sendAppPlans(); });
   $("shabbatOn").addEventListener("change", () => { setSetting("shabbat", $("shabbatOn").checked); sendAppPlans(); renderMissing(); });
   $("weeklyOn").addEventListener("change", () => { setSetting("weekly", $("weeklyOn").checked); sendAppPlans(); });
 
