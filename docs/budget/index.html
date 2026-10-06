@@ -2348,21 +2348,8 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     }
     const WD = ["א׳", "ב׳", "ג׳", "ד׳", "ה׳", "ו׳", "ש׳"];
     const dow = (ds) => { const [y, m, d] = ds.split("-").map(Number); return new Date(y, m - 1, d).getDay(); };
-    let week = null, weekEl = null, weekMin = 0, weekGross = 0;
-    const closeWeek = () => { if (weekEl) weekEl.querySelector(".wsum").textContent = hrs(weekMin) + " שעות · " + fmt(weekGross); };
     list.slice().reverse().forEach((r) => {
       const p = r._p || shiftPay(r, settings());
-      // A heading for each week (Sunday to Saturday) with its hours and pay
-      const ws = dateAdd(r.work_date, -dow(r.work_date));
-      if (ws !== week) {
-        closeWeek();
-        week = ws; weekMin = 0; weekGross = 0;
-        weekEl = document.createElement("div"); weekEl.className = "weekhead";
-        const wl = document.createElement("span"); wl.textContent = "📆 שבוע " + +ws.slice(8) + "." + +ws.slice(5, 7) + " עד " + +dateAdd(ws, 6).slice(8) + "." + +dateAdd(ws, 6).slice(5, 7);
-        const wsum = document.createElement("span"); wsum.className = "wsum";
-        weekEl.append(wl, wsum); box.append(weekEl);
-      }
-      weekMin += p.paidMin; weekGross += p.gross;
       const row = document.createElement("div");
       row.className = "shift " + (typeColor(r) || "regular") + (r.pending ? " pending" : "") + (r.work_date > todayStr() ? " future" : "");
       const chip = document.createElement("span"); chip.className = "dchip"; chip.setAttribute("aria-hidden", "true");
@@ -2390,7 +2377,6 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       row.append(chip, what, amt, del);
       box.append(row);
     });
-    closeWeek();
     const tot = document.createElement("div"); tot.className = "dh";
     const a = document.createElement("span"); a.textContent = "סה״כ ברוטו";
     const b = document.createElement("span"); b.textContent = fmt(list.reduce((s, r) => s + (r._p || shiftPay(r, settings())).gross, 0));
