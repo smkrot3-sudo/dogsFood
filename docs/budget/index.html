@@ -2587,13 +2587,14 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 
   // ---- Hilan: the Android app reads the user's attendance report with their own Hilan session; Hilan's hours win ----
   const HILAN_EVERY_MS = 30 * 60 * 1000;
+  const HILAN_OFF = true; // 2026-10-06: the user shelved the Hilan sync; the card and background sync stay off until they ask again
   const hilanApp = () => (window.BudgetApp && BudgetApp.hilanConnect ? window.BudgetApp : null);
   function hilanInfo() { try { return JSON.parse(hilanApp().hilanStatus()) || {}; } catch (e) { return {}; } }
   let hilanBusy = false;
   function renderHilan(msg, cls) {
     const app = hilanApp();
-    $("hilanBox").hidden = !app;
-    if (!app) return;
+    $("hilanBox").hidden = HILAN_OFF || !app;
+    if (HILAN_OFF || !app) return;
     const info = hilanInfo();
     const st = $("hilanState"); st.textContent = "";
     if (info.connected) {
@@ -2613,7 +2614,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   }
   function hilanSync(manual) {
     const app = hilanApp();
-    if (!app || hilanBusy || !hilanInfo().connected) return;
+    if (HILAN_OFF || !app || hilanBusy || !hilanInfo().connected) return;
     hilanBusy = true; renderHilan();
     app.hilanSync(!!manual);
   }
