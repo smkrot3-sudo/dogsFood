@@ -765,6 +765,8 @@ html.bigtext body { zoom: 1.15; }
 .emoown { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: end; }
 
 /* Version line at the very bottom */
+.btn.catedit { justify-self: start; font-size: 14.5px; padding: 8px 14px; }
+.chip.newcat span { border-style: dashed; color: var(--brand2); background: none; }
 .verfoot { border-top: 1px solid var(--line); margin-top: 8px; padding-top: 12px; color: var(--muted); font-size: 11.5px; line-height: 1.6; text-align: center; display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 4px 10px; }
 .verfoot .linkbtn, .verfoot a { font-size: 11.5px; color: var(--brand2); font-weight: 700; padding: 0; }
 </style>
@@ -906,6 +908,7 @@ html.bigtext body { zoom: 1.15; }
 
       <section class="panel" aria-labelledby="catsH">
         <h2 id="catsH" class="pc-pink" data-e="🛍️">לפי קטגוריות <span class="sum" id="spentSum">₪0</span></h2>
+        <button class="btn catedit" type="button" id="editCats">✏️ הוספה ועריכה של קטגוריות</button>
         <div class="donut" id="donut" hidden></div>
         <div class="cats" id="catList"></div>
       </section>
@@ -2306,6 +2309,14 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       const sp = document.createElement("span"); sp.textContent = (depth ? "↳ " : "") + catIcon(c) + " " + (c.name || "בלי שם");
       lab.append(inp, sp); box.append(lab);
     });
+    if (!edit) {
+      // The last chip opens the category editor with a new empty category
+      const lab = document.createElement("label"); lab.className = "chip newcat";
+      const sp = document.createElement("span"); sp.textContent = "＋ קטגוריה חדשה"; sp.tabIndex = 0; sp.setAttribute("role", "button");
+      const go = () => { closeDlg("sheet"); editCats(true); };
+      sp.addEventListener("click", go); sp.addEventListener("keydown", (e) => { if (e.key === "Enter") go(); });
+      lab.append(sp); box.append(lab);
+    }
     $("txAmount").value = edit ? edit.amount : ""; $("txNote").value = edit ? edit.note || "" : "";
     const cur = thisMonth();
     $("txDate").value = edit ? edit.spent_on : month === cur ? todayStr() : month < cur ? periodEnd(month) : periodStart(month);
@@ -4659,8 +4670,18 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   $("nextM").addEventListener("click", () => goMonth(shiftMonth(month, 1)));
   $("addInc").addEventListener("click", () => { data().income.push({ name: "", amount: 0 }); touch(); render(); focusLast("incRows"); });
   $("addExp").addEventListener("click", () => { data().expenses.push({ name: "", amount: 0 }); touch(); render(); focusLast("expRows"); });
+  // Opens the month plan at the categories card; with addNew, starts a new empty category there
+  function editCats(addNew) {
+    setView("main");
+    $("planBox").open = true;
+    const sec = $("catH").closest(".panel");
+    if (sec && sec.classList.contains("folded")) { const f = sec.querySelector(".foldbtn"); if (f) f.click(); }
+    if (addNew) { $("addCat").click(); return; }
+    setTimeout(() => $("catH").scrollIntoView({ behavior: "smooth", block: "start" }), 50);
+  }
+  $("editCats").addEventListener("click", () => editCats(false));
   $("addCat").addEventListener("click", () => { data().cats.push({ id: catId(), name: "", budget: 0 }); touch(); render(); focusLast("catRows"); });
-  function focusLast(id) { const r = $(id).lastElementChild; if (r) r.querySelector("input").focus(); }
+  function focusLast(id) { const r = [...$(id).querySelectorAll(".row")].pop(); const i = r && r.querySelector("input[type=text]"); if (i) { i.focus(); i.scrollIntoView({ block: "center" }); } }
   $("copyPrev").addEventListener("click", () => {
     const prev = store.months[prevMonth(month)];
     if (!prev || !prev.expenses.length) { snack("אין חשבונות קבועים שמורים בחודש הקודם."); return; }
