@@ -572,6 +572,29 @@ dialog.sheet::backdrop { background: rgba(40, 20, 50, .45); -webkit-backdrop-fil
 .tabs a[aria-current="true"] .missdot { background: #ffd84d; box-shadow: none; }
 .remind { display: grid; gap: 8px; padding: 12px; border-radius: 16px; background: var(--surface-2); }
 .remind .hint { margin: 0; }
+/* Shifts board: a week heading, then one row per shift with a date chip, the hours and the pay */
+.panel h2 > #shTitle { min-width: 0; font-size: 19px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.panel h2 > .btn { white-space: nowrap; flex: none; padding: 8px 14px; font-size: 15px; }
+.shifts { gap: 6px; }
+.weekhead { display: flex; justify-content: space-between; gap: 8px; margin-top: 10px; padding: 4px 4px 2px; font-size: 13px; font-weight: 700; color: var(--muted); font-variant-numeric: tabular-nums; }
+.weekhead:first-child { margin-top: 0; }
+.shift { grid-template-columns: 48px minmax(0, 1fr) auto 32px; gap: 10px; padding: 10px 10px 10px 6px; border-inline-start: 0; background: var(--surface-2); }
+.shift[class*="c-"] { background: color-mix(in srgb, var(--tc) 10%, var(--surface)); }
+.shift.future { opacity: .7; }
+.dchip { display: grid; place-items: center; align-content: center; width: 48px; height: 52px; border-radius: 14px; background: color-mix(in srgb, #8b5cf6 16%, var(--surface)); line-height: 1.05; }
+.shift[class*="c-"] .dchip { background: var(--tc); color: #fff; }
+.dchip b { font-size: 20px; font-weight: 800; }
+.dchip small { font-size: 12px; font-weight: 700; opacity: .8; }
+.shift .what { gap: 2px; padding: 2px 4px; }
+.shift .what .range { font-size: 17px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.shift .what span { font-size: 12.5px; color: var(--muted); }
+.shift .what .snote { color: var(--fg); }
+.shift .amt { font-size: 16px; font-weight: 800; }
+.shift .del { width: 32px; height: 32px; font-size: 18px; }
+#shiftList > .dh { display: flex; justify-content: space-between; gap: 12px; margin-top: 8px; font-size: 16px; font-weight: 800; color: var(--fg); padding: 10px 16px; border-radius: 999px; background: var(--surface-2); font-variant-numeric: tabular-nums; }
+/* Typed time boxes */
+.timein { direction: ltr; text-align: center !important; font-size: 20px !important; font-weight: 700; letter-spacing: 1px; font-variant-numeric: tabular-nums; }
+.timein.bad { border-color: var(--danger) !important; background: var(--danger-soft) !important; }
 </style>
 </head>
 <body>
@@ -814,7 +837,7 @@ dialog.sheet::backdrop { background: rgba(40, 20, 50, .45); -webkit-backdrop-fil
       </div>
       <div class="actions"><button class="btn" type="button" id="importShifts">📥 ייבוא מהיר: מחילן או כמה ימים ביחד</button></div>
       <div class="shifts" id="shiftList"></div>
-      <p class="hint">משמרת רגילה מסומנת באפור. משמרת מסוג מיוחד מסומנת בצבע של הסוג שלה.</p>
+      <p class="hint">לחיצה על משמרת פותחת אותה לעריכה. משמרת מסוג מיוחד מסומנת בצבע של הסוג שלה.</p>
     </section>
 
     <section class="panel hilan" id="hilanBox" aria-labelledby="hilanH" hidden>
@@ -851,7 +874,7 @@ dialog.sheet::backdrop { background: rgba(40, 20, 50, .45); -webkit-backdrop-fil
             <label class="field" for="travel" hidden>החזר נסיעות למשמרת<input type="number" id="travel" min="0" step="1" inputmode="decimal" placeholder="₪0"></label>
             <div class="remind" id="remindRow" hidden>
               <label class="check" for="remindOn"><input type="checkbox" id="remindOn"> 🔔 תזכורת יומית להזנת משמרת</label>
-              <label class="field" for="remindAt">בשעה<input type="time" id="remindAt" value="22:30"></label>
+              <label class="field" for="remindAt">בשעה<input type="text" class="timein" inputmode="numeric" autocomplete="off" maxlength="5" placeholder="22:30" id="remindAt" value="22:30"></label>
               <p class="hint">ההתראה לא תגיע ביום שכבר הוזנה בו משמרת או שסימנת בו ״לא עבדתי״.</p>
             </div>
             <p class="hint">החישוב לפי חוק שעות עבודה ומנוחה: שעתיים נוספות ראשונות ב־125% ואחריהן 150%. במשמרת עם שעתיים לפחות בין 22:00 ל־06:00 השעות הנוספות מתחילות אחרי 7 שעות. שבת וחגים ב־150%, ושעות נוספות בהם ב־175% וב־200%. השבת והחג מתחילים 18 דקות לפני השקיעה ונגמרים 40 דקות אחריה, לפי שעון תל אביב.</p>
@@ -912,8 +935,8 @@ dialog.sheet::backdrop { background: rgba(40, 20, 50, .45); -webkit-backdrop-fil
     <h2 id="shiftH" data-e="⏰">משמרת חדשה</h2>
     <label for="shDate">תאריך<input type="date" id="shDate"></label>
     <div class="two">
-      <label for="shStart">כניסה<input type="time" id="shStart"></label>
-      <label for="shEnd">יציאה<input type="time" id="shEnd"></label>
+      <label for="shStart">כניסה<input type="text" class="timein" inputmode="numeric" autocomplete="off" maxlength="5" placeholder="09:00" id="shStart"></label>
+      <label for="shEnd">יציאה<input type="text" class="timein" inputmode="numeric" autocomplete="off" maxlength="5" placeholder="17:00" id="shEnd"></label>
     </div>
     <label for="shBreak">הפסקה שלא משולמת (דקות)<input type="number" id="shBreak" min="0" max="600" step="5" inputmode="numeric"></label>
     <fieldset class="chips" id="shKinds"><legend>סוג משמרת</legend></fieldset>
@@ -944,8 +967,8 @@ dialog.sheet::backdrop { background: rgba(40, 20, 50, .45); -webkit-backdrop-fil
       <div class="calhead" aria-hidden="true"><span>א׳</span><span>ב׳</span><span>ג׳</span><span>ד׳</span><span>ה׳</span><span>ו׳</span><span>ש׳</span></div>
       <div class="calgrid pickdays" id="impDays" role="group" aria-label="ימי עבודה"></div>
       <div class="two">
-        <label for="impStart">כניסה<input type="time" id="impStart" value="09:00"></label>
-        <label for="impEnd">יציאה<input type="time" id="impEnd" value="17:00"></label>
+        <label for="impStart">כניסה<input type="text" class="timein" inputmode="numeric" autocomplete="off" maxlength="5" placeholder="09:00" id="impStart" value="09:00"></label>
+        <label for="impEnd">יציאה<input type="text" class="timein" inputmode="numeric" autocomplete="off" maxlength="5" placeholder="17:00" id="impEnd" value="17:00"></label>
       </div>
     </div>
     <label for="impBreak">הפסקה שלא משולמת בכל משמרת (דקות)<input type="number" id="impBreak" min="0" max="600" step="5" inputmode="numeric" value="0"></label>
@@ -1090,6 +1113,26 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 
   // ---- Dates ----
   const pad = (n) => String(n).padStart(2, "0");
+  // Typed clock times: "918" or "0918" or "9:18" all become "09:18"; anything else is "" (not a time)
+  function normTime(v) {
+    const d = String(v || "").replace(/\D/g, "");
+    if (!d) return "";
+    let h, m;
+    if (/:/.test(v)) { const [a, b = ""] = String(v).split(":"); h = a.replace(/\D/g, ""); m = b.replace(/\D/g, ""); }
+    else if (d.length <= 2) { h = d; m = "0"; }
+    else if (d.length === 3) { h = d.slice(0, 1); m = d.slice(1); }
+    else { h = d.slice(0, 2); m = d.slice(2, 4); }
+    const H = +h, M = +m;
+    if (!(h.length && H <= 23 && M <= 59 && m.length <= 2)) return "";
+    return pad(H) + ":" + pad(M);
+  }
+  // While typing: digits only, with the colon put in for you (a first digit above 2 is a one-digit hour)
+  function liveTime(v) {
+    const d = String(v || "").replace(/\D/g, "").slice(0, 4);
+    const one = d[0] > "2" || (d.length >= 2 && +d.slice(0, 2) > 23);
+    const h = one ? d.slice(0, 1) : d.slice(0, 2), m = d.slice(h.length, h.length + 2);
+    return d.length > h.length ? h + ":" + m : h;
+  }
   function todayStr() { const d = new Date(); return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()); }
   // A budget month ("2026-09") runs from the user's start day in that month to the day before it in the next
   function startDay() { const v = store && store.settings && +store.settings.startDay; return v >= 1 && v <= 28 ? v : 1; }
@@ -2291,7 +2334,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     if (!store) return;
     const pp = periodPay(month);
     const list = shifts[month] || [];
-    $("shTitle").textContent = "המשמרות של " + monthName(month);
+    $("shTitle").textContent = "משמרות " + monthName(month);
     $("shNet").textContent = fmt(pp.net);
     $("shLine").textContent = payLine(pp);
     const box = $("shiftList"); box.innerHTML = "";
@@ -2303,17 +2346,36 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       box.append(e);
       return;
     }
+    const WD = ["א׳", "ב׳", "ג׳", "ד׳", "ה׳", "ו׳", "ש׳"];
+    const dow = (ds) => { const [y, m, d] = ds.split("-").map(Number); return new Date(y, m - 1, d).getDay(); };
+    let week = null, weekEl = null, weekMin = 0, weekGross = 0;
+    const closeWeek = () => { if (weekEl) weekEl.querySelector(".wsum").textContent = hrs(weekMin) + " שעות · " + fmt(weekGross); };
     list.slice().reverse().forEach((r) => {
       const p = r._p || shiftPay(r, settings());
+      // A heading for each week (Sunday to Saturday) with its hours and pay
+      const ws = dateAdd(r.work_date, -dow(r.work_date));
+      if (ws !== week) {
+        closeWeek();
+        week = ws; weekMin = 0; weekGross = 0;
+        weekEl = document.createElement("div"); weekEl.className = "weekhead";
+        const wl = document.createElement("span"); wl.textContent = "📆 שבוע " + +ws.slice(8) + "." + +ws.slice(5, 7) + " עד " + +dateAdd(ws, 6).slice(8) + "." + +dateAdd(ws, 6).slice(5, 7);
+        const wsum = document.createElement("span"); wsum.className = "wsum";
+        weekEl.append(wl, wsum); box.append(weekEl);
+      }
+      weekMin += p.paidMin; weekGross += p.gross;
       const row = document.createElement("div");
-      row.className = "shift " + (typeColor(r) || "regular") + (r.pending ? " pending" : "");
+      row.className = "shift " + (typeColor(r) || "regular") + (r.pending ? " pending" : "") + (r.work_date > todayStr() ? " future" : "");
+      const chip = document.createElement("span"); chip.className = "dchip"; chip.setAttribute("aria-hidden", "true");
+      const dn = document.createElement("b"); dn.textContent = +r.work_date.slice(8);
+      const wd = document.createElement("small"); wd.textContent = WD[dow(r.work_date)];
+      chip.append(dn, wd);
       const what = document.createElement("button"); what.type = "button"; what.className = "what";
-      const d = document.createElement("span"); d.className = "sdate"; d.textContent = dayLabel(r.work_date) + (r.work_date > todayStr() ? " · מתוכנן" : "");
-      const t = document.createElement("b"); t.textContent = "\u2066" + r.start_time + "–" + r.end_time + "\u2069 · " + hrs(p.paidMin) + " שעות" + (r.note ? " · " + r.note : "");
+      const t = document.createElement("b"); t.className = "range"; t.textContent = "\u2066" + r.start_time + " – " + r.end_time + "\u2069";
       const c = document.createElement("span");
       const tl = typeLabel(r);
-      c.textContent = (tl ? tl + " · " : "") + payParts(p) + (r.pending ? " · ממתין לחיבור" : "");
-      what.append(d, t, c);
+      c.textContent = hrs(p.paidMin) + " שעות" + (tl ? " · " + tl : "") + " · " + payParts(p) + (r.work_date > todayStr() ? " · מתוכנן" : "") + (r.pending ? " · ממתין לחיבור" : "");
+      what.append(t, c);
+      if (r.note) { const n = document.createElement("span"); n.className = "snote"; n.textContent = "📝 " + r.note; what.append(n); }
       what.setAttribute("aria-label", "עריכת המשמרת של " + dayLabel(r.work_date));
       what.addEventListener("click", () => openShift(r));
       const amt = document.createElement("span"); amt.className = "amt";
@@ -2325,9 +2387,10 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
         delShift(r.id); renderPay(); renderCal();
         snack("המשמרת נמחקה", () => { saveShift({ ...copy, id: uid() }); renderPay(); renderCal(); });
       });
-      row.append(what, amt, del);
+      row.append(chip, what, amt, del);
       box.append(row);
     });
+    closeWeek();
     const tot = document.createElement("div"); tot.className = "dh";
     const a = document.createElement("span"); a.textContent = "סה״כ ברוטו";
     const b = document.createElement("span"); b.textContent = fmt(list.reduce((s, r) => s + (r._p || shiftPay(r, settings())).gross, 0));
@@ -2367,7 +2430,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     if (dlg.showModal) dlg.showModal(); else dlg.setAttribute("open", "");
   }
   function readShift() {
-    const date = $("shDate").value, a = $("shStart").value, b = $("shEnd").value;
+    const date = $("shDate").value, a = normTime($("shStart").value), b = normTime($("shEnd").value);
     if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !/^\d\d:\d\d$/.test(a) || !/^\d\d:\d\d$/.test(b)) return null;
     const k = (document.querySelector('input[name="shKind"]:checked') || {}).value || "";
     const t = shiftTypes().find((x) => x.id === k);
@@ -2485,11 +2548,25 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   }
   function saveRemind() {
     const app = remindApp(); if (!app) return;
-    app.setReminder($("remindOn").checked, $("remindAt").value || "22:30");
+    app.setReminder($("remindOn").checked, normTime($("remindAt").value) || "22:30");
     renderRemind(); renderMissing();
   }
   $("remindOn").addEventListener("change", saveRemind);
   $("remindAt").addEventListener("change", saveRemind);
+  // All typed time boxes: format while typing, tidy up on leaving the box
+  document.querySelectorAll(".timein").forEach((el) => {
+    el.addEventListener("input", (e) => {
+      const v = liveTime(el.value); if (v !== el.value) el.value = v;
+      el.classList.remove("bad");
+    });
+    el.addEventListener("focus", () => el.select());
+    el.addEventListener("blur", () => {
+      if (!el.value) return;
+      const n = normTime(el.value);
+      el.classList.toggle("bad", !n);
+      if (n && n !== el.value) { el.value = n; el.dispatchEvent(new Event("input")); el.dispatchEvent(new Event("change")); }
+    });
+  });
   // First run inside the app: the reminder starts on at 22:30 (once per phone; the user can turn it off)
   (function firstRemind() {
     const app = remindApp(); if (!app) return;
@@ -2576,7 +2653,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   }
   function impCandidates() {
     if (impMode === "paste") return parseShiftText($("impText").value, month);
-    const a = $("impStart").value, b = $("impEnd").value;
+    const a = normTime($("impStart").value), b = normTime($("impEnd").value);
     if (!/^\d\d:\d\d$/.test(a) || !/^\d\d:\d\d$/.test(b) || a === b) return [];
     return [...impPicked].sort().map((d) => ({ work_date: d, start_time: a, end_time: b }));
   }
