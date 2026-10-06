@@ -2582,9 +2582,13 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     return;
   }
 
+  // The Android app hands back Google's answer in the query (an app link can't carry a #); supabase reads it from the #
+  if (/[?&](access_token|error_description)=/.test(location.search) && !location.hash)
+    history.replaceState(null, "", location.pathname + "#" + location.search.slice(1));
   sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
   const here = () => location.origin + location.pathname;
-  const APP_RETURN = "io.github.smkrot3sudo.budget://auth";
+  // Google's answer for the app lands on this page in the phone's browser, and a tap there opens the app
+  const APP_RETURN = location.origin + location.pathname.replace(/[^/]*$/, "") + "app-return.html";
 
   // The Google button appears only once Google sign-in is switched on in Supabase
   let googleOn = false;
