@@ -24,7 +24,10 @@ import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.FrameLayout;
 import android.widget.Toast;
+
+import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -34,17 +37,22 @@ import java.nio.charset.StandardCharsets;
 /** A full-screen WebView around the budget website, with file picking, file saving and the back button wired up. */
 public class MainActivity extends Activity {
     private static final String HOME = "https://smkrot3-sudo.github.io/dogsFood/budget/";
-    private static final int PICK_FILE = 1;
+    private static final int PICK_FILE = 1, HILAN = 2;
 
     private WebView web;
     private ValueCallback<Uri[]> pendingPick;
+    private HilanSync hilanSync;
+    private boolean destroyed;
 
     @Override
     protected void onCreate(Bundle state) {
         super.onCreate(state);
         web = new WebView(this);
         web.setBackgroundColor(Color.TRANSPARENT);
-        setContentView(web);
+        FrameLayout root = new FrameLayout(this);
+        root.addView(web);
+        setContentView(root);
+        hilanSync = new HilanSync(this, root);
         hideNavigation();
 
         WebSettings s = web.getSettings();
@@ -130,6 +138,12 @@ public class MainActivity extends Activity {
 
     @Override
     protected void onActivityResult(int request, int result, Intent data) {
+        if (request == HILAN) {
+            String text = HilanActivity.lastText;
+            HilanActivity.lastText = null;
+            if (result == RESULT_OK && text != null) toPage(Hilan.result("ok", text, true));
+            return;
+        }
         if (request == PICK_FILE && pendingPick != null) {
             Uri[] picked = null;
             if (result == RESULT_OK && data != null && data.getData() != null) picked = new Uri[] { data.getData() };
@@ -196,6 +210,30 @@ public class MainActivity extends Activity {
             runOnUiThread(() -> startUpdate(url));
         }
 
+        /** Hilan connection state for the page: {"connected": bool, "lastSync": ms}. */
+        @JavascriptInterface
+        public String hilanStatus() { return Hilan.status(MainActivity.this); }
+
+        /** Opens the Hilan screen where the user signs in and picks their attendance report. */
+        @JavascriptInterface
+        public void hilanConnect() {
+            runOnUiThread(() -> startActivityForResult(new Intent(MainActivity.this, HilanActivity.class), HILAN));
+        }
+
+        /** Reads the saved report in the background; the result arrives at window.onHilan. */
+        @JavascriptInterface
+        public void hilanSync(boolean manual) {
+            runOnUiThread(() -> {
+                if (hilanSync.running()) return;
+                hilanSync.start((status, text) -> toPage(Hilan.result(status, text, manual)));
+            });
+        }
+
+        @JavascriptInterface
+        public void hilanDisconnect() {
+            runOnUiThread(() -> { if (hilanSync.running()) hilanSync.cancel(); Hilan.disconnect(MainActivity.this); });
+        }
+
         /** Opens a page (Google sign-in) in the phone's browser, since Google blocks it inside apps. */
         @JavascriptInterface
         public void openExternal(String url) {
@@ -205,6 +243,19 @@ public class MainActivity extends Activity {
                 catch (ActivityNotFoundException e) { toast("אין דפדפן לפתוח בו את ההתחברות"); }
             });
         }
+    }
+
+    /** Hands a Hilan result to the page's window.onHilan. */
+    private void toPage(String json) {
+        if (destroyed) return;
+        runOnUiThread(() -> web.evaluateJavascript("window.onHilan&&window.onHilan(" + JSONObject.quote(json) + ")", null));
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Coming back to the app counts as opening it: the page decides whether a Hilan sync is due
+        if (web != null) web.evaluateJavascript("window.hilanOnResume&&window.hilanOnResume()", null);
     }
 
     private long updateId = -1;
@@ -247,6 +298,8 @@ public class MainActivity extends Activity {
 
     @Override
     protected void onDestroy() {
+        destroyed = true;
+        if (hilanSync != null && hilanSync.running()) hilanSync.cancel();
         if (updateDone != null) { unregisterReceiver(updateDone); updateDone = null; }
         if (web != null) { web.setVisibility(View.GONE); web.destroy(); }
         super.onDestroy();

@@ -560,6 +560,9 @@ dialog.sheet::backdrop { background: rgba(40, 20, 50, .45); -webkit-backdrop-fil
   .brand .logo { width: 40px; height: 40px; font-size: 21px; border-radius: 13px; }
   .wrap > header.topbar { padding: 10px 12px; }
 }
+/* Hilan connection card */
+.hilanstate { margin: 0; font-weight: 600; }
+.hilanstate .on { color: var(--accent); }
 </style>
 </head>
 <body>
@@ -796,6 +799,18 @@ dialog.sheet::backdrop { background: rgba(40, 20, 50, .45); -webkit-backdrop-fil
       <div class="actions"><button class="btn" type="button" id="importShifts">📥 ייבוא מהיר: מחילן או כמה ימים ביחד</button></div>
       <div class="shifts" id="shiftList"></div>
       <p class="hint">משמרת רגילה מסומנת באפור. משמרת מסוג מיוחד מסומנת בצבע של הסוג שלה.</p>
+    </section>
+
+    <section class="panel hilan" id="hilanBox" aria-labelledby="hilanH" hidden>
+      <h2 id="hilanH" class="pc-blue" data-e="🔗">חיבור לחילן</h2>
+      <p class="hilanstate" id="hilanState"></p>
+      <div class="verdict" id="hilanMsg" role="status" hidden></div>
+      <div class="actions">
+        <button class="btn primary" type="button" id="hilanConnect">🔗 התחברות לחילן</button>
+        <button class="btn" type="button" id="hilanSyncBtn" hidden>🔄 סנכרון עכשיו</button>
+        <button class="linkbtn" type="button" id="hilanOff" hidden>ניתוק</button>
+      </div>
+      <p class="hint">מתחברים פעם אחת לחילן בתוך האפליקציה ופותחים את דוח הנוכחות של החודש. מאז, בכל פתיחה של האפליקציה המשמרות נמשכות לבד. הסיסמה לא נשמרת אצלנו. אם משמרת כבר רשומה כאן, השעות מחילן מחליפות אותה.</p>
     </section>
 
     <section class="panel" aria-labelledby="typesH">
@@ -2570,6 +2585,90 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       () => { rows.forEach((r) => delShift(r.id)); renderPay(); renderCal(); });
   });
 
+  // ---- Hilan: the Android app reads the user's attendance report with their own Hilan session; Hilan's hours win ----
+  const HILAN_EVERY_MS = 30 * 60 * 1000;
+  const hilanApp = () => (window.BudgetApp && BudgetApp.hilanConnect ? window.BudgetApp : null);
+  function hilanInfo() { try { return JSON.parse(hilanApp().hilanStatus()) || {}; } catch (e) { return {}; } }
+  let hilanBusy = false;
+  function renderHilan(msg, cls) {
+    const app = hilanApp();
+    $("hilanBox").hidden = !app;
+    if (!app) return;
+    const info = hilanInfo();
+    const st = $("hilanState"); st.textContent = "";
+    if (info.connected) {
+      const on = document.createElement("span"); on.className = "on"; on.textContent = "✅ מחובר לחילן";
+      st.append(on, info.lastSync ? " · סנכרון אחרון: " + new Date(info.lastSync).toLocaleString("he-IL", { day: "numeric", month: "numeric", hour: "2-digit", minute: "2-digit" }) : "");
+    } else st.textContent = "עוד לא מחובר.";
+    if (hilanBusy) st.append(" · מסנכרן…");
+    $("hilanConnect").textContent = info.connected ? "🔑 התחברות מחדש / החלפת דוח" : "🔗 התחברות לחילן";
+    $("hilanConnect").className = "btn" + (info.connected ? "" : " primary");
+    $("hilanSyncBtn").hidden = !info.connected;
+    $("hilanOff").hidden = !info.connected;
+    if (msg !== undefined) {
+      $("hilanMsg").hidden = !msg;
+      $("hilanMsg").className = "verdict " + (cls || "good");
+      $("hilanMsg").textContent = msg || "";
+    }
+  }
+  function hilanSync(manual) {
+    const app = hilanApp();
+    if (!app || hilanBusy || !hilanInfo().connected) return;
+    hilanBusy = true; renderHilan();
+    app.hilanSync(!!manual);
+  }
+  // Puts Hilan's shifts in: a day Hilan lists replaces what was logged here for that day, other days stay as they are.
+  async function applyHilan(text) {
+    if (!(+settings().wage > 0)) return { error: "wage" };
+    const found = parseShiftText(text, thisMonth());
+    if (!found.length) return { error: "empty" };
+    const byDay = new Map();
+    found.forEach((f) => { if (!byDay.has(f.work_date)) byDay.set(f.work_date, []); byDay.get(f.work_date).push(f); });
+    const months = [...new Set(found.map((f) => periodOf(f.work_date)))];
+    for (const m of months) { if (!shifts[m]) { try { await loadShifts(m); } catch (e) { shifts[m] = shifts[m] || []; } } }
+    let added = 0, changed = 0, gross = 0;
+    const wage = +settings().wage, now = Date.now();
+    byDay.forEach((rows, day) => {
+      const have = (shifts[periodOf(day)] || []).filter((r) => r.work_date === day);
+      const same = have.length === rows.length && rows.every((f) => have.some((h) => h.start_time === f.start_time && h.end_time === f.end_time));
+      if (same) return;
+      const keep = have[0] || {};
+      have.forEach((h) => delShift(h.id));
+      rows.forEach((f, i) => {
+        const row = { id: uid(), ...f, break_min: keep.break_min || 0, wage, kind: keep.kind || "", kind_rate: keep.kind_rate || 100, note: "מחילן", created_at: new Date(now + i).toISOString() };
+        saveShift(row);
+        gross += shiftPay(row, settings()).gross;
+      });
+      if (have.length) changed++; else added += rows.length;
+    });
+    return { added, changed, gross };
+  }
+  window.onHilan = async (json) => {
+    let r = {}; try { r = JSON.parse(json); } catch (e) {}
+    hilanBusy = false;
+    if (r.status === "login") { renderHilan("🔑 חילן ניתק אותך. לחץ על ״התחברות מחדש״ כדי שהמשמרות ימשיכו להיכנס לבד.", "warn"); return; }
+    if (r.status !== "ok") { if (r.manual) renderHilan("לא הצלחתי לקרוא את הדוח מחילן. נסה שוב, או התחבר מחדש ופתח שוב את דוח הנוכחות.", "bad"); else renderHilan(); return; }
+    const res = await applyHilan(r.text || "");
+    if (res.error === "wage") { renderHilan("קודם תרשום בהגדרות השכר כמה אתה מרוויח לשעה, ואז אמשוך את המשמרות.", "warn"); return; }
+    if (res.error === "empty") { renderHilan("בדוח מחילן לא היו משמרות עם שעות כניסה ויציאה.", "warn"); return; }
+    renderPay(); renderCal(); if (view === "shifts") renderShifts();
+    const parts = [];
+    if (res.added) parts.push(res.added === 1 ? "משמרת חדשה אחת" : res.added + " משמרות חדשות");
+    if (res.changed) parts.push(res.changed === 1 ? "יום אחד עודכן" : res.changed + " ימים עודכנו");
+    if (parts.length) {
+      renderHilan("מחילן: " + parts.join(", ") + ".", "good");
+      snack("🔗 חילן: " + parts.join(", "));
+    } else renderHilan(r.manual ? "הכול מעודכן. אין משמרות חדשות בחילן." : undefined, "good");
+  };
+  window.hilanOnResume = () => { const i = hilanInfo(); if (i.connected && Date.now() - (i.lastSync || 0) > HILAN_EVERY_MS) hilanSync(false); };
+  $("hilanConnect").addEventListener("click", () => { const app = hilanApp(); if (app) app.hilanConnect(); });
+  $("hilanSyncBtn").addEventListener("click", () => hilanSync(true));
+  $("hilanOff").addEventListener("click", () => {
+    const app = hilanApp(); if (!app) return;
+    app.hilanDisconnect(); renderHilan("נותקת מחילן. המשמרות שכבר נכנסו נשארות.", "good");
+  });
+  renderHilan();
+
   // ---- Pay settings ----
   function renderPaySettings() {
     const st = settings();
@@ -2773,7 +2872,9 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     render();
     await loadHist();
     renderHist();
+    if (!hilanStarted) { hilanStarted = true; hilanSync(false); }
   }
+  let hilanStarted = false;
   $("month").addEventListener("change", (e) => goMonth(e.target.value));
   $("prevM").addEventListener("click", () => goMonth(shiftMonth(month, -1)));
   $("nextM").addEventListener("click", () => goMonth(shiftMonth(month, 1)));

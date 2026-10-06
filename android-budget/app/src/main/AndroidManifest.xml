@@ -29,5 +29,11 @@
                 <data android:scheme="io.github.smkrot3sudo.budget" android:host="auth" />
             </intent-filter>
         </activity>
+        <!-- The user's Hilan site, where they sign in and pick their attendance report -->
+        <activity
+            android:name=".HilanActivity"
+            android:exported="false"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|uiMode|density"
+            android:windowSoftInputMode="adjustResize" />
     </application>
 </manifest>
