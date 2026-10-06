@@ -1311,7 +1311,7 @@ body.layedit #fab, body.onsettings #fab { display: none; }
     <label for="txNote" id="txNoteLbl">פירוט (לא חובה)<input type="text" id="txNote" maxlength="200" placeholder="למשל: שווארמה עם חברים" autocomplete="off"></label>
     <label for="txDate">מתי?<input type="date" id="txDate"></label>
     <label class="check" id="favRow" for="txFav"><input type="checkbox" id="txFav"> ⭐ שמור ככפתור ״רישום בלחיצה״</label>
-    <label class="check" id="repeatRow" for="txRepeat"><input type="checkbox" id="txRepeat"> חוזר כל חודש (ייכנס לבד מעכשיו)</label>
+    <label class="check" id="repeatRow" for="txRepeat"><input type="checkbox" id="txRepeat"> חיוב קבוע כל חודש (יירד מראש מההכנסה)</label>
     <div class="err" id="txErr" role="alert" hidden></div>
     <div class="foot">
       <button class="btn primary" type="submit" id="txSave">רישום</button>
@@ -2236,7 +2236,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       else if (spent > spend) setV("bad", say("חרגת מהכסף החופשי ב־" + X(spent - spend) + ". עד סוף החודש: אפס בזבוזים.", "עברת את הכסף החופשי ב־" + X(spent - spend) + ". עדיף לעצור הוצאות עד סוף החודש.", "עברת את הכסף החופשי ב־" + X(spent - spend) + ". זה קורה. מעכשיו ננסה להוציא רק מה שחייבים 🙏"));
       else if (left < 0) setV("bad", say("חרגת היום ב־" + X(-left) + ". זה יורד מהתקציב של מחר.", "היום הוצאת " + X(-left) + " מעבר. זה יקטין קצת את התקציב של הימים הבאים.", "היום יצא קצת יותר (" + X(-left) + "). לא נורא, מחר מתחילים מחדש 🙂"));
       else if (runOut < days) { const dd = shortDate(dateAdd(periodStart(month), runOut - 1)); setV("warn", say("בקצב הזה הכסף נגמר ב־" + dd + ". תאט עכשיו, לא מחר.", "בקצב הזה הכסף ייגמר ב־" + dd + ". כדאי להאט.", "בקצב הזה הכסף ייגמר ב־" + dd + ". אם נאט קצת, נגיע לסוף החודש בשקט.")); }
-      else if (overCat) setV("warn", say(overCat.name + " בחריגה של " + X(overCat.over) + ". הכסף הזה יוצא מקטגוריה אחרת, אז מעכשיו " + overCat.name + " סגורה עד סוף החודש.", overCat.name + " עברה את התקציב שלה ב־" + X(overCat.over) + ". כדאי לא להוציא עליה יותר החודש.", overCat.name + " עברה קצת את התקציב (" + X(overCat.over) + "). ננסה לוותר עליה עד סוף החודש."));
+      else if (false && overCat) setV("warn", say(overCat.name + " בחריגה של " + X(overCat.over) + ". הכסף הזה יוצא מקטגוריה אחרת, אז מעכשיו " + overCat.name + " סגורה עד סוף החודש.", overCat.name + " עברה את התקציב שלה ב־" + X(overCat.over) + ". כדאי לא להוציא עליה יותר החודש.", overCat.name + " עברה קצת את התקציב (" + X(overCat.over) + "). ננסה לוותר עליה עד סוף החודש."));
       else if (!list.length) setV("warn", say("עוד לא רשמת אף הוצאה החודש. כל שקל שיוצא נרשם כאן, גם הקפה.", "עוד לא רשמת הוצאות החודש. כדאי לרשום כל הוצאה, גם קטנה.", "עוד לא רשמת הוצאות החודש. כל הוצאה שתרשום תעזור לראות את התמונה 🙂"));
       else setV("good", say("אתה בתוך התקציב. זו לא סיבה להתפנק.", "אתה בתוך התקציב. ככה ממשיכים.", "כל הכבוד, אתה בתוך התקציב! 🎉"));
     } else if (isPast) {
@@ -2282,9 +2282,10 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       const nm = document.createElement("span"); nm.className = "name"; nm.textContent = (c.id ? c.icon : "🗑️") + " " + c.name;
       const nums = document.createElement("span"); nums.className = "nums"; nums.textContent = c.sub && !c.budget ? fmt(c.spent) : fmt(c.spent) + " מתוך " + fmt(c.budget);
       top.append(nm, nums);
-      if (c.sub && !c.budget) {
-        // A subcategory without its own budget: just what went on it, counted in its main category
-        const s = document.createElement("span"); s.className = "state plain"; s.textContent = "נספר בתוך " + c.parentName;
+      if (!c.budget) {
+        // No goal (a 0 budget): just what went on it. A subcategory is also counted in its main category
+        nums.textContent = fmt(c.spent);
+        const s = document.createElement("span"); s.className = "state plain"; s.textContent = c.sub ? "נספר בתוך " + c.parentName : "בלי יעד";
         b.append(top, s);
         b.setAttribute("aria-label", c.name + ": " + nums.textContent + ". " + s.textContent + ". לחצו לרישום הוצאה");
         cl.append(b);
@@ -2301,7 +2302,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       pace.append(track);
       const s = document.createElement("span"); s.className = "state " + st;
       s.textContent = c.spent > c.budget
-        ? "חריגה של " + fmt(c.spent - c.budget)
+        ? "מעל היעד ב־" + fmt(c.spent - c.budget)
         : st === "warn" ? "מהר מדי. נשארו " + fmt(c.budget - c.spent)
         : "נשארו " + fmt(c.budget - c.spent);
       b.append(top, pace, s);
@@ -2549,8 +2550,13 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     // The expense counts toward that month's plan, so make sure the month exists
     if (periodOf(row.spent_on) === month) commit();
     if ($("txRepeat").checked) {
-      store.recurring = (store.recurring || []).concat([{ id: catId(), note: row.note, amount: row.amount, category: row.category, day: +row.spent_on.slice(8), last: periodOf(row.spent_on), checked: todayStr() }]);
-      renderRecurring();
+      // A monthly charge comes off the income up front, so it isn't logged as a daily expense too
+      const n = row.note || catNames()[row.category] || "חיוב קבוע";
+      closeSheet();
+      if (periodOf(row.spent_on) !== month) showPeriodOf(row.spent_on);
+      addFixed(n, row.amount);
+      snack("״" + n + "״ נוסף לחיובים הקבועים: " + fmt(row.amount) + " יורדים מראש מההכנסה כל חודש.");
+      return;
     }
     if ($("txFav").checked) store.favs = (store.favs || []).filter((f) => f.note !== row.note).concat([{ note: row.note, amount: row.amount, category: row.category }]);
     remember(row);
@@ -2641,6 +2647,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     return out.slice(0, 8) + "-" + out.slice(8, 12) + "-4" + out.slice(13, 16) + "-a" + out.slice(17, 20) + "-" + out.slice(20, 32);
   }
   function runRecurring() {
+    if (!(store.recurring || []).length) return;
     const cur = thisMonth(), today = todayStr();
     let changed = false;
     (store.recurring || []).forEach((r) => {
@@ -2658,39 +2665,49 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     });
     if (changed) { if (month === cur) commit(); persist(); }
   }
+  // Subscriptions and fixed bills are one list: the month plan's fixed charges, taken off the income up front
+  const fixedList = () => data().expenses.filter((x) => (x.name || "").trim() || +x.amount > 0);
   function renderRecurring() {
     if (!store) return;
-    const names = catNames();
-    const box = $("recList"); box.innerHTML = "";
-    const list = store.recurring || [];
-    $("recSum").textContent = fmt(list.reduce((s, r) => s + r.amount, 0));
+    const d = data(), box = $("recList"); box.innerHTML = "";
+    const list = fixedList();
+    $("recSum").textContent = fmt(list.reduce((s, x) => s + (+x.amount || 0), 0));
     renderRecAdd(!list.length);
-    if (!list.length) { renderSubs(); return; }
-    list.forEach((r, i) => {
+    list.forEach((x) => {
       const row = document.createElement("div"); row.className = "tx";
       const what = document.createElement("div"); what.className = "what";
-      const t = document.createElement("b"); t.textContent = r.note || names[r.category] || "הוצאה קבועה";
-      const c = document.createElement("span"); c.textContent = (names[r.category] || "קטגוריה שנמחקה") + " · כל " + r.day + " בחודש";
+      const t = document.createElement("b"); t.textContent = x.name || "חיוב קבוע";
+      const c = document.createElement("span"); c.textContent = "יורד מראש מההכנסה כל חודש";
       what.append(t, c);
-      const amt = document.createElement("span"); amt.className = "amt"; amt.textContent = fmt(r.amount);
+      const amt = document.createElement("span"); amt.className = "amt"; amt.textContent = fmt(+x.amount || 0);
       const del = document.createElement("button"); del.type = "button"; del.className = "del"; del.textContent = "×";
-      del.setAttribute("aria-label", "הפסקת הרישום האוטומטי של " + t.textContent);
+      del.setAttribute("aria-label", "הסרת " + t.textContent + " מהחיובים הקבועים");
       del.addEventListener("click", () => {
-        store.recurring.splice(i, 1); persist(); renderRecurring();
-        snack("הרישום האוטומטי של " + t.textContent + " הופסק. מה שכבר נרשם נשאר.", () => { store.recurring.splice(i, 0, r); persist(); renderRecurring(); });
+        const at = d.expenses.indexOf(x);
+        d.expenses.splice(at, 1); touch(); render();
+        snack(t.textContent + " הוסר מהחיובים הקבועים מהחודש הזה והלאה.", () => { data().expenses.splice(at, 0, x); touch(); render(); });
       });
       row.append(what, amt, del);
       box.append(row);
     });
     renderSubs();
   }
+  function addFixed(name, amount) {
+    commit();
+    const d = data();
+    // Fill an empty plan row first, so the plan doesn't keep a blank line
+    const blank = d.expenses.find((x) => !(x.name || "").trim() && !(+x.amount > 0));
+    if (blank) { blank.name = name; blank.amount = amount; blank.checked = todayStr(); }
+    else d.expenses.push({ name, amount, checked: todayStr() });
+    touch(); render();
+  }
 
-  // Add a subscription right in its card: name, amount, category and charge day
+  // Add a subscription or fixed bill right in its card
   let recAddOpen = false;
   function renderRecAdd(empty) {
     const box = $("recAddBox"); box.innerHTML = "";
     if (!empty && !recAddOpen) {
-      const b = document.createElement("button"); b.type = "button"; b.className = "btn recopen"; b.textContent = "＋ הוספת מנוי";
+      const b = document.createElement("button"); b.type = "button"; b.className = "btn recopen"; b.textContent = "＋ הוספת מנוי או חיוב קבוע";
       b.addEventListener("click", () => { recAddOpen = true; renderRecAdd(false); box.querySelector("input").focus(); });
       box.append(b); return;
     }
@@ -2698,35 +2715,20 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     const field = (label, el, cls) => { const l = document.createElement("label"); if (cls) l.className = cls; l.append(label, el); f.append(l); return el; };
     const name = document.createElement("input"); name.type = "text"; name.maxLength = 200; name.autocomplete = "off"; name.placeholder = "למשל נטפליקס, חדר כושר";
     const amt = document.createElement("input"); amt.type = "number"; amt.min = "0"; amt.step = "0.1"; amt.inputMode = "decimal"; amt.placeholder = "₪";
-    const day = document.createElement("input"); day.type = "number"; day.min = "1"; day.max = "31"; day.inputMode = "numeric"; day.placeholder = "1–31";
-    const cat = document.createElement("select");
-    catTree(data().cats).forEach(({ c, depth }) => { const o = document.createElement("option"); o.value = c.id; o.textContent = (depth ? "↳ " : "") + catIcon(c) + " " + (c.name || "בלי שם"); cat.append(o); });
-    const sub = data().cats.find((c) => /מנוי|קבוע|תקשורת|חשבונות/.test(c.name || ""));
-    if (sub) cat.value = sub.id;
-    const now = document.createElement("input"); now.type = "checkbox";
-    field("שם המנוי", name, "full"); field("סכום לחודש", amt); field("יום החיוב בחודש", day); field("קטגוריה", cat, "full");
-    field("", now, "full chk").parentNode.append("החיוב של החודש כבר ירד ועוד לא רשמתי אותו");
+    field("שם", name); field("סכום לחודש", amt);
     const acts = document.createElement("div"); acts.className = "acts";
-    const ok = document.createElement("button"); ok.type = "submit"; ok.className = "btn primary"; ok.textContent = "＋ הוספת מנוי";
+    const ok = document.createElement("button"); ok.type = "submit"; ok.className = "btn primary"; ok.textContent = "＋ הוספה";
     acts.append(ok);
     if (!empty) { const no = document.createElement("button"); no.type = "button"; no.className = "btn"; no.textContent = "ביטול"; no.addEventListener("click", () => { recAddOpen = false; renderRecAdd(false); }); acts.append(no); }
     f.append(acts);
     f.addEventListener("submit", (e) => {
       e.preventDefault();
-      const n = name.value.trim(), a = Math.round((parseFloat(amt.value) || 0) * 100) / 100, d = Math.round(+day.value);
-      if (!n) { name.focus(); snack("מה שם המנוי?"); return; }
+      const n = name.value.trim(), a = Math.round((parseFloat(amt.value) || 0) * 100) / 100;
+      if (!n) { name.focus(); snack("מה השם?"); return; }
       if (!(a > 0)) { amt.focus(); snack("צריך סכום גדול מאפס."); return; }
-      if (!(d >= 1 && d <= 31)) { day.focus(); snack("יום החיוב: מספר בין 1 ל־31."); return; }
-      const cur = thisMonth(), today = todayStr();
-      // Charge day already passed this month: log it now only when asked, otherwise start from next month
-      let passed = false;
-      for (let s2 = periodStart(cur); s2 <= today && s2 <= periodEnd(cur); s2 = dateAdd(s2, 1)) { const [y, mo] = s2.split("-").map(Number); if (+s2.slice(8) === Math.min(d, new Date(y, mo, 0).getDate())) passed = true; }
-      const r = { id: catId(), note: n, amount: a, category: cat.value, day: d, checked: today };
-      if (passed && !now.checked) r.last = cur;
-      store.recurring = (store.recurring || []).concat([r]);
       recAddOpen = false;
-      persist(); runRecurring(); renderRecurring(); renderTracking();
-      snack("״" + n + "״ נוסף. הוא יירשם לבד כל " + d + " בחודש.");
+      addFixed(n, a);
+      snack("״" + n + "״ נוסף. " + fmt(a) + " יורדים מראש מההכנסה כל חודש.");
     });
     box.append(f);
   }
@@ -3993,9 +3995,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     const spentCat = monthTx().filter((r) => ids.includes(r.category)).reduce((s, r) => s + r.amount, 0);
     const budget = c ? +c.budget || 0 : 0, before = spentCat - row.amount;
     let msg = "נרשם: " + fmt(row.amount) + (ownName ? " על " + ownName : "");
-    if (c && budget > 0 && spentCat > budget) msg = "נרשם. " + c.name + " בחריגה של " + fmt(spentCat - budget) + ".";
-    else if (c && budget > 0 && spentCat >= budget * 0.8 && before < budget * 0.8) msg = "נרשם. ⚠️ " + c.name + ": השתמשת ב־" + Math.round(spentCat / budget * 100) + "% מהתקציב. נשארו " + fmt(budget - spentCat) + ".";
-    if (c && budget > 0 && ((spentCat > budget && before <= budget) || (spentCat >= budget * 0.8 && before < budget * 0.8))) notifyApp("⚠️ " + c.name, msg.replace(/^נרשם\. (⚠️ )?/, ""));
+    // Categories only show where the money went: no overspend warnings here (the category's bar turns red)
     snack(msg, () => { delTx(row.id); renderTracking(); });
   }
   // A phone notification through the Android app (1.6 and later); elsewhere the snack is enough
@@ -4063,42 +4063,38 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   const SUB_RE = /נטפליקס|netflix|ספוטיפיי|spotify|יוטיוב|youtube|דיסני|disney|אפל|apple|icloud|גוגל|google|אמזון|amazon|chatgpt|openai|חדר כושר|מנוי|סלקום|פרטנר|הוט|hot|yes|בזק|גולן|פלאפון|רמי לוי תקשורת|wolt\+|וולט פלוס|xbox|playstation|פלייסטיישן|canva|dropbox|adobe/i;
   function renderSubs() {
     if (!store) return;
-    const list = store.recurring || [];
-    const monthly = list.reduce((s2, r) => s2 + r.amount, 0);
+    const list = fixedList();
+    const monthly = list.reduce((s2, x) => s2 + (+x.amount || 0), 0);
     $("recYear").textContent = list.length ? "כל אלה ביחד: " + fmt(monthly * 12) + " בשנה." : "";
     const old = dateAdd(todayStr(), -90);
     [...$("recList").children].forEach((row, i) => {
-      const r = list[i]; if (!r || !row.querySelector(".what")) return;
+      const x = list[i]; if (!x || !row.querySelector(".what")) return;
       const w = row.querySelector(".what");
-      const y = document.createElement("span"); y.className = "sub2"; y.textContent = fmt(r.amount * 12) + " בשנה";
+      const y = document.createElement("span"); y.className = "sub2"; y.textContent = fmt((+x.amount || 0) * 12) + " בשנה";
       w.append(y);
-      if (!r.checked || r.checked < old) {
+      if (!x.checked || x.checked < old) {
         const chk = document.createElement("button"); chk.type = "button"; chk.className = "linkbtn"; chk.textContent = "✓ עדיין צריך את זה?";
         chk.title = "לחיצה מאשרת שאתה עדיין משתמש בזה (נשאל שוב בעוד 3 חודשים)";
-        chk.addEventListener("click", () => { r.checked = todayStr(); r.addedOn = r.addedOn || ""; store.subsChecked = true; persist(); renderRecurring(); snack("מעולה. נשאל שוב בעוד 3 חודשים. לא צריך? לחץ × כדי להפסיק לרשום אותו, ותבטל גם אצל הספק."); });
+        chk.addEventListener("click", () => { x.checked = todayStr(); store.subsChecked = true; touch(); renderRecurring(); snack("מעולה. נשאל שוב בעוד 3 חודשים. לא צריך? לחץ × כדי להסיר אותו, ותבטל גם אצל הספק."); });
         w.append(chk);
       }
     });
     // Expenses that look like a subscription and aren't on the list yet
     const box = $("subSuggest"); box.innerHTML = "";
-    const have = new Set(list.map((r) => (r.note || "").trim()));
+    const have = new Set(list.map((x) => (x.name || "").trim()));
     const all = allNotes();
     Object.keys(all).filter((k) => SUB_RE.test(k) && !have.has(k) && !(store.subHide || []).includes(k)).slice(0, 4).forEach((k) => {
       const o = all[k];
       const row = document.createElement("div"); row.className = "subrow";
-      const t = document.createElement("span"); t.textContent = "🤔 ״" + k + "״ (" + fmt(o.a) + ") נראה כמו מנוי. לרשום אותו כל חודש?";
+      const t = document.createElement("span"); t.textContent = "🤔 ״" + k + "״ (" + fmt(o.a) + ") נראה כמו מנוי. להוסיף אותו לחיובים הקבועים?";
       const acts = document.createElement("span"); acts.className = "actions";
       const yes = document.createElement("button"); yes.type = "button"; yes.className = "btn"; yes.textContent = "כן, כל חודש";
-      yes.addEventListener("click", () => {
-        store.recurring = list.concat([{ id: catId(), note: k, amount: o.a, category: o.c, day: +(o.t || todayStr()).slice(8), last: periodOf(o.t || todayStr()), checked: todayStr() }]);
-        persist(); renderRecurring(); snack("״" + k + "״ יירשם לבד כל חודש.");
-      });
+      yes.addEventListener("click", () => { addFixed(k, o.a); snack("״" + k + "״ נוסף. " + fmt(o.a) + " יורדים מראש מההכנסה כל חודש."); });
       const no = document.createElement("button"); no.type = "button"; no.className = "linkbtn"; no.textContent = "לא";
       no.addEventListener("click", () => { store.subHide = (store.subHide || []).concat([k]); persist(); renderRecurring(); });
       acts.append(yes, no); row.append(t, acts); box.append(row);
     });
   }
-
 
   // ---- Insights: the previous month, streaks, the donut, comparisons, the month summary and badges ----
   const PIE = ["#f97316", "#ec4899", "#8b5cf6", "#3b82f6", "#10b981", "#f5b400", "#ef4444", "#14b8a6", "#a855f7", "#64748b"];
