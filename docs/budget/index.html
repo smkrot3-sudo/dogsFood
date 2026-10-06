@@ -816,6 +816,10 @@ body.layedit #fab, body.onsettings #fab { display: none; }
 .shiftinc { display: flex; justify-content: space-between; gap: 8px; align-items: center; padding: 10px 14px; border-radius: 12px; background: var(--surface-2); font-weight: 600; }
 .shiftinc b { font-variant-numeric: tabular-nums; }
 
+/* Savings % is switched off for now (user's call, 2026-10-06) */
+body.nosave .savebit, body.nosave #bSave { display: none !important; }
+body.nosave .split { grid-template-columns: 1fr; }
+
 /* "Allowed today": one number, details on tap */
 .today .todaymore { justify-self: start; align-self: start; background: rgba(255,255,255,.18); color: inherit; border: 0; border-radius: 999px; padding: 6px 14px; font-weight: 700; font-size: 14px; }
 .today .todaybox { display: grid; gap: 12px; }
@@ -1101,11 +1105,11 @@ body.layedit #fab, body.onsettings #fab { display: none; }
           </div>
           <div class="legend">
             <span><i style="background:var(--must)"></i>חשבונות קבועים</span>
-            <span><i style="background:var(--accent)"></i>חיסכון</span>
+            <span class="savebit"><i style="background:var(--accent)"></i>חיסכון</span>
             <span><i style="background:var(--spend)"></i>כסף חופשי</span>
           </div>
           <div class="alert" id="alert" hidden></div>
-          <div class="slider">
+          <div class="slider savebit">
             <div class="top"><label for="pct">כמה מהיתרה לחסוך</label><span id="pctVal">50%</span></div>
             <input type="range" id="pct" min="0" max="100" step="5" value="50">
             <div class="presets" id="presets">
@@ -1116,7 +1120,7 @@ body.layedit #fab, body.onsettings #fab { display: none; }
             </div>
           </div>
           <div class="split">
-            <div class="tile save">
+            <div class="tile save savebit">
               <span class="t">להעביר לחיסכון</span>
               <span class="n" id="save">₪0</span>
               <span class="d" id="saveD">חיסכון לחודש זה</span>
@@ -1463,8 +1467,8 @@ body.layedit #fab, body.onsettings #fab { display: none; }
       <div class="wzbills" id="wzBills"></div>
     </div>
     <div class="wzstep" data-step="3" hidden>
-      <p class="sub">כמה מהיתרה לחסוך כל חודש?</p>
-      <div class="seg" id="wzPct" role="group" aria-label="אחוז חיסכון">
+      <p class="sub savebit">כמה מהיתרה לחסוך כל חודש?</p>
+      <div class="seg savebit" id="wzPct" role="group" aria-label="אחוז חיסכון">
         <button type="button" data-p="10" aria-pressed="false">10%</button>
         <button type="button" data-p="20" aria-pressed="true">20%</button>
         <button type="button" data-p="30" aria-pressed="false">30%</button>
@@ -1881,6 +1885,10 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   }
   let lastShiftInc = null;
   const loadingPrevPay = new Set();
+  // Savings % is switched off for now: nothing is set aside, and its controls are hidden
+  const SAVINGS_OFF = true;
+  document.body.classList.toggle("nosave", SAVINGS_OFF);
+  const savePct = (d) => (SAVINGS_OFF ? 0 : +d.pct || 0);
   function plan() {
     const d = data();
     const shiftInc = shiftIncome(month);
@@ -1888,7 +1896,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     const exp = d.expenses.reduce((s, x) => s + (+x.amount || 0), 0);
     const remain = inc - exp;
     const pos = Math.max(remain, 0);
-    const save = Math.round(pos * d.pct / 100);
+    const save = Math.round(pos * savePct(d) / 100);
     const spend = pos - save;
     const catTotal = d.cats.reduce((s, c) => s + (isSub(c, d.cats) ? 0 : +c.budget || 0), 0); // subcategories are part of their main one
     return { d, inc, exp, remain, save, spend, catTotal, shiftInc };
@@ -2757,7 +2765,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     const inc = d.income.reduce((s, x) => s + (+x.amount || 0), 0);
     const exp = d.expenses.reduce((s, x) => s + (+x.amount || 0), 0);
     const pos = Math.max(inc - exp, 0);
-    return pos - Math.round(pos * d.pct / 100);
+    return pos - Math.round(pos * savePct(d) / 100);
   }
   function renderHist() {
     if (!store) return;
@@ -4234,7 +4242,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     const list = tx[m], names = catNames();
     const spent = list.reduce((s2, r) => s2 + r.amount, 0);
     const free = (m === month ? plan().spend : spendOf(d) || 0) + (m === month ? incTotal() : 0);
-    const saved = d ? Math.round(Math.max(d.income.reduce((s2, x) => s2 + (+x.amount || 0), 0) - d.expenses.reduce((s2, x) => s2 + (+x.amount || 0), 0), 0) * d.pct / 100) : 0;
+    const saved = d ? Math.round(Math.max(d.income.reduce((s2, x) => s2 + (+x.amount || 0), 0) - d.expenses.reduce((s2, x) => s2 + (+x.amount || 0), 0), 0) * savePct(d) / 100) : 0;
     const left = free - spent;
     $("sumTitle").textContent = "סיכום " + monthName(m);
     const g = $("sumGrid"); g.innerHTML = "";
@@ -4558,10 +4566,10 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   const wzPick = (id) => (document.querySelector("#" + id + ' [aria-pressed="true"]') || {}).dataset || {};
   function wzSummary() {
     const inc = parseFloat($("wzInc").value) || 0, exp = wzBills().reduce((a, x) => a + x.amount, 0);
-    const pct = +(wzPick("wzPct").p || 20), rem = Math.max(inc - exp, 0), save = Math.round(rem * pct / 100), free = rem - save;
+    const pct = SAVINGS_OFF ? 0 : +(wzPick("wzPct").p || 20), rem = Math.max(inc - exp, 0), save = Math.round(rem * pct / 100), free = rem - save;
     $("wzSum").className = "verdict " + (inc > exp ? "good" : "bad");
     $("wzSum").textContent = inc > exp
-      ? "תחסוך " + fmt(save) + " בחודש, ויישארו לך " + fmt(free) + " כסף חופשי. זה בערך " + fmt(free / 30) + " ליום."
+      ? (save ? "תחסוך " + fmt(save) + " בחודש, ויישארו לך " : "יישארו לך ") + fmt(free) + " כסף חופשי. זה בערך " + fmt(free / 30) + " ליום."
       : "החשבונות הקבועים (" + fmt(exp) + ") גבוהים מההכנסה. נבנה את התוכנית, ואחר כך כדאי לחפש איפה לקצץ.";
   }
   function openWizard() {
@@ -4596,7 +4604,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     d.income = [{ name: "משכורת", amount: inc }];
     d.expenses = wzBills().filter((x) => x.amount > 0);
     d.pct = +(wzPick("wzPct").p || 20);
-    const free = Math.max(inc - d.expenses.reduce((a, x) => a + x.amount, 0), 0) * (100 - d.pct) / 100;
+    const free = Math.max(inc - d.expenses.reduce((a, x) => a + x.amount, 0), 0) * (100 - savePct(d)) / 100;
     const W = [30, 20, 20, 15, 15];
     d.cats = blankCats().map((c, i) => ({ ...c, budget: Math.floor(free * (W[i] || 0) / 100 / 10) * 10 }));
     d.example = false;
@@ -4784,7 +4792,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     histH: "כל עמודה היא כמה הוצאת מהכסף החופשי בחודש אחד, והקו הוא מה שתכננת. עמודה אדומה עם ⚠️ היא חודש עם חריגה.",
     incH: "כמה כסף נכנס לך בחודש אחרי מס (נטו): משכורת, קצבה, עזרה מההורים. מכאן מתחיל כל החישוב.",
     expH: "תשלומים שחייבים לשלם כל חודש ואי אפשר לוותר עליהם: שכר דירה, חשבונות, תרופות, תחבורה לעבודה.",
-    resH: "מה שנשאר אחרי החשבונות הקבועים מתחלק לשניים: חיסכון (כסף שלא נוגעים בו) וכסף חופשי להוצאות היומיום. בוחרים כמה אחוז לחסוך.",
+    resH: "מה שנשאר אחרי החשבונות הקבועים הוא הכסף החופשי להוצאות היומיום.",
     catH: "מחלקים את הכסף החופשי לקטגוריות, למשל אוכל בחוץ או בילויים. כל הוצאה שנרשמת יורדת מהקטגוריה שלה.",
     recH: "מנויים ותשלומים שחוזרים כל חודש באותו סכום. הם נרשמים לבד ביום שלהם. כל 3 חודשים נשאל אם אתה עדיין צריך כל אחד מהם, כי מנוי שכוח עולה הרבה בשנה.",
     quickH: "הוצאות שחוזרות אצלך הופכות לכפתורים. לחיצה אחת והן נרשמות להיום, בלי לפתוח טופס. ⭐ הם כפתורים ששמרת בעצמך. ״עריכה״ מאפשרת להסיר כפתור.",
