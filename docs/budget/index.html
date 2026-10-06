@@ -820,6 +820,9 @@ body.layedit #fab, body.onsettings #fab { display: none; }
 body.nosave .savebit, body.nosave #bSave { display: none !important; }
 body.nosave .split { grid-template-columns: 1fr; }
 
+#txForm .check[hidden], #txDel[hidden] { display: none !important; }
+#txDel { margin-inline-start: auto; color: var(--danger); }
+
 /* "Allowed today": one number, details on tap */
 .today .todaymore { justify-self: start; align-self: start; background: rgba(255,255,255,.18); color: inherit; border: 0; border-radius: 999px; padding: 6px 14px; font-weight: 700; font-size: 14px; }
 .today .todaybox { display: grid; gap: 12px; }
@@ -1320,6 +1323,7 @@ body.nosave .split { grid-template-columns: 1fr; }
     <div class="foot">
       <button class="btn primary" type="submit" id="txSave">רישום</button>
       <button class="btn" type="button" id="txCancel">ביטול</button>
+      <button class="btn txdel" type="button" id="txDel" hidden>🗑️ מחיקה</button>
     </div>
     <button class="btn wishbtn" type="button" id="txWish">🤔 אולי אקנה. אחליט בעוד 48 שעות</button>
   </form>
@@ -3779,7 +3783,20 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     $("txNoteLbl").firstChild.textContent = inc ? "ממי או על מה? (לא חובה)" : "פירוט (לא חובה)";
     $("txNote").placeholder = inc ? "למשל: דני החזיר על ארוחת הצהריים" : "למשל: שווארמה עם חברים";
     $("modeRow").hidden = !!(editing || editingInc);
+    $("txDel").hidden = !(inc ? editingInc : editing);
   }
+  // Delete the expense or one-off income open in the sheet, with undo
+  $("txDel").addEventListener("click", () => {
+    if (sheetMode === "inc" && editingInc) {
+      const r = editingInc, copy = clean(r);
+      closeSheet(); INC.del(r.id); renderTracking(); renderPay(); renderCal();
+      snack("נמחקה הכנסה של " + fmt(r.amount), () => { INC.save({ ...copy, id: uid() }); renderTracking(); renderPay(); renderCal(); });
+    } else if (editing) {
+      const r = editing, copy = { id: r.id, spent_on: r.spent_on, amount: r.amount, category: r.category, note: r.note, created_at: r.created_at };
+      closeSheet(); delTx(r.id); renderTracking();
+      snack("נמחקה הוצאה של " + fmt(r.amount), () => { addTx({ ...copy, id: uid() }); renderTracking(); });
+    }
+  });
   $("modeExp").addEventListener("click", () => setSheetMode("exp"));
   $("modeInc").addEventListener("click", () => setSheetMode("inc"));
   (function () {
