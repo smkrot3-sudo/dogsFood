@@ -1869,15 +1869,27 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   // Pay from logged shifts (gross) counts as income: from the same month, or from the month before
   // (pay that arrives this month for last month's work), as each user chooses in settings
   const shiftIncomeFrom = () => (store && ["same", "prev", "off"].includes(settings().shiftIncome) ? settings().shiftIncome : "same");
-  function shiftIncome(m) {
-    const from = shiftIncomeFrom();
-    if (from === "off" || !store) return 0;
-    const pm = from === "prev" ? prevMonth(m) : m;
+  function monthPay(pm, load) {
     if (!shifts[pm]) {
-      if (from === "prev" && !loadingPrevPay.has(pm)) { loadingPrevPay.add(pm); loadShifts(pm).catch(() => { shifts[pm] = shifts[pm] || []; }).then(() => { loadingPrevPay.delete(pm); render(); renderTracking(); }); }
-      return 0;
+      if (load && !loadingPrevPay.has(pm)) { loadingPrevPay.add(pm); loadShifts(pm).catch(() => { shifts[pm] = shifts[pm] || []; }).then(() => { loadingPrevPay.delete(pm); render(); renderTracking(); }); }
+      return null;
     }
     return Math.round(shifts[pm].reduce((s, r) => s + shiftPay(r, settings()).gross, 0));
+  }
+  // For "same month": until this month's logged shifts pass last month's pay, count last month's pay as the
+  // expected income, so the month isn't planned on the few shifts logged so far (past months use what was logged)
+  let shiftIncEst = false;
+  function shiftIncome(m) {
+    const from = shiftIncomeFrom();
+    shiftIncEst = false;
+    if (from === "off" || !store) return 0;
+    if (from === "prev") return monthPay(prevMonth(m), true) || 0;
+    const got = monthPay(m, false);
+    if (got === null) return 0;
+    if (m < thisMonth()) return got;
+    const before = monthPay(prevMonth(m), true) || 0;
+    if (before > got) { shiftIncEst = true; return before; }
+    return got;
   }
   let lastShiftInc = null;
   const loadingPrevPay = new Set();
@@ -2148,7 +2160,9 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     const from = shiftIncomeFrom(), si = plan().shiftInc;
     lastShiftInc = si;
     $("shiftIncRow").hidden = from === "off" || !(+settings().wage > 0 || si > 0);
-    $("shiftIncLbl").textContent = "⏰ מהמשמרות של " + monthName(from === "prev" ? prevMonth(month) : month) + " (ברוטו)";
+    $("shiftIncLbl").textContent = shiftIncEst
+      ? "⏰ צפוי מהמשמרות (כמו ב" + monthName(prevMonth(month)) + ", עד שתעבור את זה)"
+      : "⏰ מהמשמרות של " + monthName(from === "prev" ? prevMonth(month) : month) + " (ברוטו)";
     $("shiftIncVal").textContent = fmt(si);
     $("expSum").textContent = fmt(exp);
     $("remain").textContent = signed(remain);
