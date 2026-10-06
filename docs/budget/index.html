@@ -611,7 +611,7 @@ html.bigtext body { zoom: 1.15; }
 .panel h2.foldable { cursor: pointer; -webkit-tap-highlight-color: transparent; }
 .helptext { background: var(--surface-2); border-radius: 14px; padding: 10px 14px; font-size: 14px; margin: 0; color: var(--fg); font-weight: 400; }
 .helptext::before { content: "💡 "; }
-.today .helpbtn { position: absolute; top: 14px; inset-inline-start: 14px; background: rgba(255, 255, 255, .22); border-color: transparent; color: #fff; z-index: 1; }
+.today .helpbtn { position: absolute; top: 22px; inset-inline-end: 74px; background: rgba(255, 255, 255, .22); border-color: transparent; color: #fff; z-index: 1; }
 .today .lbl { padding-inline-end: 0; }
 .today .helptext { background: rgba(255, 255, 255, .2); color: #fff; }
 /* Choice buttons (tone and the like) */
@@ -644,6 +644,56 @@ html.bigtext body { zoom: 1.15; }
 .tx .sub2 { display: block; font-size: 12.5px; color: var(--spend); font-weight: 600; }
 .subrow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; background: var(--surface-2); border-radius: 14px; padding: 10px 12px; }
 .subrow span { min-width: 0; }
+
+/* Streak line on today's card */
+.streak { display: flex; flex-wrap: wrap; gap: 6px; }
+.streak span { background: rgba(255, 255, 255, .2); border-radius: 999px; padding: 4px 12px; font-weight: 600; font-size: 14px; }
+/* Month summary */
+.sumgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; }
+.sumgrid div { background: var(--surface-2); border-radius: 16px; padding: 10px 12px; display: grid; gap: 2px; }
+.sumgrid span { font-size: 13px; color: var(--muted); font-weight: 600; }
+.sumgrid b { font-size: 20px; font-variant-numeric: tabular-nums; }
+.sumgrid b.pos { color: var(--accent); } .sumgrid b.neg { color: var(--danger); }
+.sumlist { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; font-size: 15px; }
+/* Donut */
+.donut { display: grid; grid-template-columns: 140px minmax(0, 1fr); gap: 14px; align-items: center; }
+@media (max-width: 360px) { .donut { grid-template-columns: minmax(0, 1fr); justify-items: center; } }
+.donut svg { width: 140px; height: 140px; }
+.donut .dl { display: grid; gap: 4px; font-size: 14px; min-width: 0; }
+.donut .dl div { display: flex; gap: 6px; align-items: center; min-width: 0; }
+.donut .dl i { width: 12px; height: 12px; border-radius: 4px; flex: none; }
+.donut .dl .nm { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
+.donut .dl .pc { color: var(--muted); font-variant-numeric: tabular-nums; }
+.donut .ctr { font: 700 15px var(--font-display); fill: var(--fg); }
+.donut .ctr2 { font: 500 11px var(--font-body); fill: var(--muted); }
+/* Goals */
+.goals { display: grid; gap: 10px; }
+.goal { background: var(--surface-2); border-radius: 16px; padding: 12px 14px; display: grid; gap: 8px; }
+.goal .gt { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+.goal .gt b { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.goal .gn { font-variant-numeric: tabular-nums; font-size: 14px; color: var(--muted); white-space: nowrap; }
+.goal .gbar { height: 12px; border-radius: 99px; background: var(--line); overflow: hidden; }
+.goal .gbar i { display: block; height: 100%; border-radius: 99px; background: var(--good-grad); }
+.goal .gl { font-size: 14px; color: var(--muted); }
+.goal.done { background: var(--accent-soft); }
+.goal .gdep { display: flex; gap: 8px; }
+.goal .gdep input { max-width: 140px; }
+.goalform { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) auto; gap: 8px; }
+/* Compare */
+.cmp { display: grid; gap: 10px; }
+.cmprow { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 10px; align-items: baseline; background: var(--surface-2); border-radius: 16px; padding: 10px 14px; }
+.cmprow b { font-variant-numeric: tabular-nums; }
+.cmprow small { grid-column: 1 / -1; color: var(--muted); font-size: 13.5px; }
+.up { color: var(--danger); } .down { color: var(--accent); }
+/* Badges */
+#badgeBox { grid-column: 1 / -1; }
+.badges { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 8px; }
+.badge { display: grid; justify-items: center; text-align: center; gap: 2px; background: var(--surface-2); border-radius: 16px; padding: 10px 6px; }
+.badge .be { font-size: 30px; line-height: 1.1; }
+.badge b { font-size: 13.5px; line-height: 1.25; }
+.badge small { font-size: 11.5px; color: var(--muted); line-height: 1.3; }
+.badge.locked .be { filter: grayscale(1); opacity: .35; }
+.badge.locked b { color: var(--muted); }
 </style>
 </head>
 <body>
@@ -734,6 +784,14 @@ html.bigtext body { zoom: 1.15; }
           <div class="cap"><span id="paceSpent"></span><span id="paceDay"></span></div>
         </div>
         <div class="verdict" id="verdict" role="status"></div>
+        <div class="streak" id="streak" hidden></div>
+      </section>
+
+      <section class="panel summary" id="sumBox" aria-labelledby="sumH" hidden>
+        <h2 id="sumH" class="pc-mint" data-e="📋"><span class="h2t" id="sumTitle">סיכום החודש</span></h2>
+        <div class="sumgrid" id="sumGrid"></div>
+        <ul class="sumlist" id="sumList"></ul>
+        <div class="actions"><button class="btn" type="button" id="sumOk" hidden>הבנתי, תסתיר</button></div>
       </section>
 
       <section class="panel" aria-labelledby="quickH">
@@ -759,7 +817,18 @@ html.bigtext body { zoom: 1.15; }
 
       <section class="panel" aria-labelledby="catsH">
         <h2 id="catsH" class="pc-pink" data-e="🛍️">לפי קטגוריות <span class="sum" id="spentSum">₪0</span></h2>
+        <div class="donut" id="donut" hidden></div>
         <div class="cats" id="catList"></div>
+      </section>
+
+      <section class="panel" aria-labelledby="goalsH">
+        <h2 id="goalsH" class="pc-mint" data-e="🎯">יעדי חיסכון</h2>
+        <div class="goals" id="goalList"></div>
+        <form class="goalform" id="goalForm" novalidate>
+          <input type="text" id="goalName" maxlength="40" placeholder="למה חוסכים? למשל: טיול" aria-label="שם היעד">
+          <input type="number" id="goalTarget" min="1" step="50" inputmode="decimal" placeholder="₪ כמה" aria-label="סכום היעד">
+          <button class="btn primary" type="submit">+ יעד</button>
+        </form>
       </section>
 
       <section class="panel" aria-labelledby="logH">
@@ -798,6 +867,11 @@ html.bigtext body { zoom: 1.15; }
         <div class="log" id="wishList"></div>
       </section>
 
+      <section class="panel" aria-labelledby="cmpH">
+        <h2 id="cmpH" class="pc-violet" data-e="📈">לעומת קודם</h2>
+        <div class="cmp" id="cmpBox"></div>
+      </section>
+
       <section class="panel" aria-labelledby="histH">
         <h2 id="histH" class="pc-blue" data-e="📊">לאורך החודשים</h2>
         <p class="hint">העמודה היא כמה הוצאת מהכסף החופשי, והקו הוא מה שתכננת.</p>
@@ -806,6 +880,11 @@ html.bigtext body { zoom: 1.15; }
         <p class="histnote" id="histTop"></p>
       </section>
     </div>
+
+    <section class="panel" aria-labelledby="badgeH" id="badgeBox">
+      <h2 id="badgeH" class="pc-yellow" data-e="🏆">הישגים <span class="sum" id="badgeSum">0</span></h2>
+      <div class="badges" id="badgeList"></div>
+    </section>
 
     <details class="plan" id="planBox">
       <summary>📋 התוכנית של החודש</summary>
@@ -1773,6 +1852,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     renderQuick();
     renderRecurring();
     fillFindCats();
+    renderInsights();
   }
 
   function catNames() {
@@ -3216,6 +3296,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     });
   }
   function quickLog(it) {
+    store.usedQuick = true;
     const row = { id: uid(), spent_on: todayStr(), amount: it.amount, category: it.category, note: it.note || "", created_at: new Date().toISOString() };
     if (periodOf(row.spent_on) === month) commit();
     remember(row); persist();
@@ -3311,7 +3392,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       if (!r.checked || r.checked < old) {
         const chk = document.createElement("button"); chk.type = "button"; chk.className = "linkbtn"; chk.textContent = "✓ עדיין צריך את זה?";
         chk.title = "לחיצה מאשרת שאתה עדיין משתמש בזה (נשאל שוב בעוד 3 חודשים)";
-        chk.addEventListener("click", () => { r.checked = todayStr(); persist(); renderRecurring(); snack("מעולה. נשאל שוב בעוד 3 חודשים. לא צריך? לחץ × כדי להפסיק לרשום אותו, ותבטל גם אצל הספק."); });
+        chk.addEventListener("click", () => { r.checked = todayStr(); r.addedOn = r.addedOn || ""; store.subsChecked = true; persist(); renderRecurring(); snack("מעולה. נשאל שוב בעוד 3 חודשים. לא צריך? לחץ × כדי להפסיק לרשום אותו, ותבטל גם אצל הספק."); });
         w.append(chk);
       }
     });
@@ -3335,6 +3416,290 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     });
   }
 
+
+  // ---- Insights: the previous month, streaks, the donut, comparisons, the month summary and badges ----
+  const PIE = ["#f97316", "#ec4899", "#8b5cf6", "#3b82f6", "#10b981", "#f5b400", "#ef4444", "#14b8a6", "#a855f7", "#64748b"];
+  // Expenses of every loaded month, once each
+  function allTx() { const seen = new Map(); Object.values(tx).forEach((l) => l.forEach((r) => seen.set(r.id, r))); return [...seen.values()]; }
+  async function ensurePrev(m) {
+    const pm = prevMonth(m);
+    if (tx[pm]) return;
+    try { await loadTx(pm); } catch (e) { const c = lsGet(cacheKey()); tx[pm] = (c && c.tx && c.tx[pm]) || []; }
+    if (store) renderTracking();
+  }
+  const isRecurringRow = (r) => (store.recurring || []).some((x) => (x.note || "") === (r.note || "") && +x.amount === +r.amount && x.category === r.category);
+  function streakInfo() {
+    const cur = thisMonth(), days = periodDays(cur);
+    const sp = (cur === month ? plan().spend : spendOf(store.months[cur]) || 0) + (cur === month ? incTotal() : 0);
+    const avg = sp / days;
+    if (!(avg > 0)) return null;
+    // Only days whose month is loaded can be judged
+    const loaded = Object.keys(tx).filter((m) => m <= cur).sort();
+    if (!loaded.length) return null;
+    const byDay = {}; let first = null;
+    allTx().forEach((r) => { if (isRecurringRow(r)) return; byDay[r.spent_on] = (byDay[r.spent_on] || 0) + r.amount; if (!first || r.spent_on < first) first = r.spent_on; });
+    if (!first) return null;
+    let from = periodStart(loaded[0]);
+    for (let i = loaded.length - 1; i > 0; i--) if (loaded[i - 1] !== prevMonth(loaded[i])) { from = periodStart(loaded[i]); break; }
+    if (first > from) from = first;
+    const today = todayStr();
+    let n = 0;
+    for (let d = today; d >= from; d = dateAdd(d, -1)) { if ((byDay[d] || 0) <= avg) n++; else break; }
+    let free = 0;
+    for (let d = periodStart(cur) > from ? periodStart(cur) : from; d < today; d = dateAdd(d, 1)) if (!byDay[d]) free++;
+    return { n, free, avg };
+  }
+  function renderStreak() {
+    const box = $("streak"); box.innerHTML = "";
+    const st = month === thisMonth() ? streakInfo() : null;
+    if (!st) { box.hidden = true; return; }
+    const add = (t) => { const s2 = document.createElement("span"); s2.textContent = t; box.append(s2); };
+    if (st.n >= 2) add("🔥 " + st.n + " ימים ברצף בתוך התקציב היומי");
+    if (st.free) add("🧘 " + st.free + (st.free === 1 ? " יום בלי הוצאה" : " ימים בלי הוצאה") + " החודש");
+    box.hidden = !box.children.length;
+  }
+  function renderDonut() {
+    const box = $("donut"), names = catNames();
+    const by = {};
+    monthTx().forEach((r) => { by[r.category] = (by[r.category] || 0) + r.amount; });
+    let items = Object.entries(by).sort((a, b) => b[1] - a[1]);
+    const total = items.reduce((s2, [, v]) => s2 + v, 0);
+    box.innerHTML = "";
+    if (!total || items.length < 2) { box.hidden = true; return; }
+    box.hidden = false;
+    if (items.length > 6) items = items.slice(0, 5).concat([["_rest", items.slice(5).reduce((s2, [, v]) => s2 + v, 0)]]);
+    const ns = "http://www.w3.org/2000/svg", R = 52, C = 2 * Math.PI * R;
+    const el = (tag, at, text) => { const n = document.createElementNS(ns, tag); Object.entries(at).forEach(([k, v]) => n.setAttribute(k, v)); if (text != null) n.textContent = text; return n; };
+    const svg = el("svg", { viewBox: "0 0 140 140", role: "img" });
+    svg.setAttribute("aria-label", items.map(([id, v]) => (id === "_rest" ? "אחר" : names[id] || "קטגוריה שנמחקה") + " " + Math.round(v / total * 100) + "%").join(", "));
+    let off = 0;
+    const legend = document.createElement("div"); legend.className = "dl";
+    items.forEach(([id, v], i) => {
+      const len = v / total * C, col = PIE[i % PIE.length];
+      svg.append(el("circle", { cx: 70, cy: 70, r: R, fill: "none", stroke: col, "stroke-width": 22, "stroke-dasharray": Math.max(len - 1.5, .5) + " " + (C - Math.max(len - 1.5, .5)), "stroke-dashoffset": -off, transform: "rotate(-90 70 70)" }));
+      off += len;
+      const nm = id === "_rest" ? "אחר" : names[id] || "קטגוריה שנמחקה";
+      const row = document.createElement("div");
+      const sw = document.createElement("i"); sw.style.background = col;
+      const t = document.createElement("span"); t.className = "nm"; t.textContent = (id === "_rest" ? "➕" : catEmoji(nm)) + " " + nm;
+      const pc = document.createElement("span"); pc.className = "pc"; pc.textContent = Math.round(v / total * 100) + "%";
+      row.append(sw, t, pc); legend.append(row);
+    });
+    svg.append(el("text", { x: 70, y: 70, "text-anchor": "middle", class: "ctr" }, fmt(total)));
+    svg.append(el("text", { x: 70, y: 88, "text-anchor": "middle", class: "ctr2" }, "הוצאת"));
+    box.append(svg, legend);
+  }
+  function sumBy(list) { const o = {}; list.forEach((r) => { o[r.category] = (o[r.category] || 0) + r.amount; }); return o; }
+  function renderCompare() {
+    const box = $("cmpBox"); box.innerHTML = "";
+    const pm = prevMonth(month), names = catNames();
+    const row = (title, a, b, note) => {
+      const d = document.createElement("div"); d.className = "cmprow";
+      const t = document.createElement("span"); t.textContent = title;
+      const v = document.createElement("b"); v.textContent = fmt(a);
+      d.append(t, v);
+      const sm = document.createElement("small");
+      if (b > 0) {
+        const diff = a - b, pct = Math.round(Math.abs(diff) / b * 100);
+        const arrow = document.createElement("span"); arrow.className = diff > 0 ? "up" : "down";
+        arrow.textContent = diff > 0 ? "▲ " + fmt(diff) + " יותר (" + pct + "%)" : diff < 0 ? "▼ " + fmt(-diff) + " פחות (" + pct + "%)" : "בדיוק כמו";
+        sm.append(arrow, " " + note + " (" + fmt(b) + ")");
+      } else sm.textContent = "אין עם מה להשוות " + note + ".";
+      d.append(sm); box.append(d);
+    };
+    // This month so far against the same number of days last month
+    if (tx[pm]) {
+      const isCur = month === thisMonth();
+      const dayNum = isCur ? daysBetween(periodStart(month), todayStr()) + 1 : periodDays(month);
+      const now = monthTx().filter((r) => daysBetween(periodStart(month), r.spent_on) < dayNum);
+      const then = tx[pm].filter((r) => daysBetween(periodStart(pm), r.spent_on) < dayNum);
+      const a = now.reduce((s2, r) => s2 + r.amount, 0), b = then.reduce((s2, r) => s2 + r.amount, 0);
+      row(isCur ? "החודש עד היום (" + dayNum + " ימים)" : "כל " + monthName(month), a, b, isCur ? "לעומת אותם ימים ב" + monthName(pm) : "לעומת " + monthName(pm));
+      // The categories that moved the most
+      const A = sumBy(now), B = sumBy(then);
+      const moves = [...new Set(Object.keys(A).concat(Object.keys(B)))].map((id) => [id, (A[id] || 0) - (B[id] || 0)]).filter(([, v]) => Math.abs(v) >= 1).sort((x, y) => Math.abs(y[1]) - Math.abs(x[1])).slice(0, 3);
+      if (moves.length) {
+        const d = document.createElement("div"); d.className = "cmprow";
+        const t = document.createElement("span"); t.textContent = "מה זז הכי הרבה";
+        d.append(t, document.createElement("span"));
+        moves.forEach(([id, v]) => {
+          const sm = document.createElement("small"); const nm = names[id] || "קטגוריה שנמחקה";
+          const ar = document.createElement("span"); ar.className = v > 0 ? "up" : "down"; ar.textContent = v > 0 ? "▲ " + fmt(v) : "▼ " + fmt(-v);
+          sm.append(catEmoji(nm) + " " + nm + ": ", ar); d.append(sm);
+        });
+        box.append(d);
+      }
+    }
+    // This week against last week (weeks start on Sunday)
+    if (month === thisMonth()) {
+      const today = todayStr(), [y, m2, d2] = today.split("-").map(Number);
+      const wStart = dateAdd(today, -new Date(y, m2 - 1, d2).getDay()), lastStart = dateAdd(wStart, -7);
+      const all = allTx();
+      const a = all.filter((r) => r.spent_on >= wStart && r.spent_on <= today).reduce((s2, r) => s2 + r.amount, 0);
+      const sameDay = dateAdd(lastStart, daysBetween(wStart, today));
+      const b = all.filter((r) => r.spent_on >= lastStart && r.spent_on <= sameDay).reduce((s2, r) => s2 + r.amount, 0);
+      const hasLast = Object.keys(tx).some((mm) => periodStart(mm) <= lastStart);
+      row("השבוע (מיום ראשון)", a, hasLast ? b : 0, "לעומת אותם ימים בשבוע שעבר");
+    }
+    if (!box.children.length) { const e = document.createElement("p"); e.className = "empty"; e.textContent = "ההשוואה תופיע כשיהיו הוצאות גם בחודש הקודם."; box.append(e); }
+  }
+
+  // The month summary: on a past month, and in the first 5 days of a new month for the one that just ended
+  function renderSummary() {
+    const box = $("sumBox"), cur = thisMonth();
+    let m = null, early = false;
+    if (month < cur) m = month;
+    else if (month === cur && daysBetween(periodStart(cur), todayStr()) < 5 && !(store.sumSeen || []).includes(prevMonth(cur)) && store.months[prevMonth(cur)] && tx[prevMonth(cur)] && tx[prevMonth(cur)].length) { m = prevMonth(cur); early = true; }
+    if (!m || !tx[m]) { box.hidden = true; return; }
+    const d = store.months[m];
+    const list = tx[m], names = catNames();
+    const spent = list.reduce((s2, r) => s2 + r.amount, 0);
+    const free = (m === month ? plan().spend : spendOf(d) || 0) + (m === month ? incTotal() : 0);
+    const saved = d ? Math.round(Math.max(d.income.reduce((s2, x) => s2 + (+x.amount || 0), 0) - d.expenses.reduce((s2, x) => s2 + (+x.amount || 0), 0), 0) * d.pct / 100) : 0;
+    const left = free - spent;
+    $("sumTitle").textContent = "סיכום " + monthName(m);
+    const g = $("sumGrid"); g.innerHTML = "";
+    const tile = (label, val, cls) => { const t = document.createElement("div"); const a = document.createElement("span"); a.textContent = label; const b = document.createElement("b"); b.textContent = val; if (cls) b.className = cls; t.append(a, b); g.append(t); };
+    tile("הוצאת", fmt(spent));
+    tile(left >= 0 ? "נשאר מהכסף החופשי" : "חריגה", fmt(Math.abs(left)), left >= 0 ? "pos" : "neg");
+    if (saved) tile("תוכנן לחיסכון", fmt(saved), "pos");
+    const days = periodDays(m), byDay = {};
+    list.forEach((r) => { byDay[r.spent_on] = (byDay[r.spent_on] || 0) + r.amount; });
+    let nos = 0, inb = 0;
+    for (let i = 0; i < days; i++) { const ds = dateAdd(periodStart(m), i); if (!byDay[ds]) nos++; if ((byDay[ds] || 0) <= free / days) inb++; }
+    tile("ימים בתוך התקציב", inb + " מתוך " + days);
+    const ul = $("sumList"); ul.innerHTML = "";
+    const li = (t) => { const x = document.createElement("li"); x.textContent = t; ul.append(x); };
+    const by = sumBy(list), top = Object.entries(by).sort((a, b) => b[1] - a[1])[0];
+    if (top) li("🏷️ הכי הרבה יצא על " + (names[top[0]] || "קטגוריה שנמחקה") + ": " + fmt(top[1]) + " (" + Math.round(top[1] / (spent || 1) * 100) + "%).");
+    const overs = (d && d.cats || []).filter((c) => (by[c.id] || 0) > (+c.budget || 0) && +c.budget > 0);
+    if (overs.length) li("⛔ חרגת ב" + overs.map((c) => (c.name || "בלי שם") + " (" + fmt(by[c.id] - c.budget) + ")").join(", ") + ".");
+    if (nos) li("🧘 " + nos + " ימים בלי אף הוצאה.");
+    const skipped = (store.wishlist || []).filter((w) => w.outcome === "skipped" && w.decidedAt && periodOf(w.decidedAt.slice(0, 10)) === m);
+    if (skipped.length) li("🤔 ויתרת על " + skipped.length + " קניות בשווי " + fmt(skipped.reduce((s2, w) => s2 + w.amount, 0)) + ".");
+    if (shifts[m] && shifts[m].length) li("⏰ " + shifts[m].length + " משמרות, " + fmt(shifts[m].reduce((s2, r) => s2 + (r._p || shiftPay(r, settings())).gross, 0)) + " ברוטו.");
+    li(left < 0
+      ? "💡 לחודש הבא: " + (overs[0] ? "תן ל" + (overs[0].name || "קטגוריה הזו") + " תקציב מציאותי, או תוותר עליה מוקדם יותר בחודש." : "נסה להוריד את הקטגוריה שהכי ברחה.")
+      : "💡 לחודש הבא: " + (left > 0 ? "את ה־" + fmt(left) + " שנשארו כדאי להעביר עכשיו לחיסכון או ליעד." : "ממשיכים באותו קצב."));
+    $("sumOk").hidden = !early;
+    box.hidden = false;
+  }
+  $("sumOk").addEventListener("click", () => { store.sumSeen = (store.sumSeen || []).concat([prevMonth(thisMonth())]).slice(-12); persist(); renderSummary(); });
+
+  // ---- Savings goals ----
+  const goals = () => (store.goals = store.goals || []);
+  function renderGoals() {
+    const box = $("goalList"); box.innerHTML = "";
+    const perMonth = plan().save;
+    goals().forEach((gl, i) => {
+      const done = gl.saved >= gl.target;
+      const card = document.createElement("div"); card.className = "goal" + (done ? " done" : "");
+      const top = document.createElement("div"); top.className = "gt";
+      const nm = document.createElement("b"); nm.textContent = (done ? "🎉 " : "🎯 ") + gl.name;
+      const nums = document.createElement("span"); nums.className = "gn"; nums.textContent = fmt(gl.saved) + " מתוך " + fmt(gl.target);
+      top.append(nm, nums);
+      const bar = document.createElement("div"); bar.className = "gbar"; bar.setAttribute("role", "progressbar");
+      bar.setAttribute("aria-valuenow", String(Math.round(Math.min(gl.saved / gl.target, 1) * 100))); bar.setAttribute("aria-label", gl.name);
+      const fill = document.createElement("i"); fill.style.width = Math.min(gl.saved / gl.target, 1) * 100 + "%"; bar.append(fill);
+      const line = document.createElement("span"); line.className = "gl";
+      const need = gl.target - gl.saved;
+      line.textContent = done ? "הגעת ליעד! " + say("עכשיו לא לגעת בכסף הזה בלי סיבה טובה.", "כל הכבוד.", "כל הכבוד, איזה כיף! 💛")
+        : "עוד " + fmt(need) + (perMonth > 0 ? ". בקצב החיסכון החודשי שלך (" + fmt(perMonth) + ") זה בערך " + Math.ceil(need / perMonth) + " חודשים." : ".");
+      const dep = document.createElement("form"); dep.className = "gdep"; dep.noValidate = true;
+      const amt = document.createElement("input"); amt.type = "number"; amt.min = "1"; amt.inputMode = "decimal"; amt.placeholder = "₪"; amt.id = "goal-dep-" + i;
+      amt.setAttribute("aria-label", "כמה הפקדת ל" + gl.name);
+      const add = document.createElement("button"); add.type = "submit"; add.className = "btn"; add.textContent = "+ הפקדתי";
+      const del = document.createElement("button"); del.type = "button"; del.className = "del"; del.textContent = "×"; del.setAttribute("aria-label", "מחיקת היעד " + gl.name);
+      dep.append(amt, add, del);
+      dep.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const v = Math.round((parseFloat(amt.value) || 0) * 100) / 100; if (!(v > 0)) { amt.focus(); return; }
+        const wasDone = gl.saved >= gl.target;
+        gl.saved = Math.round((gl.saved + v) * 100) / 100; persist(); renderGoals(); renderBadges();
+        snack(!wasDone && gl.saved >= gl.target ? "🎉 הגעת ליעד ״" + gl.name + "״!" : "נוספו " + fmt(v) + " ל״" + gl.name + "״. עוד " + fmt(Math.max(gl.target - gl.saved, 0)) + ".",
+          () => { gl.saved = Math.round((gl.saved - v) * 100) / 100; persist(); renderGoals(); });
+      });
+      del.addEventListener("click", () => {
+        goals().splice(i, 1); persist(); renderGoals();
+        snack("היעד נמחק", () => { goals().splice(i, 0, gl); persist(); renderGoals(); });
+      });
+      card.append(top, bar, line, dep);
+      box.append(card);
+    });
+    if (!goals().length) { const e = document.createElement("p"); e.className = "empty"; e.textContent = "חוסכים בשביל משהו? תן לו שם וסכום, ותראה כמה כבר יש וכמה עוד חסר."; box.append(e); }
+  }
+  $("goalForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const name = $("goalName").value.trim(), target = Math.round(parseFloat($("goalTarget").value) || 0);
+    if (!name) { $("goalName").focus(); return; }
+    if (!(target > 0)) { $("goalTarget").focus(); return; }
+    goals().push({ id: catId(), name, target, saved: 0, created: todayStr() });
+    $("goalName").value = ""; $("goalTarget").value = "";
+    persist(); renderGoals(); renderBadges();
+    snack("יעד חדש: " + name + " · " + fmt(target));
+  });
+
+  // ---- Badges ----
+  const BADGES = [
+    ["first", "👣", "צעד ראשון", "רשמת הוצאה ראשונה"],
+    ["days7", "📝", "רושם קבוע", "רשמת הוצאות ב־7 ימים שונים"],
+    ["quick", "⚡", "לחיצה אחת", "רשמת הוצאה בכפתור מהיר"],
+    ["streak3", "🔥", "3 ימים ברצף", "3 ימים ברצף בתוך התקציב היומי"],
+    ["streak7", "🔥", "שבוע ברצף", "7 ימים ברצף בתוך התקציב היומי"],
+    ["streak14", "🌟", "שבועיים ברצף", "14 ימים ברצף בתוך התקציב היומי"],
+    ["streak30", "👑", "חודש ברצף", "30 ימים ברצף בתוך התקציב היומי"],
+    ["nospend5", "🧘", "5 ימים נקיים", "5 ימים בלי אף הוצאה בחודש אחד"],
+    ["wish1", "🤔", "ויתרתי!", "ויתרת על קנייה מ״אולי אקנה״"],
+    ["wish500", "💎", "500 ש״ח נשארו", "ויתרת על קניות בשווי ₪500 ביחד"],
+    ["month", "🏁", "חודש בלי חריגה", "סיימת חודש בתוך הכסף החופשי"],
+    ["goal", "🎯", "יש מטרה", "פתחת יעד חיסכון"],
+    ["goaldone", "🎉", "הגעתי!", "הגעת ליעד חיסכון"],
+    ["shift1", "⏰", "משמרת ראשונה", "רשמת משמרת"],
+    ["shift20", "💪", "20 משמרות", "רשמת 20 משמרות בחודש אחד או בשניים"],
+    ["subs", "🔍", "בדקתי מנויים", "אישרת שאתה עדיין צריך מנוי"]
+  ];
+  function earnedNow() {
+    const out = new Set(), all = allTx();
+    if (all.length) out.add("first");
+    if (new Set(all.map((r) => r.spent_on)).size >= 7) out.add("days7");
+    if (store.usedQuick) out.add("quick");
+    const st = streakInfo();
+    if (st) { [3, 7, 14, 30].forEach((n) => { if (st.n >= n) out.add("streak" + n); }); if (st.free >= 5) out.add("nospend5"); }
+    const sk = (store.wishlist || []).filter((w) => w.outcome === "skipped");
+    if (sk.length) out.add("wish1");
+    if (sk.reduce((s2, w) => s2 + w.amount, 0) >= 500) out.add("wish500");
+    const pm = prevMonth(thisMonth());
+    if (tx[pm] && tx[pm].length && store.months[pm] && spendOf(store.months[pm]) > 0 && tx[pm].reduce((s2, r) => s2 + r.amount, 0) <= spendOf(store.months[pm])) out.add("month");
+    if (goals().length) out.add("goal");
+    if (goals().some((g2) => g2.saved >= g2.target)) out.add("goaldone");
+    const sh = Object.values(shifts).reduce((n, l) => n + l.length, 0);
+    if (sh) out.add("shift1");
+    if (sh >= 20) out.add("shift20");
+    if (store.subsChecked) out.add("subs");
+    return out;
+  }
+  function renderBadges() {
+    if (!store) return;
+    const have = (store.badges = store.badges || {});
+    const fresh = [...earnedNow()].filter((id) => !have[id]);
+    if (fresh.length) {
+      const first = Object.keys(have).length === 0 && fresh.length > 2; // first run with old data: record quietly
+      fresh.forEach((id) => { have[id] = todayStr(); });
+      persist();
+      if (!first) { const b = BADGES.find((x) => x[0] === fresh[0]); if (b) setTimeout(() => snack("🏆 הישג חדש: " + b[1] + " " + b[2] + (fresh.length > 1 ? " (ועוד " + (fresh.length - 1) + ")" : "")), 4200); }
+    }
+    const box = $("badgeList"); box.innerHTML = "";
+    BADGES.forEach(([id, e, name, how]) => {
+      const d = document.createElement("div"); d.className = "badge" + (have[id] ? "" : " locked");
+      const ee = document.createElement("span"); ee.className = "be"; ee.textContent = e; ee.setAttribute("aria-hidden", "true");
+      const b = document.createElement("b"); b.textContent = name;
+      const sm = document.createElement("small"); sm.textContent = have[id] ? "✓ " + shortDate(have[id]) : how;
+      d.append(ee, b, sm); box.append(d);
+    });
+    $("badgeSum").textContent = Object.keys(have).filter((k) => BADGES.some((x) => x[0] === k)).length + "/" + BADGES.length;
+  }
+  function renderInsights() { renderStreak(); renderDonut(); renderCompare(); renderSummary(); renderGoals(); renderBadges(); }
+
   // ---- "?" help on every card, and cards that fold away (remembered on this device) ----
   const HELP = {
     todayLbl: "זה הסכום שאפשר להוציא היום בלי לפגוע בשאר החודש: הכסף החופשי שנשאר, חלקי הימים שנשארו. הוצאת פחות היום? מחר יהיה לך יותר. הפס מראה כמה מהכסף החופשי כבר יצא, והקו מראה כמה מהחודש עבר.",
@@ -3349,6 +3714,10 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     catH: "מחלקים את הכסף החופשי לקטגוריות, למשל אוכל בחוץ או בילויים. כל הוצאה שנרשמת יורדת מהקטגוריה שלה.",
     recH: "מנויים ותשלומים שחוזרים כל חודש באותו סכום. הם נרשמים לבד ביום שלהם. כל 3 חודשים נשאל אם אתה עדיין צריך כל אחד מהם, כי מנוי שכוח עולה הרבה בשנה.",
     quickH: "הוצאות שחוזרות אצלך הופכות לכפתורים. לחיצה אחת והן נרשמות להיום, בלי לפתוח טופס. ⭐ הם כפתורים ששמרת בעצמך. ״עריכה״ מאפשרת להסיר כפתור.",
+    sumH: "תמונה של חודש שנגמר: כמה יצא, כמה נשאר, איפה חרגת, ומה כדאי לעשות בחודש הבא. מופיע ב־5 הימים הראשונים של חודש חדש, ותמיד כשמסתכלים על חודש שעבר.",
+    goalsH: "חוסכים בשביל משהו? פותחים יעד עם סכום, ובכל פעם שמעבירים כסף לחיסכון לוחצים ״הפקדתי״. רואים כמה חסר ובעוד כמה חודשים תגיע לפי החיסכון החודשי שתכננת.",
+    cmpH: "משווים את החודש עד היום לאותם ימים בחודש שעבר, ואת השבוע הזה לשבוע שעבר. ▲ אדום: הוצאת יותר. ▼ ירוק: הוצאת פחות.",
+    badgeH: "הישגים קטנים שנפתחים כשמתמידים: רצף ימים בתוך התקציב, ויתור על קנייה, הגעה ליעד. האפורים עוד לא נפתחו, ומתחתם כתוב איך פותחים אותם.",
     findH: "מחפשים לפי מילה מהפירוט או שם קטגוריה, ובוחרים תקופה. מקבלים כמה הוצאות היו וכמה כסף יצא עליהן ביחד.",
     setH: "מתי החודש שלך מתחיל, איך ההודעות נשמעות, גודל הטקסט וייצוא לאקסל.",
     shH: "כל המשמרות של החודש והשכר עליהן. לחיצה על משמרת פותחת אותה לעריכה, ו־× מוחק.",
@@ -3438,7 +3807,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     if (!m) return;
     month = m; draft = null; draftFor = null;
     render();
-    ensureTx(m).then(loadHist).then(() => { if (month === m) renderTracking(); });
+    ensureTx(m).then(loadHist).then(() => { if (month === m) renderTracking(); ensurePrev(m); });
   }
 
   // Once the month's expenses are in: log due recurring items, then draw everything
@@ -3450,6 +3819,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     renderHist();
     if (!hilanStarted) { hilanStarted = true; hilanSync(false); }
     takeAppOffDays(); renderMissing();
+    ensurePrev(month);
     const ns = new URLSearchParams(location.search).get("newShift");
     if (ns) { history.replaceState(null, "", location.pathname + location.hash); window.openShiftFromApp(ns); }
   }
