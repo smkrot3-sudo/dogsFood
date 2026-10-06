@@ -1074,8 +1074,14 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       $("appUpdateText").textContent = "יש גרסה חדשה לאפליקציה (" + v.versionName + ")" + (v.notes ? ": " + v.notes : ".");
       $("appUpdate").hidden = false;
       $("appUpdateBtn").onclick = () => {
-        // The phone's browser downloads the APK; opening the finished download shows Android's own install screen
-        if (app.openExternal) { app.openExternal(apk); $("appUpdateText").textContent = "ההורדה נפתחה בדפדפן. כשהיא מסתיימת, לחץ על הקובץ (או על ההתראה ״ההורדה הושלמה״) ואשר ״עדכון״."; }
+        // Inside the app: the app downloads the APK itself; the browser download stays as a fallback link
+        if (app.installUpdate) {
+          app.installUpdate(apk);
+          $("appUpdateText").textContent = "מוריד את העדכון. כשההורדה תסתיים יופיע מסך ההתקנה. לא הופיע? לחץ על ההתראה ״ההורדה הושלמה״.";
+          $("appUpdateBtn").textContent = "הורדה דרך הדפדפן";
+          $("appUpdateBtn").onclick = () => (app.openExternal ? app.openExternal(apk) : (location.href = apk));
+        }
+        else if (app.openExternal) app.openExternal(apk);
         else location.href = apk;
       };
       $("appUpdateLater").onclick = () => { $("appUpdate").hidden = true; try { sessionStorage.setItem("appUpdateLater", String(v.versionCode)); } catch (e) {} };
