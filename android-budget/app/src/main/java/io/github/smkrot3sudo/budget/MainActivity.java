@@ -38,6 +38,7 @@ import java.nio.charset.StandardCharsets;
 public class MainActivity extends Activity {
     private static final String HOME = "https://smkrot3-sudo.github.io/dogsFood/budget/";
     private static final int PICK_FILE = 1, HILAN = 2;
+    static final String EXTRA_SHIFT_DATE = "shiftDate";
 
     private WebView web;
     private ValueCallback<Uri[]> pendingPick;
@@ -93,7 +94,13 @@ public class MainActivity extends Activity {
             }
         });
 
-        if (!openSignIn(getIntent())) {
+        String shiftDate = getIntent().getStringExtra(EXTRA_SHIFT_DATE);
+        if (shiftDate != null) {
+            // From the shift reminder: the page opens the new-shift form for that day once it has loaded
+            Reminder.cancel(this);
+            getIntent().removeExtra(EXTRA_SHIFT_DATE);
+            web.loadUrl(HOME + "?newShift=" + Uri.encode(shiftDate) + "#shifts");
+        } else if (!openSignIn(getIntent())) {
             if (state != null) web.restoreState(state);
             else web.loadUrl(HOME);
         }
@@ -103,6 +110,14 @@ public class MainActivity extends Activity {
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         setIntent(intent);
+        String shiftDate = intent.getStringExtra(EXTRA_SHIFT_DATE);
+        if (shiftDate != null) {
+            Reminder.cancel(this);
+            web.evaluateJavascript("window.openShiftFromApp?(window.openShiftFromApp(" + JSONObject.quote(shiftDate) + "),1):0", r -> {
+                if (!"1".equals(r)) web.loadUrl(HOME + "?newShift=" + Uri.encode(shiftDate) + "#shifts");
+            });
+            return;
+        }
         openSignIn(intent);
     }
 
@@ -234,6 +249,31 @@ public class MainActivity extends Activity {
             runOnUiThread(() -> { if (hilanSync.running()) hilanSync.cancel(); Hilan.disconnect(MainActivity.this); });
         }
 
+        /** Shift reminder state for the page: {"on": bool, "time": "HH:MM"}. */
+        @JavascriptInterface
+        public String reminderStatus() {
+            try { return new JSONObject().put("on", Reminder.isOn(MainActivity.this)).put("time", Reminder.time(MainActivity.this)).toString(); }
+            catch (Exception e) { return "{}"; }
+        }
+
+        /** Turns the daily shift reminder on or off at HH:MM; asks for notification permission where Android needs it. */
+        @JavascriptInterface
+        public void setReminder(boolean on, String time) {
+            if (time == null || !time.matches("\\d\\d:\\d\\d")) time = "22:30";
+            Reminder.set(MainActivity.this, on, time);
+            if (on && Build.VERSION.SDK_INT >= 33
+                && checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) != android.content.pm.PackageManager.PERMISSION_GRANTED)
+                runOnUiThread(() -> requestPermissions(new String[] { android.Manifest.permission.POST_NOTIFICATIONS }, 3));
+        }
+
+        /** The page reports which recent days already have a shift or a "didn't work" mark (comma-separated yyyy-mm-dd). */
+        @JavascriptInterface
+        public void setDoneDays(String csv) { Reminder.setDoneDays(MainActivity.this, csv); }
+
+        /** Days marked "didn't work" from the notification since the page last asked. */
+        @JavascriptInterface
+        public String takeOffDays() { return Reminder.takeOffDays(MainActivity.this); }
+
         /** Opens a page (Google sign-in) in the phone's browser, since Google blocks it inside apps. */
         @JavascriptInterface
         public void openExternal(String url) {
@@ -255,7 +295,7 @@ public class MainActivity extends Activity {
     protected void onResume() {
         super.onResume();
         // Coming back to the app counts as opening it: the page decides whether a Hilan sync is due
-        if (web != null) web.evaluateJavascript("window.hilanOnResume&&window.hilanOnResume()", null);
+        if (web != null) web.evaluateJavascript("window.hilanOnResume&&window.hilanOnResume();window.appResumed&&window.appResumed()", null);
     }
 
     private long updateId = -1;

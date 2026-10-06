@@ -563,6 +563,15 @@ dialog.sheet::backdrop { background: rgba(40, 20, 50, .45); -webkit-backdrop-fil
 /* Hilan connection card */
 .hilanstate { margin: 0; font-weight: 600; }
 .hilanstate .on { color: var(--accent); }
+/* Days with no shift logged */
+.misslist { display: grid; gap: 8px; }
+.missrow { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 16px; background: var(--spend-soft); }
+.missrow .d { flex: 1 1 120px; font-weight: 700; }
+.missrow .btn { padding: 6px 12px; font-size: 14px; }
+.missdot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: #ff3b5c; margin-inline-start: 5px; vertical-align: super; box-shadow: 0 0 0 2px var(--surface); }
+.tabs a[aria-current="true"] .missdot { background: #ffd84d; box-shadow: none; }
+.remind { display: grid; gap: 8px; padding: 12px; border-radius: 16px; background: var(--surface-2); }
+.remind .hint { margin: 0; }
 </style>
 </head>
 <body>
@@ -638,7 +647,7 @@ dialog.sheet::backdrop { background: rgba(40, 20, 50, .45); -webkit-backdrop-fil
 
   <nav class="tabs" aria-label="עמודים">
     <a href="#" data-view="main" aria-current="true">🏠 ראשי</a>
-    <a href="#shifts" data-view="shifts">⏰ משמרות</a>
+    <a href="#shifts" data-view="shifts">⏰ משמרות<span class="missdot" id="missDot" hidden aria-label="יש ימים שלא הוזנו"></span></a>
     <a href="#calendar" data-view="calendar">📅 לוח שנה</a>
   </nav>
 
@@ -789,6 +798,13 @@ dialog.sheet::backdrop { background: rgba(40, 20, 50, .45); -webkit-backdrop-fil
   </div>
 
   <div class="viewcol" id="viewShifts" hidden>
+    <section class="panel missing" id="missBox" aria-labelledby="missH" hidden>
+      <h2 id="missH" class="pc-orange" data-e="📝">ימים שלא הוזנו</h2>
+      <p class="hint">בימים האלה אין משמרת רשומה. עבדת? הכנס את השעות. לא עבדת? סמן ״לא עבדתי״ והיום ייעלם מהרשימה.</p>
+      <div class="misslist" id="missList"></div>
+      <div class="actions"><button class="linkbtn" type="button" id="missAllOff" hidden>לא עבדתי באף אחד מהם</button></div>
+    </section>
+
     <section class="panel pay" aria-labelledby="shTitle">
       <h2 class="pc-violet" data-e="⏰"><span id="shTitle">המשמרות</span> <button class="btn primary" type="button" id="addShift3">⏰ משמרת</button></h2>
       <div class="paybody">
@@ -833,6 +849,11 @@ dialog.sheet::backdrop { background: rgba(40, 20, 50, .45); -webkit-backdrop-fil
               </select></label>
             <label class="field" for="deduct" hidden>ניכויים משוערים באחוזים (מס, ביטוח לאומי, פנסיה)<input type="number" id="deduct" min="0" max="90" step="0.5" inputmode="decimal"></label>
             <label class="field" for="travel" hidden>החזר נסיעות למשמרת<input type="number" id="travel" min="0" step="1" inputmode="decimal" placeholder="₪0"></label>
+            <div class="remind" id="remindRow" hidden>
+              <label class="check" for="remindOn"><input type="checkbox" id="remindOn"> 🔔 תזכורת יומית להזנת משמרת</label>
+              <label class="field" for="remindAt">בשעה<input type="time" id="remindAt" value="22:30"></label>
+              <p class="hint">ההתראה לא תגיע ביום שכבר הוזנה בו משמרת או שסימנת בו ״לא עבדתי״.</p>
+            </div>
             <p class="hint">החישוב לפי חוק שעות עבודה ומנוחה: שעתיים נוספות ראשונות ב־125% ואחריהן 150%. במשמרת עם שעתיים לפחות בין 22:00 ל־06:00 השעות הנוספות מתחילות אחרי 7 שעות. שבת וחגים ב־150%, ושעות נוספות בהם ב־175% וב־200%. השבת והחג מתחילים 18 דקות לפני השקיעה ונגמרים 40 דקות אחריה, לפי שעון תל אביב.</p>
           </div>
         
@@ -2220,6 +2241,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   }
   function renderPay() {
     if (!store) return;
+    renderMissing();
     const w = +settings().wage || 0;
     const pp = periodPay(month);
     const list = shifts[month] || [];
@@ -2314,13 +2336,13 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 
   // ---- Shift sheet ----
   let editingShift = null;
-  function openShift(edit) {
+  function openShift(edit, presetDate) {
     if (!(+settings().wage > 0)) { setView("shifts"); $("wage").focus(); snack("קודם תרשום כמה אתה מרוויח לשעה."); return; }
     editingShift = edit || null;
     const last = (shifts[month] || [])[0];
     $("shiftH").textContent = edit ? "עריכת משמרת" : "משמרת חדשה";
     const cur = thisMonth();
-    $("shDate").value = edit ? edit.work_date : calDay && view === "calendar" ? calDay : month === cur ? todayStr() : month < cur ? periodEnd(month) : periodStart(month);
+    $("shDate").value = edit ? edit.work_date : presetDate ? presetDate : calDay && view === "calendar" ? calDay : month === cur ? todayStr() : month < cur ? periodEnd(month) : periodStart(month);
     $("shStart").value = edit ? edit.start_time : last ? last.start_time : "09:00";
     $("shEnd").value = edit ? edit.end_time : last ? last.end_time : "17:00";
     $("shBreak").value = edit ? edit.break_min : last ? last.break_min : 0;
@@ -2386,6 +2408,95 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       () => { if (before) saveShift(before); else delShift(row.id); renderPay(); renderCal(); });
   });
 
+
+  // ---- Daily shift reminder (Android app) and days with no shift logged ----
+  // A day counts as logged when it has a shift or the user marked "didn't work" (store.noWork).
+  // Days are checked from the first time this ran (store.shiftCheckFrom), at most 31 days back.
+  const remindApp = () => (window.BudgetApp && BudgetApp.setReminder ? window.BudgetApp : null);
+  const noWork = () => (store.noWork = store.noWork || []);
+  function dayLogged(d) {
+    if (noWork().includes(d)) return true;
+    const l = shifts[periodOf(d)];
+    return !l || l.some((r) => r.work_date === d); // a month that isn't loaded yet is not reported
+  }
+  function remindTime() { try { return JSON.parse(remindApp().reminderStatus()).time || "22:30"; } catch (e) { return "22:30"; } }
+  function missingDays() {
+    if (!store || !(+settings().wage > 0)) return [];
+    const today = todayStr();
+    if (!store.shiftCheckFrom) { store.shiftCheckFrom = today; persist(); }
+    const now = new Date(), [h, m] = remindTime().split(":").map(Number);
+    const last = now.getHours() * 60 + now.getMinutes() >= h * 60 + m ? today : dateAdd(today, -1);
+    let d = store.shiftCheckFrom > dateAdd(today, -31) ? store.shiftCheckFrom : dateAdd(today, -31);
+    const out = [];
+    for (; d <= last; d = dateAdd(d, 1)) if (!dayLogged(d)) out.push(d);
+    return out.reverse();
+  }
+  function markNoWork(days) {
+    days.forEach((d) => { if (!noWork().includes(d)) noWork().push(d); });
+    store.noWork = noWork().filter((d) => d >= dateAdd(todayStr(), -62)).sort();
+    persist(); renderMissing();
+  }
+  function renderMissing() {
+    if (!store) return;
+    const miss = missingDays();
+    $("missBox").hidden = !miss.length;
+    $("missDot").hidden = !miss.length;
+    $("missAllOff").hidden = miss.length < 2;
+    const box = $("missList"); box.innerHTML = "";
+    miss.forEach((d) => {
+      const row = document.createElement("div"); row.className = "missrow";
+      const t = document.createElement("span"); t.className = "d"; t.textContent = "📅 " + dayLabel(d);
+      const add = document.createElement("button"); add.type = "button"; add.className = "btn primary"; add.textContent = "✍️ הכנס משמרת";
+      add.addEventListener("click", () => openShift(null, d));
+      const off = document.createElement("button"); off.type = "button"; off.className = "btn"; off.textContent = "🏖️ לא עבדתי";
+      off.addEventListener("click", () => { markNoWork([d]); snack("סומן: לא עבדת ב" + dayLabel(d) + ".", () => { store.noWork = noWork().filter((x) => x !== d); persist(); renderMissing(); }); });
+      row.append(t, add, off); box.append(row);
+    });
+    // Tell the app which recent days are done, so tonight's reminder is skipped once today is logged
+    const app = remindApp();
+    if (app && app.setDoneDays) {
+      const done = [];
+      for (let i = 0; i < 7; i++) { const d = dateAdd(todayStr(), -i); if (noWork().includes(d) || (shifts[periodOf(d)] || []).some((r) => r.work_date === d)) done.push(d); }
+      try { app.setDoneDays(done.join(",")); } catch (e) {}
+    }
+  }
+  $("missAllOff").addEventListener("click", () => {
+    const miss = missingDays(); markNoWork(miss);
+    snack("סומנו " + miss.length + " ימים שבהם לא עבדת.", () => { store.noWork = noWork().filter((x) => !miss.includes(x)); persist(); renderMissing(); });
+  });
+  // "Didn't work today" pressed on the notification while the page was closed
+  function takeAppOffDays() {
+    const app = remindApp(); if (!app || !app.takeOffDays || !store) return;
+    let csv = ""; try { csv = app.takeOffDays() || ""; } catch (e) {}
+    const days = csv.split(",").filter((d) => /^\d{4}-\d{2}-\d{2}$/.test(d));
+    if (days.length) markNoWork(days);
+  }
+  window.appResumed = () => { takeAppOffDays(); renderMissing(); };
+  // The notification's "enter shift" button opens the new-shift form for that day
+  window.openShiftFromApp = (d) => { if (!store) return false; setView("shifts"); openShift(null, /^\d{4}-\d{2}-\d{2}$/.test(d) ? d : todayStr()); return true; };
+  function renderRemind() {
+    const app = remindApp();
+    $("remindRow").hidden = !app;
+    if (!app) return;
+    let st = {}; try { st = JSON.parse(app.reminderStatus()) || {}; } catch (e) {}
+    $("remindOn").checked = !!st.on;
+    $("remindAt").value = st.time || "22:30";
+    $("remindAt").disabled = !st.on;
+  }
+  function saveRemind() {
+    const app = remindApp(); if (!app) return;
+    app.setReminder($("remindOn").checked, $("remindAt").value || "22:30");
+    renderRemind(); renderMissing();
+  }
+  $("remindOn").addEventListener("change", saveRemind);
+  $("remindAt").addEventListener("change", saveRemind);
+  // First run inside the app: the reminder starts on at 22:30 (once per phone; the user can turn it off)
+  (function firstRemind() {
+    const app = remindApp(); if (!app) return;
+    let seen = false; try { seen = localStorage.getItem("budget-remind-init") === "1"; localStorage.setItem("budget-remind-init", "1"); } catch (e) { seen = true; }
+    if (!seen) app.setReminder(true, "22:30");
+    renderRemind();
+  })();
 
   // ---- Quick import: paste a Hilan attendance report, a file, or pick many days with the same hours ----
   let impMode = "paste", impRows = [], impPicked = new Set();
@@ -2874,6 +2985,9 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     await loadHist();
     renderHist();
     if (!hilanStarted) { hilanStarted = true; hilanSync(false); }
+    takeAppOffDays(); renderMissing();
+    const ns = new URLSearchParams(location.search).get("newShift");
+    if (ns) { history.replaceState(null, "", location.pathname + location.hash); window.openShiftFromApp(ns); }
   }
   let hilanStarted = false;
   $("month").addEventListener("change", (e) => goMonth(e.target.value));
