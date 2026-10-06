@@ -816,6 +816,11 @@ body.layedit #fab, body.onsettings #fab { display: none; }
 .shiftinc { display: flex; justify-content: space-between; gap: 8px; align-items: center; padding: 10px 14px; border-radius: 12px; background: var(--surface-2); font-weight: 600; }
 .shiftinc b { font-variant-numeric: tabular-nums; }
 
+/* "Allowed today": one number, details on tap */
+.today .todaymore { justify-self: start; align-self: start; background: rgba(255,255,255,.18); color: inherit; border: 0; border-radius: 999px; padding: 6px 14px; font-weight: 700; font-size: 14px; }
+.today .todaybox { display: grid; gap: 12px; }
+.today .todaybox[hidden] { display: none; }
+
 /* Bank-statement style list of the month's expenses */
 .stmsum { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; color: var(--muted); font-size: 14px; font-weight: 600; }
 .stmsum b { color: var(--fg); font-variant-numeric: tabular-nums; }
@@ -955,6 +960,8 @@ body.layedit #fab, body.onsettings #fab { display: none; }
       <section data-block="today" class="panel today" aria-labelledby="todayLbl">
         <span class="lbl" id="todayLbl">מותר לך להוציא היום</span>
         <span class="big" id="todayVal">₪0</span>
+        <button type="button" class="todaymore" id="todayMoreBtn" aria-expanded="false" aria-controls="todayMore">פרטים ▾</button>
+        <div class="todaybox" id="todayMore" hidden>
         <span class="line" id="todayLine"></span>
         <div class="pace" id="pace">
           <div class="track"><div class="fill" id="paceFill"></div><div class="mark" id="paceMark"></div></div>
@@ -962,6 +969,7 @@ body.layedit #fab, body.onsettings #fab { display: none; }
         </div>
         <div class="verdict" id="verdict" role="status"></div>
         <div class="streak" id="streak" hidden></div>
+        </div>
       </section>
 
       <section data-block="statement" class="panel" aria-labelledby="stmH">
@@ -2335,6 +2343,15 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   }
 
   function renderTx() { if (store) renderStatement(); }
+
+  // The "allowed today" card shows only its number until "פרטים" is tapped (remembered per device)
+  (function () {
+    const btn = $("todayMoreBtn"), box = $("todayMore");
+    const set = (open) => { box.hidden = !open; btn.setAttribute("aria-expanded", String(open)); btn.textContent = open ? "פחות ▴" : "פרטים ▾"; };
+    let open = false; try { open = localStorage.getItem("budget-today-more") === "1"; } catch (e) {}
+    set(open);
+    btn.addEventListener("click", (e) => { e.stopPropagation(); open = !open; set(open); try { localStorage.setItem("budget-today-more", open ? "1" : "0"); } catch (er) {} });
+  })();
 
   // ---- "All the month's expenses": a bank-statement style list with quick inline editing ----
   let stmOpen = null;
