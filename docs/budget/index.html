@@ -702,6 +702,33 @@ html.bigtext body { zoom: 1.15; }
 .paygoal span { font-size: 14.5px; font-weight: 600; }
 .goalrow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .goalrow input { max-width: 140px; }
+
+/* Landing (signed out) */
+.landing { display: grid; gap: 12px; }
+.landing h2 { margin: 0; text-align: center; font-size: 22px; }
+.feats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.feats div { background: var(--surface); border-radius: 18px; padding: 14px 12px; display: grid; gap: 4px; box-shadow: var(--card-shadow); }
+.feats span { font-size: 26px; line-height: 1; }
+.feats b { font-size: 15.5px; }
+.feats small { color: var(--muted); font-size: 13px; line-height: 1.4; }
+/* Account sheet */
+.accsec { display: grid; gap: 8px; border-top: 1px solid var(--line); padding-top: 12px; }
+.accsec h3 { margin: 0; font-size: 17px; }
+.accsec .hint { margin: 0; }
+.btn.danger { background: var(--danger); border-color: var(--danger); color: #fff; }
+.btn.danger:disabled { opacity: .4; }
+/* Welcome wizard */
+.wzdots { display: flex; gap: 6px; justify-content: center; }
+.wzdots i { width: 28px; height: 6px; border-radius: 99px; background: var(--line); }
+.wzdots i.on { background: var(--brand); }
+.wzstep { display: grid; gap: 12px; }
+.wzstep .sub { margin: 0; color: var(--fg); font-weight: 600; }
+.wzbills { display: grid; gap: 8px; }
+.wzbill { display: grid; grid-template-columns: minmax(0, 1fr) 120px; gap: 8px; align-items: center; }
+.wzbill .chipbtn { justify-self: start; border: 1.5px solid var(--line); background: var(--surface-2); color: var(--fg); padding: 7px 14px; font-weight: 600; }
+.wzbill .chipbtn[aria-pressed="true"] { border-color: var(--brand2); color: var(--brand2); background: color-mix(in srgb, var(--brand2) 12%, var(--surface)); }
+.wzbill input[disabled] { opacity: .35; }
+#wzSkip { justify-self: center; color: var(--muted); }
 </style>
 </head>
 <body>
@@ -736,6 +763,18 @@ html.bigtext body { zoom: 1.15; }
     <p class="switch" id="forgotRow"><button class="linkbtn" type="button" id="forgotBtn">שכחתי סיסמה</button></p>
     <p class="switch" id="switchRow"><span id="switchText">אין לכם חשבון?</span> <button class="linkbtn" type="button" id="switchMode">הרשמה</button></p>
   </section>
+  <section class="landing" aria-labelledby="landH">
+    <h2 id="landH">מה יש כאן?</h2>
+    <p class="sub">אפליקציה חינמית בעברית למי שהכסף נגמר לו לפני סוף החודש.</p>
+    <div class="feats">
+      <div><span aria-hidden="true">😎</span><b>כמה מותר היום</b><small>סכום אחד ברור לכל יום, שמתעדכן עם כל הוצאה.</small></div>
+      <div><span aria-hidden="true">⚡</span><b>רישום בלחיצה</b><small>הקפה של הבוקר נרשם בלחיצה אחת, בלי טפסים.</small></div>
+      <div><span aria-hidden="true">⏰</span><b>משמרות ושכר</b><small>שעות נוספות, לילה, שבת וחג לפי החוק, ותזכורת יומית.</small></div>
+      <div><span aria-hidden="true">🤔</span><b>״אולי אקנה״</b><small>מחכים 48 שעות לפני קנייה, ורוב הפעמים מוותרים.</small></div>
+      <div><span aria-hidden="true">🎯</span><b>יעדי חיסכון</b><small>רואים כמה חסר ומתי מגיעים.</small></div>
+      <div><span aria-hidden="true">📱</span><b>בכל מכשיר</b><small>טלפון, מחשב ואפליקציה לאנדרואיד, הכול מסונכרן.</small></div>
+    </div>
+  </section>
 </div>
 
 <div class="wrap" id="app" hidden>
@@ -754,6 +793,9 @@ html.bigtext body { zoom: 1.15; }
         <div class="menu">
           <span class="who" id="userName"></span>
           <a class="getapp" href="budget.apk" download hidden>📱 הורדת האפליקציה לאנדרואיד</a>
+          <button class="btn" type="button" id="feedbackBtn">💬 שלח משוב</button>
+          <button class="btn" type="button" id="inviteBtn">📣 המלץ לחבר</button>
+          <button class="btn" type="button" id="accountBtn">💾 גיבוי, שחזור ומחיקה</button>
           <button class="btn" type="button" id="logoutBtn">🚪 התנתקות</button>
         </div>
       </details>
@@ -1162,6 +1204,88 @@ html.bigtext body { zoom: 1.15; }
       <button class="btn primary" type="submit" id="impSave">הוספה</button>
       <button class="btn" type="button" id="impCancel">ביטול</button>
     </div>
+  </form>
+</dialog>
+
+<dialog class="sheet" id="feedbackSheet" aria-labelledby="fbH">
+  <form id="fbForm" method="dialog" novalidate>
+    <h2 id="fbH" data-e="💬">משוב</h2>
+    <div class="seg" id="fbKind" role="group" aria-label="סוג המשוב">
+      <button type="button" data-k="idea" aria-pressed="true">💡 רעיון</button>
+      <button type="button" data-k="bug" aria-pressed="false">🐞 משהו לא עובד</button>
+      <button type="button" data-k="other" aria-pressed="false">💬 אחר</button>
+    </div>
+    <label for="fbText">מה תרצה לספר לנו?<textarea id="fbText" rows="5" maxlength="4000" placeholder="למשל: הייתי רוצה לראות…"></textarea></label>
+    <div class="err" id="fbErr" role="alert" hidden></div>
+    <div class="foot">
+      <button class="btn primary" type="submit" id="fbSend">שליחה</button>
+      <button class="btn" type="button" id="fbCancel">ביטול</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog class="sheet" id="accountSheet" aria-labelledby="accH">
+  <form id="accForm" method="dialog" novalidate>
+    <h2 id="accH" data-e="💾">גיבוי, שחזור ומחיקה</h2>
+    <section class="accsec">
+      <h3>💾 גיבוי</h3>
+      <p class="hint">קובץ אחד עם כל מה ששמור כאן: התוכנית, ההוצאות, המשמרות וההכנסות. שמור אותו במקום בטוח.</p>
+      <div class="actions"><button class="btn primary" type="button" id="backupBtn">הורדת קובץ גיבוי</button></div>
+    </section>
+    <section class="accsec">
+      <h3>♻️ שחזור מגיבוי</h3>
+      <p class="hint">מחזיר את התוכנית מהקובץ ומוסיף ממנו הוצאות, משמרות והכנסות. מה שכבר רשום כאן נשאר.</p>
+      <label for="restoreFile">קובץ גיבוי<input type="file" id="restoreFile" accept=".json,application/json"></label>
+      <div class="verdict warn" id="restoreInfo" hidden></div>
+      <div class="actions"><button class="btn" type="button" id="restoreBtn" hidden>כן, לשחזר</button></div>
+    </section>
+    <section class="accsec danger">
+      <h3>🗑️ מחיקת החשבון</h3>
+      <p class="hint">מוחק לתמיד את החשבון ואת כל הנתונים שבו. אי אפשר לבטל את זה. כדאי להוריד גיבוי קודם.</p>
+      <label for="delConfirm">כדי למחוק, כתוב: מחק<input type="text" id="delConfirm" autocomplete="off"></label>
+      <div class="actions"><button class="btn danger" type="button" id="delBtn" disabled>מחיקת החשבון וכל הנתונים</button></div>
+    </section>
+    <div class="err" id="accErr" role="alert" hidden></div>
+    <div class="foot"><button class="btn" type="button" id="accClose">סגירה</button></div>
+  </form>
+</dialog>
+
+<dialog class="sheet" id="wizard" aria-labelledby="wzH">
+  <form id="wzForm" method="dialog" novalidate>
+    <div class="wzdots" aria-hidden="true"><i></i><i></i><i></i></div>
+    <h2 id="wzH" data-e="👋">ברוכים הבאים!</h2>
+    <div class="wzstep" data-step="1">
+      <p class="sub">שלוש שאלות קצרות, ואת השאר האפליקציה תחשב בשבילך.</p>
+      <label for="wzInc">כמה כסף נכנס לך בחודש, אחרי מס?<input type="number" id="wzInc" class="amount-in" inputmode="decimal" min="0" placeholder="₪0"></label>
+      <p class="hint">הכנסה משתנה? כתוב את הסכום הנמוך שבטוח ייכנס.</p>
+      <label for="wzWage">עובד לפי שעות? שכר לשעה (לא חובה)<input type="number" id="wzWage" inputmode="decimal" min="0" step="0.01" placeholder="₪"></label>
+    </div>
+    <div class="wzstep" data-step="2" hidden>
+      <p class="sub">מה החשבונות הקבועים שלך? לחץ על מה שיש לך ורשום סכום.</p>
+      <div class="wzbills" id="wzBills"></div>
+    </div>
+    <div class="wzstep" data-step="3" hidden>
+      <p class="sub">כמה מהיתרה לחסוך כל חודש?</p>
+      <div class="seg" id="wzPct" role="group" aria-label="אחוז חיסכון">
+        <button type="button" data-p="10" aria-pressed="false">10%</button>
+        <button type="button" data-p="20" aria-pressed="true">20%</button>
+        <button type="button" data-p="30" aria-pressed="false">30%</button>
+        <button type="button" data-p="50" aria-pressed="false">50%</button>
+      </div>
+      <p class="sub">איך שההודעות ידברו אליך?</p>
+      <div class="seg" id="wzTone" role="group" aria-label="טון ההודעות">
+        <button type="button" data-tone="tough" aria-pressed="false">💪 קשוח</button>
+        <button type="button" data-tone="mid" aria-pressed="true">⚖️ מאוזן</button>
+        <button type="button" data-tone="soft" aria-pressed="false">💛 עדין</button>
+      </div>
+      <div class="verdict good" id="wzSum"></div>
+    </div>
+    <div class="err" id="wzErr" role="alert" hidden></div>
+    <div class="foot">
+      <button class="btn primary" type="submit" id="wzNext">המשך</button>
+      <button class="btn" type="button" id="wzBack" hidden>חזרה</button>
+    </div>
+    <button class="linkbtn" type="button" id="wzSkip">דלג, אמלא לבד</button>
   </form>
 </dialog>
 
@@ -3787,6 +3911,194 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   }
   function renderInsights() { renderStreak(); renderDonut(); renderCompare(); renderSummary(); renderGoals(); renderBadges(); }
 
+
+  // ---- Feedback, invite a friend, backup / restore, delete the account ----
+  function openDlg(id) { const d = $(id); if (d.showModal) d.showModal(); else d.setAttribute("open", ""); $("userbar").open = false; }
+  function closeDlg(id) { const d = $(id); if (d.close) d.close(); else d.removeAttribute("open"); }
+  let fbKind = "idea";
+  $("feedbackBtn").addEventListener("click", () => { $("fbText").value = ""; $("fbErr").hidden = true; openDlg("feedbackSheet"); setTimeout(() => $("fbText").focus(), 50); });
+  $("fbCancel").addEventListener("click", () => closeDlg("feedbackSheet"));
+  $("fbKind").addEventListener("click", (e) => { const b = e.target.closest("[data-k]"); if (!b) return; fbKind = b.dataset.k; document.querySelectorAll("#fbKind button").forEach((x) => x.setAttribute("aria-pressed", String(x === b))); });
+  $("fbForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const body = $("fbText").value.trim();
+    if (!body) { $("fbText").focus(); return; }
+    if (!sb || !user) { $("fbErr").textContent = "צריך להיות מחובר כדי לשלוח משוב."; $("fbErr").hidden = false; return; }
+    $("fbSend").disabled = true;
+    const app = window.BudgetApp ? " · app" : "";
+    const { error } = await sb.from("feedback").insert({ user_id: user.id, kind: fbKind, body, page: (navigator.userAgent.includes("Android") ? "android" : "web") + app });
+    $("fbSend").disabled = false;
+    if (error) { $("fbErr").textContent = "לא הצלחתי לשלוח כרגע. נסה שוב מאוחר יותר."; $("fbErr").hidden = false; return; }
+    closeDlg("feedbackSheet");
+    snack("תודה! המשוב נשלח 💛");
+  });
+  const SITE_URL = "https://smkrot3-sudo.github.io/dogsFood/budget/";
+  $("inviteBtn").addEventListener("click", async () => {
+    $("userbar").open = false;
+    const text = "אני משתמש ב״התקציב שלי״, אפליקציה חינמית שעוזרת לא לבזבז ולדעת כל יום כמה מותר להוציא. נסה גם: " + SITE_URL;
+    const app = window.BudgetApp;
+    try { if (app && app.share) { app.share(text); return; } } catch (e) {}
+    if (navigator.share) { try { await navigator.share({ text }); return; } catch (e) { if (e && e.name === "AbortError") return; } }
+    const wa = "https://wa.me/?text=" + encodeURIComponent(text);
+    if (app && app.openExternal) { app.openExternal(wa); return; }
+    try { await navigator.clipboard.writeText(text); snack("הקישור הועתק. אפשר להדביק אותו בוואטסאפ."); } catch (e) { window.open(wa, "_blank"); }
+  });
+
+  $("accountBtn").addEventListener("click", () => { $("accErr").hidden = true; $("restoreInfo").hidden = true; $("restoreBtn").hidden = true; $("restoreFile").value = ""; $("delConfirm").value = ""; $("delBtn").disabled = true; openDlg("accountSheet"); });
+  $("accClose").addEventListener("click", () => closeDlg("accountSheet"));
+  const accErr = (t) => { $("accErr").textContent = t; $("accErr").hidden = false; };
+  async function allRows(table, cols) {
+    if (!sb || !user) return (store[table === "expenses" ? "tx" : table] || []).map((r) => ({ ...r }));
+    const out = [];
+    for (let from = 0; ; from += 1000) {
+      const { data: r, error } = await sb.from(table).select(cols).range(from, from + 999);
+      if (error) throw error;
+      out.push(...r);
+      if (r.length < 1000) break;
+    }
+    return out;
+  }
+  $("backupBtn").addEventListener("click", async () => {
+    $("backupBtn").disabled = true; $("accErr").hidden = true;
+    try {
+      await flushOutbox();
+      const b = {
+        app: "budget", v: 1, exported: new Date().toISOString(), store,
+        expenses: await allRows("expenses", "id, spent_on, amount, category, note, created_at"),
+        shifts: await allRows("shifts", "id, work_date, start_time, end_time, break_min, wage, kind, kind_rate, note, created_at"),
+        incomes: await allRows("incomes", "id, received_on, amount, kind, note, created_at")
+      };
+      download("גיבוי-תקציב-" + todayStr() + ".json", JSON.stringify(b));
+      snack("קובץ הגיבוי ירד: " + b.expenses.length + " הוצאות, " + b.shifts.length + " משמרות.");
+    } catch (e) { accErr("הגיבוי נכשל. בדקו את החיבור לאינטרנט."); }
+    $("backupBtn").disabled = false;
+  });
+  let restoreData = null;
+  $("restoreFile").addEventListener("change", async () => {
+    restoreData = null; $("restoreBtn").hidden = true; $("accErr").hidden = true;
+    const f = $("restoreFile").files[0]; if (!f) return;
+    try {
+      const b = JSON.parse(await f.text());
+      if (!b || b.app !== "budget" || !b.store || !b.store.months) throw new Error("bad");
+      restoreData = b;
+      $("restoreInfo").textContent = "בקובץ מ־" + new Date(b.exported).toLocaleDateString("he-IL") + ": תוכנית ל־" + Object.keys(b.store.months).length + " חודשים, " + (b.expenses || []).length + " הוצאות, " + (b.shifts || []).length + " משמרות ו־" + (b.incomes || []).length + " הכנסות. התוכנית שכאן תוחלף בזו שבקובץ.";
+      $("restoreInfo").hidden = false; $("restoreBtn").hidden = false;
+    } catch (e) { accErr("זה לא נראה כמו קובץ גיבוי של האפליקציה."); }
+  });
+  $("restoreBtn").addEventListener("click", async () => {
+    const b = restoreData; if (!b) return;
+    $("restoreBtn").disabled = true;
+    try {
+      store = b.store;
+      if (!sb || !user) {
+        const merge = (key, rows) => { const have = new Map((store[key] || []).map((r) => [r.id, r])); (rows || []).forEach((r) => have.set(r.id, r)); store[key] = [...have.values()]; };
+        merge("tx", b.expenses); merge("shifts", b.shifts); merge("incomes", b.incomes);
+        lsSet(LOCAL_KEY, store);
+      } else {
+        persist(); await flushSave();
+        for (const [table, rows] of [["expenses", b.expenses], ["shifts", b.shifts], ["incomes", b.incomes]]) {
+          for (let i = 0; i < (rows || []).length; i += 500) {
+            const { error } = await sb.from(table).upsert(rows.slice(i, i + 500).map((r) => ({ ...r, user_id: user.id })));
+            if (error) throw error;
+          }
+        }
+      }
+      [tx, shifts, incomes, hist].forEach((c) => Object.keys(c).forEach((k) => delete c[k]));
+      closeDlg("accountSheet");
+      goMonth(thisMonth());
+      snack("השחזור הושלם.");
+    } catch (e) { accErr("השחזור לא הושלם. בדקו את החיבור לאינטרנט ונסו שוב."); }
+    $("restoreBtn").disabled = false;
+  });
+  $("delConfirm").addEventListener("input", () => { $("delBtn").disabled = $("delConfirm").value.trim() !== "מחק"; });
+  $("delBtn").addEventListener("click", async () => {
+    if ($("delConfirm").value.trim() !== "מחק") return;
+    $("delBtn").disabled = true;
+    if (!sb || !user) {
+      lsDel(LOCAL_KEY); location.reload(); return;
+    }
+    const { error } = await sb.rpc("delete_my_account");
+    if (error) { $("delBtn").disabled = false; accErr("המחיקה לא הצליחה כרגע. נסה שוב מאוחר יותר."); return; }
+    lsDel(cacheKey()); lsDel(outboxKey());
+    closeDlg("accountSheet");
+    try { await sb.auth.signOut(); } catch (e) {}
+    location.reload();
+  });
+
+  // ---- Welcome wizard for a brand-new user: income, fixed bills, how much to save ----
+  const WZ_BILLS = ["שכר דירה", "חשמל", "מים", "ארנונה", "טלפון", "אינטרנט וטלוויזיה", "תחבורה", "סופר", "ביטוחים", "תרופות", "חוגים וגן"];
+  let wzStep = 1;
+  function isNewUser() {
+    if (store.onboarded) return false;
+    const months = Object.values(store.months);
+    const used = months.some((m) => !m.example && (m.income.some((x) => +x.amount > 0) || m.expenses.length || (m.cats || []).some((c) => +c.budget > 0)))
+      || (store.tx || []).length || Object.values(tx).some((l) => l.length) || (store.recurring || []).length || +settings().wage > 0;
+    if (used) { store.onboarded = true; return false; }
+    return true;
+  }
+  function wzShow() {
+    document.querySelectorAll(".wzstep").forEach((el) => { el.hidden = +el.dataset.step !== wzStep; });
+    document.querySelectorAll(".wzdots i").forEach((el, i) => el.classList.toggle("on", i < wzStep));
+    $("wzH").textContent = ["ברוכים הבאים!", "חשבונות קבועים", "כמעט סיימנו"][wzStep - 1];
+    $("wzH").dataset.e = ["👋", "🏠", "🐷"][wzStep - 1];
+    $("wzBack").hidden = wzStep === 1;
+    $("wzNext").textContent = wzStep === 3 ? "יאללה, מתחילים 🚀" : "המשך";
+    $("wzErr").hidden = true;
+    if (wzStep === 3) wzSummary();
+  }
+  function wzBills() { return [...document.querySelectorAll(".wzbill")].filter((r) => r.querySelector("button").getAttribute("aria-pressed") === "true").map((r) => ({ name: r.dataset.name, amount: Math.max(parseFloat(r.querySelector("input").value) || 0, 0) })); }
+  const wzPick = (id) => (document.querySelector("#" + id + ' [aria-pressed="true"]') || {}).dataset || {};
+  function wzSummary() {
+    const inc = parseFloat($("wzInc").value) || 0, exp = wzBills().reduce((a, x) => a + x.amount, 0);
+    const pct = +(wzPick("wzPct").p || 20), rem = Math.max(inc - exp, 0), save = Math.round(rem * pct / 100), free = rem - save;
+    $("wzSum").className = "verdict " + (inc > exp ? "good" : "bad");
+    $("wzSum").textContent = inc > exp
+      ? "תחסוך " + fmt(save) + " בחודש, ויישארו לך " + fmt(free) + " כסף חופשי. זה בערך " + fmt(free / 30) + " ליום."
+      : "החשבונות הקבועים (" + fmt(exp) + ") גבוהים מההכנסה. נבנה את התוכנית, ואחר כך כדאי לחפש איפה לקצץ.";
+  }
+  function openWizard() {
+    wzStep = 1;
+    const box = $("wzBills"); box.innerHTML = "";
+    WZ_BILLS.forEach((name, i) => {
+      const row = document.createElement("div"); row.className = "wzbill"; row.dataset.name = name;
+      const b = document.createElement("button"); b.type = "button"; b.className = "chipbtn"; b.textContent = catEmoji(name) + " " + name; b.setAttribute("aria-pressed", "false");
+      const inp = document.createElement("input"); inp.type = "number"; inp.min = "0"; inp.inputMode = "decimal"; inp.placeholder = "₪"; inp.disabled = true; inp.id = "wzb-" + i;
+      inp.setAttribute("aria-label", "כמה " + name);
+      b.addEventListener("click", () => { const on = b.getAttribute("aria-pressed") !== "true"; b.setAttribute("aria-pressed", String(on)); inp.disabled = !on; if (on) inp.focus(); });
+      row.append(b, inp); box.append(row);
+    });
+    wzShow();
+    const d = $("wizard"); if (d.showModal) d.showModal(); else d.setAttribute("open", "");
+  }
+  ["wzPct", "wzTone"].forEach((id) => $(id).addEventListener("click", (e) => {
+    const b = e.target.closest("button"); if (!b) return;
+    document.querySelectorAll("#" + id + " button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+    wzSummary();
+  }));
+  $("wzBack").addEventListener("click", () => { wzStep = Math.max(1, wzStep - 1); wzShow(); });
+  $("wzSkip").addEventListener("click", () => { store.onboarded = true; persist(); closeDlg("wizard"); $("planBox").open = true; });
+  $("wzForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    if (wzStep === 1 && !(parseFloat($("wzInc").value) > 0)) { $("wzErr").textContent = "כמה נכנס לך בחודש? אפשר גם הערכה."; $("wzErr").hidden = false; $("wzInc").focus(); return; }
+    if (wzStep < 3) { wzStep++; wzShow(); return; }
+    // Build the plan
+    commit();
+    const d = data();
+    const inc = Math.round(parseFloat($("wzInc").value) || 0);
+    d.income = [{ name: "משכורת", amount: inc }];
+    d.expenses = wzBills().filter((x) => x.amount > 0);
+    d.pct = +(wzPick("wzPct").p || 20);
+    const free = Math.max(inc - d.expenses.reduce((a, x) => a + x.amount, 0), 0) * (100 - d.pct) / 100;
+    const W = [30, 20, 20, 15, 15];
+    d.cats = blankCats().map((c, i) => ({ ...c, budget: Math.floor(free * (W[i] || 0) / 100 / 10) * 10 }));
+    d.example = false;
+    const w = parseFloat($("wzWage").value) || 0;
+    store.settings = { ...settings(), tone: wzPick("wzTone").tone || "mid", ...(w > 0 ? { wage: w } : {}) };
+    store.onboarded = true;
+    persist(); closeDlg("wizard"); render();
+    snack("התוכנית מוכנה! אפשר לשנות הכול ב״התוכנית של החודש״.");
+  });
+
   // ---- "?" help on every card, and cards that fold away (remembered on this device) ----
   const HELP = {
     todayLbl: "זה הסכום שאפשר להוציא היום בלי לפגוע בשאר החודש: הכסף החופשי שנשאר, חלקי הימים שנשארו. הוצאת פחות היום? מחר יהיה לך יותר. הפס מראה כמה מהכסף החופשי כבר יצא, והקו מראה כמה מהחודש עבר.",
@@ -3907,6 +4219,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     if (!hilanStarted) { hilanStarted = true; hilanSync(false); }
     takeAppOffDays(); renderMissing();
     ensurePrev(month);
+    if (isNewUser()) openWizard();
     const ns = new URLSearchParams(location.search).get("newShift");
     if (ns) { history.replaceState(null, "", location.pathname + location.hash); window.openShiftFromApp(ns); }
   }
