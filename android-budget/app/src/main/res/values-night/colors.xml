@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="splash">#17121f</color>
+    <color name="bar">#17121f</color>
+    <bool name="lightBar">false</bool>
+</resources>

@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>התקציב החודשי שלי</title>
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#db3577">
+<meta name="theme-color" content="#fff6ee">
 <script>try { var t = localStorage.getItem("budget-theme"); if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t); if (localStorage.getItem("budget-bigtext") === "1") document.documentElement.classList.add("bigtext"); } catch (e) {}</script>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="התקציב שלי">
@@ -601,6 +601,9 @@ html.bigtext body { zoom: 1.15; }
 /* Card tools: "?" help and fold */
 .panel h2 { flex-wrap: wrap; row-gap: 6px; }
 .panel h2 > .h2t, .panel h2 > #shTitle, .panel h2 > #calTitle { flex: 1 1 0; min-width: 0; }
+/* Card titles wrap to a second line instead of being cut */
+.panel h2 > .h2t, .panel h2 > #shTitle, .panel h2 > #calTitle { white-space: normal; overflow: visible; text-overflow: clip; min-width: auto; line-height: 1.2; }
+#addShift3 { flex: none; padding-inline: 16px; font-size: 24px; font-weight: 700; line-height: 1; }
 .panel h2 > .h2tools { margin-inline-start: auto; display: inline-flex; gap: 6px; align-items: center; flex: none; }
 .panel h2 > .sum ~ .h2tools, .panel h2 > .btn ~ .h2tools { margin-inline-start: 0; }
 .helpbtn, .foldbtn { width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--line); background: var(--surface-2); color: var(--muted); font-weight: 700; font-size: 15px; line-height: 1; padding: 0; display: inline-grid; place-items: center; flex: none; }
@@ -1050,7 +1053,7 @@ html.bigtext body { zoom: 1.15; }
     </section>
 
     <section class="panel pay" aria-labelledby="shTitle">
-      <h2 id="shH" class="pc-violet" data-e="⏰"><span id="shTitle">המשמרות</span> <button class="btn primary" type="button" id="addShift3">⏰ משמרת</button></h2>
+      <h2 id="shH" class="pc-violet" data-e="⏰"><span id="shTitle">המשמרות</span> <button class="btn primary" type="button" id="addShift3" aria-label="הוסף משמרת">+</button></h2>
       <div class="paybody">
         <span class="lbl">משכורת עד עכשיו (ברוטו)</span>
         <span class="big2" id="shNet">₪0</span>
@@ -1435,7 +1438,9 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   function paintTheme() {
     const t = currentTheme();
     document.querySelectorAll("[data-theme-pick]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.themePick === t)));
-    const meta = document.querySelector('meta[name="theme-color"]'); if (meta) meta.content = t === "dark" ? "#17121f" : "#db3577";
+    const meta = document.querySelector('meta[name="theme-color"]'); if (meta) meta.content = t === "dark" ? "#17121f" : "#fff6ee";
+    // In the Android app the phone's top bar takes the page's background color
+    try { if (window.BudgetApp && BudgetApp.setBars) BudgetApp.setBars(t); } catch (e) {}
   }
   document.addEventListener("click", (e) => { const m = $("userbar"); if (m.open && !m.contains(e.target)) m.open = false; });
   document.querySelectorAll("[data-theme-pick]").forEach((b) => b.addEventListener("click", () => {

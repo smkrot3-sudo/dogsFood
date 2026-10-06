@@ -142,8 +142,22 @@ public class MainActivity extends Activity {
                 c.setSystemBarsBehavior(WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
             }
         } else {
-            getWindow().getDecorView().setSystemUiVisibility(
-                View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+            View v = getWindow().getDecorView();
+            v.setSystemUiVisibility(v.getSystemUiVisibility() | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+        }
+    }
+
+    @SuppressWarnings("deprecation")
+    private void paintBars(boolean dark) {
+        getWindow().setStatusBarColor(dark ? 0xFF17121F : 0xFFFFF6EE);
+        if (Build.VERSION.SDK_INT >= 30) {
+            WindowInsetsController c = getWindow().getInsetsController();
+            if (c != null) c.setSystemBarsAppearance(dark ? 0 : WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS,
+                WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS);
+        } else {
+            View v = getWindow().getDecorView();
+            int f = v.getSystemUiVisibility();
+            v.setSystemUiVisibility(dark ? f & ~View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR : f | View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
         }
     }
 
@@ -282,6 +296,13 @@ public class MainActivity extends Activity {
         /** The page's reminder times per day for the coming weeks (Fridays and holiday eves come earlier, Shabbat is skipped). */
         @JavascriptInterface
         public void setReminderPlan(String csv) { Reminder.setPlan(MainActivity.this, csv); }
+
+        /** The phone's top bar takes the page's background: cream with dark icons, or dark purple with light ones. */
+        @JavascriptInterface
+        public void setBars(String theme) {
+            final boolean dark = "dark".equals(theme);
+            runOnUiThread(() -> paintBars(dark));
+        }
 
         /** A notification right now, e.g. a category that just went over its budget. */
         @JavascriptInterface
