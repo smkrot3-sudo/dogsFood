@@ -805,6 +805,9 @@ body.layedit .home > [data-block], body.layedit .home > [data-block] * { user-se
 .home > [data-block] input, .home > [data-block] textarea { -webkit-user-select: text; user-select: text; }
 body.layedit #fab, body.onsettings #fab { display: none; }
 
+.shiftinc { display: flex; justify-content: space-between; gap: 8px; align-items: center; padding: 10px 14px; border-radius: 12px; background: var(--surface-2); font-weight: 600; }
+.shiftinc b { font-variant-numeric: tabular-nums; }
+
 /* Version line at the very bottom */
 .btn.catedit { justify-self: start; font-size: 14.5px; padding: 8px 14px; }
 .chip.newcat span { border-style: dashed; color: var(--brand2); background: none; }
@@ -1032,6 +1035,7 @@ body.layedit #fab, body.onsettings #fab { display: none; }
           <h2 id="incH" class="pc-mint" data-e="💵">הכנסה צפויה נטו <span class="sum" id="incSum">₪0</span></h2>
           <p class="hint">הכנסה משתנה? רשמו את הסכום הנמוך שאתם בטוחים שייכנס. מה שיגיע מעבר לזה הוא בונוס, לא תקציב.</p>
           <div class="rows" id="incRows"></div>
+          <div class="shiftinc" id="shiftIncRow" hidden><span id="shiftIncLbl">⏰ מהמשמרות (ברוטו)</span><b id="shiftIncVal">₪0</b></div>
           <div class="actions"><button class="btn" type="button" id="addInc">+ הוספת הכנסה</button></div>
         </section>
 
@@ -1118,6 +1122,14 @@ body.layedit #fab, body.onsettings #fab { display: none; }
           <button type="button" data-tone="soft" aria-pressed="false">💛 עדין</button>
         </div>
       </div>
+      <div class="field"><span>הכסף מהמשמרות נכנס להכנסה של</span>
+        <div class="seg" id="shiftIncSeg" role="group" aria-label="מאיזה חודש לקחת את הכסף מהמשמרות">
+          <button type="button" data-k="same" aria-pressed="false">אותו חודש</button>
+          <button type="button" data-k="prev" aria-pressed="false">החודש הקודם</button>
+          <button type="button" data-k="off" aria-pressed="false">לא להכניס</button>
+        </div>
+      </div>
+      <p class="hint">״אותו חודש״: ההוצאות של אוקטובר נבדקות מול המשכורת על אוקטובר. ״החודש הקודם״: מול המשכורת על ספטמבר, שנכנסת באוקטובר. הסכום הוא ברוטו לפי המשמרות שרשמת, וגדל עם כל משמרת.</p>
       <label class="check" for="bigText"><input type="checkbox" id="bigText"> 🔠 טקסט גדול (במכשיר הזה)</label>
       <div class="actions">
         <button class="btn" type="button" id="expTx">📤 ייצוא ההוצאות לאקסל</button>
@@ -1810,16 +1822,32 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     draft = null; draftFor = null;
   }
 
+  // Pay from logged shifts (gross) counts as income: from the same month, or from the month before
+  // (pay that arrives this month for last month's work), as each user chooses in settings
+  const shiftIncomeFrom = () => (store && ["same", "prev", "off"].includes(settings().shiftIncome) ? settings().shiftIncome : "same");
+  function shiftIncome(m) {
+    const from = shiftIncomeFrom();
+    if (from === "off" || !store) return 0;
+    const pm = from === "prev" ? prevMonth(m) : m;
+    if (!shifts[pm]) {
+      if (from === "prev" && !loadingPrevPay.has(pm)) { loadingPrevPay.add(pm); loadShifts(pm).catch(() => { shifts[pm] = shifts[pm] || []; }).then(() => { loadingPrevPay.delete(pm); render(); renderTracking(); }); }
+      return 0;
+    }
+    return Math.round(shifts[pm].reduce((s, r) => s + shiftPay(r, settings()).gross, 0));
+  }
+  let lastShiftInc = null;
+  const loadingPrevPay = new Set();
   function plan() {
     const d = data();
-    const inc = d.income.reduce((s, x) => s + (+x.amount || 0), 0);
+    const shiftInc = shiftIncome(month);
+    const inc = d.income.reduce((s, x) => s + (+x.amount || 0), 0) + shiftInc;
     const exp = d.expenses.reduce((s, x) => s + (+x.amount || 0), 0);
     const remain = inc - exp;
     const pos = Math.max(remain, 0);
     const save = Math.round(pos * d.pct / 100);
     const spend = pos - save;
     const catTotal = d.cats.reduce((s, c) => s + (isSub(c, d.cats) ? 0 : +c.budget || 0), 0); // subcategories are part of their main one
-    return { d, inc, exp, remain, save, spend, catTotal };
+    return { d, inc, exp, remain, save, spend, catTotal, shiftInc };
   }
 
   // ---- Saving the plan ----
@@ -2073,6 +2101,11 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     const { d, inc, exp, remain, save, spend, catTotal } = plan();
     const days = periodDays(month);
     $("incSum").textContent = fmt(inc);
+    const from = shiftIncomeFrom(), si = plan().shiftInc;
+    lastShiftInc = si;
+    $("shiftIncRow").hidden = from === "off" || !(+settings().wage > 0 || si > 0);
+    $("shiftIncLbl").textContent = "⏰ מהמשמרות של " + monthName(from === "prev" ? prevMonth(month) : month) + " (ברוטו)";
+    $("shiftIncVal").textContent = fmt(si);
     $("expSum").textContent = fmt(exp);
     $("remain").textContent = signed(remain);
     $("remain").style.color = remain < 0 ? "var(--danger)" : "";
@@ -2704,6 +2737,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     $("startDay").value = startDay();
     const tone = settings().tone || "tough";
     document.querySelectorAll("#toneSeg button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.tone === tone)));
+    document.querySelectorAll("#shiftIncSeg button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.k === shiftIncomeFrom())));
     $("tagline").textContent = say("כל שקל שיוצא נרשם כאן. בלי תירוצים.", "כל שקל שיוצא נרשם כאן.", "יחד נגיע לסוף החודש בשקט 💛");
     $("bigText").checked = document.documentElement.classList.contains("bigtext");
     renderPaySettings();
@@ -2719,6 +2753,12 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     snack("מעכשיו החודש שלך מתחיל ב־" + startDay() + " לחודש.");
   });
 
+  $("shiftIncSeg").addEventListener("click", (e) => {
+    const b = e.target.closest("[data-k]"); if (!b) return;
+    store.settings = { ...(store.settings || {}), shiftIncome: b.dataset.k };
+    persist(); render(); renderTracking();
+    snack(b.dataset.k === "off" ? "הכסף מהמשמרות לא נכנס להכנסה." : "הכסף מהמשמרות של " + (b.dataset.k === "prev" ? "החודש הקודם" : "אותו חודש") + " נכנס להכנסה.");
+  });
   $("toneSeg").addEventListener("click", (e) => {
     const b = e.target.closest("[data-tone]"); if (!b) return;
     store.settings = { ...(store.settings || {}), tone: b.dataset.tone };
@@ -2875,6 +2915,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   }
   function renderPay() {
     if (!store) return;
+    if (shiftIncome(month) !== lastShiftInc) { computePlan(); setTimeout(renderTracking, 0); }
     renderMissing();
     const w = +settings().wage || 0;
     const pp = periodPay(month);
