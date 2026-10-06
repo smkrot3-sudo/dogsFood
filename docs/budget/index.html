@@ -6,7 +6,7 @@
 <title>התקציב החודשי שלי</title>
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#db3577">
-<script>try { var t = localStorage.getItem("budget-theme"); if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t); } catch (e) {}</script>
+<script>try { var t = localStorage.getItem("budget-theme"); if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t); if (localStorage.getItem("budget-bigtext") === "1") document.documentElement.classList.add("bigtext"); } catch (e) {}</script>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="התקציב שלי">
 <link rel="apple-touch-icon" href="icon-180.png">
@@ -595,6 +595,35 @@ dialog.sheet::backdrop { background: rgba(40, 20, 50, .45); -webkit-backdrop-fil
 /* Typed time boxes */
 .timein { direction: ltr; text-align: center !important; font-size: 20px !important; font-weight: 700; letter-spacing: 1px; font-variant-numeric: tabular-nums; }
 .timein.bad { border-color: var(--danger) !important; background: var(--danger-soft) !important; }
+
+/* Bigger text (per device) */
+html.bigtext body { zoom: 1.15; }
+/* Card tools: "?" help and fold */
+.panel h2 { flex-wrap: wrap; row-gap: 6px; }
+.panel h2 > .h2t, .panel h2 > #shTitle, .panel h2 > #calTitle { flex: 1 1 0; min-width: 0; }
+.panel h2 > .h2tools { margin-inline-start: auto; display: inline-flex; gap: 6px; align-items: center; flex: none; }
+.panel h2 > .sum ~ .h2tools, .panel h2 > .btn ~ .h2tools { margin-inline-start: 0; }
+.helpbtn, .foldbtn { width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--line); background: var(--surface-2); color: var(--muted); font-weight: 700; font-size: 15px; line-height: 1; padding: 0; display: inline-grid; place-items: center; flex: none; }
+.helpbtn[aria-expanded="true"] { background: var(--brand2); border-color: var(--brand2); color: #fff; }
+.foldbtn { transition: transform .2s ease; }
+.panel.folded .foldbtn { transform: rotate(90deg); }
+.panel.folded > :not(h2) { display: none !important; }
+.panel h2.foldable { cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.helptext { background: var(--surface-2); border-radius: 14px; padding: 10px 14px; font-size: 14px; margin: 0; color: var(--fg); font-weight: 400; }
+.helptext::before { content: "💡 "; }
+.today .helpbtn { position: absolute; top: 14px; inset-inline-start: 14px; background: rgba(255, 255, 255, .22); border-color: transparent; color: #fff; z-index: 1; }
+.today .lbl { padding-inline-end: 0; }
+.today .helptext { background: rgba(255, 255, 255, .2); color: #fff; }
+/* Choice buttons (tone and the like) */
+.seg { display: flex; flex-wrap: wrap; gap: 6px; }
+.seg button { border: 1.5px solid var(--line); background: var(--surface); color: var(--fg); padding: 7px 14px; font-weight: 600; font-size: 14.5px; }
+.seg button[aria-pressed="true"] { border-color: var(--brand2); color: var(--brand2); background: color-mix(in srgb, var(--brand2) 12%, var(--surface)); }
+/* Not by color alone: shapes and stripes next to every good / warning / over state */
+.cat .state.good::before { content: "✓ "; }
+.cat .state.warn::before { content: "⚠️ "; }
+.cat .state.bad::before { content: "⛔ "; }
+.pace .fill.warn { background-image: repeating-linear-gradient(135deg, rgba(255, 255, 255, .35) 0 4px, transparent 4px 10px), linear-gradient(90deg, #f97316, #fbbf24); }
+.pace .fill.bad { background-image: repeating-linear-gradient(135deg, rgba(255, 255, 255, .45) 0 6px, transparent 6px 9px), linear-gradient(90deg, #e11d48, #f43f5e); }
 </style>
 </head>
 <body>
@@ -637,7 +666,7 @@ dialog.sheet::backdrop { background: rgba(40, 20, 50, .45); -webkit-backdrop-fil
       <span class="logo" aria-hidden="true">💰</span>
       <div class="brandtext">
         <h1><span class="gt">התקציב החודשי שלי</span></h1>
-        <p class="sub">כל שקל שיוצא נרשם כאן. בלי תירוצים.</p>
+        <p class="sub" id="tagline">כל שקל שיוצא נרשם כאן. בלי תירוצים.</p>
       </div>
     </div>
     <div class="tools">
@@ -677,7 +706,7 @@ dialog.sheet::backdrop { background: rgba(40, 20, 50, .45); -webkit-backdrop-fil
   <div class="grid" id="viewMain">
     <div class="col">
       <section class="panel today" aria-labelledby="todayLbl">
-        <span class="lbl" id="todayLbl">מותר לך לבזבז היום</span>
+        <span class="lbl" id="todayLbl">מותר לך להוציא היום</span>
         <span class="big" id="todayVal">₪0</span>
         <span class="line" id="todayLine"></span>
         <div class="pace" id="pace">
@@ -723,7 +752,7 @@ dialog.sheet::backdrop { background: rgba(40, 20, 50, .45); -webkit-backdrop-fil
 
       <section class="panel" aria-labelledby="histH">
         <h2 id="histH" class="pc-blue" data-e="📊">לאורך החודשים</h2>
-        <p class="hint">העמודה היא כמה הוצאת על בזבוזים, והקו הוא התקציב שתכננת.</p>
+        <p class="hint">העמודה היא כמה הוצאת מהכסף החופשי, והקו הוא מה שתכננת.</p>
         <div class="hist" id="histChart"></div>
         <p class="histnote" id="histNote"></p>
         <p class="histnote" id="histTop"></p>
@@ -741,8 +770,8 @@ dialog.sheet::backdrop { background: rgba(40, 20, 50, .45); -webkit-backdrop-fil
         </section>
 
         <section class="panel" aria-labelledby="expH">
-          <h2 id="expH" class="pc-violet" data-e="🏠">הוצאות חובה <span class="sum" id="expSum">₪0</span></h2>
-          <p class="hint">חשבונות קבועים שחייבים לשלם: שכר דירה, חשמל, תרופות, אוכל לכלבים.</p>
+          <h2 id="expH" class="pc-violet" data-e="🏠">חשבונות קבועים <span class="sum" id="expSum">₪0</span></h2>
+          <p class="hint">מה שחייבים לשלם כל חודש: שכר דירה, חשמל, תרופות, אוכל לכלבים.</p>
           <div class="rows" id="expRows"></div>
           <div class="actions">
             <button class="btn" type="button" id="addExp">+ הוספת הוצאה</button>
@@ -753,16 +782,16 @@ dialog.sheet::backdrop { background: rgba(40, 20, 50, .45); -webkit-backdrop-fil
         <section class="panel" aria-labelledby="resH">
           <h2 id="resH" class="pc-orange" data-e="🥧">החלוקה לחודש</h2>
           <div class="remain">
-            <span class="lbl">נשאר אחרי הוצאות החובה</span>
+            <span class="lbl">נשאר אחרי החשבונות הקבועים</span>
             <span class="val" id="remain">₪0</span>
           </div>
           <div class="bar" aria-hidden="true">
             <span class="b-must" id="bMust"></span><span class="b-save" id="bSave"></span><span class="b-spend" id="bSpend"></span>
           </div>
           <div class="legend">
-            <span><i style="background:var(--must)"></i>הוצאות חובה</span>
-            <span><i style="background:var(--accent)"></i>פיקדון</span>
-            <span><i style="background:var(--spend)"></i>בזבוזים</span>
+            <span><i style="background:var(--must)"></i>חשבונות קבועים</span>
+            <span><i style="background:var(--accent)"></i>חיסכון</span>
+            <span><i style="background:var(--spend)"></i>כסף חופשי</span>
           </div>
           <div class="alert" id="alert" hidden></div>
           <div class="slider">
@@ -777,26 +806,26 @@ dialog.sheet::backdrop { background: rgba(40, 20, 50, .45); -webkit-backdrop-fil
           </div>
           <div class="split">
             <div class="tile save">
-              <span class="t">להעביר לפיקדון</span>
+              <span class="t">להעביר לחיסכון</span>
               <span class="n" id="save">₪0</span>
               <span class="d" id="saveD">חיסכון לחודש זה</span>
             </div>
             <div class="tile spend">
-              <span class="t">תקציב הבזבוזים</span>
+              <span class="t">כסף חופשי להוצאות</span>
               <span class="n" id="spend">₪0</span>
               <span class="d" id="spendD"></span>
             </div>
           </div>
           <div class="facts">
             <div><span>הכנסה נטו</span><b id="fInc">₪0</b></div>
-            <div><span>הוצאות חובה</span><b id="fExp">₪0</b></div>
-            <div><span>סה״כ להשאיר בעו״ש (חובה + בזבוזים)</span><b id="fKeep">₪0</b></div>
+            <div><span>חשבונות קבועים</span><b id="fExp">₪0</b></div>
+            <div><span>סה״כ להשאיר בעו״ש (חשבונות + כסף חופשי)</span><b id="fKeep">₪0</b></div>
           </div>
         </section>
 
         <section class="panel" aria-labelledby="catH">
           <h2 id="catH" class="pc-pink" data-e="🎯">תקציב לכל קטגוריה <span class="sum" id="catSum">₪0</span></h2>
-          <p class="hint">מחלקים את תקציב הבזבוזים לקטגוריות שלכם. כל הוצאה שנרשמת יורדת מהקטגוריה שלה.</p>
+          <p class="hint">מחלקים את הכסף החופשי לקטגוריות שלכם. כל הוצאה שנרשמת יורדת מהקטגוריה שלה.</p>
           <div class="rows" id="catRows"></div>
           <div class="alloc" id="alloc"></div>
           <div class="actions"><button class="btn" type="button" id="addCat">+ הוספת קטגוריה</button></div>
@@ -811,6 +840,14 @@ dialog.sheet::backdrop { background: rgba(40, 20, 50, .45); -webkit-backdrop-fil
           <h2 id="setH" class="pc-gray" data-e="⚙️">הגדרות</h2>
           <label class="field" for="startDay">החודש שלי מתחיל ב־<select id="startDay"></select></label>
           <p class="hint">למשל ביום שהמשכורת נכנסת או שהאשראי יורד. ״כמה מותר היום״ והגרף יחושבו לפי זה.</p>
+          <div class="field"><span>איך ההודעות שלי נשמעות</span>
+            <div class="seg" id="toneSeg" role="group" aria-label="טון ההודעות">
+              <button type="button" data-tone="tough" aria-pressed="false">💪 קשוח</button>
+              <button type="button" data-tone="mid" aria-pressed="false">⚖️ מאוזן</button>
+              <button type="button" data-tone="soft" aria-pressed="false">💛 עדין</button>
+            </div>
+          </div>
+          <label class="check" for="bigText"><input type="checkbox" id="bigText"> 🔠 טקסט גדול (במכשיר הזה)</label>
           <div class="actions">
             <button class="btn" type="button" id="expTx">📤 ייצוא ההוצאות לאקסל</button>
             <button class="btn" type="button" id="expPlan">📤 ייצוא התוכנית לאקסל</button>
@@ -829,7 +866,7 @@ dialog.sheet::backdrop { background: rgba(40, 20, 50, .45); -webkit-backdrop-fil
     </section>
 
     <section class="panel pay" aria-labelledby="shTitle">
-      <h2 class="pc-violet" data-e="⏰"><span id="shTitle">המשמרות</span> <button class="btn primary" type="button" id="addShift3">⏰ משמרת</button></h2>
+      <h2 id="shH" class="pc-violet" data-e="⏰"><span id="shTitle">המשמרות</span> <button class="btn primary" type="button" id="addShift3">⏰ משמרת</button></h2>
       <div class="paybody">
         <span class="lbl">משכורת עד עכשיו (ברוטו)</span>
         <span class="big2" id="shNet">₪0</span>
@@ -884,8 +921,8 @@ dialog.sheet::backdrop { background: rgba(40, 20, 50, .45); -webkit-backdrop-fil
   </div>
 
   <div class="viewcol" id="viewCal" hidden>
-    <section class="panel" aria-labelledby="calTitle">
-      <h2 id="calTitle" class="pc-blue" data-e="📅">החודש</h2>
+    <section class="panel" aria-labelledby="calH">
+      <h2 id="calH" class="pc-blue" data-e="📅"><span id="calTitle">החודש</span></h2>
       <div class="caltiles">
         <div class="ctile"><span class="t">הכנסת</span><span class="n pos" id="calIn">+₪0</span></div>
         <div class="ctile"><span class="t">הוצאת</span><span class="n neg" id="calOut">−₪0</span></div>
@@ -1115,6 +1152,13 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   const outboxKey = () => "budget-outbox-" + (user ? user.id : "local");
   function hasOwnData(s) {
     return !!(s && s.months && Object.values(s.months).some((m) => !m.example));
+  }
+
+  // ---- Tone of the messages: each user picks tough (default), balanced or gentle ----
+  const TONES = ["tough", "mid", "soft"];
+  function say(tough, mid, soft) {
+    const t = store && store.settings && store.settings.tone;
+    return t === "soft" ? soft : t === "mid" ? mid : tough;
   }
 
   // ---- Dates ----
@@ -1456,7 +1500,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     store = s && s.months ? s : { months: {} };
     version = v == null ? null : v;
     month = thisMonth();
-    if (!Object.keys(store.months).length) store.months[month] = exampleMonth();
+    if (!Object.keys(store.months).length) store.months[month] = { pct: 50, income: [{ name: "משכורת", amount: 0 }], expenses: [], cats: blankCats() };
     $("saving").textContent = "";
     render();
     show("app");
@@ -1536,7 +1580,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     $("spend").textContent = fmt(spend);
     $("spendD").textContent = spend > 0
       ? "בערך " + fmt(spend / days) + " ליום, " + fmt(spend / (days / 7)) + " לשבוע"
-      : "אין כסף פנוי לבזבוזים החודש";
+      : "אין כסף חופשי החודש";
     $("saveD").textContent = save > 0 ? "בקצב הזה: " + fmt(save * 12) + " בשנה" : "אין יתרה לחיסכון החודש";
     $("fInc").textContent = fmt(inc);
     $("fExp").textContent = fmt(exp);
@@ -1548,7 +1592,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     const alert = $("alert");
     if (inc > 0 && remain < 0) {
       alert.hidden = false;
-      alert.textContent = "הוצאות החובה גבוהות מההכנסה ב־" + fmt(-remain) + ". אתה חי על חשבון העתיד. חייבים לקצץ.";
+      alert.textContent = "החשבונות הקבועים גבוהים מההכנסה ב־" + fmt(-remain) + ". " + say("אתה חי על חשבון העתיד. חייבים לקצץ.", "צריך לקצץ.", "כדאי לבדוק יחד איפה אפשר לחסוך.");
     } else alert.hidden = true;
     document.querySelectorAll("#presets button").forEach((b) =>
       b.setAttribute("aria-pressed", String(+b.dataset.p === d.pct)));
@@ -1558,10 +1602,10 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     const gap = spend - catTotal;
     alloc.className = "alloc" + (gap < 0 ? " bad" : "");
     alloc.textContent = gap < 0
-      ? "חילקת לקטגוריות " + fmt(-gap) + " יותר ממה שיש לך לבזבוזים. תוריד."
+      ? "חילקת לקטגוריות " + fmt(-gap) + " יותר מהכסף החופשי שלך. " + say("תוריד.", "כדאי להוריד.", "כדאי להוריד קצת.")
       : gap > 0
         ? "חילקת " + fmt(catTotal) + " מתוך " + fmt(spend) + ". עוד " + fmt(gap) + " לא שויכו לאף קטגוריה."
-        : "כל תקציב הבזבוזים מחולק לקטגוריות.";
+        : "כל הכסף החופשי מחולק לקטגוריות.";
   }
 
   function stateOf(spent, budget, elapsed) {
@@ -1602,33 +1646,34 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       const pool = spend - spentBefore - spentFuture;
       const allowance = Math.max(pool, 0) / daysLeft;
       const left = allowance - spentToday;
-      $("todayLbl").textContent = left >= 0 ? "מותר לך לבזבז היום" : "חרגת היום ב־";
+      $("todayLbl").textContent = left >= 0 ? "מותר לך להוציא היום" : "חרגת היום ב־";
       $("todayVal").textContent = fmt(Math.abs(left));
       $("todayVal").classList.toggle("neg", left < 0);
-      $("todayLine").textContent = "נשארו " + fmt(Math.max(spend - spent, 0)) + " לבזבוזים ל־" + daysLeft + " ימים (כולל היום)";
+      $("todayLine").textContent = "נשארו " + fmt(Math.max(spend - spent, 0)) + " כסף חופשי ל־" + daysLeft + " ימים (כולל היום)";
       const rate = spent / dayNum;
       const runOut = rate > 0 ? Math.ceil(spend / rate) : Infinity;
-      if (spend <= 0) setV("bad", "אין לך כסף פנוי לבזבוזים החודש. כל שקל שתוציא יבוא מהחיסכון.");
-      else if (spent > spend) setV("bad", "חרגת מתקציב הבזבוזים ב־" + fmt(spent - spend) + ". עד סוף החודש: אפס בזבוזים.");
-      else if (left < 0) setV("bad", "חרגת היום ב־" + fmt(-left) + ". זה יורד מהתקציב של מחר.");
-      else if (runOut < days) setV("warn", "בקצב הזה הכסף נגמר ב־" + shortDate(dateAdd(periodStart(month), runOut - 1)) + ". תאט עכשיו, לא מחר.");
-      else if (overCat) setV("warn", overCat.name + " בחריגה של " + fmt(overCat.over) + ". הכסף הזה יוצא מקטגוריה אחרת, אז מעכשיו " + overCat.name + " סגורה עד סוף החודש.");
-      else if (!list.length) setV("warn", "עוד לא רשמת אף הוצאה החודש. כל שקל שיוצא נרשם כאן, גם הקפה.");
-      else setV("good", "אתה בתוך התקציב. זו לא סיבה להתפנק.");
+      const X = (n) => fmt(n);
+      if (spend <= 0) setV("bad", say("אין לך כסף חופשי החודש. כל שקל שתוציא יבוא מהחיסכון.", "אין כסף חופשי החודש. כל הוצאה תבוא מהחיסכון.", "החודש אין כסף חופשי. כדאי לעבור על התוכנית ולמצוא קצת מרווח 💛"));
+      else if (spent > spend) setV("bad", say("חרגת מהכסף החופשי ב־" + X(spent - spend) + ". עד סוף החודש: אפס בזבוזים.", "עברת את הכסף החופשי ב־" + X(spent - spend) + ". עדיף לעצור הוצאות עד סוף החודש.", "עברת את הכסף החופשי ב־" + X(spent - spend) + ". זה קורה. מעכשיו ננסה להוציא רק מה שחייבים 🙏"));
+      else if (left < 0) setV("bad", say("חרגת היום ב־" + X(-left) + ". זה יורד מהתקציב של מחר.", "היום הוצאת " + X(-left) + " מעבר. זה יקטין קצת את התקציב של הימים הבאים.", "היום יצא קצת יותר (" + X(-left) + "). לא נורא, מחר מתחילים מחדש 🙂"));
+      else if (runOut < days) { const dd = shortDate(dateAdd(periodStart(month), runOut - 1)); setV("warn", say("בקצב הזה הכסף נגמר ב־" + dd + ". תאט עכשיו, לא מחר.", "בקצב הזה הכסף ייגמר ב־" + dd + ". כדאי להאט.", "בקצב הזה הכסף ייגמר ב־" + dd + ". אם נאט קצת, נגיע לסוף החודש בשקט.")); }
+      else if (overCat) setV("warn", say(overCat.name + " בחריגה של " + X(overCat.over) + ". הכסף הזה יוצא מקטגוריה אחרת, אז מעכשיו " + overCat.name + " סגורה עד סוף החודש.", overCat.name + " עברה את התקציב שלה ב־" + X(overCat.over) + ". כדאי לא להוציא עליה יותר החודש.", overCat.name + " עברה קצת את התקציב (" + X(overCat.over) + "). ננסה לוותר עליה עד סוף החודש."));
+      else if (!list.length) setV("warn", say("עוד לא רשמת אף הוצאה החודש. כל שקל שיוצא נרשם כאן, גם הקפה.", "עוד לא רשמת הוצאות החודש. כדאי לרשום כל הוצאה, גם קטנה.", "עוד לא רשמת הוצאות החודש. כל הוצאה שתרשום תעזור לראות את התמונה 🙂"));
+      else setV("good", say("אתה בתוך התקציב. זו לא סיבה להתפנק.", "אתה בתוך התקציב. ככה ממשיכים.", "כל הכבוד, אתה בתוך התקציב! 🎉"));
     } else if (isPast) {
       const left = spend - spent;
       $("todayLbl").textContent = left >= 0 ? "נשאר בסוף " + monthName(month) : "חריגה ב" + monthName(month);
       $("todayVal").textContent = fmt(Math.abs(left));
       $("todayVal").classList.toggle("neg", left < 0);
-      $("todayLine").textContent = "הוצאת " + fmt(spent) + " מתוך " + fmt(spend) + " שתכננת לבזבוזים";
-      if (left < 0) setV("bad", "החודש הזה נגמר בחריגה של " + fmt(-left) + ". תבדוק איזו קטגוריה ברחה ותוריד לה תקציב.");
-      else setV("good", "סיימת את החודש בלי חריגה. " + (left > 0 ? "את ה־" + fmt(left) + " שנשארו תעביר לחיסכון, לא לחודש הבא." : ""));
+      $("todayLine").textContent = "הוצאת " + fmt(spent) + " מתוך " + fmt(spend) + " כסף חופשי שתכננת";
+      if (left < 0) setV("bad", say("החודש הזה נגמר בחריגה של " + fmt(-left) + ". תבדוק איזו קטגוריה ברחה ותוריד לה תקציב.", "החודש נגמר בחריגה של " + fmt(-left) + ". כדאי לבדוק איזו קטגוריה עברה את התקציב.", "החודש נגמר בחריגה של " + fmt(-left) + ". בחודש הבא נשים לב לקטגוריה שהכי ברחה 💛"));
+      else setV("good", say("סיימת את החודש בלי חריגה. " + (left > 0 ? "את ה־" + fmt(left) + " שנשארו תעביר לחיסכון, לא לחודש הבא." : ""), "סיימת את החודש בלי חריגה." + (left > 0 ? " נשארו " + fmt(left) + ", כדאי להעביר אותם לחיסכון." : ""), "סיימת את החודש בלי חריגה, כל הכבוד! 🎉" + (left > 0 ? " נשארו " + fmt(left) + " לחיסכון." : "")));
     } else {
-      $("todayLbl").textContent = "תקציב הבזבוזים ל" + monthName(month);
+      $("todayLbl").textContent = "הכסף החופשי ל" + monthName(month);
       $("todayVal").textContent = fmt(spend);
       $("todayVal").classList.remove("neg");
       $("todayLine").textContent = "בערך " + fmt(spend / days) + " ליום";
-      setV("good", "החודש עוד לא התחיל. זה הזמן לתכנן אותו, לא לבזבז אותו מראש.");
+      setV("good", say("החודש עוד לא התחיל. זה הזמן לתכנן אותו, לא לבזבז אותו מראש.", "החודש עוד לא התחיל. זה הזמן לתכנן אותו.", "החודש עוד לא התחיל. זה זמן טוב לתכנן אותו 🙂"));
     }
     if (!$("pace").hidden) {
       const frac = spend > 0 ? spent / spend : 0;
@@ -1906,8 +1951,8 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     renderWish();
     renderTracking();
     snack(outcome === "skipped"
-      ? "ויתרת. " + fmt(item.amount) + " נשארו אצלך, תעביר אותם לחיסכון לפני שהם נעלמים."
-      : "נרשם כהוצאה של " + fmt(item.amount) + ". לפחות חיכית 48 שעות.");
+      ? say("ויתרת. " + fmt(item.amount) + " נשארו אצלך, תעביר אותם לחיסכון לפני שהם נעלמים.", "ויתרת. " + fmt(item.amount) + " נשארו אצלך, כדאי להעביר אותם לחיסכון.", "ויתרת, כל הכבוד! " + fmt(item.amount) + " נשארו אצלך 🎉")
+      : say("נרשם כהוצאה של " + fmt(item.amount) + ". לפחות חיכית 48 שעות.", "נרשם כהוצאה של " + fmt(item.amount) + ".", "נרשם כהוצאה של " + fmt(item.amount) + ". חיכית 48 שעות, יפה."));
   }
 
   function renderWish() {
@@ -2060,7 +2105,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       const h = Math.max(base - y(r.spent), r.spent > 0 ? 2 : 0);
       if (h > 0) g.append(el("path", { d: "M" + (cx - bw / 2) + "," + base + "V" + (base - h + 4) + "q0,-4 4,-4H" + (cx + bw / 2 - 4) + "q4,0 4,4V" + base + "Z", class: over ? "over" : "spent" }));
       if (r.budget != null) g.append(el("line", { x1: cx - bw / 2 - 8, x2: cx + bw / 2 + 8, y1: y(r.budget), y2: y(r.budget), class: "budget" }));
-      g.append(el("text", { x: cx, y: Math.max(y(r.spent) - 8, 16), class: "val" + (over ? " bad" : "") }, r.spent ? fmt(r.spent) : ""));
+      g.append(el("text", { x: cx, y: Math.max(y(r.spent) - 8, 16), class: "val" + (over ? " bad" : "") }, r.spent ? (over ? "⚠️ " : "") + fmt(r.spent) : ""));
       g.append(el("text", { x: cx, y: base + 22, class: "lbl" }, monthName(r.m)));
       g.append(el("rect", { x: cx - slot / 2, y: 0, width: slot, height: H, class: "hit" }));
       g.append(el("title", {}, monthName(r.m) + ": הוצאת " + fmt(r.spent) + (r.budget != null ? " מתוך " + fmt(r.budget) + (over ? ", חריגה של " + fmt(r.spent - r.budget) : "") : "")));
@@ -2118,7 +2163,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       const d = store.months[m];
       if (d.example) return;
       d.income.forEach((x) => out.push([m, "הכנסה", x.name, +x.amount || 0]));
-      d.expenses.forEach((x) => out.push([m, "הוצאת חובה", x.name, +x.amount || 0]));
+      d.expenses.forEach((x) => out.push([m, "חשבון קבוע", x.name, +x.amount || 0]));
       (d.cats || []).forEach((c) => out.push([m, "תקציב קטגוריה", c.name, +c.budget || 0]));
       out.push([m, "אחוז חיסכון מהיתרה", "", d.pct]);
     });
@@ -2132,6 +2177,10 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   })();
   function renderSettings() {
     $("startDay").value = startDay();
+    const tone = settings().tone || "tough";
+    document.querySelectorAll("#toneSeg button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.tone === tone)));
+    $("tagline").textContent = say("כל שקל שיוצא נרשם כאן. בלי תירוצים.", "כל שקל שיוצא נרשם כאן.", "יחד נגיע לסוף החודש בשקט 💛");
+    $("bigText").checked = document.documentElement.classList.contains("bigtext");
     renderPaySettings();
   }
   $("startDay").addEventListener("change", () => {
@@ -2143,6 +2192,17 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     Object.keys(hist).forEach((k) => delete hist[k]);
     goMonth(thisMonth());
     snack("מעכשיו החודש שלך מתחיל ב־" + startDay() + " לחודש.");
+  });
+
+  $("toneSeg").addEventListener("click", (e) => {
+    const b = e.target.closest("[data-tone]"); if (!b) return;
+    store.settings = { ...(store.settings || {}), tone: b.dataset.tone };
+    persist(); render();
+    snack(say("טון קשוח. בלי הנחות.", "טון מאוזן.", "טון עדין 💛"));
+  });
+  $("bigText").addEventListener("change", () => {
+    document.documentElement.classList.toggle("bigtext", $("bigText").checked);
+    try { localStorage.setItem("budget-bigtext", $("bigText").checked ? "1" : "0"); } catch (e) {}
   });
 
   // ---- Dated records kept in their own tables (shifts, one-off incomes) ----
@@ -2316,7 +2376,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       const projected = Math.max(pp.net / dayNum * days, pp.net + pp.plannedNet) + extra;
       const gap = need - projected;
       const avgShift = pp.count ? pp.min / pp.count / 60 : 8;
-      const needTxt = "הוצאות החובה ותקציב הבזבוזים שלך הם " + fmt(need) + ". ";
+      const needTxt = "החשבונות הקבועים והכסף החופשי שלך הם " + fmt(need) + ". ";
       if (!pp.count && !pp.plannedNet) {
         const h = Math.ceil(Math.max(need - extra, 0) / netHour);
         setV("warn", "עוד לא רשמת אף משמרת החודש. " + needTxt + "כדי לכסות אותם צריך בערך " + h + " שעות עבודה, כלומר " + Math.ceil(h / avgShift) + " משמרות.");
@@ -2324,7 +2384,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
         const h = Math.ceil(gap / netHour);
         setV("bad", "בקצב הזה תרוויח בערך " + fmt(projected) + " החודש. " + needTxt + "חסרים " + fmt(gap) + ": צריך עוד בערך " + h + " שעות, כלומר " + Math.ceil(h / avgShift) + " משמרות, עד " + shortDate(periodEnd(month)) + ".");
       } else {
-        setV("good", "בקצב הזה תרוויח בערך " + fmt(projected) + " החודש, " + fmt(-gap) + " יותר מההוצאות שתכננת. אל תוריד משמרות, את העודף תעביר לחיסכון.");
+        setV("good", "בקצב הזה תרוויח בערך " + fmt(projected) + " החודש, " + fmt(-gap) + " יותר מההוצאות שתכננת. " + say("אל תוריד משמרות, את העודף תעביר לחיסכון.", "את העודף כדאי להעביר לחיסכון.", "יופי! את העודף אפשר לשים בחיסכון 💛"));
       }
     } else if (isPast && pp.count) {
       const left = pp.net + extra - need;
@@ -2761,7 +2821,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     const gross = on.reduce((s, r) => s + r.pay.gross, 0);
     const m = periodOf(rows[rows.length - 1].work_date);
     if (m !== month) goMonth(m); else { renderPay(); renderCal(); }
-    snack("נוספו " + rows.length + " משמרות, " + fmt(gross) + " ברוטו. עכשיו אין תירוץ לא לדעת כמה הרווחת.",
+    snack("נוספו " + rows.length + " משמרות, " + fmt(gross) + " ברוטו." + say(" עכשיו אין תירוץ לא לדעת כמה הרווחת.", "", ""),
       () => { rows.forEach((r) => delShift(r.id)); renderPay(); renderCal(); });
   });
 
@@ -2925,7 +2985,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     showPeriodOf(row.received_on);
     renderPay(); renderCal();
     snack(before ? "ההכנסה עודכנה"
-      : "נרשמה הכנסה של " + fmt(amount) + (kind === "מתנה" ? ". מתנה זה לא תקציב, תעביר אותה לחיסכון." : ". היא נוספה לתקציב הבזבוזים של החודש."),
+      : "נרשמה הכנסה של " + fmt(amount) + (kind === "מתנה" ? ". " + say("מתנה זה לא תקציב, תעביר אותה לחיסכון.", "כדאי להעביר מתנה לחיסכון.", "אולי כדאי לשים אותה בחיסכון 💛") : ". היא נוספה לכסף החופשי של החודש."),
       () => { if (before) INC.save(before); else INC.del(row.id); renderTracking(); renderPay(); renderCal(); });
   }
 
@@ -2952,7 +3012,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     const net = inSum - outSum;
     $("calNet").textContent = (net >= 0 ? "+" : "−") + fmt(Math.abs(net));
     $("calNet").className = "n " + (net >= 0 ? "pos" : "neg");
-    $("calNote").textContent = "הכנסות: משמרות (ברוטו) והכנסות חד־פעמיות. הוצאות: מה שרשמת, בלי הוצאות החובה של " + fmt(plan().exp) + ".";
+    $("calNote").textContent = "הכנסות: משמרות (ברוטו) והכנסות חד־פעמיות. הוצאות: מה שרשמת, בלי החשבונות הקבועים של " + fmt(plan().exp) + ".";
 
     const grid = $("calGrid"); grid.innerHTML = "";
     const first = periodStart(month), last = periodEnd(month);
@@ -3007,6 +3067,72 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     tot.className = "verdict " + (dn >= 0 ? "good" : "bad");
     tot.textContent = dn >= 0 ? "ביום הזה הרווחת " + fmt(dn) + " יותר ממה שהוצאת." : "ביום הזה הוצאת " + fmt(-dn) + " יותר ממה שהרווחת.";
   }
+
+  // ---- "?" help on every card, and cards that fold away (remembered on this device) ----
+  const HELP = {
+    todayLbl: "זה הסכום שאפשר להוציא היום בלי לפגוע בשאר החודש: הכסף החופשי שנשאר, חלקי הימים שנשארו. הוצאת פחות היום? מחר יהיה לך יותר. הפס מראה כמה מהכסף החופשי כבר יצא, והקו מראה כמה מהחודש עבר.",
+    payH: "כמה הרווחת מהמשמרות החודש, לפי השכר לשעה ולפי החוק (שעות נוספות, לילה, שבת וחג). זו הערכה של הברוטו, לפני מס וניכויים.",
+    catsH: "כל קטגוריה מראה כמה הוצאת עליה מתוך התקציב שקבעת לה. ✓ בסדר, ⚠️ מהר מדי לעומת החודש, ⛔ עברת את התקציב. לחיצה על קטגוריה פותחת הוצאה חדשה בה.",
+    logH: "כל ההוצאות וההכנסות החד־פעמיות של החודש, לפי ימים. לחיצה על שורה פותחת אותה לתיקון, ו־× מוחק.",
+    wishH: "בא לך לקנות משהו לא מתוכנן? במקום לקנות מיד, שמים אותו כאן ומחכים 48 שעות. ברוב המקרים החשק עובר והכסף נשאר אצלך.",
+    histH: "כל עמודה היא כמה הוצאת מהכסף החופשי בחודש אחד, והקו הוא מה שתכננת. עמודה אדומה עם ⚠️ היא חודש עם חריגה.",
+    incH: "כמה כסף נכנס לך בחודש אחרי מס (נטו): משכורת, קצבה, עזרה מההורים. מכאן מתחיל כל החישוב.",
+    expH: "תשלומים שחייבים לשלם כל חודש ואי אפשר לוותר עליהם: שכר דירה, חשבונות, תרופות, תחבורה לעבודה.",
+    resH: "מה שנשאר אחרי החשבונות הקבועים מתחלק לשניים: חיסכון (כסף שלא נוגעים בו) וכסף חופשי להוצאות היומיום. בוחרים כמה אחוז לחסוך.",
+    catH: "מחלקים את הכסף החופשי לקטגוריות, למשל אוכל בחוץ או בילויים. כל הוצאה שנרשמת יורדת מהקטגוריה שלה.",
+    recH: "הוצאות שחוזרות כל חודש באותו סכום, כמו מנויים. הן נרשמות לבד ביום שלהן.",
+    setH: "מתי החודש שלך מתחיל, איך ההודעות נשמעות, גודל הטקסט וייצוא לאקסל.",
+    shH: "כל המשמרות של החודש והשכר עליהן. לחיצה על משמרת פותחת אותה לעריכה, ו־× מוחק.",
+    typesH: "משמרת מיוחדת, כמו מוצ״ש, יכולה לקבל אחוז קבוע לכל שעה. אם החוק נותן יותר, מקבלים את הגבוה.",
+    paySetH: "השכר לשעה, מתי מתחילות שעות נוספות, והתזכורת היומית להזין משמרת.",
+    missH: "ימים שעברו בלי משמרת רשומה. עבדת? הכנס את השעות. לא עבדת? סמן ״לא עבדתי״.",
+    calH: "מה נכנס החודש (משמרות והכנסות) ומה יצא (הוצאות שרשמת). לחיצה על יום בלוח מציגה מה היה בו."
+  };
+  const NO_FOLD = new Set(["calH", "calDayH", "missH"]);
+  let folded = new Set();
+  try { folded = new Set(JSON.parse(localStorage.getItem("budget-folded") || "[]")); } catch (e) {}
+  function saveFolded() { try { localStorage.setItem("budget-folded", JSON.stringify([...folded])); } catch (e) {} }
+  function helpFor(key, anchor, holder) {
+    const btn = document.createElement("button"); btn.type = "button"; btn.className = "helpbtn"; btn.textContent = "?";
+    btn.setAttribute("aria-label", "הסבר"); btn.setAttribute("aria-expanded", "false");
+    const p = document.createElement("p"); p.className = "helptext"; p.hidden = true; p.textContent = HELP[key];
+    btn.addEventListener("click", (e) => { e.stopPropagation(); p.hidden = !p.hidden; btn.setAttribute("aria-expanded", String(!p.hidden)); if (!p.hidden) holder.closest(".panel").classList.remove("folded"); });
+    anchor.after(p);
+    return btn;
+  }
+  function setupCards() {
+    document.querySelectorAll("#app .panel").forEach((panel) => {
+      if (panel.dataset.tools) return;
+      panel.dataset.tools = "1";
+      if (panel.classList.contains("today")) {
+        const lbl = $("todayLbl");
+        panel.prepend(helpFor("todayLbl", lbl, lbl));
+        return;
+      }
+      const h = panel.querySelector(":scope > h2");
+      if (!h || !h.id) return;
+      // The title text shrinks and wraps, so the buttons stay on the heading's line
+      [...h.childNodes].forEach((n) => { if (n.nodeType === 3 && n.textContent.trim()) { const t = document.createElement("span"); t.className = "h2t"; t.textContent = n.textContent.trim(); n.replaceWith(t); } });
+      const tools = document.createElement("span"); tools.className = "h2tools";
+      if (HELP[h.id]) tools.append(helpFor(h.id, h, h));
+      if (!NO_FOLD.has(h.id)) {
+        const f = document.createElement("button"); f.type = "button"; f.className = "foldbtn"; f.textContent = "▾";
+        const sync = () => { const on = panel.classList.contains("folded"); f.setAttribute("aria-expanded", String(!on)); f.setAttribute("aria-label", on ? "פתיחת הכרטיס" : "קיפול הכרטיס"); };
+        const toggle = () => {
+          panel.classList.toggle("folded");
+          if (panel.classList.contains("folded")) folded.add(h.id); else folded.delete(h.id);
+          saveFolded(); sync();
+        };
+        f.addEventListener("click", (e) => { e.stopPropagation(); toggle(); });
+        h.classList.add("foldable");
+        h.addEventListener("click", (e) => { if (!e.target.closest("button, input, select, a")) toggle(); });
+        if (folded.has(h.id)) panel.classList.add("folded");
+        tools.append(f); sync();
+      }
+      h.append(tools);
+    });
+  }
+  setupCards();
 
   // ---- Pages ----
   let view = "main";
@@ -3068,8 +3194,8 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   function focusLast(id) { const r = $(id).lastElementChild; if (r) r.querySelector("input").focus(); }
   $("copyPrev").addEventListener("click", () => {
     const prev = store.months[prevMonth(month)];
-    if (!prev || !prev.expenses.length) { snack("אין הוצאות חובה שמורות בחודש הקודם."); return; }
-    data().expenses = clone(prev.expenses); touch(); render(); snack("הועתקו " + prev.expenses.length + " הוצאות חובה מהחודש הקודם.");
+    if (!prev || !prev.expenses.length) { snack("אין חשבונות קבועים שמורים בחודש הקודם."); return; }
+    data().expenses = clone(prev.expenses); touch(); render(); snack("הועתקו " + prev.expenses.length + " חשבונות קבועים מהחודש הקודם.");
   });
   $("pct").addEventListener("input", (e) => { data().pct = +e.target.value; touch(); renderTracking(); });
   $("presets").addEventListener("click", (e) => {
