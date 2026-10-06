@@ -729,6 +729,17 @@ html.bigtext body { zoom: 1.15; }
 .wzbill .chipbtn[aria-pressed="true"] { border-color: var(--brand2); color: var(--brand2); background: color-mix(in srgb, var(--brand2) 12%, var(--surface)); }
 .wzbill input[disabled] { opacity: .35; }
 #wzSkip { justify-self: center; color: var(--muted); }
+
+/* Card import rows */
+.cardrow { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 4px 10px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--line); }
+.cardrow input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--brand2); }
+.cardrow .cm { min-width: 0; display: grid; }
+.cardrow .cm b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cardrow .cm small { color: var(--muted); font-size: 12.5px; }
+.cardrow .ca { font-weight: 700; font-variant-numeric: tabular-nums; }
+.cardrow select { grid-column: 2 / -1; font-size: 14px; padding: 6px 10px; }
+.cardrow.dup { opacity: .55; }
+.btn.voice { justify-self: start; }
 </style>
 </head>
 <body>
@@ -885,7 +896,7 @@ html.bigtext body { zoom: 1.15; }
       <section class="panel" aria-labelledby="logH">
         <h2 id="logH" class="pc-orange" data-e="🧾">הוצאות והכנסות של החודש</h2>
         <p class="hint">לחצו על שורה כדי לתקן אותה. קיבלת כסף מתנה או החזר מחבר? רשמו אותו כהכנסה.</p>
-        <div class="actions"><button class="btn" type="button" id="addIncome">💰 הכנסה חד־פעמית</button></div>
+        <div class="actions"><button class="btn" type="button" id="addIncome">💰 הכנסה חד־פעמית</button><button class="btn" type="button" id="cardImport">💳 ייבוא מכרטיס אשראי</button></div>
         <div class="log" id="txList"></div>
       </section>
 
@@ -1137,6 +1148,8 @@ html.bigtext body { zoom: 1.15; }
     </div>
     <h2 id="sheetH" data-e="✍️">הוצאה חדשה</h2>
     <div class="sheetquick" id="sheetQuick"></div>
+    <button class="btn voice" type="button" id="voiceBtn" hidden>🎤 להגיד במקום להקליד</button>
+    <p class="hint" id="voiceHint" hidden></p>
     <label for="txAmount">כמה?<input type="number" id="txAmount" class="amount-in" inputmode="decimal" min="0" step="0.01" placeholder="₪0"></label>
     <p class="hours" id="txHours" aria-live="polite"></p>
     <fieldset class="chips" id="txCats"><legend>על מה?</legend></fieldset>
@@ -1203,6 +1216,21 @@ html.bigtext body { zoom: 1.15; }
     <div class="foot">
       <button class="btn primary" type="submit" id="impSave">הוספה</button>
       <button class="btn" type="button" id="impCancel">ביטול</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog class="sheet" id="cardSheet" aria-labelledby="cardH">
+  <form id="cardForm" method="dialog" novalidate>
+    <h2 id="cardH" data-e="💳">ייבוא מכרטיס אשראי</h2>
+    <p class="hint">באתר או באפליקציה של חברת האשראי (מקס, ישראכרט, כאל, אמריקן אקספרס) מורידים את פירוט החיובים לאקסל ומעלים אותו כאן. בודקים את הרשימה, מתקנים קטגוריות ומוסיפים.</p>
+    <label for="cardFile">קובץ פירוט חיובים<input type="file" id="cardFile" accept=".xlsx,.xls,.csv,text/csv"></label>
+    <div class="verdict" id="cardInfo" hidden></div>
+    <div class="implist" id="cardList" aria-live="polite"></div>
+    <div class="err" id="cardErr" role="alert" hidden></div>
+    <div class="foot">
+      <button class="btn primary" type="submit" id="cardSave" disabled>הוספה</button>
+      <button class="btn" type="button" id="cardCancel">ביטול</button>
     </div>
   </form>
 </dialog>
@@ -1310,6 +1338,9 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   const catId = () => "c" + Math.random().toString(36).slice(2, 9);
 
   const CAT_EMOJI = [
+    [/סופר.?פארם|ניו.?פארם|גוד.?פארם/, "💊"], [/שופרסל|רמי לוי|ויקטורי|יוחננוף|אושר עד|טיב טעם|יינות ביתן|חצי חינם|מגה בעיר/, "🛒"],
+    [/ארומה|גרג|לנדוור|קופיקס|קפה קפה|רולדין/, "☕"], [/סינמה|יס פלאנט|פנאי|לונה פארק|בולינג/, "🎉"],
+    [/סונול|דור אלון|פז |^פז$|רב.?קו|גט טקסי|yango|פנגו|סלופארק|כביש 6/i, "🚗"], [/מקדונלד|בורגר|דומינו|ארקפה|קפה גרג/, "🍔"],
     [/אוכל|מסעד|משלוח|שווארמ|פיצה|המבורגר|סושי|פלאפל|וולט|תן ביס/, "🍔"], [/קפה|נשנוש|ממתק|חטיף|גלידה|מאפ/, "☕"],
     [/סופר|מכולת|מצרכ|ירקות/, "🛒"], [/קניות|אונליין|אמזון|עליאקספרס|שופינג|בגד|נעל/, "🛍️"],
     [/בילוי|יציא|מסיב|סרט|קולנוע|הופע/, "🎉"], [/דלק|רכב|תחבור|אוטובוס|רכבת|מונית|חני|נסיע/, "🚗"],
@@ -3283,6 +3314,8 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     $("txHours").hidden = inc;
     $("repeatRow").hidden = inc || !!editing;
     $("favRow").hidden = inc || !!editing;
+    $("voiceBtn").hidden = inc || !(voiceApp() || SR);
+    $("voiceHint").hidden = true;
     $("sheetQuick").hidden = inc || !!editing;
     $("txWish").hidden = inc || !!editing;
     $("sheetH").textContent = inc ? (editingInc ? "עריכת הכנסה" : "הכנסה חד־פעמית") : editing ? "עריכת הוצאה" : "הוצאה חדשה";
@@ -4097,6 +4130,173 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     store.onboarded = true;
     persist(); closeDlg("wizard"); render();
     snack("התוכנית מוכנה! אפשר לשנות הכול ב״התוכנית של החודש״.");
+  });
+
+
+  // ---- Credit card statement import (Max, Isracard, Cal, Amex: their Excel or CSV exports) ----
+  let cardRows = [];
+  const num = (v) => { const n = parseFloat(String(v || "").replace(/[^\d.\-]/g, "")); return isFinite(n) ? n : NaN; };
+  function cardDate(v) {
+    const m = String(v || "").match(/(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{2,4})/) || String(v || "").match(/(\d{4})-(\d{2})-(\d{2})/);
+    if (!m) return "";
+    let d, mo, y;
+    if (m[1].length === 4) { y = +m[1]; mo = +m[2]; d = +m[3]; } else { d = +m[1]; mo = +m[2]; y = m[3].length === 2 ? 2000 + +m[3] : +m[3]; }
+    const dt = new Date(y, mo - 1, d);
+    return dt.getMonth() === mo - 1 && y > 2000 ? y + "-" + pad(mo) + "-" + pad(d) : "";
+  }
+  async function cardTable(f) {
+    if (/\.xlsx?$/i.test(f.name)) {
+      const X = await loadXlsx();
+      const wb = X.read(await f.arrayBuffer(), { type: "array", cellNF: true });
+      const out = [];
+      wb.SheetNames.forEach((n) => {
+        const ws = wb.Sheets[n]; if (!ws["!ref"]) return;
+        const r = X.utils.decode_range(ws["!ref"]);
+        for (let y = r.s.r; y <= r.e.r; y++) { const cells = []; for (let x = r.s.c; x <= r.e.c; x++) cells.push(cellText(ws[X.utils.encode_cell({ r: y, c: x })], X).trim()); out.push(cells); }
+        out.push([]);
+      });
+      return out;
+    }
+    const text = await f.text();
+    return text.split(/\r?\n/).map((line) => { const out = []; let cur = "", q = false; for (const ch of line) { if (ch === '"') q = !q; else if ((ch === "," || ch === "\t" || ch === ";") && !q) { out.push(cur.trim()); cur = ""; } else cur += ch; } out.push(cur.trim()); return out; });
+  }
+  // Finds header rows (date, business name, amount) anywhere in the file; each one sets the columns for the rows under it
+  function parseCard(table) {
+    let cols = null; const out = [];
+    table.forEach((row) => {
+      const find = (re) => row.findIndex((c) => re.test(c));
+      const di = find(/תאריך (עסקה|רכישה)|^תאריך$/), mi = find(/בית.?ה?עסק|שם העסק|תיאור|פירוט/);
+      const ai = [find(/סכום חיוב|סכום לחיוב/), find(/סכום (ה)?עסקה|סכום מקורי/), find(/^סכום/)].find((i) => i >= 0);
+      if (di >= 0 && mi >= 0 && ai != null && ai >= 0) { cols = { di, mi, ai, ci: find(/^קטגוריה|ענף/) }; return; }
+      if (!cols) return;
+      const date = cardDate(row[cols.di]), amount = num(row[cols.ai]), merchant = (row[cols.mi] || "").trim();
+      if (!date || !merchant || !(amount > 0)) return;
+      out.push({ date, merchant: merchant.slice(0, 200), amount: Math.round(amount * 100) / 100, hint: cols.ci >= 0 ? row[cols.ci] || "" : "" });
+    });
+    return out;
+  }
+  function guessCat(merchant, hint) {
+    const cats = data().cats, mem = allNotes()[merchant];
+    if (mem && cats.some((c) => c.id === mem.c)) return mem.c;
+    for (const t of [merchant, hint]) {
+      const e = catEmoji(t); if (e === "💸") continue;
+      const c = cats.find((x) => catEmoji(x.name) === e); if (c) return c.id;
+    }
+    const other = cats.find((c) => /שונות|אחר/.test(c.name || ""));
+    return (other || cats[cats.length - 1] || {}).id;
+  }
+  function renderCard() {
+    const box = $("cardList"); box.innerHTML = "";
+    const cats = data().cats;
+    cardRows.forEach((r, i) => {
+      const row = document.createElement("div"); row.className = "cardrow" + (r.dup ? " dup" : "");
+      const cb = document.createElement("input"); cb.type = "checkbox"; cb.checked = r.on; cb.id = "card-" + i; cb.setAttribute("aria-label", r.merchant);
+      cb.addEventListener("change", () => { r.on = cb.checked; cardFoot(); });
+      const m = document.createElement("label"); m.className = "cm"; m.htmlFor = cb.id;
+      const b = document.createElement("b"); b.textContent = r.merchant;
+      const sm = document.createElement("small"); sm.textContent = dayLabel(r.date) + (r.dup ? " · כבר רשומה" : "");
+      m.append(b, sm);
+      const a = document.createElement("span"); a.className = "ca"; a.textContent = fmt(r.amount);
+      const sel = document.createElement("select"); sel.setAttribute("aria-label", "קטגוריה ל" + r.merchant);
+      cats.forEach((c) => { const o = document.createElement("option"); o.value = c.id; o.textContent = catEmoji(c.name) + " " + (c.name || "בלי שם"); sel.append(o); });
+      sel.value = r.cat; sel.addEventListener("change", () => { r.cat = sel.value; });
+      row.append(cb, m, a, sel); box.append(row);
+    });
+    cardFoot();
+  }
+  function cardFoot() {
+    const on = cardRows.filter((r) => r.on);
+    $("cardSave").disabled = !on.length;
+    $("cardSave").textContent = on.length ? "הוספת " + on.length + " הוצאות · " + fmt(on.reduce((a, r) => a + r.amount, 0)) : "הוספה";
+  }
+  $("cardImport").addEventListener("click", () => {
+    if (!data().cats.length) { snack("קודם הוסיפו קטגוריות בתוכנית של החודש."); return; }
+    cardRows = []; $("cardFile").value = ""; $("cardInfo").hidden = true; $("cardErr").hidden = true; renderCard();
+    openDlg("cardSheet");
+  });
+  $("cardCancel").addEventListener("click", () => closeDlg("cardSheet"));
+  $("cardFile").addEventListener("change", async () => {
+    const f = $("cardFile").files[0]; if (!f) return;
+    $("cardErr").hidden = true; $("cardInfo").hidden = true;
+    try {
+      const found = parseCard(await cardTable(f));
+      if (!found.length) throw new Error("empty");
+      const months = [...new Set(found.map((r) => periodOf(r.date)))];
+      for (const m of months) if (!tx[m]) { try { await loadTx(m); } catch (e) { tx[m] = tx[m] || []; } }
+      const have = (r) => (tx[periodOf(r.date)] || []).some((x) => x.spent_on === r.date && Math.abs(x.amount - r.amount) < 0.01);
+      cardRows = found.map((r) => { const dup = have(r); return { ...r, dup, on: !dup, cat: guessCat(r.merchant, r.hint) }; });
+      const dups = cardRows.filter((r) => r.dup).length;
+      $("cardInfo").className = "verdict good"; $("cardInfo").hidden = false;
+      $("cardInfo").textContent = "נמצאו " + cardRows.length + " חיובים" + (dups ? ", מתוכם " + dups + " כבר רשומים (לא מסומנים)" : "") + ". הורד סימון מחיובים שהם חשבונות קבועים (כמו חשמל), כי הם כבר בתוכנית.";
+      renderCard();
+    } catch (e) {
+      cardRows = []; renderCard();
+      $("cardErr").textContent = "לא מצאתי בקובץ טבלה עם תאריך, שם בית עסק וסכום. נסו את קובץ האקסל המקורי מחברת האשראי.";
+      $("cardErr").hidden = false;
+    }
+  });
+  $("cardForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const on = cardRows.filter((r) => r.on); if (!on.length) return;
+    const now = Date.now();
+    const rows = on.map((r, i) => ({ id: uid(), spent_on: r.date, amount: r.amount, category: r.cat, note: r.merchant, created_at: new Date(now + i).toISOString() }));
+    $("cardSave").disabled = true;
+    rows.forEach(remember);
+    if (sb && user) {
+      for (let i = 0; i < rows.length; i += 500) {
+        const { error } = await sb.from("expenses").upsert(rows.slice(i, i + 500).map((r) => ({ ...r, user_id: user.id })));
+        if (error) { $("cardErr").textContent = "ההוספה נכשלה. בדקו את החיבור לאינטרנט ונסו שוב."; $("cardErr").hidden = false; $("cardSave").disabled = false; return; }
+      }
+      [...new Set(rows.map((r) => periodOf(r.spent_on)))].forEach((m) => delete tx[m]);
+    } else rows.forEach((r) => addTx(r));
+    Object.keys(hist).forEach((k) => delete hist[k]);
+    persist();
+    closeDlg("cardSheet");
+    goMonth(month);
+    snack("נוספו " + rows.length + " הוצאות מכרטיס האשראי, " + fmt(rows.reduce((a, r) => a + r.amount, 0)) + ".");
+  });
+
+  // ---- Voice: "קפה שתים עשרה שקל" fills in the expense ----
+  const HEB_NUM = { "אחד": 1, "אחת": 1, "שניים": 2, "שתיים": 2, "שני": 2, "שתי": 2, "שתים": 2, "שלוש": 3, "שלושה": 3, "ארבע": 4, "ארבעה": 4, "חמש": 5, "חמישה": 5, "שש": 6, "שישה": 6, "שבע": 7, "שבעה": 7, "שמונה": 8, "תשע": 9, "תשעה": 9, "עשר": 10, "עשרה": 10,
+    "עשרים": 20, "שלושים": 30, "ארבעים": 40, "חמישים": 50, "שישים": 60, "שבעים": 70, "שמונים": 80, "תשעים": 90, "מאה": 100, "מאתיים": 200, "אלף": 1000, "אלפיים": 2000, "חצי": 0.5 };
+  function parseVoice(text) {
+    const words = String(text || "").replace(/[₪,]/g, " ").split(/\s+/).filter(Boolean);
+    let amount = 0, cur = 0, used = new Set(), digits = null;
+    words.forEach((w, i) => {
+      const dm = w.match(/^\d+(\.\d+)?$/);
+      if (dm && digits == null) { digits = +w; used.add(i); return; }
+      const base = w.replace(/^ו/, "");
+      if (base === "מאות" && cur) { cur *= 100; used.add(i); return; }
+      if (base === "אלפים" && cur) { amount += cur * 1000; cur = 0; used.add(i); return; }
+      const v = HEB_NUM[w] != null ? HEB_NUM[w] : HEB_NUM[base];
+      if (v != null) { if (v === 1000 && cur) { amount += cur * 1000; cur = 0; } else cur += v; used.add(i); }
+    });
+    amount += cur;
+    if (digits != null) amount = digits;
+    const note = words.filter((w, i) => !used.has(i) && !/^(ו?שקל(ים)?|ש"ח|ש״ח|nis|על|ב|של)$/i.test(w)).join(" ").trim();
+    return { amount, note };
+  }
+  function applyVoice(text) {
+    const v = parseVoice(text);
+    $("voiceHint").hidden = false; $("voiceHint").textContent = "שמעתי: ״" + text + "״";
+    if (v.note) { $("txNote").value = v.note; applyNote(); }
+    if (v.amount > 0) $("txAmount").value = v.amount;
+    showHours();
+  }
+  window.onVoice = (text) => { if (text) applyVoice(text); else { $("voiceHint").hidden = false; $("voiceHint").textContent = "לא שמעתי. נסה שוב, למשל: ״קפה שתים עשרה שקל״."; } };
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const voiceApp = () => (window.BudgetApp && BudgetApp.listen ? window.BudgetApp : null);
+  $("voiceBtn").hidden = !(voiceApp() || SR);
+  $("voiceBtn").addEventListener("click", () => {
+    $("voiceHint").hidden = false; $("voiceHint").textContent = "🎙️ מקשיב… למשל: ״קפה שתים עשרה שקל״";
+    const app = voiceApp();
+    if (app) { try { app.listen(); } catch (e) {} return; }
+    try {
+      const r = new SR(); r.lang = "he-IL"; r.interimResults = false; r.maxAlternatives = 1;
+      r.onresult = (e) => window.onVoice(e.results[0][0].transcript);
+      r.onerror = () => window.onVoice("");
+      r.start();
+    } catch (e) { window.onVoice(""); }
   });
 
   // ---- "?" help on every card, and cards that fold away (remembered on this device) ----
