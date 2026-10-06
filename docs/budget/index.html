@@ -834,6 +834,14 @@ body.layedit #fab, body.onsettings #fab { display: none; }
 .stm .sedit input, .stm .sedit select { min-width: 0; width: 100%; }
 .stm .sedit .acts { grid-column: 1 / -1; display: flex; gap: 8px; flex-wrap: wrap; }
 .stm .sedit .acts .gone { margin-inline-start: auto; color: var(--danger); }
+.recadd { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 12px; margin-top: 8px; border-radius: 14px; background: var(--surface-2); }
+.recadd label { display: grid; gap: 4px; font-size: 13px; font-weight: 600; color: var(--muted); min-width: 0; }
+.recadd .full { grid-column: 1 / -1; }
+.recadd input, .recadd select { min-width: 0; width: 100%; }
+.recadd label.chk { display: flex; align-items: center; gap: 8px; font-weight: 500; color: var(--fg); }
+.recadd label.chk input { width: auto; }
+.recadd .acts { grid-column: 1 / -1; display: flex; gap: 8px; flex-wrap: wrap; }
+.recopen { margin-top: 8px; }
 
 /* Version line at the very bottom */
 .btn.catedit { justify-self: start; font-size: 14.5px; padding: 8px 14px; }
@@ -1034,6 +1042,7 @@ body.layedit #fab, body.onsettings #fab { display: none; }
         <h2 id="recH" class="pc-blue" data-e="🔁">מנויים וחיובים קבועים <span class="sum" id="recSum">₪0</span></h2>
         <p class="hint" id="recYear"></p>
         <div class="log" id="recList"></div>
+        <div id="recAddBox"></div>
         <div class="log" id="subSuggest"></div>
       </section>
 
@@ -2698,13 +2707,8 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     const box = $("recList"); box.innerHTML = "";
     const list = store.recurring || [];
     $("recSum").textContent = fmt(list.reduce((s, r) => s + r.amount, 0));
-    if (!list.length) {
-      const e = document.createElement("p"); e.className = "empty";
-      e.textContent = "מנוי או תשלום שחוזר כל חודש? סמנו ״חוזר כל חודש״ כשאתם רושמים אותו, והוא יירשם לבד מעכשיו.";
-      box.append(e);
-      renderSubs();
-      return;
-    }
+    renderRecAdd(!list.length);
+    if (!list.length) { renderSubs(); return; }
     list.forEach((r, i) => {
       const row = document.createElement("div"); row.className = "tx";
       const what = document.createElement("div"); what.className = "what";
@@ -2722,6 +2726,52 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       box.append(row);
     });
     renderSubs();
+  }
+
+  // Add a subscription right in its card: name, amount, category and charge day
+  let recAddOpen = false;
+  function renderRecAdd(empty) {
+    const box = $("recAddBox"); box.innerHTML = "";
+    if (!empty && !recAddOpen) {
+      const b = document.createElement("button"); b.type = "button"; b.className = "btn recopen"; b.textContent = "＋ הוספת מנוי";
+      b.addEventListener("click", () => { recAddOpen = true; renderRecAdd(false); box.querySelector("input").focus(); });
+      box.append(b); return;
+    }
+    const f = document.createElement("form"); f.className = "recadd"; f.noValidate = true;
+    const field = (label, el, cls) => { const l = document.createElement("label"); if (cls) l.className = cls; l.append(label, el); f.append(l); return el; };
+    const name = document.createElement("input"); name.type = "text"; name.maxLength = 200; name.autocomplete = "off"; name.placeholder = "למשל נטפליקס, חדר כושר";
+    const amt = document.createElement("input"); amt.type = "number"; amt.min = "0"; amt.step = "0.1"; amt.inputMode = "decimal"; amt.placeholder = "₪";
+    const day = document.createElement("input"); day.type = "number"; day.min = "1"; day.max = "31"; day.inputMode = "numeric"; day.placeholder = "1–31";
+    const cat = document.createElement("select");
+    catTree(data().cats).forEach(({ c, depth }) => { const o = document.createElement("option"); o.value = c.id; o.textContent = (depth ? "↳ " : "") + catIcon(c) + " " + (c.name || "בלי שם"); cat.append(o); });
+    const sub = data().cats.find((c) => /מנוי|קבוע|תקשורת|חשבונות/.test(c.name || ""));
+    if (sub) cat.value = sub.id;
+    const now = document.createElement("input"); now.type = "checkbox";
+    field("שם המנוי", name, "full"); field("סכום לחודש", amt); field("יום החיוב בחודש", day); field("קטגוריה", cat, "full");
+    const nl = field("", now, "full chk"); nl.append("החיוב של החודש כבר ירד ועוד לא רשמתי אותו");
+    const acts = document.createElement("div"); acts.className = "acts";
+    const ok = document.createElement("button"); ok.type = "submit"; ok.className = "btn primary"; ok.textContent = "＋ הוספת מנוי";
+    acts.append(ok);
+    if (!empty) { const no = document.createElement("button"); no.type = "button"; no.className = "btn"; no.textContent = "ביטול"; no.addEventListener("click", () => { recAddOpen = false; renderRecAdd(false); }); acts.append(no); }
+    f.append(acts);
+    f.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const n = name.value.trim(), a = Math.round((parseFloat(amt.value) || 0) * 100) / 100, d = Math.round(+day.value);
+      if (!n) { name.focus(); snack("מה שם המנוי?"); return; }
+      if (!(a > 0)) { amt.focus(); snack("צריך סכום גדול מאפס."); return; }
+      if (!(d >= 1 && d <= 31)) { day.focus(); snack("יום החיוב: מספר בין 1 ל־31."); return; }
+      const cur = thisMonth(), today = todayStr();
+      // Charge day already passed this month: log it now only when asked, otherwise start from next month
+      let passed = false;
+      for (let s2 = periodStart(cur); s2 <= today && s2 <= periodEnd(cur); s2 = dateAdd(s2, 1)) { const [y, mo] = s2.split("-").map(Number); if (+s2.slice(8) === Math.min(d, new Date(y, mo, 0).getDate())) passed = true; }
+      const r = { id: catId(), note: n, amount: a, category: cat.value, day: d, checked: today };
+      if (passed && !now.checked) r.last = cur;
+      store.recurring = (store.recurring || []).concat([r]);
+      recAddOpen = false;
+      persist(); runRecurring(); renderRecurring(); renderTracking();
+      snack("״" + n + "״ נוסף. הוא יירשם לבד כל " + d + " בחודש.");
+    });
+    box.append(f);
   }
 
   // ---- The last six months ----
