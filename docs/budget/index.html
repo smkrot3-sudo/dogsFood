@@ -1030,8 +1030,8 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       $("appUpdateText").textContent = "יש גרסה חדשה לאפליקציה (" + v.versionName + ")" + (v.notes ? ": " + v.notes : ".");
       $("appUpdate").hidden = false;
       $("appUpdateBtn").onclick = () => {
-        if (app.installUpdate) { app.installUpdate(apk); $("appUpdateText").textContent = "מוריד את העדכון. כשההורדה תסתיים, אשר את ההתקנה."; $("appUpdateBtn").hidden = true; }
-        else if (app.openExternal) app.openExternal(apk);
+        // The phone's browser downloads the APK; opening the finished download shows Android's own install screen
+        if (app.openExternal) { app.openExternal(apk); $("appUpdateText").textContent = "ההורדה נפתחה בדפדפן. כשהיא מסתיימת, לחץ על הקובץ (או על ההתראה ״ההורדה הושלמה״) ואשר ״עדכון״."; }
         else location.href = apk;
       };
       $("appUpdateLater").onclick = () => { $("appUpdate").hidden = true; try { sessionStorage.setItem("appUpdateLater", String(v.versionCode)); } catch (e) {} };
