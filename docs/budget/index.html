@@ -801,7 +801,8 @@ details[data-block] > summary .laytools { top: -20px; }
 .layrow button { width: 38px; height: 36px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--fg); font-size: 15px; cursor: pointer; padding: 0; }
 .layrow button:disabled { opacity: .3; }
 body.layedit .home > [data-block], body.layedit .home > [data-block] * { user-select: none; -webkit-user-select: none; }
-.home > [data-block] { -webkit-touch-callout: none; }
+.home > [data-block], .home > [data-block] * { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
+.home > [data-block] input, .home > [data-block] textarea { -webkit-user-select: text; user-select: text; }
 body.layedit #fab, body.onsettings #fab { display: none; }
 
 /* Version line at the very bottom */
@@ -4814,12 +4815,17 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     const x = e.clientX, y = e.clientY;
     lpCancel();
     const blk = e.target.closest("[data-block]");
-    lp = { x, y, t: setTimeout(() => { lp = null; eatClick = true; try { if (navigator.vibrate) navigator.vibrate(30); } catch (er) {} enterLayEdit(blk); }, 600) };
+    lp = { x, y, t: setTimeout(() => { lp = null; eatClick = true; try { if (navigator.vibrate) navigator.vibrate(30); } catch (er) {} enterLayEdit(blk); }, 550) };
   });
   $("homeList").addEventListener("pointermove", (e) => { if (lp && Math.hypot(e.clientX - lp.x, e.clientY - lp.y) > 10) lpCancel(); });
   ["pointerup", "pointercancel"].forEach((ev) => $("homeList").addEventListener(ev, lpCancel));
   document.addEventListener("click", (e) => { if (eatClick) { eatClick = false; e.preventDefault(); e.stopPropagation(); } }, true);
-  $("homeList").addEventListener("contextmenu", (e) => { if (!e.target.closest("input, textarea")) e.preventDefault(); });
+  $("homeList").addEventListener("contextmenu", (e) => {
+    if (e.target.closest("input, textarea")) return;
+    e.preventDefault();
+    const blk = e.target.closest("[data-block]");
+    if (blk && !layEditing) { lpCancel(); eatClick = true; try { if (navigator.vibrate) navigator.vibrate(30); } catch (er) {} enterLayEdit(blk); }
+  });
 
   window.addEventListener("hashchange", () => setView(location.hash.slice(1), true));
   document.querySelectorAll(".tabs a").forEach((a) => a.addEventListener("click", (e) => { e.preventDefault(); setView(a.dataset.view); }));
