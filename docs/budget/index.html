@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>התקציב החודשי שלי</title>
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#1f6b4f">
+<meta name="theme-color" content="#db3577">
 <script>try { var t = localStorage.getItem("budget-theme"); if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t); } catch (e) {}</script>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="התקציב שלי">
@@ -13,41 +13,53 @@
 <link rel="icon" href="icon-192.png" type="image/png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@500;700&family=Assistant:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&display=swap">
 <style>
 /* Layout: today's allowance leads; tracking on the start side, the monthly plan beside it on wide screens; a floating add button on every screen */
 :root {
-  --bg: #f3f5f2;
+  --bg: #fff6ee;
   --surface: #ffffff;
-  --fg: #1c2420;
-  --muted: #5f6b65;
-  --line: #dde3de;
-  --accent: #1f6b4f;       /* savings green */
-  --accent-soft: #e2efe8;
-  --spend: #b86a1c;        /* spending amber */
-  --spend-soft: #f6eadb;
-  --must: #6b7a8c;         /* mandatory slate */
-  --danger: #b3261e;
-  --danger-soft: #fbe5e3;
+  --surface-2: #fdf3ea;
+  --fg: #2b2238;
+  --muted: #6e6481;
+  --line: #f0e3d8;
+  --accent: #0e8a66;       /* savings green */
+  --accent-soft: #daf5ea;
+  --spend: #c25a10;        /* spending orange */
+  --spend-soft: #ffecd9;
+  --must: #7c6fd6;         /* mandatory lavender */
+  --danger: #d02c4c;
+  --danger-soft: #ffe2e8;
   --on-accent: #ffffff;
-  --shadow: 0 6px 20px rgba(20, 40, 30, .18);
-  --font-display: "Frank Ruhl Libre", "David", "Times New Roman", serif;
-  --font-body: "Assistant", "Segoe UI", Arial, sans-serif;
-  --radius: 12px;
+  --brand1: #ef5a33; --brand2: #db3577; --brand3: #7a46de;
+  --brand: linear-gradient(120deg, var(--brand1), var(--brand2) 55%, var(--brand3));
+  --good-grad: linear-gradient(135deg, #10a37a, #1aa0b8 60%, #5a62e0);
+  --warn-grad: linear-gradient(135deg, #f08a1c, #e8553a 70%, #d43a6b);
+  --bad-grad: linear-gradient(135deg, #e0344f, #b8287a 70%, #7a2fbf);
+  --shadow: 0 10px 30px rgba(120, 60, 40, .16);
+  --card-shadow: 0 2px 4px rgba(120, 70, 40, .05), 0 8px 24px rgba(120, 70, 40, .07);
+  --blob1: rgba(255, 138, 101, .22); --blob2: rgba(160, 110, 255, .16); --blob3: rgba(40, 200, 160, .14);
+  --font-display: "Rubik", "Assistant", "Segoe UI", Arial, sans-serif;
+  --font-body: "Rubik", "Assistant", "Segoe UI", Arial, sans-serif;
+  --radius: 22px;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #141a17; --surface: #1c2420; --fg: #e8eee9; --muted: #9aa8a0; --line: #2e3833;
-    --accent: #5cc195; --accent-soft: #1f3a2e; --spend: #e3a15a; --spend-soft: #3a2b1b;
-    --must: #95a5b8; --danger: #ff8a80; --danger-soft: #3d1f1d; --on-accent: #0f1a14;
-    --shadow: 0 6px 20px rgba(0, 0, 0, .5); color-scheme: dark;
+    --bg: #17121f; --surface: #221b2e; --surface-2: #2a2238; --fg: #f4eefb; --muted: #aba0bd; --line: #372d47;
+    --accent: #4fd8a8; --accent-soft: #173a31; --spend: #ffa45e; --spend-soft: #3f2a1a;
+    --must: #a99cf5; --danger: #ff7d95; --danger-soft: #45202b; --on-accent: #ffffff;
+    --shadow: 0 10px 30px rgba(0, 0, 0, .55); --card-shadow: 0 8px 24px rgba(0, 0, 0, .35);
+    --blob1: rgba(255, 110, 80, .14); --blob2: rgba(140, 90, 255, .16); --blob3: rgba(40, 200, 160, .08);
+    color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --bg: #141a17; --surface: #1c2420; --fg: #e8eee9; --muted: #9aa8a0; --line: #2e3833;
-  --accent: #5cc195; --accent-soft: #1f3a2e; --spend: #e3a15a; --spend-soft: #3a2b1b;
-  --must: #95a5b8; --danger: #ff8a80; --danger-soft: #3d1f1d; --on-accent: #0f1a14;
-  --shadow: 0 6px 20px rgba(0, 0, 0, .5); color-scheme: dark;
+  --bg: #17121f; --surface: #221b2e; --surface-2: #2a2238; --fg: #f4eefb; --muted: #aba0bd; --line: #372d47;
+  --accent: #4fd8a8; --accent-soft: #173a31; --spend: #ffa45e; --spend-soft: #3f2a1a;
+  --must: #a99cf5; --danger: #ff7d95; --danger-soft: #45202b; --on-accent: #ffffff;
+  --shadow: 0 10px 30px rgba(0, 0, 0, .55); --card-shadow: 0 8px 24px rgba(0, 0, 0, .35);
+  --blob1: rgba(255, 110, 80, .14); --blob2: rgba(140, 90, 255, .16); --blob3: rgba(40, 200, 160, .08);
+  color-scheme: dark;
 }
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
@@ -350,6 +362,172 @@ dialog.sheet::backdrop { background: rgba(10, 20, 15, .45); }
 .themes button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .saving { font-size: 13px; color: var(--muted); min-height: 1.2em; }
 .loading { text-align: center; color: var(--muted); padding-block: 80px; display: grid; gap: 12px; justify-items: center; }
+/* ===== Friendly look: warm colors, emoji badges, soft cards (styling only) ===== */
+body {
+  background:
+    radial-gradient(600px 420px at 100% -80px, var(--blob1), transparent 70%),
+    radial-gradient(520px 420px at -120px 340px, var(--blob2), transparent 70%),
+    radial-gradient(520px 420px at 110% 900px, var(--blob3), transparent 70%),
+    var(--bg);
+  background-repeat: no-repeat;
+  -webkit-tap-highlight-color: transparent;
+}
+h1 { font-weight: 800; letter-spacing: -.5px; display: flex; align-items: center; gap: 10px; }
+h1 .logo { display: inline-grid; place-items: center; width: 1.45em; height: 1.45em; border-radius: 30%; background: var(--brand); font-size: .72em; box-shadow: 0 6px 16px rgba(219, 53, 119, .35); flex: none; }
+h1 .gt { background: var(--brand); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.sub { font-weight: 500; }
+
+/* Cards */
+.panel { border: 0; box-shadow: var(--card-shadow); padding: 20px 18px; }
+.panel h2 { font-weight: 700; font-size: 20px; justify-content: flex-start; align-items: center; gap: 10px; }
+.panel h2 > .sum, .panel h2 > .btn { margin-inline-start: auto; }
+.panel h2[data-e]::before, .sheet h2[data-e]::before {
+  content: attr(data-e); display: inline-grid; place-items: center; flex: none;
+  width: 38px; height: 38px; border-radius: 13px; font-size: 20px; line-height: 1;
+  background: color-mix(in srgb, var(--pc, var(--brand2)) 16%, var(--surface));
+}
+.pc-mint { --pc: #10b981; } .pc-orange { --pc: #f97316; } .pc-pink { --pc: #ec4899; }
+.pc-violet { --pc: #8b5cf6; } .pc-blue { --pc: #3b82f6; } .pc-yellow { --pc: #f5b400; } .pc-gray { --pc: #94a3b8; }
+.panel h2 .sum { color: var(--fg); background: var(--surface-2); padding: 2px 12px; border-radius: 999px; font-size: 16px; }
+.hint { font-size: 13.5px; }
+
+/* Buttons and inputs */
+button { border-radius: 999px; }
+.btn { border: 1.5px solid var(--line); background: var(--surface); padding: 8px 16px; transition: transform .12s ease, box-shadow .2s ease, border-color .2s; }
+.btn:hover { border-color: var(--brand2); color: var(--brand2); }
+.btn:active { transform: scale(.97); }
+.btn.primary { background: var(--brand); border-color: transparent; color: #fff; box-shadow: 0 4px 14px rgba(219, 53, 119, .3); }
+.btn.primary:hover { color: #fff; filter: brightness(1.06); }
+input[type="text"], input[type="number"], input[type="month"], input[type="date"], input[type="time"], select, .auth input[type="email"], .auth input[type="password"], .sheet textarea {
+  background: var(--surface-2); border: 1.5px solid var(--line); border-radius: 14px;
+}
+input:focus, select:focus, textarea:focus { border-color: var(--brand2) !important; outline: none; box-shadow: 0 0 0 4px color-mix(in srgb, var(--brand2) 18%, transparent); }
+input:focus-visible, button:focus-visible, summary:focus-visible, select:focus-visible, .tabs a:focus-visible { outline-color: var(--brand2); }
+.del { border-radius: 12px; }
+.linkbtn { color: var(--brand2); }
+.month .step { border-radius: 12px; border-width: 1.5px; }
+
+/* Tabs */
+.tabs { border: 0; border-radius: 999px; padding: 5px; box-shadow: var(--card-shadow); background: color-mix(in srgb, var(--surface) 88%, transparent); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
+.tabs a { border-radius: 999px; padding: 9px 6px; transition: background .2s, color .2s; }
+.tabs a[aria-current="true"] { background: var(--brand); color: #fff; box-shadow: 0 4px 12px rgba(219, 53, 119, .3); }
+.themes { border: 0; box-shadow: var(--card-shadow); }
+.themes button[aria-pressed="true"] { background: var(--brand); color: #fff; }
+.getapp { background: var(--surface); padding: 6px 14px; border-radius: 999px; text-decoration: none; box-shadow: var(--card-shadow); color: var(--brand2); }
+
+/* Today hero */
+.panel.today { position: relative; overflow: hidden; color: #fff; background: var(--good-grad); box-shadow: 0 14px 34px rgba(26, 140, 160, .3); padding: 22px 20px; }
+.panel.today:has(.verdict.warn) { background: var(--warn-grad); box-shadow: 0 14px 34px rgba(232, 85, 58, .3); }
+.panel.today:has(.verdict.bad), .panel.today:has(.big.neg) { background: var(--bad-grad); box-shadow: 0 14px 34px rgba(184, 40, 122, .3); }
+.panel.today::before { content: ""; position: absolute; width: 220px; height: 220px; border-radius: 50%; background: rgba(255, 255, 255, .12); inset-inline-end: -70px; top: -90px; pointer-events: none; }
+.panel.today::after { content: "😎"; position: absolute; inset-inline-end: 16px; top: 14px; font-size: 44px; line-height: 1; filter: drop-shadow(0 4px 8px rgba(0, 0, 0, .18)); animation: bob 3s ease-in-out infinite; pointer-events: none; }
+.panel.today:has(.verdict.warn)::after { content: "😬"; }
+.panel.today:has(.verdict.bad)::after, .panel.today:has(.big.neg)::after { content: "🚨"; }
+.today .lbl, .today .line { color: rgba(255, 255, 255, .9); }
+.today .lbl { font-size: 16px; }
+.today .big, .today .big.neg { color: #fff !important; font-weight: 800; text-shadow: 0 4px 18px rgba(0, 0, 0, .15); }
+.today .pace .track { background: rgba(255, 255, 255, .28); }
+.today .pace .fill, .today .pace .fill.warn, .today .pace .fill.bad { background: #fff; }
+.today .pace .mark { background: #ffd84d; width: 3px; }
+.today .pace .cap { color: rgba(255, 255, 255, .88); }
+.today .verdict, .today .verdict.good, .today .verdict.warn, .today .verdict.bad { background: rgba(255, 255, 255, .2); color: #fff; }
+@keyframes bob { 0%, 100% { transform: translateY(0) rotate(-4deg); } 50% { transform: translateY(-6px) rotate(4deg); } }
+
+/* Status messages with emoji */
+.verdict { border-radius: 16px; }
+.verdict.good::before { content: "👍 "; }
+.verdict.warn::before { content: "😬 "; }
+.verdict.bad::before { content: "🚨 "; }
+.alert::before { content: "🚨 "; }
+.note::before { content: "💡 "; }
+.example span::before { content: "👀 "; }
+.empty::before { content: "🌱 "; }
+.alert, .note, .example, .preview, .ok, .auth .err, .sheet .err { border-radius: 16px; }
+
+/* Bars */
+.pace .track { height: 14px; border-radius: 999px; }
+.pace .fill { border-radius: 999px; background: linear-gradient(90deg, #10b981, #34d399); }
+.pace .fill.warn { background: linear-gradient(90deg, #f97316, #fbbf24); }
+.pace .fill.bad { background: linear-gradient(90deg, #e11d48, #f43f5e); }
+.bar { height: 20px; border-radius: 999px; }
+.cat { border-radius: 16px; padding: 12px 10px; }
+.cat:hover { background: var(--surface-2); }
+.cat .name { font-size: 16px; }
+
+/* Payslip */
+.big2 { font-weight: 800; background: linear-gradient(120deg, #0e9f6e, #0ea5a4); -webkit-background-clip: text; background-clip: text; color: transparent; }
+:root[data-theme="dark"] .big2 { background-image: linear-gradient(120deg, #4fd8a8, #5ee0e0); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .big2 { background-image: linear-gradient(120deg, #4fd8a8, #5ee0e0); } }
+
+/* Log rows with an emoji avatar */
+.day .dh { border-bottom: 0; background: var(--surface-2); border-radius: 999px; padding: 4px 12px; }
+.tx { padding: 4px 0; }
+.tx .what[data-e] { display: grid; grid-template-columns: 42px minmax(0, 1fr); column-gap: 10px; align-items: center; }
+.tx .what[data-e]::before { content: attr(data-e); grid-row: span 2; display: grid; place-items: center; width: 42px; height: 42px; border-radius: 14px; font-size: 21px; background: var(--spend-soft); }
+.tx.income .what[data-e]::before { background: var(--accent-soft); }
+button.what:hover { background: var(--surface-2); }
+.wish { border-bottom: 1px dashed var(--line); }
+
+/* Plan */
+details.plan > summary { font-weight: 800; font-size: 22px; background: var(--surface); padding: 16px 18px; border-radius: var(--radius); box-shadow: var(--card-shadow); }
+details.plan > summary::after { width: 32px; height: 32px; display: grid; place-items: center; border-radius: 50%; background: var(--surface-2); }
+.remain .val { font-weight: 800; }
+.tile { border-radius: 18px; padding: 16px; }
+.tile.save { background: linear-gradient(135deg, var(--accent-soft), color-mix(in srgb, var(--accent-soft) 60%, var(--surface))); }
+.tile.spend { background: linear-gradient(135deg, var(--spend-soft), color-mix(in srgb, var(--spend-soft) 60%, var(--surface))); }
+.tile.save .t::before { content: "🐷 "; }
+.tile.spend .t::before { content: "🛍️ "; }
+.tile .n { font-weight: 800; }
+.presets button { border-radius: 999px; }
+.presets button[aria-pressed="true"] { border-color: var(--brand2); color: var(--brand2); background: color-mix(in srgb, var(--brand2) 12%, var(--surface)); }
+input[type="range"], .check input, .implist .improw input { accent-color: var(--brand2); }
+
+/* Shifts and calendar */
+.shift { border-radius: 16px; }
+.ctile { border-radius: 16px; background: var(--surface-2); }
+.caltiles .ctile:nth-child(1) { background: var(--accent-soft); }
+.caltiles .ctile:nth-child(2) { background: var(--danger-soft); }
+.caltiles .ctile:nth-child(3) { background: color-mix(in srgb, #8b5cf6 14%, var(--surface)); }
+.caltiles .ctile:nth-child(1) .t::before { content: "💰 "; }
+.caltiles .ctile:nth-child(2) .t::before { content: "💸 "; }
+.caltiles .ctile:nth-child(3) .t::before { content: "⚖️ "; }
+.ctile .n { font-weight: 800; }
+.cday { border: 0; border-radius: 12px; background: var(--surface-2); }
+.cday.rest { background: color-mix(in srgb, #8b5cf6 9%, var(--surface)); }
+.cday.today { box-shadow: inset 0 0 0 2px var(--brand2); }
+.cday.today .dn { color: var(--brand2); text-decoration: none; }
+.cday.sel, .cday.today.sel { border: 0; padding: 4px; background: color-mix(in srgb, var(--brand2) 16%, var(--surface)); box-shadow: inset 0 0 0 2px var(--brand2); }
+.pickdays .cday[aria-pressed="true"] { background: var(--brand); color: #fff; }
+
+/* Add button, sheets, chips */
+.fab { background: var(--brand); color: #fff; padding: 15px 30px; font-size: 18px; box-shadow: 0 10px 26px rgba(219, 53, 119, .45); transition: transform .15s ease; }
+.fab:active { transform: translateX(-50%) scale(.95); }
+dialog.sheet { border-radius: 28px 28px 0 0; }
+@media (min-width: 600px) { dialog.sheet { border-radius: 28px; } }
+dialog.sheet::backdrop { background: rgba(40, 20, 50, .45); -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); }
+.sheet form::before { content: ""; justify-self: center; width: 44px; height: 5px; border-radius: 99px; background: var(--line); margin-bottom: -4px; }
+@media (min-width: 600px) { .sheet form::before { display: none; } }
+.sheet h2 { display: flex; align-items: center; gap: 10px; }
+.amount-in { text-align: center !important; border-radius: 18px !important; }
+.chip span { border: 1.5px solid var(--line); background: var(--surface-2); padding: 7px 14px; transition: transform .1s; }
+.chip input:checked + span { background: var(--brand); color: #fff; border-color: transparent; box-shadow: 0 4px 12px rgba(219, 53, 119, .28); }
+.chip span:active { transform: scale(.95); }
+.mode { border-radius: 999px; background: var(--surface-2); }
+.mode button { border-radius: 999px; }
+.mode button#modeExp[aria-pressed="true"] { color: var(--spend); }
+.wishbtn { border-radius: 16px; }
+.snack { border-radius: 18px; }
+.appupdate { background: var(--brand); color: #fff; border-bottom: 0; }
+.appupdate .linkbtn { color: #fff; }
+.appupdate .btn.primary { background: #fff; color: var(--brand2); }
+
+/* Sign-in and loading */
+.auth { padding-block: 32px 48px; }
+.auth .hero-logo { justify-self: center; display: grid; place-items: center; width: 96px; height: 96px; border-radius: 30px; background: var(--brand); font-size: 50px; box-shadow: 0 14px 34px rgba(219, 53, 119, .4); animation: bob 3.2s ease-in-out infinite; }
+.auth h1 { justify-content: center; }
+.auth .panel { padding: 24px 20px; }
+.loading .spin { font-size: 44px; animation: bob 1.4s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .panel.today::after, .auth .hero-logo, .loading .spin { animation: none; } }
 </style>
 </head>
 <body>
@@ -359,10 +537,11 @@ dialog.sheet::backdrop { background: rgba(10, 20, 15, .45); }
   <button class="linkbtn" type="button" id="appUpdateLater">אחר כך</button>
 </div>
 
-<div class="loading" id="loading"><span id="loadingText">טוען…</span><button class="btn" type="button" id="retryBtn" hidden>נסו שוב</button></div>
+<div class="loading" id="loading"><span class="spin" aria-hidden="true">🪙</span><span id="loadingText">טוען…</span><button class="btn" type="button" id="retryBtn" hidden>נסו שוב</button></div>
 
 <div class="auth" id="authScreen" hidden>
-  <a class="getapp" href="budget.apk" download hidden>הורדת האפליקציה לאנדרואיד</a><div class="themes" role="group" aria-label="מצב תצוגה"><button type="button" data-theme-pick="light" aria-pressed="false">☀ בהיר</button><button type="button" data-theme-pick="dark" aria-pressed="false">☾ כהה</button></div>
+  <a class="getapp" href="budget.apk" download hidden>📱 הורדת האפליקציה לאנדרואיד</a><div class="themes" role="group" aria-label="מצב תצוגה"><button type="button" data-theme-pick="light" aria-pressed="false">☀️ בהיר</button><button type="button" data-theme-pick="dark" aria-pressed="false">🌙 כהה</button></div>
+  <div class="hero-logo" aria-hidden="true">💰</div>
   <div>
     <h1>התקציב החודשי שלי</h1>
     <p class="sub">התחברו כדי לשמור את התקציב שלכם ולראות אותו מכל מכשיר.</p>
@@ -388,11 +567,11 @@ dialog.sheet::backdrop { background: rgba(10, 20, 15, .45); }
 <div class="wrap" id="app" hidden>
   <header>
     <div>
-      <h1>התקציב החודשי שלי</h1>
-      <p class="sub">כל שקל שיוצא נרשם כאן. בלי תירוצים.</p>
+      <h1><span class="logo" aria-hidden="true">💰</span><span class="gt">התקציב החודשי שלי</span></h1>
+      <p class="sub">כל שקל שיוצא נרשם כאן. בלי תירוצים. 💪</p>
     </div>
     <div class="head-side">
-      <a class="getapp" href="budget.apk" download hidden>הורדת האפליקציה לאנדרואיד</a><div class="themes" role="group" aria-label="מצב תצוגה"><button type="button" data-theme-pick="light" aria-pressed="false">☀ בהיר</button><button type="button" data-theme-pick="dark" aria-pressed="false">☾ כהה</button></div>
+      <a class="getapp" href="budget.apk" download hidden>📱 הורדת האפליקציה לאנדרואיד</a><div class="themes" role="group" aria-label="מצב תצוגה"><button type="button" data-theme-pick="light" aria-pressed="false">☀️ בהיר</button><button type="button" data-theme-pick="dark" aria-pressed="false">🌙 כהה</button></div>
       <div class="userbar" id="userbar" hidden>
         <img id="userPhoto" alt="" referrerpolicy="no-referrer" hidden>
         <span class="who" id="userName"></span>
@@ -411,13 +590,13 @@ dialog.sheet::backdrop { background: rgba(10, 20, 15, .45); }
   <div class="note" id="netNote" hidden></div>
   <div class="example" id="exampleNote" hidden>
     <span>אלה נתוני דוגמה כדי להראות איך זה עובד. החליפו אותם בנתונים שלכם.</span>
-    <button class="btn" id="clearExample" type="button">ניקוי הדוגמה</button>
+    <button class="btn" id="clearExample" type="button">🧹 ניקוי הדוגמה</button>
   </div>
 
   <nav class="tabs" aria-label="עמודים">
-    <a href="#" data-view="main" aria-current="true">ראשי</a>
-    <a href="#shifts" data-view="shifts">משמרות</a>
-    <a href="#calendar" data-view="calendar">לוח שנה</a>
+    <a href="#" data-view="main" aria-current="true">🏠 ראשי</a>
+    <a href="#shifts" data-view="shifts">⏰ משמרות</a>
+    <a href="#calendar" data-view="calendar">📅 לוח שנה</a>
   </nav>
 
   <div class="grid" id="viewMain">
@@ -434,7 +613,7 @@ dialog.sheet::backdrop { background: rgba(10, 20, 15, .45); }
       </section>
 
       <section class="panel pay" aria-labelledby="payH">
-        <h2 id="payH">המשכורת שלי <button class="btn primary" type="button" id="addShift">+ משמרת</button></h2>
+        <h2 id="payH" class="pc-violet" data-e="💼">המשכורת שלי <button class="btn primary" type="button" id="addShift">⏰ משמרת</button></h2>
         <div class="paybody" id="payBody">
           <span class="lbl" id="payLbl">המשכורת עד עכשיו (ברוטו)</span>
           <span class="big2" id="payNet">₪0</span>
@@ -450,25 +629,25 @@ dialog.sheet::backdrop { background: rgba(10, 20, 15, .45); }
       </section>
 
       <section class="panel" aria-labelledby="catsH">
-        <h2 id="catsH">לפי קטגוריות <span class="sum" id="spentSum">₪0</span></h2>
+        <h2 id="catsH" class="pc-pink" data-e="🛍️">לפי קטגוריות <span class="sum" id="spentSum">₪0</span></h2>
         <div class="cats" id="catList"></div>
       </section>
 
       <section class="panel" aria-labelledby="logH">
-        <h2 id="logH">הוצאות והכנסות של החודש</h2>
+        <h2 id="logH" class="pc-orange" data-e="🧾">הוצאות והכנסות של החודש</h2>
         <p class="hint">לחצו על שורה כדי לתקן אותה. קיבלת כסף מתנה או החזר מחבר? רשמו אותו כהכנסה.</p>
-        <div class="actions"><button class="btn" type="button" id="addIncome">+ הכנסה חד־פעמית</button></div>
+        <div class="actions"><button class="btn" type="button" id="addIncome">💰 הכנסה חד־פעמית</button></div>
         <div class="log" id="txList"></div>
       </section>
 
       <section class="panel" aria-labelledby="wishH">
-        <h2 id="wishH">אולי אקנה</h2>
+        <h2 id="wishH" class="pc-yellow" data-e="🤔">אולי אקנה</h2>
         <div class="verdict good" id="wishSaved" hidden></div>
         <div class="log" id="wishList"></div>
       </section>
 
       <section class="panel" aria-labelledby="histH">
-        <h2 id="histH">לאורך החודשים</h2>
+        <h2 id="histH" class="pc-blue" data-e="📊">לאורך החודשים</h2>
         <p class="hint">העמודה היא כמה הוצאת על בזבוזים, והקו הוא התקציב שתכננת.</p>
         <div class="hist" id="histChart"></div>
         <p class="histnote" id="histNote"></p>
@@ -477,17 +656,17 @@ dialog.sheet::backdrop { background: rgba(10, 20, 15, .45); }
     </div>
 
     <details class="plan" id="planBox">
-      <summary>התוכנית של החודש</summary>
+      <summary>📋 התוכנית של החודש</summary>
       <div class="col">
         <section class="panel" aria-labelledby="incH">
-          <h2 id="incH">הכנסה צפויה נטו <span class="sum" id="incSum">₪0</span></h2>
+          <h2 id="incH" class="pc-mint" data-e="💵">הכנסה צפויה נטו <span class="sum" id="incSum">₪0</span></h2>
           <p class="hint">הכנסה משתנה? רשמו את הסכום הנמוך שאתם בטוחים שייכנס. מה שיגיע מעבר לזה הוא בונוס, לא תקציב.</p>
           <div class="rows" id="incRows"></div>
           <div class="actions"><button class="btn" type="button" id="addInc">+ הוספת הכנסה</button></div>
         </section>
 
         <section class="panel" aria-labelledby="expH">
-          <h2 id="expH">הוצאות חובה <span class="sum" id="expSum">₪0</span></h2>
+          <h2 id="expH" class="pc-violet" data-e="🏠">הוצאות חובה <span class="sum" id="expSum">₪0</span></h2>
           <p class="hint">חשבונות קבועים שחייבים לשלם: שכר דירה, חשמל, תרופות, אוכל לכלבים.</p>
           <div class="rows" id="expRows"></div>
           <div class="actions">
@@ -497,7 +676,7 @@ dialog.sheet::backdrop { background: rgba(10, 20, 15, .45); }
         </section>
 
         <section class="panel" aria-labelledby="resH">
-          <h2 id="resH">החלוקה לחודש</h2>
+          <h2 id="resH" class="pc-orange" data-e="🥧">החלוקה לחודש</h2>
           <div class="remain">
             <span class="lbl">נשאר אחרי הוצאות החובה</span>
             <span class="val" id="remain">₪0</span>
@@ -541,7 +720,7 @@ dialog.sheet::backdrop { background: rgba(10, 20, 15, .45); }
         </section>
 
         <section class="panel" aria-labelledby="catH">
-          <h2 id="catH">תקציב לכל קטגוריה <span class="sum" id="catSum">₪0</span></h2>
+          <h2 id="catH" class="pc-pink" data-e="🎯">תקציב לכל קטגוריה <span class="sum" id="catSum">₪0</span></h2>
           <p class="hint">מחלקים את תקציב הבזבוזים לקטגוריות שלכם. כל הוצאה שנרשמת יורדת מהקטגוריה שלה.</p>
           <div class="rows" id="catRows"></div>
           <div class="alloc" id="alloc"></div>
@@ -549,17 +728,17 @@ dialog.sheet::backdrop { background: rgba(10, 20, 15, .45); }
         </section>
 
         <section class="panel" aria-labelledby="recH">
-          <h2 id="recH">נרשמות לבד כל חודש <span class="sum" id="recSum">₪0</span></h2>
+          <h2 id="recH" class="pc-blue" data-e="🔁">נרשמות לבד כל חודש <span class="sum" id="recSum">₪0</span></h2>
           <div class="log" id="recList"></div>
         </section>
 
         <section class="panel" aria-labelledby="setH">
-          <h2 id="setH">הגדרות</h2>
+          <h2 id="setH" class="pc-gray" data-e="⚙️">הגדרות</h2>
           <label class="field" for="startDay">החודש שלי מתחיל ב־<select id="startDay"></select></label>
           <p class="hint">למשל ביום שהמשכורת נכנסת או שהאשראי יורד. ״כמה מותר היום״ והגרף יחושבו לפי זה.</p>
           <div class="actions">
-            <button class="btn" type="button" id="expTx">ייצוא ההוצאות לאקסל</button>
-            <button class="btn" type="button" id="expPlan">ייצוא התוכנית לאקסל</button>
+            <button class="btn" type="button" id="expTx">📤 ייצוא ההוצאות לאקסל</button>
+            <button class="btn" type="button" id="expPlan">📤 ייצוא התוכנית לאקסל</button>
           </div>
         </section>
       </div>
@@ -568,26 +747,26 @@ dialog.sheet::backdrop { background: rgba(10, 20, 15, .45); }
 
   <div class="viewcol" id="viewShifts" hidden>
     <section class="panel pay" aria-labelledby="shTitle">
-      <h2><span id="shTitle">המשמרות</span> <button class="btn primary" type="button" id="addShift3">+ משמרת</button></h2>
+      <h2 class="pc-violet" data-e="⏰"><span id="shTitle">המשמרות</span> <button class="btn primary" type="button" id="addShift3">⏰ משמרת</button></h2>
       <div class="paybody">
         <span class="lbl">משכורת עד עכשיו (ברוטו)</span>
         <span class="big2" id="shNet">₪0</span>
         <span class="line" id="shLine"></span>
       </div>
-      <div class="actions"><button class="btn" type="button" id="importShifts">ייבוא מהיר: מחילן או כמה ימים ביחד</button></div>
+      <div class="actions"><button class="btn" type="button" id="importShifts">📥 ייבוא מהיר: מחילן או כמה ימים ביחד</button></div>
       <div class="shifts" id="shiftList"></div>
       <p class="hint">משמרת רגילה מסומנת באפור. משמרת מסוג מיוחד מסומנת בצבע של הסוג שלה.</p>
     </section>
 
     <section class="panel" aria-labelledby="typesH">
-      <h2 id="typesH">סוגי משמרות</h2>
+      <h2 id="typesH" class="pc-pink" data-e="🎨">סוגי משמרות</h2>
       <p class="hint">סוג משמרת קובע אחוז מינימלי לכל שעה בה. למשל ״מוצ״ש״ ב־150%. אם החוק נותן יותר (שעות נוספות, שבת), מקבלים את הגבוה מביניהם.</p>
       <div class="rows" id="typeRows"></div>
       <div class="actions"><button class="btn" type="button" id="addType">+ סוג משמרת</button></div>
     </section>
 
     <section class="panel" id="paySet" aria-labelledby="paySetH">
-      <h2 id="paySetH">הגדרות שכר</h2>
+      <h2 id="paySetH" class="pc-mint" data-e="🧮">הגדרות שכר</h2>
           
           <div class="rows">
             <label class="field" for="wage">שכר לשעה (ברוטו)<input type="number" id="wage" min="0" step="0.01" inputmode="decimal" placeholder="₪"></label>
@@ -607,7 +786,7 @@ dialog.sheet::backdrop { background: rgba(10, 20, 15, .45); }
 
   <div class="viewcol" id="viewCal" hidden>
     <section class="panel" aria-labelledby="calTitle">
-      <h2 id="calTitle">החודש</h2>
+      <h2 id="calTitle" class="pc-blue" data-e="📅">החודש</h2>
       <div class="caltiles">
         <div class="ctile"><span class="t">הכנסת</span><span class="n pos" id="calIn">+₪0</span></div>
         <div class="ctile"><span class="t">הוצאת</span><span class="n neg" id="calOut">−₪0</span></div>
@@ -620,14 +799,14 @@ dialog.sheet::backdrop { background: rgba(10, 20, 15, .45); }
       <div class="calgrid" id="calGrid"></div>
     </section>
     <section class="panel" aria-labelledby="calDayH">
-      <h2 id="calDayH">היום</h2>
+      <h2 id="calDayH" class="pc-orange" data-e="📍">היום</h2>
       <div class="log" id="calDayList"></div>
       <div class="verdict" id="calDayTotal" role="status" hidden></div>
     </section>
   </div>
 </div>
 
-<button class="fab" type="button" id="fab" hidden>+ הוצאה</button>
+<button class="fab" type="button" id="fab" hidden>💸 הוצאה</button>
 
 <dialog class="sheet" id="sheet" aria-labelledby="sheetH">
   <form id="txForm" method="dialog" novalidate>
@@ -635,7 +814,7 @@ dialog.sheet::backdrop { background: rgba(10, 20, 15, .45); }
       <button type="button" id="modeExp" aria-pressed="true">הוצאה</button>
       <button type="button" id="modeInc" aria-pressed="false">הכנסה</button>
     </div>
-    <h2 id="sheetH">הוצאה חדשה</h2>
+    <h2 id="sheetH" data-e="✍️">הוצאה חדשה</h2>
     <label for="txAmount">כמה?<input type="number" id="txAmount" class="amount-in" inputmode="decimal" min="0" step="0.01" placeholder="₪0"></label>
     <p class="hours" id="txHours" aria-live="polite"></p>
     <fieldset class="chips" id="txCats"><legend>על מה?</legend></fieldset>
@@ -648,13 +827,13 @@ dialog.sheet::backdrop { background: rgba(10, 20, 15, .45); }
       <button class="btn primary" type="submit" id="txSave">רישום</button>
       <button class="btn" type="button" id="txCancel">ביטול</button>
     </div>
-    <button class="btn wishbtn" type="button" id="txWish">אולי אקנה. אחליט בעוד 48 שעות</button>
+    <button class="btn wishbtn" type="button" id="txWish">🤔 אולי אקנה. אחליט בעוד 48 שעות</button>
   </form>
 </dialog>
 
 <dialog class="sheet" id="shiftSheet" aria-labelledby="shiftH">
   <form id="shiftForm" method="dialog" novalidate>
-    <h2 id="shiftH">משמרת חדשה</h2>
+    <h2 id="shiftH" data-e="⏰">משמרת חדשה</h2>
     <label for="shDate">תאריך<input type="date" id="shDate"></label>
     <div class="two">
       <label for="shStart">כניסה<input type="time" id="shStart"></label>
@@ -678,7 +857,7 @@ dialog.sheet::backdrop { background: rgba(10, 20, 15, .45); }
       <button type="button" id="impModePaste" aria-pressed="true">הדבקה מחילן</button>
       <button type="button" id="impModeDays" aria-pressed="false">כמה ימים ביחד</button>
     </div>
-    <h2 id="importH">ייבוא משמרות</h2>
+    <h2 id="importH" data-e="📥">ייבוא משמרות</h2>
     <div id="impPaste">
       <p class="hint">בחילן נט (באתר, לא באפליקציה) פותחים את דוח הנוכחות של החודש, מסמנים את הטבלה עם העכבר, מעתיקים ומדביקים כאן. אם יש כפתור ייצוא לאקסל, אפשר גם להעלות את הקובץ. כל שורה עם תאריך ושתי שעות הופכת למשמרת.</p>
       <label for="impText">הדבקה<textarea id="impText" rows="5" placeholder="01/09 ב׳ 08:00 16:30&#10;02/09 ג׳ 14:00 22:15"></textarea></label>
@@ -724,6 +903,16 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   }));
   const catId = () => "c" + Math.random().toString(36).slice(2, 9);
 
+  const CAT_EMOJI = [
+    [/אוכל|מסעד|משלוח|שווארמ|פיצה|המבורגר|סושי|פלאפל|וולט|תן ביס/, "🍔"], [/קפה|נשנוש|ממתק|חטיף|גלידה|מאפ/, "☕"],
+    [/סופר|מכולת|מצרכ|ירקות/, "🛒"], [/קניות|אונליין|אמזון|עליאקספרס|שופינג|בגד|נעל/, "🛍️"],
+    [/בילוי|יציא|מסיב|סרט|קולנוע|הופע/, "🎉"], [/דלק|רכב|תחבור|אוטובוס|רכבת|מונית|חני|נסיע/, "🚗"],
+    [/טיפוח|מספרה|קוסמטיק|ציפורנ/, "💅"], [/בריאות|תרופ|רופא|פארם|קופת/, "💊"], [/כלב|חתול|חיות|וטרינר/, "🐶"], [/ספורט|כושר|חדר כושר/, "🏋️"],
+    [/טלפון|סלולר|אינטרנט|מנוי|נטפליקס|ספוטיפיי/, "📱"], [/מתנ/, "🎁"], [/חשמל/, "💡"], [/מים|גז/, "💧"],
+    [/דירה|שכירות|ארנונה|משכנתא|בית/, "🏠"], [/לימוד|ספר|קורס|אוניברסיט/, "📚"], [/טיול|חופש|נופש|טיסה/, "✈️"],
+    [/עישון|סיגרי|טבק/, "🚬"], [/ילד|תינוק|גן/, "🧸"], [/שונות|אחר/, "🎲"],
+  ];
+  const catEmoji = (name) => { const hit = CAT_EMOJI.find(([re]) => re.test(name || "")); return hit ? hit[1] : "💸"; };
   const DEFAULT_CATS = ["אוכל בחוץ ומשלוחים", "קניות אונליין", "בילויים ויציאות", "קפה ונשנושים", "שונות"];
   const blankCats = () => DEFAULT_CATS.map((name) => ({ id: catId(), name, budget: 0 }));
 
@@ -800,7 +989,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   function paintTheme() {
     const t = currentTheme();
     document.querySelectorAll("[data-theme-pick]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.themePick === t)));
-    const meta = document.querySelector('meta[name="theme-color"]'); if (meta) meta.content = t === "dark" ? "#141a17" : "#1f6b4f";
+    const meta = document.querySelector('meta[name="theme-color"]'); if (meta) meta.content = t === "dark" ? "#17121f" : "#db3577";
   }
   document.querySelectorAll("[data-theme-pick]").forEach((b) => b.addEventListener("click", () => {
     document.documentElement.setAttribute("data-theme", b.dataset.themePick);
@@ -1338,7 +1527,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       b.type = "button"; b.className = "cat";
       if (c.id) b.addEventListener("click", () => openSheet(c.id)); else b.disabled = true;
       const top = document.createElement("div"); top.className = "top";
-      const nm = document.createElement("span"); nm.className = "name"; nm.textContent = c.name;
+      const nm = document.createElement("span"); nm.className = "name"; nm.textContent = (c.id ? catEmoji(c.name) : "🗑️") + " " + c.name;
       const nums = document.createElement("span"); nums.className = "nums"; nums.textContent = fmt(c.spent) + " מתוך " + fmt(c.budget);
       top.append(nm, nums);
       const pace = document.createElement("div"); pace.className = "pace";
@@ -1416,6 +1605,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
         if (r._inc) { day.append(incomeRow(r._inc)); return; }
         const row = document.createElement("div"); row.className = "tx" + (r.pending ? " pending" : "");
         const what = document.createElement("button"); what.type = "button"; what.className = "what";
+        what.dataset.e = names[r.category] ? catEmoji(names[r.category]) : "💸";
         const t = document.createElement("b"); t.textContent = r.note || names[r.category] || "הוצאה";
         const hrs = hoursText(r.amount);
         const c = document.createElement("span");
@@ -1440,7 +1630,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 
   function incomeRow(r) {
     const row = document.createElement("div"); row.className = "tx income" + (r.pending ? " pending" : "");
-    const what = document.createElement("button"); what.type = "button"; what.className = "what";
+    const what = document.createElement("button"); what.type = "button"; what.className = "what"; what.dataset.e = "💰";
     const t = document.createElement("b"); t.textContent = r.note || r.kind || "הכנסה";
     const c = document.createElement("span"); c.textContent = "הכנסה · " + (r.kind || "אחר") + (r.pending ? " · ממתין לחיבור" : "");
     what.append(t, c);
@@ -1489,7 +1679,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       const lab = document.createElement("label"); lab.className = "chip";
       const inp = document.createElement("input"); inp.type = "radio"; inp.name = "txCat"; inp.value = c.id; inp.id = "txCat-" + i;
       inp.checked = c.id === pick;
-      const sp = document.createElement("span"); sp.textContent = c.name || "בלי שם";
+      const sp = document.createElement("span"); sp.textContent = catEmoji(c.name) + " " + (c.name || "בלי שם");
       lab.append(inp, sp); box.append(lab);
     });
     $("txAmount").value = edit ? edit.amount : ""; $("txNote").value = edit ? edit.note || "" : "";
@@ -2505,7 +2695,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     $("viewShifts").hidden = view !== "shifts";
     $("viewCal").hidden = view !== "calendar";
     document.querySelectorAll(".tabs a").forEach((a) => a.setAttribute("aria-current", String(a.dataset.view === view)));
-    $("fab").textContent = view === "shifts" ? "+ משמרת" : "+ הוצאה";
+    $("fab").textContent = view === "shifts" ? "⏰ משמרת" : "💸 הוצאה";
     if (!fromHash) { const h = view === "main" ? "" : "#" + view; if (location.hash !== h) history.replaceState(null, "", location.pathname + h); }
     if (view === "calendar") renderCal();
     if (view === "shifts") renderShifts();
