@@ -14,6 +14,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.speech.RecognizerIntent;
 import android.view.View;
 import android.view.WindowInsets;
 import android.view.WindowInsetsController;
@@ -33,11 +34,12 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 
 /** A full-screen WebView around the budget website, with file picking, file saving and the back button wired up. */
 public class MainActivity extends Activity {
     private static final String HOME = "https://smkrot3-sudo.github.io/dogsFood/budget/";
-    private static final int PICK_FILE = 1, HILAN = 2;
+    private static final int PICK_FILE = 1, HILAN = 2, VOICE = 4;
     static final String EXTRA_SHIFT_DATE = "shiftDate";
 
     private WebView web;
@@ -159,6 +161,11 @@ public class MainActivity extends Activity {
             if (result == RESULT_OK && text != null) toPage(Hilan.result("ok", text, true));
             return;
         }
+        if (request == VOICE) {
+            ArrayList<String> heard = result == RESULT_OK && data != null ? data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS) : null;
+            voiceToPage(heard != null && !heard.isEmpty() ? heard.get(0) : "");
+            return;
+        }
         if (request == PICK_FILE && pendingPick != null) {
             Uri[] picked = null;
             if (result == RESULT_OK && data != null && data.getData() != null) picked = new Uri[] { data.getData() };
@@ -261,9 +268,7 @@ public class MainActivity extends Activity {
         public void setReminder(boolean on, String time) {
             if (time == null || !time.matches("\\d\\d:\\d\\d")) time = "22:30";
             Reminder.set(MainActivity.this, on, time);
-            if (on && Build.VERSION.SDK_INT >= 33
-                && checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) != android.content.pm.PackageManager.PERMISSION_GRANTED)
-                runOnUiThread(() -> requestPermissions(new String[] { android.Manifest.permission.POST_NOTIFICATIONS }, 3));
+            if (on) askNotifications();
         }
 
         /** The page reports which recent days already have a shift or a "didn't work" mark (comma-separated yyyy-mm-dd). */
@@ -274,6 +279,45 @@ public class MainActivity extends Activity {
         @JavascriptInterface
         public String takeOffDays() { return Reminder.takeOffDays(MainActivity.this); }
 
+        /** The page's reminder times per day for the coming weeks (Fridays and holiday eves come earlier, Shabbat is skipped). */
+        @JavascriptInterface
+        public void setReminderPlan(String csv) { Reminder.setPlan(MainActivity.this, csv); }
+
+        /** A notification right now, e.g. a category that just went over its budget. */
+        @JavascriptInterface
+        public void notifyNow(String title, String text) {
+            if (title == null || title.isEmpty()) return;
+            askNotifications();
+            Notes.show(MainActivity.this, title, text == null ? "" : text, 100 + (int) (System.currentTimeMillis() / 1000 % 100));
+        }
+
+        /** Scheduled notifications (JSON list), such as the weekly summary after Shabbat. */
+        @JavascriptInterface
+        public void setNotes(String json) { Notes.set(MainActivity.this, json); }
+
+        /** Speech to text in Hebrew; the words arrive at window.onVoice. */
+        @JavascriptInterface
+        public void listen() {
+            runOnUiThread(() -> {
+                Intent i = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
+                    .putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+                    .putExtra(RecognizerIntent.EXTRA_LANGUAGE, "he-IL")
+                    .putExtra(RecognizerIntent.EXTRA_PROMPT, "מה קנית ובכמה?");
+                try { startActivityForResult(i, VOICE); }
+                catch (ActivityNotFoundException e) { toast("אין בטלפון זיהוי דיבור"); voiceToPage(""); }
+            });
+        }
+
+        /** The phone's share menu (WhatsApp and the like) with a ready text. */
+        @JavascriptInterface
+        public void share(String text) {
+            if (text == null) return;
+            runOnUiThread(() -> {
+                Intent s = new Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT, text);
+                try { startActivity(Intent.createChooser(s, "שיתוף")); } catch (ActivityNotFoundException e) { toast("אין אפליקציה לשיתוף"); }
+            });
+        }
+
         /** Opens a page (Google sign-in) in the phone's browser, since Google blocks it inside apps. */
         @JavascriptInterface
         public void openExternal(String url) {
@@ -283,6 +327,17 @@ public class MainActivity extends Activity {
                 catch (ActivityNotFoundException e) { toast("אין דפדפן לפתוח בו את ההתחברות"); }
             });
         }
+    }
+
+    private void askNotifications() {
+        if (Build.VERSION.SDK_INT >= 33
+            && checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) != android.content.pm.PackageManager.PERMISSION_GRANTED)
+            runOnUiThread(() -> requestPermissions(new String[] { android.Manifest.permission.POST_NOTIFICATIONS }, 3));
+    }
+
+    private void voiceToPage(String text) {
+        if (destroyed) return;
+        runOnUiThread(() -> web.evaluateJavascript("window.onVoice&&window.onVoice(" + JSONObject.quote(text) + ")", null));
     }
 
     /** Hands a Hilan result to the page's window.onHilan. */

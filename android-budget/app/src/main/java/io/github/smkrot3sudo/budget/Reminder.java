@@ -61,20 +61,41 @@ public class Reminder extends BroadcastReceiver {
         return android.text.TextUtils.join(",", s);
     }
 
+    /** Times the page worked out per day ("yyyy-MM-dd=HH:MM", or "=-" for no reminder that day), e.g. an hour before Shabbat starts. */
+    static void setPlan(Context c, String csv) {
+        prefs(c).edit().putString("plan", csv == null ? "" : csv).apply();
+        schedule(c);
+    }
+
+    private static String planFor(Context c, String date) {
+        for (String p : prefs(c).getString("plan", "").split(",")) {
+            if (p.length() > 11 && p.charAt(10) == '=' && p.startsWith(date)) return p.substring(11);
+        }
+        return null;
+    }
+
     static void schedule(Context c) {
         AlarmManager am = (AlarmManager) c.getSystemService(Context.ALARM_SERVICE);
         PendingIntent pi = PendingIntent.getBroadcast(c, 1, new Intent(c, Reminder.class).setAction(ACTION_FIRE),
             PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
         am.cancel(pi);
         if (!isOn(c)) return;
-        String[] hm = time(c).split(":");
-        Calendar at = Calendar.getInstance();
-        at.set(Calendar.HOUR_OF_DAY, Integer.parseInt(hm[0]));
-        at.set(Calendar.MINUTE, Integer.parseInt(hm[1]));
-        at.set(Calendar.SECOND, 0);
-        at.set(Calendar.MILLISECOND, 0);
-        if (at.getTimeInMillis() <= System.currentTimeMillis() + 1000) at.add(Calendar.DAY_OF_MONTH, 1);
-        am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, at.getTimeInMillis(), pi);
+        SimpleDateFormat f = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+        long now = System.currentTimeMillis();
+        // The first day from today whose reminder time is still ahead; a day planned as "-" is skipped
+        for (int i = 0; i < 70; i++) {
+            Calendar at = Calendar.getInstance();
+            at.add(Calendar.DAY_OF_MONTH, i);
+            String t = planFor(c, f.format(at.getTime()));
+            if (t == null) t = time(c);
+            if (!t.matches("\\d\\d:\\d\\d")) continue;
+            String[] hm = t.split(":");
+            at.set(Calendar.HOUR_OF_DAY, Integer.parseInt(hm[0]));
+            at.set(Calendar.MINUTE, Integer.parseInt(hm[1]));
+            at.set(Calendar.SECOND, 0);
+            at.set(Calendar.MILLISECOND, 0);
+            if (at.getTimeInMillis() > now + 1000) { am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, at.getTimeInMillis(), pi); return; }
+        }
     }
 
     static void cancel(Context c) {

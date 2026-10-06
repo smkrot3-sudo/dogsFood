@@ -1105,6 +1105,9 @@ html.bigtext body { zoom: 1.15; }
             </div>
             <label class="field" for="payday">💰 המשכורת נכנסת ב־
               <select id="payday"></select></label>
+            <label class="check" for="shabbatOn"><input type="checkbox" id="shabbatOn"> 🕯️ שומר שבת וחג</label>
+            <p class="hint">בלי תזכורת להזנת משמרת ובלי ״ימים שלא הוזנו״ בשבת ובחג. בערב שבת ובערב חג התזכורת מגיעה שעה לפני כניסת השבת או החג.</p>
+            <label class="check" for="weeklyOn" id="weeklyRow" hidden><input type="checkbox" id="weeklyOn"> 📆 התראה על הסיכום השבועי במוצאי שבת</label>
             <div class="remind" id="remindRow" hidden>
               <label class="check" for="remindOn"><input type="checkbox" id="remindOn"> 🔔 תזכורת יומית להזנת משמרת</label>
               <label class="field" for="remindAt">בשעה<input type="text" class="timein" inputmode="numeric" autocomplete="off" maxlength="5" placeholder="22:30" id="remindAt" value="22:30"></label>
@@ -2850,7 +2853,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     const last = now.getHours() * 60 + now.getMinutes() >= h * 60 + m ? today : dateAdd(today, -1);
     let d = store.shiftCheckFrom > dateAdd(today, -31) ? store.shiftCheckFrom : dateAdd(today, -31);
     const out = [];
-    for (; d <= last; d = dateAdd(d, 1)) if (!dayLogged(d)) out.push(d);
+    for (; d <= last; d = dateAdd(d, 1)) if (!dayLogged(d) && !(keepsShabbat() && restName(d))) out.push(d);
     return out.reverse();
   }
   function markNoWork(days) {
@@ -2908,7 +2911,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   function saveRemind() {
     const app = remindApp(); if (!app) return;
     app.setReminder($("remindOn").checked, normTime($("remindAt").value) || "22:30");
-    renderRemind(); renderMissing();
+    renderRemind(); renderMissing(); sendAppPlans();
   }
   $("remindOn").addEventListener("change", saveRemind);
   $("remindAt").addEventListener("change", saveRemind);
@@ -3279,6 +3282,43 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   $("pgKind").addEventListener("click", (e) => { const b = e.target.closest("[data-k]"); if (!b) return; setSetting("payGoalKind", b.dataset.k); renderPaySettings(); });
   $("payday").addEventListener("change", () => setSetting("payday", +$("payday").value || 0));
 
+  // ---- Shabbat and holidays: no shift reminder on them, and on the eve it comes an hour before candle lighting ----
+  function keepsShabbat() { return !!store && settings().shabbat !== false; }
+  function remindPlan() {
+    const T = toMin(normTime(remindTime()) || "22:30"), today = todayStr(), out = [];
+    const hm = (x) => pad(Math.floor(x / 60)) + ":" + pad(x % 60);
+    for (let i = 0; i < 60; i++) {
+      const day = dateAdd(today, i);
+      let t = T;
+      if (keepsShabbat() && isRestMinute(day, T)) {
+        if (!restName(day)) t = sunset(day) - 18 - 60;                  // the eve: an hour before it starts
+        else if (!restName(dateAdd(day, 1))) t = sunset(day) + 40 + 15; // still Shabbat at that hour: right after it ends
+        else t = -1;                                                    // a holiday running into Shabbat
+      }
+      out.push(day + "=" + (t < 0 ? "-" : hm(Math.min(t, 1439))));
+    }
+    return out.join(",");
+  }
+  // The weekly summary note, Saturday night after Shabbat ends
+  function weeklyAt() {
+    const at = (s) => { const [y, m, d] = s.split("-").map(Number); return new Date(y, m - 1, d).getTime() + (sunset(s) + 70) * 60000; };
+    const today = todayStr(), [y, m, d] = today.split("-").map(Number);
+    let sat = dateAdd(today, (6 - new Date(y, m - 1, d).getDay() + 7) % 7);
+    if (at(sat) < Date.now()) sat = dateAdd(sat, 7);
+    return at(sat);
+  }
+  function sendAppPlans() {
+    const app = window.BudgetApp;
+    if (!app || !store) return;
+    try { if (app.setReminderPlan) app.setReminderPlan(remindPlan()); } catch (e) {}
+    try {
+      if (app.setNotes) app.setNotes(JSON.stringify(settings().weekly === false ? [] :
+        [{ id: "weekly", at: weeklyAt(), every: 7, title: "📆 הסיכום השבועי שלך מוכן", text: "כמה הוצאת השבוע לעומת השבוע שעבר? היכנס וראה." }]));
+    } catch (e) {}
+  }
+  $("shabbatOn").addEventListener("change", () => { setSetting("shabbat", $("shabbatOn").checked); sendAppPlans(); renderMissing(); });
+  $("weeklyOn").addEventListener("change", () => { setSetting("weekly", $("weeklyOn").checked); sendAppPlans(); });
+
   // ---- Pay settings ----
   function renderPaySettings() {
     const st = settings();
@@ -3288,6 +3328,9 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     set("deduct", st.deduct === 0 || st.deduct > 0 ? st.deduct : 12);
     set("travel", +st.travel > 0 ? st.travel : "");
     set("pgVal", +st.payGoal > 0 ? st.payGoal : "");
+    $("shabbatOn").checked = st.shabbat !== false;
+    $("weeklyRow").hidden = !(window.BudgetApp && BudgetApp.setNotes);
+    $("weeklyOn").checked = st.weekly !== false;
     document.querySelectorAll("#pgKind button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.k === (st.payGoalKind === "m" ? "m" : "h"))));
     $("payday").value = +st.payday > 0 ? String(st.payday) : "";
     renderTypes();
@@ -3562,7 +3605,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   }
   // A phone notification through the Android app (1.6 and later); elsewhere the snack is enough
   function notifyApp(title, text) {
-    try { if (window.BudgetApp && BudgetApp.notify) BudgetApp.notify(title, text); } catch (e) {}
+    try { if (window.BudgetApp && BudgetApp.notifyNow) BudgetApp.notifyNow(title, text); } catch (e) {}
   }
 
   // ---- Search across all expenses ----
@@ -4419,6 +4462,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     if (!hilanStarted) { hilanStarted = true; hilanSync(false); }
     takeAppOffDays(); renderMissing();
     ensurePrev(month);
+    sendAppPlans();
     if (isNewUser()) openWizard();
     const ns = new URLSearchParams(location.search).get("newShift");
     if (ns) { history.replaceState(null, "", location.pathname + location.hash); window.openShiftFromApp(ns); }
