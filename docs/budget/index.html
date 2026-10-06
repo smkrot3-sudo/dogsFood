@@ -694,6 +694,14 @@ html.bigtext body { zoom: 1.15; }
 .badge small { font-size: 11.5px; color: var(--muted); line-height: 1.3; }
 .badge.locked .be { filter: grayscale(1); opacity: .35; }
 .badge.locked b { color: var(--muted); }
+
+/* Monthly hours / pay goal and next payday */
+.paygoal { display: grid; gap: 6px; background: var(--surface-2); border-radius: 16px; padding: 10px 14px; }
+.paygoal .pgbar { height: 10px; border-radius: 99px; background: var(--line); overflow: hidden; }
+.paygoal .pgbar i { display: block; height: 100%; border-radius: 99px; background: linear-gradient(90deg, #8b5cf6, #db3577); }
+.paygoal span { font-size: 14.5px; font-weight: 600; }
+.goalrow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.goalrow input { max-width: 140px; }
 </style>
 </head>
 <body>
@@ -805,6 +813,7 @@ html.bigtext body { zoom: 1.15; }
           <span class="lbl" id="payLbl">המשכורת עד עכשיו (ברוטו)</span>
           <span class="big2" id="payNet">₪0</span>
           <span class="line" id="payLine"></span>
+          <div class="paygoal" id="payGoal" hidden></div>
           <div class="verdict" id="payVerdict" role="status" hidden></div>
           <p class="hint">הערכה בלבד. בונוסים, תוספות וניכויים אמיתיים יופיעו רק בתלוש.</p>
         </div>
@@ -993,6 +1002,7 @@ html.bigtext body { zoom: 1.15; }
         <span class="lbl">משכורת עד עכשיו (ברוטו)</span>
         <span class="big2" id="shNet">₪0</span>
         <span class="line" id="shLine"></span>
+        <div class="paygoal" id="shGoal" hidden></div>
       </div>
       <div class="actions"><button class="btn" type="button" id="importShifts">📥 ייבוא מהיר: מחילן או כמה ימים ביחד</button></div>
       <div class="shifts" id="shiftList"></div>
@@ -1031,6 +1041,17 @@ html.bigtext body { zoom: 1.15; }
               </select></label>
             <label class="field" for="deduct" hidden>ניכויים משוערים באחוזים (מס, ביטוח לאומי, פנסיה)<input type="number" id="deduct" min="0" max="90" step="0.5" inputmode="decimal"></label>
             <label class="field" for="travel" hidden>החזר נסיעות למשמרת<input type="number" id="travel" min="0" step="1" inputmode="decimal" placeholder="₪0"></label>
+            <div class="field"><span>🎯 יעד לחודש</span>
+              <div class="goalrow">
+                <input type="number" id="pgVal" min="0" step="1" inputmode="decimal" placeholder="למשל 160" aria-label="היעד החודשי">
+                <div class="seg" id="pgKind" role="group" aria-label="סוג היעד">
+                  <button type="button" data-k="h" aria-pressed="true">שעות</button>
+                  <button type="button" data-k="m" aria-pressed="false">₪ ברוטו</button>
+                </div>
+              </div>
+            </div>
+            <label class="field" for="payday">💰 המשכורת נכנסת ב־
+              <select id="payday"></select></label>
             <div class="remind" id="remindRow" hidden>
               <label class="check" for="remindOn"><input type="checkbox" id="remindOn"> 🔔 תזכורת יומית להזנת משמרת</label>
               <label class="field" for="remindAt">בשעה<input type="text" class="timein" inputmode="numeric" autocomplete="off" maxlength="5" placeholder="22:30" id="remindAt" value="22:30"></label>
@@ -2523,6 +2544,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
         : "המשמרות של " + monthName(month) + " לא כיסו את ההוצאות. חסרו " + fmt(-left) + ".");
     }
     renderShifts();
+    renderPayExtras();
   }
 
   // The shifts page: summary, the list with type colors, types and pay settings
@@ -3040,6 +3062,68 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   });
   renderHilan();
 
+
+  // ---- Monthly hours or pay goal, and the next payday ----
+  function calMonthShifts(cm) {
+    const out = new Map();
+    Object.values(shifts).forEach((l) => l.forEach((r) => { if (r.work_date.slice(0, 7) === cm) out.set(r.id, r); }));
+    return [...out.values()];
+  }
+  const loadingCal = new Set();
+  function ensureCalMonth(cm) {
+    const ps = [...new Set([periodOf(cm + "-01"), periodOf(cm + "-" + pad(daysIn(cm)))])].filter((m) => !shifts[m] && !loadingCal.has(m));
+    ps.forEach((m) => { loadingCal.add(m); loadShifts(m).catch(() => { shifts[m] = shifts[m] || []; }).then(() => { loadingCal.delete(m); renderPayExtras(); }); });
+    return !ps.length && ![...loadingCal].length;
+  }
+  function renderPayExtras() {
+    if (!store) return;
+    const st = settings(), pp = periodPay(month);
+    const boxes = [$("payGoal"), $("shGoal")];
+    const parts = [];
+    const goal = +st.payGoal || 0, kind = st.payGoalKind === "m" ? "m" : "h";
+    if (goal > 0 && month >= thisMonth()) {
+      const all = (shifts[month] || []).reduce((a, r) => { const p = r._p || shiftPay(r, st); a.min += p.paidMin; a.gross += p.gross; return a; }, { min: 0, gross: 0 });
+      const have = kind === "h" ? all.min / 60 : all.gross;
+      const frac = Math.min(have / goal, 1);
+      const w = +st.wage || 0;
+      let text;
+      if (have >= goal) text = "🎉 הגעת ליעד: " + (kind === "h" ? hrs(all.min) + " שעות" : fmt(all.gross)) + " מתוך " + (kind === "h" ? goal + " שעות" : fmt(goal)) + ".";
+      else if (kind === "h") text = "🎯 עוד " + (Math.round((goal - have) * 10) / 10).toLocaleString("he-IL") + " שעות כדי להגיע ל־" + goal + " שעות החודש.";
+      else text = "🎯 עוד " + fmt(goal - have) + " כדי להגיע ל־" + fmt(goal) + " ברוטו" + (w > 0 ? ", בערך " + Math.ceil((goal - have) / w) + " שעות." : ".");
+      parts.push({ text, frac });
+    }
+    const pd = +st.payday || 0;
+    if (pd >= 1 && pd <= 31 && month === thisMonth()) {
+      const t = todayStr(), [ty, tm, td] = t.split("-").map(Number);
+      const thisCM = t.slice(0, 7);
+      const payCM = td < Math.min(pd, daysIn(thisCM)) ? thisCM : shiftMonth(thisCM, 1);
+      const workCM = shiftMonth(payCM, -1);
+      const payDate = payCM + "-" + pad(Math.min(pd, daysIn(payCM)));
+      if (ensureCalMonth(workCM)) {
+        const list = calMonthShifts(workCM);
+        const gross = list.reduce((a, r) => a + (r._p || shiftPay(r, st)).gross, 0);
+        const still = workCM === thisCM;
+        if (list.length) parts.push({ text: "💰 ב־" + shortDate(payDate) + " (" + (daysBetween(t, payDate) === 0 ? "היום" : "עוד " + daysBetween(t, payDate) + " ימים") + ") ייכנסו בערך " + fmt(gross) + " ברוטו, על " + (list.length === 1 ? "המשמרת" : list.length + " המשמרות") + " של " + monthName(workCM) + (still ? " עד עכשיו" : "") + "." });
+        else parts.push({ text: "💰 המשכורת הבאה ב־" + shortDate(payDate) + ". אין משמרות רשומות ב" + monthName(workCM) + "." });
+      }
+    }
+    boxes.forEach((box) => {
+      box.innerHTML = ""; box.hidden = !parts.length;
+      parts.forEach((pt) => {
+        const sp = document.createElement("span"); sp.textContent = pt.text; box.append(sp);
+        if (pt.frac != null) { const bar = document.createElement("div"); bar.className = "pgbar"; const i = document.createElement("i"); i.style.width = pt.frac * 100 + "%"; bar.append(i); box.append(bar); }
+      });
+    });
+  }
+  (function () {
+    const sel = $("payday");
+    const o0 = document.createElement("option"); o0.value = ""; o0.textContent = "לא הוגדר"; sel.append(o0);
+    for (let i = 1; i <= 31; i++) { const o = document.createElement("option"); o.value = i; o.textContent = i + " בחודש"; sel.append(o); }
+  })();
+  $("pgVal").addEventListener("input", () => { const v = parseFloat($("pgVal").value); setSetting("payGoal", v > 0 ? v : 0); });
+  $("pgKind").addEventListener("click", (e) => { const b = e.target.closest("[data-k]"); if (!b) return; setSetting("payGoalKind", b.dataset.k); renderPaySettings(); });
+  $("payday").addEventListener("change", () => setSetting("payday", +$("payday").value || 0));
+
   // ---- Pay settings ----
   function renderPaySettings() {
     const st = settings();
@@ -3048,6 +3132,9 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     $("otAfter").value = String(st.otAfter || 8.6);
     set("deduct", st.deduct === 0 || st.deduct > 0 ? st.deduct : 12);
     set("travel", +st.travel > 0 ? st.travel : "");
+    set("pgVal", +st.payGoal > 0 ? st.payGoal : "");
+    document.querySelectorAll("#pgKind button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.k === (st.payGoalKind === "m" ? "m" : "h"))));
+    $("payday").value = +st.payday > 0 ? String(st.payday) : "";
     renderTypes();
   }
   function setSetting(k, v) {
@@ -3722,7 +3809,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     setH: "מתי החודש שלך מתחיל, איך ההודעות נשמעות, גודל הטקסט וייצוא לאקסל.",
     shH: "כל המשמרות של החודש והשכר עליהן. לחיצה על משמרת פותחת אותה לעריכה, ו־× מוחק.",
     typesH: "משמרת מיוחדת, כמו מוצ״ש, יכולה לקבל אחוז קבוע לכל שעה. אם החוק נותן יותר, מקבלים את הגבוה.",
-    paySetH: "השכר לשעה, מתי מתחילות שעות נוספות, והתזכורת היומית להזין משמרת.",
+    paySetH: "השכר לשעה, מתי מתחילות שעות נוספות, יעד שעות או שכר לחודש, היום שבו המשכורת נכנסת, והתזכורת היומית להזין משמרת.",
     missH: "ימים שעברו בלי משמרת רשומה. עבדת? הכנס את השעות. לא עבדת? סמן ״לא עבדתי״.",
     calH: "מה נכנס החודש (משמרות והכנסות) ומה יצא (הוצאות שרשמת). לחיצה על יום בלוח מציגה מה היה בו."
   };
