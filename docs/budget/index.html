@@ -640,6 +640,7 @@ html.bigtext body { zoom: 1.15; }
 .sheetquick:empty { display: none; }
 .sheetquick .qbtn { flex: none; padding: 6px 12px; font-size: 14px; }
 /* Search */
+.panel .actions + .findbar { margin-top: 10px; }
 .findbar { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px; }
 .findbar input { grid-column: 1 / -1; }
 .findbar input, .findbar select { font: inherit; color: var(--fg); background: var(--bg); border: 1.5px solid var(--line); border-radius: 14px; padding: 9px 12px; width: 100%; min-width: 0; }
@@ -965,6 +966,19 @@ body.layedit #fab, body.onsettings #fab { display: none; }
 
       <section data-block="statement" class="panel" aria-labelledby="stmH">
         <h2 id="stmH" class="pc-blue" data-e="🏦">כל ההוצאות של החודש</h2>
+        <div class="actions"><button class="btn" type="button" id="addIncome">💰 הכנסה חד־פעמית</button><button class="btn" type="button" id="cardImport">💳 ייבוא מכרטיס אשראי</button></div>
+        <div class="findbar">
+          <input type="search" id="findText" placeholder="🔎 חיפוש: וולט, קפה, נעליים" aria-label="חיפוש הוצאות" autocomplete="off">
+          <select id="findRange" aria-label="תקופה">
+            <option value="month">החודש</option>
+            <option value="3">3 חודשים</option>
+            <option value="year" selected>השנה האחרונה</option>
+            <option value="all">הכול</option>
+          </select>
+          <select id="findCat" aria-label="קטגוריה"></select>
+        </div>
+        <div class="verdict good" id="findSum" hidden></div>
+        <div class="log" id="findList"></div>
         <div class="stmsum" id="stmSum"></div>
         <div class="stm" id="stmList"></div>
       </section>
@@ -1013,29 +1027,6 @@ body.layedit #fab, body.onsettings #fab { display: none; }
           <input type="number" id="goalTarget" min="1" step="50" inputmode="decimal" placeholder="₪ כמה" aria-label="סכום היעד">
           <button class="btn primary" type="submit">+ יעד</button>
         </form>
-      </section>
-
-      <section data-block="log" class="panel" aria-labelledby="logH">
-        <h2 id="logH" class="pc-orange" data-e="🧾">הוצאות והכנסות של החודש</h2>
-        <p class="hint">לחצו על שורה כדי לתקן אותה. קיבלת כסף מתנה או החזר מחבר? רשמו אותו כהכנסה.</p>
-        <div class="actions"><button class="btn" type="button" id="addIncome">💰 הכנסה חד־פעמית</button><button class="btn" type="button" id="cardImport">💳 ייבוא מכרטיס אשראי</button></div>
-        <div class="log" id="txList"></div>
-      </section>
-
-      <section data-block="find" class="panel" aria-labelledby="findH">
-        <h2 id="findH" class="pc-blue" data-e="🔎">חיפוש הוצאות</h2>
-        <div class="findbar">
-          <input type="search" id="findText" placeholder="למשל: וולט, קפה, נעליים" aria-label="מה לחפש" autocomplete="off">
-          <select id="findRange" aria-label="תקופה">
-            <option value="month">החודש</option>
-            <option value="3">3 חודשים</option>
-            <option value="year" selected>השנה האחרונה</option>
-            <option value="all">הכול</option>
-          </select>
-          <select id="findCat" aria-label="קטגוריה"></select>
-        </div>
-        <div class="verdict good" id="findSum" hidden></div>
-        <div class="log" id="findList"></div>
       </section>
 
       <section data-block="rec" class="panel" aria-labelledby="recH">
@@ -2343,79 +2334,35 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     return (Math.round(h * 10) / 10).toLocaleString("he-IL") + " שעות עבודה";
   }
 
-  function renderTx() {
-    if (!store) return;
-    renderStatement();
-    const names = catNames();
-    const box = $("txList"); box.innerHTML = "";
-    const list = monthTx().concat(monthInc().map((r) => ({ ...r, spent_on: r.received_on, _inc: r })))
-      .sort((a, b) => b.spent_on.localeCompare(a.spent_on) || String(b.created_at).localeCompare(String(a.created_at)));
-    if (!list.length) {
-      const e = document.createElement("p"); e.className = "empty";
-      e.textContent = "עוד אין הוצאות רשומות ב" + monthName(month) + ". לחצו על ״+ הוצאה״ ורשמו כל קנייה ברגע שהיא קורית.";
-      box.append(e);
-      return;
-    }
-    const groups = [];
-    list.forEach((r) => {
-      const g = groups[groups.length - 1];
-      if (g && g.day === r.spent_on) g.rows.push(r); else groups.push({ day: r.spent_on, rows: [r] });
-    });
-    groups.forEach((g) => {
-      const day = document.createElement("div"); day.className = "day";
-      const dh = document.createElement("div"); dh.className = "dh";
-      const a = document.createElement("span"); a.textContent = dayLabel(g.day);
-      const b = document.createElement("span"); b.textContent = fmt(g.rows.reduce((s, r) => s + (r._inc ? 0 : r.amount), 0));
-      dh.append(a, b); day.append(dh);
-      g.rows.forEach((r) => {
-        if (r._inc) { day.append(incomeRow(r._inc)); return; }
-        const row = document.createElement("div"); row.className = "tx" + (r.pending ? " pending" : "");
-        const what = document.createElement("button"); what.type = "button"; what.className = "what";
-        what.dataset.e = names[r.category] ? emojiOf(r.category, names[r.category]) : "💸";
-        const t = document.createElement("b"); t.textContent = r.note || names[r.category] || "הוצאה";
-        const hrs = hoursText(r.amount);
-        const c = document.createElement("span");
-        c.textContent = (names[r.category] || "קטגוריה שנמחקה") + (hrs ? " · " + hrs : "") + (r.pending ? " · ממתין לחיבור" : "");
-        what.append(t, c);
-        what.setAttribute("aria-label", "עריכת " + t.textContent + " " + fmt(r.amount));
-        what.addEventListener("click", () => openSheet(null, r));
-        const amt = document.createElement("span"); amt.className = "amt"; amt.textContent = fmt(r.amount);
-        const del = document.createElement("button"); del.type = "button"; del.className = "del"; del.textContent = "×";
-        del.setAttribute("aria-label", "מחיקת " + t.textContent + " " + fmt(r.amount));
-        del.addEventListener("click", () => {
-          const copy = { id: r.id, spent_on: r.spent_on, amount: r.amount, category: r.category, note: r.note, created_at: r.created_at };
-          delTx(r.id); renderTracking();
-          snack("נמחקה הוצאה של " + fmt(r.amount), () => { addTx({ ...copy, id: uid() }); renderTracking(); });
-        });
-        row.append(what, amt, del);
-        day.append(row);
-      });
-      box.append(day);
-    });
-  }
-
+  function renderTx() { if (store) renderStatement(); }
 
   // ---- "All the month's expenses": a bank-statement style list with quick inline editing ----
   let stmOpen = null;
   function renderStatement() {
     if (!store) return;
     const names = catNames(), box = $("stmList"); box.innerHTML = "";
-    const list = monthTx().slice().sort((a, b) => b.spent_on.localeCompare(a.spent_on) || String(b.created_at).localeCompare(String(a.created_at)));
-    const total = list.reduce((s, r) => s + r.amount, 0);
+    const searching = !!($("findText").value.trim() || $("findCat").value);
+    box.hidden = $("stmSum").hidden = searching;
+    const exp = monthTx(), inc = monthInc();
+    const list = exp.concat(inc.map((r) => ({ ...r, spent_on: r.received_on, _inc: r })))
+      .sort((a, b) => b.spent_on.localeCompare(a.spent_on) || String(b.created_at).localeCompare(String(a.created_at)));
+    const total = exp.reduce((s, r) => s + r.amount, 0), incTotal = inc.reduce((s, r) => s + r.amount, 0);
     $("stmSum").innerHTML = "";
-    const l = document.createElement("span"); l.textContent = list.length + " הוצאות ב" + monthName(month);
+    const l = document.createElement("span"); l.textContent = exp.length + " הוצאות ב" + monthName(month);
     const t = document.createElement("span"); t.append("סה״כ "); const tb = document.createElement("b"); tb.textContent = fmt(total); t.append(tb);
+    if (incTotal) { const ib = document.createElement("b"); ib.className = "pos"; ib.textContent = "+" + fmt(incTotal); t.append(" · הכנסות ", ib); }
     $("stmSum").append(l, t);
-    if (!list.length) { const e = document.createElement("p"); e.className = "empty"; e.textContent = "עוד אין הוצאות רשומות החודש."; box.append(e); return; }
+    if (!list.length) { const e = document.createElement("p"); e.className = "empty"; e.textContent = "עוד אין הוצאות רשומות ב" + monthName(month) + ". לחצו על ״+ הוצאה״ ורשמו כל קנייה ברגע שהיא קורית."; box.append(e); return; }
     let day = null;
     list.forEach((r) => {
       if (r.spent_on !== day) {
         day = r.spent_on;
         const h = document.createElement("div"); h.className = "sday";
         const a = document.createElement("span"); a.textContent = dayLabel(day);
-        const b = document.createElement("span"); b.textContent = fmt(list.filter((x) => x.spent_on === day).reduce((s, x) => s + x.amount, 0));
+        const b = document.createElement("span"); b.textContent = fmt(list.filter((x) => x.spent_on === day && !x._inc).reduce((s, x) => s + x.amount, 0));
         h.append(a, b); box.append(h);
       }
+      if (r._inc) { box.append(stmIncome(r._inc)); return; }
       const row = document.createElement("button"); row.type = "button"; row.className = "srow" + (r.pending ? " pending" : "");
       const ic = document.createElement("span"); ic.className = "ic"; ic.textContent = names[r.category] ? emojiOf(r.category, names[r.category]) : "💸";
       const tt = document.createElement("span"); tt.className = "tt";
@@ -2430,6 +2377,19 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       box.append(row);
       if (stmOpen === r.id) box.append(stmEditor(r));
     });
+  }
+  function stmIncome(r) {
+    const row = document.createElement("button"); row.type = "button"; row.className = "srow" + (r.pending ? " pending" : "");
+    const ic = document.createElement("span"); ic.className = "ic"; ic.textContent = "💰";
+    const tt = document.createElement("span"); tt.className = "tt";
+    const b = document.createElement("b"); b.textContent = r.note || r.kind || "הכנסה";
+    const sm = document.createElement("small"); sm.textContent = "הכנסה · " + (r.kind || "אחר") + (r.pending ? " · ממתין לחיבור" : "");
+    tt.append(b, sm);
+    const am = document.createElement("span"); am.className = "am pos"; am.textContent = "\u2066+" + fmt(r.amount) + "\u2069";
+    row.append(ic, tt, am);
+    row.setAttribute("aria-label", "הכנסה " + b.textContent + ", " + fmt(r.amount) + ". לחצו לעריכה");
+    row.addEventListener("click", () => openIncome(r));
+    return row;
   }
   function stmEditor(r) {
     const f = document.createElement("form"); f.className = "sedit"; f.noValidate = true;
@@ -2468,26 +2428,6 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     });
     setTimeout(() => amt.focus(), 30);
     return f;
-  }
-
-  function incomeRow(r) {
-    const row = document.createElement("div"); row.className = "tx income" + (r.pending ? " pending" : "");
-    const what = document.createElement("button"); what.type = "button"; what.className = "what"; what.dataset.e = "💰";
-    const t = document.createElement("b"); t.textContent = r.note || r.kind || "הכנסה";
-    const c = document.createElement("span"); c.textContent = "הכנסה · " + (r.kind || "אחר") + (r.pending ? " · ממתין לחיבור" : "");
-    what.append(t, c);
-    what.setAttribute("aria-label", "עריכת ההכנסה " + t.textContent + " " + fmt(r.amount));
-    what.addEventListener("click", () => openIncome(r));
-    const amt = document.createElement("span"); amt.className = "amt pos"; amt.textContent = "+" + fmt(r.amount);
-    const del = document.createElement("button"); del.type = "button"; del.className = "del"; del.textContent = "×";
-    del.setAttribute("aria-label", "מחיקת ההכנסה " + t.textContent);
-    del.addEventListener("click", () => {
-      const copy = clean(r);
-      INC.del(r.id); renderTracking();
-      snack("נמחקה הכנסה של " + fmt(r.amount), () => { INC.save({ ...copy, id: uid() }); renderTracking(); });
-    });
-    row.append(what, amt, del);
-    return row;
   }
 
   // ---- Snackbar with undo ----
@@ -2748,7 +2688,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     if (sub) cat.value = sub.id;
     const now = document.createElement("input"); now.type = "checkbox";
     field("שם המנוי", name, "full"); field("סכום לחודש", amt); field("יום החיוב בחודש", day); field("קטגוריה", cat, "full");
-    const nl = field("", now, "full chk"); nl.append("החיוב של החודש כבר ירד ועוד לא רשמתי אותו");
+    field("", now, "full chk").parentNode.append("החיוב של החודש כבר ירד ועוד לא רשמתי אותו");
     const acts = document.createElement("div"); acts.className = "acts";
     const ok = document.createElement("button"); ok.type = "submit"; ok.className = "btn primary"; ok.textContent = "＋ הוספת מנוי";
     acts.append(ok);
@@ -4065,6 +4005,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   async function runFind() {
     const q = $("findText").value.trim(), cat = $("findCat").value;
     const box = $("findList"), sum = $("findSum");
+    renderStatement();
     if (!q && !cat) { box.innerHTML = ""; sum.hidden = true; return; }
     const seq = ++findSeq, from = findFrom(), names = catNames();
     let rows;
@@ -4825,7 +4766,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     todayLbl: "זה הסכום שאפשר להוציא היום בלי לפגוע בשאר החודש: הכסף החופשי שנשאר, חלקי הימים שנשארו. הוצאת פחות היום? מחר יהיה לך יותר. הפס מראה כמה מהכסף החופשי כבר יצא, והקו מראה כמה מהחודש עבר.",
     payH: "כמה הרווחת מהמשמרות החודש, לפי השכר לשעה ולפי החוק (שעות נוספות, לילה, שבת וחג). זו הערכה של הברוטו, לפני מס וניכויים.",
     catsH: "כל קטגוריה מראה כמה הוצאת עליה מתוך התקציב שקבעת לה. ✓ בסדר, ⚠️ מהר מדי לעומת החודש, ⛔ עברת את התקציב. לחיצה על קטגוריה פותחת הוצאה חדשה בה.",
-    logH: "כל ההוצאות וההכנסות החד־פעמיות של החודש, לפי ימים. לחיצה על שורה פותחת אותה לתיקון, ו־× מוחק.",
+    stmH: "כל ההוצאות וההכנסות החד־פעמיות של החודש, לפי ימים, כמו בדף חשבון. לחיצה על הוצאה פותחת תיקון מהיר של סכום, תאריך, קטגוריה ופירוט. בשורת החיפוש אפשר לחפש לפי מילה או קטגוריה, גם בחודשים קודמים.",
     wishH: "בא לך לקנות משהו לא מתוכנן? במקום לקנות מיד, שמים אותו כאן ומחכים 48 שעות. ברוב המקרים החשק עובר והכסף נשאר אצלך.",
     histH: "כל עמודה היא כמה הוצאת מהכסף החופשי בחודש אחד, והקו הוא מה שתכננת. עמודה אדומה עם ⚠️ היא חודש עם חריגה.",
     incH: "כמה כסף נכנס לך בחודש אחרי מס (נטו): משכורת, קצבה, עזרה מההורים. מכאן מתחיל כל החישוב.",
@@ -4838,7 +4779,6 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     goalsH: "חוסכים בשביל משהו? פותחים יעד עם סכום, ובכל פעם שמעבירים כסף לחיסכון לוחצים ״הפקדתי״. רואים כמה חסר ובעוד כמה חודשים תגיע לפי החיסכון החודשי שתכננת.",
     cmpH: "משווים את החודש עד היום לאותם ימים בחודש שעבר, ואת השבוע הזה לשבוע שעבר. ▲ אדום: הוצאת יותר. ▼ ירוק: הוצאת פחות.",
     badgeH: "הישגים קטנים שנפתחים כשמתמידים: רצף ימים בתוך התקציב, ויתור על קנייה, הגעה ליעד. האפורים עוד לא נפתחו, ומתחתם כתוב איך פותחים אותם.",
-    findH: "מחפשים לפי מילה מהפירוט או שם קטגוריה, ובוחרים תקופה. מקבלים כמה הוצאות היו וכמה כסף יצא עליהן ביחד.",
     setH: "מתי החודש שלך מתחיל, איך ההודעות נשמעות, גודל הטקסט וייצוא לאקסל.",
     shH: "כל המשמרות של החודש והשכר עליהן. לחיצה על משמרת פותחת אותה לעריכה, ו־× מוחק.",
     typesH: "משמרת מיוחדת, כמו מוצ״ש, יכולה לקבל אחוז קבוע לכל שעה. אם החוק נותן יותר, מקבלים את הגבוה.",
@@ -4922,7 +4862,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 
   // ---- Home layout: each user hides and orders the home page's parts; saved in the account ----
   const BLOCK_NAMES = { today: "😎 מותר לך היום", summary: "📋 סיכום החודש", quick: "⚡ רישום בלחיצה", pay: "💼 המשכורת שלי",
-    statement: "🏦 כל ההוצאות של החודש", cats: "🛍️ לפי קטגוריות", goals: "🎯 יעדי חיסכון", log: "🧾 הוצאות והכנסות של החודש", find: "🔎 חיפוש הוצאות",
+    statement: "🏦 כל ההוצאות של החודש", cats: "🛍️ לפי קטגוריות", goals: "🎯 יעדי חיסכון", 
     rec: "🔁 מנויים וחיובים קבועים", wish: "🤔 אולי אקנה", cmp: "📈 לעומת קודם", hist: "📊 לאורך החודשים", badges: "🏆 הישגים", plan: "📋 התוכנית של החודש" };
   const homeBlocks = () => [...$("homeList").querySelectorAll(":scope > [data-block]")];
   const DEFAULT_ORDER = homeBlocks().map((b) => b.dataset.block);
