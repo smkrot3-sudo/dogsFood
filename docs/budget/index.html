@@ -743,6 +743,30 @@ html.bigtext body { zoom: 1.15; }
 .cardrow select { grid-column: 2 / -1; font-size: 14px; padding: 6px 10px; }
 .cardrow.dup { opacity: .55; }
 .btn.voice { justify-self: start; }
+
+/* Categories: own emoji and one level of subcategories */
+.row.catrow { grid-template-columns: 44px minmax(0, 1fr) 110px 36px; }
+.row.catrow.sub { padding-inline-start: 26px; position: relative; }
+.row.catrow.sub::before { content: "↳"; position: absolute; inset-inline-start: 6px; color: var(--muted); font-weight: 700; }
+.emobtn { width: 44px; height: 44px; border-radius: 12px; border: 1.5px dashed var(--line); background: var(--surface-2); font-size: 22px; line-height: 1; padding: 0; display: grid; place-items: center; cursor: pointer; }
+.emobtn.set { border-style: solid; border-color: var(--brand2); }
+.subadd { justify-self: start; margin-inline-start: 52px; background: none; border: 0; color: var(--brand2); font: inherit; font-size: 13.5px; font-weight: 600; padding: 2px 0 6px; cursor: pointer; }
+.cat.sub { padding-block: 8px; padding-inline-start: 26px; position: relative; }
+.cat.sub::before { content: "↳"; position: absolute; inset-inline-start: 6px; top: 8px; color: var(--muted); font-weight: 700; }
+.cat.sub .name { font-weight: 600; font-size: 14.5px; }
+.cat.sub .state.plain { color: var(--muted); }
+.emotabs { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
+.emotabs button { flex: none; border: 1px solid var(--line); background: var(--surface-2); border-radius: 999px; padding: 6px 12px; font: inherit; font-size: 14px; font-weight: 600; color: var(--fg); cursor: pointer; white-space: nowrap; }
+.emotabs button[aria-pressed="true"] { background: var(--brand2); border-color: var(--brand2); color: #fff; }
+.emogrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(44px, 1fr)); gap: 4px; max-height: 46vh; overflow-y: auto; }
+.emogrid button { font-size: 26px; line-height: 1; aspect-ratio: 1; max-width: 100%; border: 0; border-radius: 10px; background: none; cursor: pointer; padding: 0; }
+.emogrid button:hover, .emogrid button:focus-visible { background: var(--surface-2); }
+.emogrid button[aria-pressed="true"] { background: color-mix(in srgb, var(--brand2) 18%, var(--surface)); }
+.emoown { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: end; }
+
+/* Version line at the very bottom */
+.verfoot { border-top: 1px solid var(--line); margin-top: 8px; padding-top: 12px; color: var(--muted); font-size: 11.5px; line-height: 1.6; text-align: center; display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 4px 10px; }
+.verfoot .linkbtn, .verfoot a { font-size: 11.5px; color: var(--brand2); font-weight: 700; padding: 0; }
 </style>
 </head>
 <body>
@@ -1017,7 +1041,7 @@ html.bigtext body { zoom: 1.15; }
 
         <section class="panel" aria-labelledby="catH">
           <h2 id="catH" class="pc-pink" data-e="🎯">תקציב לכל קטגוריה <span class="sum" id="catSum">₪0</span></h2>
-          <p class="hint">מחלקים את הכסף החופשי לקטגוריות שלכם. כל הוצאה שנרשמת יורדת מהקטגוריה שלה.</p>
+          <p class="hint">מחלקים את הכסף החופשי לקטגוריות שלכם. כל הוצאה שנרשמת יורדת מהקטגוריה שלה. אפשר להוסיף כמה קטגוריות שרוצים, לבחור לכל אחת אימוג׳י, ולפתוח תת־קטגוריה בתוך קטגוריה. הוצאה בתת־קטגוריה נספרת גם בקטגוריה שמעליה, ותקציב לתת־קטגוריה הוא לא חובה.</p>
           <div class="rows" id="catRows"></div>
           <div class="alloc" id="alloc"></div>
           <div class="actions"><button class="btn" type="button" id="addCat">+ הוספת קטגוריה</button></div>
@@ -1142,6 +1166,7 @@ html.bigtext body { zoom: 1.15; }
       <div class="verdict" id="calDayTotal" role="status" hidden></div>
     </section>
   </div>
+  <footer class="verfoot" id="verFoot" hidden></footer>
 </div>
 
 <button class="fab" type="button" id="fab" hidden>💸 הוצאה</button>
@@ -1237,6 +1262,23 @@ html.bigtext body { zoom: 1.15; }
     <div class="foot">
       <button class="btn primary" type="submit" id="cardSave" disabled>הוספה</button>
       <button class="btn" type="button" id="cardCancel">ביטול</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog class="sheet" id="emoSheet" aria-labelledby="emoH">
+  <form id="emoForm" method="dialog" novalidate>
+    <h2 id="emoH" data-e="🎨">בחירת אימוג׳י</h2>
+    <p class="hint" id="emoFor"></p>
+    <div class="emotabs" id="emoTabs" role="group" aria-label="קבוצות אימוג׳י"></div>
+    <div class="emogrid" id="emoGrid"></div>
+    <div class="emoown">
+      <label for="emoOwn">או הקלידו אימוג׳י מהמקלדת<input type="text" id="emoOwn" maxlength="16" autocomplete="off" placeholder="🙂"></label>
+      <button class="btn" type="button" id="emoOwnOk">בחירה</button>
+    </div>
+    <div class="foot">
+      <button class="btn" type="button" id="emoAuto">✨ אוטומטי לפי השם</button>
+      <button class="btn" type="button" id="emoCancel">סגירה</button>
     </div>
   </form>
 </dialog>
@@ -1356,6 +1398,30 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     [/עישון|סיגרי|טבק/, "🚬"], [/ילד|תינוק|גן/, "🧸"], [/שונות|אחר/, "🎲"],
   ];
   const catEmoji = (name) => { const hit = CAT_EMOJI.find(([re]) => re.test(name || "")); return hit ? hit[1] : "💸"; };
+  // A category's own emoji wins over the automatic one
+  const catIcon = (c) => (c && c.emoji) || catEmoji(c && c.name);
+  function emojiOf(id, name) {
+    let c = store && data().cats.find((x) => x.id === id);
+    if (!c && store) for (const m of Object.keys(store.months).sort().reverse()) { c = (store.months[m].cats || []).find((x) => x.id === id); if (c) break; }
+    return c ? catIcon(c) : catEmoji(name);
+  }
+  // Categories in display order: each main category followed by its subcategories (one level)
+  const isSub = (c, cats) => !!c.parent && cats.some((p) => p.id === c.parent && !p.parent);
+  function catTree(cats) {
+    const out = [];
+    cats.forEach((c, i) => {
+      if (isSub(c, cats)) return;
+      out.push({ c, i, depth: 0 });
+      cats.forEach((k, j) => { if (k.parent === c.id && isSub(k, cats)) out.push({ c: k, i: j, depth: 1 }); });
+    });
+    return out;
+  }
+  // Spending per category, with each subcategory's spending added to its main category
+  function rollup(cats, by) {
+    const r = { ...by };
+    cats.forEach((c) => { if (isSub(c, cats)) r[c.parent] = (r[c.parent] || 0) + (by[c.id] || 0); });
+    return r;
+  }
   const DEFAULT_CATS = ["אוכל בחוץ ומשלוחים", "קניות אונליין", "בילויים ויציאות", "קפה ונשנושים", "שונות"];
   const blankCats = () => DEFAULT_CATS.map((name) => ({ id: catId(), name, budget: 0 }));
 
@@ -1405,6 +1471,20 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   // ---- Browser storage (never trusted to exist) ----
 
   // ---- Android app updates: the page tells an outdated app that a newer APK exists and installs it ----
+  function startAppUpdate(v) {
+    const app = window.BudgetApp; if (!app) return;
+    const apk = new URL("budget.apk?v=" + v.versionCode, location.href).href;
+    $("appUpdate").hidden = false;
+    // Inside the app: the app downloads the APK itself; the browser download stays as a fallback link
+    if (app.installUpdate) {
+      app.installUpdate(apk);
+      $("appUpdateText").textContent = "מוריד את העדכון. כשההורדה תסתיים יופיע מסך ההתקנה. לא הופיע? לחץ על ההתראה ״ההורדה הושלמה״.";
+      $("appUpdateBtn").textContent = "הורדה דרך הדפדפן";
+      $("appUpdateBtn").onclick = () => (app.openExternal ? app.openExternal(apk) : (location.href = apk));
+    }
+    else if (app.openExternal) app.openExternal(apk);
+    else location.href = apk;
+  }
   (function checkAppUpdate() {
     const app = window.BudgetApp;
     if (!app) return;
@@ -1414,21 +1494,37 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     fetch("app-version.json", { cache: "no-store" }).then((r) => r.json()).then((v) => {
       if (!(v.versionCode > mine)) return;
       try { if (sessionStorage.getItem("appUpdateLater") === String(v.versionCode)) return; } catch (e) {}
-      const apk = new URL("budget.apk?v=" + v.versionCode, location.href).href;
       $("appUpdateText").textContent = "יש גרסה חדשה לאפליקציה (" + v.versionName + ")" + (v.notes ? ": " + v.notes : ".");
       $("appUpdate").hidden = false;
-      $("appUpdateBtn").onclick = () => {
-        // Inside the app: the app downloads the APK itself; the browser download stays as a fallback link
-        if (app.installUpdate) {
-          app.installUpdate(apk);
-          $("appUpdateText").textContent = "מוריד את העדכון. כשההורדה תסתיים יופיע מסך ההתקנה. לא הופיע? לחץ על ההתראה ״ההורדה הושלמה״.";
-          $("appUpdateBtn").textContent = "הורדה דרך הדפדפן";
-          $("appUpdateBtn").onclick = () => (app.openExternal ? app.openExternal(apk) : (location.href = apk));
-        }
-        else if (app.openExternal) app.openExternal(apk);
-        else location.href = apk;
-      };
+      $("appUpdateBtn").onclick = () => startAppUpdate(v);
       $("appUpdateLater").onclick = () => { $("appUpdate").hidden = true; try { sessionStorage.setItem("appUpdateLater", String(v.versionCode)); } catch (e) {} };
+    }).catch(() => {});
+  })();
+
+  // ---- Version line at the bottom: this app's version, the newest one and when it came out (Israel time) ----
+  (function versionLine() {
+    const app = window.BudgetApp;
+    let mineCode = 0, mineName = "";
+    if (app) {
+      try { mineName = app.version ? app.version() : ""; } catch (e) {}
+      try { mineCode = app.versionCode ? +app.versionCode() : ({ "1.0": 1, "1.1": 2, "1.2": 3 })[mineName || "1.0"] || 1; } catch (e) { mineCode = 1; }
+    }
+    fetch("app-version.json", { cache: "no-store" }).then((r) => r.json()).then((v) => {
+      const box = $("verFoot"); box.innerHTML = "";
+      let when = "";
+      try {
+        if (v.released) when = new Intl.DateTimeFormat("he-IL", { timeZone: "Asia/Jerusalem", day: "numeric", month: "numeric", year: "numeric", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(v.released));
+      } catch (e) {}
+      const span = (t) => { const x = document.createElement("span"); x.textContent = t; box.append(x); };
+      if (app) span("הגרסה שלך: " + (mineName || "ישנה"));
+      span("הגרסה העדכנית: " + v.versionName + (when ? ", שוחררה ב־" + when + " (שעון ישראל)" : ""));
+      if (app && v.versionCode > mineCode) {
+        const b = document.createElement("button"); b.type = "button"; b.className = "linkbtn"; b.textContent = "⬆️ עדכון";
+        b.addEventListener("click", () => startAppUpdate(v));
+        box.append(b);
+      } else if (app) span("✓ מעודכן");
+      else { const a = document.createElement("a"); a.href = "budget.apk?v=" + v.versionCode; a.textContent = "הורדת האפליקציה לאנדרואיד"; box.append(a); }
+      box.hidden = false;
     }).catch(() => {});
   })();
 
@@ -1510,6 +1606,8 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   const periodOf = (s) => (+s.slice(8) >= startDay() ? s.slice(0, 7) : shiftMonth(s.slice(0, 7), -1));
   const thisMonth = () => periodOf(todayStr());
   const shortDate = (s) => +s.slice(8) + "." + +s.slice(5, 7);
+  const EMOJI_ALBUM = [["😊","פרצופים","😀 😁 😂 😃 😄 😅 😆 😇 😈 😉 😊 😋 😌 😍 😎 😏 😐 😑 😒 😓 😔 😕 😖 😗 😘 😙 😚 😛 😜 😝 😞 😟 😠 😡 😢 😣 😤 😥 😦 😧 😨 😩 😪 😫 😬 😭 😮 😯 😰 😱 😲 😳 😴 😵 😶 😷 😸 😹 😺 😻 😼 😽 😾 😿 🙀 🙁 🙂 🙃 🙄 🙅 🙆 🙇 🙈 🙉 🙊 🙋 🙌 🙍 🙎 🙏 🤐 🤑 🤒 🤓 🤔 🤕 🤖 🤗 🤘 🤙 🤚 🤛 🤜 🤝 🤞 🤟 🤠 🤡 🤢 🤣 🤤 🤥 🤦 🤧 🤨 🤩 🤪 🤫 🤬 🤭 🤮 🤯 🥰 🥱 🥲 🥳 🥴 🥵 🥶 🥷 🥸 🥹 🥺 🧐 🧑"],["❤️","לבבות וסמלים","💓 💔 💕 💖 💗 💘 💙 💚 💛 💜 💝 💞 💟 🧡 🤍 🤎 🖤 ❤️ ❣️ 💯 💢 💥 💫 💦 💨 💬 💭 💤 ✨ ⭐ 🌟 🌠 ⚡ 🔥 ✅ ❌ ❓ ❗ 🔴 🟠 🟡 🟢 🔵 🟣 🟤 ⚫ ⚪ 🟥 🟦 🟧 🟨 🟩 🟪 🟫 🔶 🔷 🔸 🔹 🔺 🔻 💠 🔘 ♾️ ☮️ ☯️ ✡️ 🔯 🕎 ♻️ 🔆 🔅 📶 💲 💱"],["🐶","חיות","🐀 🐁 🐂 🐃 🐄 🐅 🐆 🐇 🐈 🐉 🐊 🐋 🐌 🐍 🐎 🐏 🐐 🐑 🐒 🐓 🐔 🐕 🐖 🐗 🐘 🐙 🐚 🐛 🐜 🐝 🐞 🐟 🐠 🐡 🐢 🐣 🐤 🐥 🐦 🐧 🐨 🐩 🐪 🐫 🐬 🐭 🐮 🐯 🐰 🐱 🐲 🐳 🐴 🐵 🐶 🐷 🐸 🐹 🐺 🐻 🐼 🐽 🐾 🦀 🦁 🦂 🦃 🦄 🦅 🦆 🦇 🦈 🦉 🦊 🦋 🦌 🦍 🦎 🦏 🦐 🦑 🦒 🦓 🦔 🦕 🦖 🦗 🦘 🦙 🦚 🦛 🦜 🦝 🦞 🦟 🦠 🦡 🦢 🦣 🦤 🦥 🦦 🦧 🦨 🦩 🦪 🦫 🦬 🦭 🦮 🕷️ 🕸️ 🕊️"],["🌸","טבע ומזג אוויר","🌰 🌱 🌲 🌳 🌴 🌵 🌶️ 🌷 🌸 🌹 🌺 🌻 🌼 🌽 🌾 🌿 🍀 🍁 🍂 🍃 🍄 💐 🏵️ 🪴 🪵 🌀 🌁 🌂 🌃 🌄 🌅 🌆 🌇 🌈 🌉 🌊 🌋 🌌 🌍 🌎 🌏 🌐 🌑 🌒 🌓 🌔 🌕 🌖 🌗 🌘 🌙 🌚 🌛 🌜 🌝 🌞 ☀️ ⛅ ☁️ 🌤️ 🌥️ 🌦️ 🌧️ ⛈️ 🌩️ 🌪️ 🌫️ 🌬️ ❄️ ☃️ ⛄ ☔ 🏔️ ⛰️ 🏕️ 🏖️ 🏝️ 🏜️"],["🍔","אוכל ושתייה","🍅 🍆 🍇 🍈 🍉 🍊 🍋 🍌 🍍 🍎 🍏 🍐 🍑 🍒 🍓 🍔 🍕 🍖 🍗 🍘 🍙 🍚 🍛 🍜 🍝 🍞 🍟 🍠 🍡 🍢 🍣 🍤 🍥 🍦 🍧 🍨 🍩 🍪 🍫 🍬 🍭 🍮 🍯 🍰 🍱 🍲 🍳 🍴 🍵 🍶 🍷 🍸 🍹 🍺 🍻 🍼 🍽️ 🍾 🍿 🥐 🥑 🥒 🥓 🥔 🥕 🥖 🥗 🥘 🥙 🥚 🥛 🥜 🥝 🥞 🥟 🥠 🥡 🥢 🥣 🥤 🥥 🥦 🥧 🥨 🥩 🥪 🥫 🥬 🥭 🥮 🥯 🧀 🧁 🧂 🧃 🧄 🧅 🧆 🧇 🧈 🧉 🧊 🧋 🫐 🫑 🫒 🫓 🫔 🫕 🫖 ☕ 🌶️"],["🎉","בילוי וחגיגות","🎀 🎁 🎂 🎃 🎄 🎅 🎆 🎇 🎈 🎉 🎊 🎋 🎌 🎍 🎎 🎏 🎐 🎑 🎒 🎓 🎠 🎡 🎢 🎣 🎤 🎥 🎦 🎧 🎨 🎩 🎪 🎫 🎬 🎭 🎮 🎯 🎰 🎱 🎲 🎳 🎴 🎵 🎶 🎷 🎸 🎹 🎺 🎻 🎼 🎽 🎾 🎿 🏀 🏁 🏂 🏃 🏄 🏅 🏆 🏇 🏈 🏉 🏊 🏏 🏐 🏑 🏒 🏓 🏸 🏹 🏺 ⚽ ⚾ 🥊 🥋 🥅 ⛳ ⛸️ 🤿 🛷 🥌 🪀 🪁 🪂 🧩 🧸 🕹️ ♟️ 🧿 🪄 🪅 🪆 🎞️ 🎟️ 🎖️ 🎗️"],["🛍️","קניות ובגדים","👚 👛 👜 👝 👞 👟 👠 👡 👢 👓 👔 👕 👖 👗 👘 👙 🥻 🥼 🥽 🥾 🥿 🩰 🩱 🩲 🩳 🧢 🧣 🧤 🧥 🧦 💍 💄 💅 💎 👑 👒 🎓 ⛑️ 🛍️ 🛒 💳 🧾 💰 💵 💴 💶 💷 💸 🪙 🏷️ 🎁"],["🚗","תחבורה וטיולים","🚀 🚁 🚂 🚃 🚄 🚅 🚆 🚇 🚈 🚉 🚊 🚋 🚌 🚍 🚎 🚏 🚐 🚑 🚒 🚓 🚔 🚕 🚖 🚗 🚘 🚙 🚚 🚛 🚜 🚝 🚞 🚟 🚠 🚡 🚢 🚣 🚤 🚥 🚦 🚧 🚨 🚩 🚪 🚫 🚬 🚭 🚮 🚯 🚰 🚱 🚲 🚳 🚴 🚵 🚶 🚷 🚸 🚹 🚺 🚻 🚼 🚽 🚾 🚿 🛀 🛁 🛂 🛃 🛄 🛅 🛴 🛵 🛶 🛹 🛺 🛻 🛼 🛫 🛬 🛩️ 🛰️ 🛥️ 🛳️ ⛵ ⛴️ ✈️ ⛽ 🏎️ 🏍️ 🧳 🗺️ 🧭 🗽 🗼 🏰 🏯 🏟️ 🎡 🎢 🎠 ⛲ ⛱️ 🏖️ 🏝️ 🌅 🌄 🌆 🌇 🌉 🌃 🌌"],["🏠","בית ומשפחה","🏠 🏡 🏢 🏣 🏤 🏥 🏦 🏧 🏨 🏩 🏪 🏫 🏬 🏭 🏮 🏯 🏰 🛋️ 🛏️ 🛌 🛁 🚿 🚽 🪑 🪒 🪔 🪟 🧹 🧺 🧻 🧼 🧽 🧾 🧴 🧷 🧵 🧶 🔑 🗝️ 🚪 🧱 👶 👦 👧 👨 👩 👴 👵 👪 👫 👬 👭 💏 💑 🤰 🤱 🍼 🧸 🚼 🐕 🐈"],["💡","חפצים ועבודה","💻 💼 💽 💾 💿 📀 📁 📂 📃 📄 📅 📆 📇 📈 📉 📊 📋 📌 📍 📎 📏 📐 📑 📒 📓 📔 📕 📖 📗 📘 📙 📚 📛 📜 📝 📞 📟 📠 📡 📢 📣 📤 📥 📦 📧 📨 📩 📪 📫 📬 📭 📮 📯 📰 📱 📲 📳 📴 📵 📶 📷 📸 📹 📺 📻 📼 💡 🔦 🕯️ 🔋 🔌 🔧 🔨 🔩 🔪 🔫 🔬 🔭 🔮 ⚙️ 🛠️ ⚒️ ⛏️ 🪓 🧰 🧲 🧪 🧫 🧬 💉 🩸 🩹 🩺 💊 🧯 🚬 ⚰️ 🏺 🖼️ 🧭 ⌚ ⏰ ⏱️ ⏲️ ⌛ ⏳ 🕰️ 🗓️ ✂️ 🖊️ 🖋️ ✏️ ✒️ 🖌️ 🖍️ 🗂️ 🖇️ 💌 🔔 🔕 🎵 🎶 🎙️ 🎚️ 🎛️ 🎤 🎧 🎷 🎸 🎹 🎺 🎻 🪕 🥁"],["🏋️","ספורט ובריאות","🏋️ 🤺 🤼 🤽 🤾 🤸 🤹 🏃 🚶 🚴 🚵 🏊 🏄 🚣 🧗 🧘 🧖 🏇 ⛷️ 🏂 🎿 🎽 🥏 🏅 🏆 🥇 🥈 🥉 🎖️ 🦷 🦴 🧠 🫀 🫁 👁️ 👀 👃 👂 👄 👅 💪 🦵 🦶 👍 👎 👌 ✌️ 🤞 🤟 🤘 🤙 👋 🤚 🖐️ ✋ 🖖 👏 🙌 👐 🤲 🤝 🙏 ✍️ 💅 🤳 👉 👈 👆 👇 ☝️ 🖕"]];
+
   // ---- Pay rules (Israeli Hours of Work and Rest Law) ----
   // Regular day: settings.otAfter hours (8.6 in a 5-day week, 8 in a 6-day week); a shift with 2+ hours
   // between 22:00 and 06:00 is a night shift with a 7-hour day. The first 2 overtime hours pay 125%, the rest 150%.
@@ -1619,7 +1717,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 
   // ---- Plan data ----
   const clone = (a) => a.map((x) => ({ name: x.name, amount: x.amount }));
-  const cloneCats = (a) => a.map((c) => ({ id: c.id, name: c.name, budget: c.budget }));
+  const cloneCats = (a) => a.map((c) => { const o = { id: c.id, name: c.name, budget: c.budget }; if (c.emoji) o.emoji = c.emoji; if (c.parent) o.parent = c.parent; return o; });
 
   // A month that doesn't exist yet is shown as a draft built from the previous month,
   // and only saved once something in it changes.
@@ -1654,7 +1752,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     const pos = Math.max(remain, 0);
     const save = Math.round(pos * d.pct / 100);
     const spend = pos - save;
-    const catTotal = d.cats.reduce((s, c) => s + (+c.budget || 0), 0);
+    const catTotal = d.cats.reduce((s, c) => s + (isSub(c, d.cats) ? 0 : +c.budget || 0), 0); // subcategories are part of their main one
     return { d, inc, exp, remain, save, spend, catTotal };
   }
 
@@ -1843,9 +1941,21 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       if (isCat) {
         const n = monthTx().filter((r) => r.category === item.id).length;
         if (n) { snack("יש " + n + " הוצאות בקטגוריה הזו החודש. מחקו או העבירו אותן קודם."); return; }
+        // Its subcategories stay, as main categories
+        list.forEach((c) => { if (c.parent === item.id) delete c.parent; });
       }
       list.splice(i, 1); touch(); render();
     });
+    if (isCat) {
+      row.classList.add("catrow");
+      if (isSub(item, list)) { row.classList.add("sub"); name.placeholder = "שם התת־קטגוריה"; amt.placeholder = "₪ לא חובה"; }
+      const eb = document.createElement("button");
+      eb.type = "button"; eb.className = "emobtn" + (item.emoji ? " set" : ""); eb.textContent = catIcon(item);
+      eb.setAttribute("aria-label", "בחירת אימוג׳י לקטגוריה");
+      eb.addEventListener("click", () => openEmoji(item));
+      name.addEventListener("input", () => { if (!item.emoji) eb.textContent = catEmoji(item.name); });
+      row.append(eb);
+    }
     row.append(name, amt, del);
     return row;
   }
@@ -1867,7 +1977,23 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     const exp = $("expRows"); exp.innerHTML = "";
     d.expenses.forEach((_, i) => exp.append(rowEl(d.expenses, i, "exp")));
     const cr = $("catRows"); cr.innerHTML = "";
-    d.cats.forEach((_, i) => cr.append(rowEl(d.cats, i, "cat")));
+    catTree(d.cats).forEach(({ c, i, depth }, k, all) => {
+      cr.append(rowEl(d.cats, i, "cat"));
+      // After a main category and its subcategories: a small button to add another subcategory
+      const next = all[k + 1];
+      if (!next || next.depth === 0) {
+        const parent = depth ? d.cats.find((p) => p.id === c.parent) : c;
+        const b = document.createElement("button"); b.type = "button"; b.className = "subadd";
+        b.textContent = "↳ הוספת תת־קטגוריה ל" + (parent.name || "קטגוריה");
+        b.addEventListener("click", () => {
+          const at = d.cats.indexOf(parent) + 1 + d.cats.filter((x) => x.parent === parent.id).length;
+          d.cats.splice(at, 0, { id: catId(), name: "", budget: 0, parent: parent.id });
+          touch(); render();
+          const ins = [...$("catRows").querySelectorAll(".catrow.sub input[type=text]")].find((x) => !x.value); if (ins) ins.focus();
+        });
+        cr.append(b);
+      }
+    });
     $("pct").value = d.pct;
     $("exampleNote").hidden = !d.example;
     computePlan();
@@ -1946,8 +2072,9 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 
     const catSpent = {};
     list.forEach((r) => { catSpent[r.category] = (catSpent[r.category] || 0) + r.amount; });
-    const overCat = d.cats
-      .map((c) => ({ name: c.name || "קטגוריה בלי שם", over: (catSpent[c.id] || 0) - (+c.budget || 0) }))
+    const catRoll = rollup(d.cats, catSpent);
+    const overCat = d.cats.filter((c) => !isSub(c, d.cats) || +c.budget > 0)
+      .map((c) => ({ name: c.name || "קטגוריה בלי שם", over: (catRoll[c.id] || 0) - (+c.budget || 0) }))
       .filter((c) => c.over > 0).sort((a, b) => b.over - a.over)[0];
 
     if (isCur) {
@@ -1998,18 +2125,28 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     const byCat = {};
     list.forEach((r) => { byCat[r.category] = (byCat[r.category] || 0) + r.amount; });
     const cl = $("catList"); cl.innerHTML = "";
-    const rows = d.cats.map((c) => ({ id: c.id, name: c.name || "בלי שם", budget: +c.budget || 0, spent: byCat[c.id] || 0 }));
+    const roll = rollup(d.cats, byCat);
+    const rows = catTree(d.cats).map(({ c, depth }) => ({ id: c.id, name: c.name || "בלי שם", icon: catIcon(c), sub: depth > 0, budget: +c.budget || 0, spent: roll[c.id] || 0,
+      parentName: depth ? (d.cats.find((p) => p.id === c.parent) || {}).name || "" : "" }));
     const known = new Set(d.cats.map((c) => c.id));
     const orphan = Object.keys(byCat).filter((k) => !known.has(k)).reduce((s, k) => s + byCat[k], 0);
     if (orphan) rows.push({ id: null, name: "קטגוריה שנמחקה", budget: 0, spent: orphan });
     rows.forEach((c) => {
       const b = document.createElement("button");
-      b.type = "button"; b.className = "cat";
+      b.type = "button"; b.className = "cat" + (c.sub ? " sub" : "");
       if (c.id) b.addEventListener("click", () => openSheet(c.id)); else b.disabled = true;
       const top = document.createElement("div"); top.className = "top";
-      const nm = document.createElement("span"); nm.className = "name"; nm.textContent = (c.id ? catEmoji(c.name) : "🗑️") + " " + c.name;
-      const nums = document.createElement("span"); nums.className = "nums"; nums.textContent = fmt(c.spent) + " מתוך " + fmt(c.budget);
+      const nm = document.createElement("span"); nm.className = "name"; nm.textContent = (c.id ? c.icon : "🗑️") + " " + c.name;
+      const nums = document.createElement("span"); nums.className = "nums"; nums.textContent = c.sub && !c.budget ? fmt(c.spent) : fmt(c.spent) + " מתוך " + fmt(c.budget);
       top.append(nm, nums);
+      if (c.sub && !c.budget) {
+        // A subcategory without its own budget: just what went on it, counted in its main category
+        const s = document.createElement("span"); s.className = "state plain"; s.textContent = "נספר בתוך " + c.parentName;
+        b.append(top, s);
+        b.setAttribute("aria-label", c.name + ": " + nums.textContent + ". " + s.textContent + ". לחצו לרישום הוצאה");
+        cl.append(b);
+        return;
+      }
       const pace = document.createElement("div"); pace.className = "pace";
       const track = document.createElement("div"); track.className = "track";
       const st = stateOf(c.spent, c.budget, isCur ? elapsed : null);
@@ -2089,7 +2226,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
         if (r._inc) { day.append(incomeRow(r._inc)); return; }
         const row = document.createElement("div"); row.className = "tx" + (r.pending ? " pending" : "");
         const what = document.createElement("button"); what.type = "button"; what.className = "what";
-        what.dataset.e = names[r.category] ? catEmoji(names[r.category]) : "💸";
+        what.dataset.e = names[r.category] ? emojiOf(r.category, names[r.category]) : "💸";
         const t = document.createElement("b"); t.textContent = r.note || names[r.category] || "הוצאה";
         const hrs = hoursText(r.amount);
         const c = document.createElement("span");
@@ -2162,11 +2299,11 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     const box = $("txCats");
     box.querySelectorAll(".chip").forEach((n) => n.remove());
     const pick = edit ? edit.category : preset || (d.cats.some((c) => c.id === lastCat) ? lastCat : d.cats[0].id);
-    d.cats.forEach((c, i) => {
+    catTree(d.cats).forEach(({ c, i, depth }) => {
       const lab = document.createElement("label"); lab.className = "chip";
       const inp = document.createElement("input"); inp.type = "radio"; inp.name = "txCat"; inp.value = c.id; inp.id = "txCat-" + i;
       inp.checked = c.id === pick;
-      const sp = document.createElement("span"); sp.textContent = catEmoji(c.name) + " " + (c.name || "בלי שם");
+      const sp = document.createElement("span"); sp.textContent = (depth ? "↳ " : "") + catIcon(c) + " " + (c.name || "בלי שם");
       lab.append(inp, sp); box.append(lab);
     });
     $("txAmount").value = edit ? edit.amount : ""; $("txNote").value = edit ? edit.note || "" : "";
@@ -3543,7 +3680,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   }
   function qButton(it, names) {
     const b = document.createElement("button"); b.type = "button"; b.className = "qbtn" + (it.fav ? " fav" : "");
-    const e = document.createElement("span"); e.textContent = it.fav ? "⭐" : catEmoji(names[it.category]);
+    const e = document.createElement("span"); e.textContent = it.fav ? "⭐" : emojiOf(it.category, names[it.category]);
     const n = document.createElement("span"); n.className = "qn"; n.textContent = it.note || names[it.category] || "הוצאה";
     const a = document.createElement("span"); a.className = "qa"; a.textContent = fmt(it.amount);
     const x = document.createElement("span"); x.className = "qx"; x.textContent = "×"; x.setAttribute("aria-hidden", "true");
@@ -3599,10 +3736,14 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   $("quickEdit").addEventListener("click", () => { quickEditing = !quickEditing; renderQuick(); });
   // Snack after logging, with a warning when the category goes past 80% or 100% of its budget
   function afterSpend(row) {
-    const c = data().cats.find((x) => x.id === row.category);
-    const spentCat = monthTx().filter((r) => r.category === row.category).reduce((s, r) => s + r.amount, 0);
+    const cats = data().cats;
+    let c = cats.find((x) => x.id === row.category);
+    const ownName = c ? c.name : "";
+    if (c && isSub(c, cats) && !(+c.budget > 0)) c = cats.find((x) => x.id === c.parent);
+    const ids = c ? [c.id, ...cats.filter((x) => x.parent === c.id && isSub(x, cats)).map((x) => x.id)] : [row.category];
+    const spentCat = monthTx().filter((r) => ids.includes(r.category)).reduce((s, r) => s + r.amount, 0);
     const budget = c ? +c.budget || 0 : 0, before = spentCat - row.amount;
-    let msg = "נרשם: " + fmt(row.amount) + (c ? " על " + c.name : "");
+    let msg = "נרשם: " + fmt(row.amount) + (ownName ? " על " + ownName : "");
     if (c && budget > 0 && spentCat > budget) msg = "נרשם. " + c.name + " בחריגה של " + fmt(spentCat - budget) + ".";
     else if (c && budget > 0 && spentCat >= budget * 0.8 && before < budget * 0.8) msg = "נרשם. ⚠️ " + c.name + ": השתמשת ב־" + Math.round(spentCat / budget * 100) + "% מהתקציב. נשארו " + fmt(budget - spentCat) + ".";
     if (c && budget > 0 && ((spentCat > budget && before <= budget) || (spentCat >= budget * 0.8 && before < budget * 0.8))) notifyApp("⚠️ " + c.name, msg.replace(/^נרשם\. (⚠️ )?/, ""));
@@ -3626,7 +3767,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     const sel = $("findCat"), cur = sel.value, names = catNames();
     sel.innerHTML = "";
     const all = document.createElement("option"); all.value = ""; all.textContent = "כל הקטגוריות"; sel.append(all);
-    Object.entries(names).forEach(([id, n]) => { const o = document.createElement("option"); o.value = id; o.textContent = catEmoji(n) + " " + n; sel.append(o); });
+    Object.entries(names).forEach(([id, n]) => { const o = document.createElement("option"); o.value = id; o.textContent = emojiOf(id, n) + " " + n; sel.append(o); });
     sel.value = [...sel.options].some((o) => o.value === cur) ? cur : "";
   }
   async function runFind() {
@@ -3653,7 +3794,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     rows.slice(0, 100).forEach((r) => {
       const row = document.createElement("div"); row.className = "tx";
       const what = document.createElement("button"); what.type = "button"; what.className = "what";
-      what.dataset.e = names[r.category] ? catEmoji(names[r.category]) : "💸";
+      what.dataset.e = names[r.category] ? emojiOf(r.category, names[r.category]) : "💸";
       const t = document.createElement("b"); t.textContent = r.note || names[r.category] || "הוצאה";
       const c = document.createElement("span"); c.textContent = dayLabel(r.spent_on) + " · " + (names[r.category] || "קטגוריה שנמחקה");
       what.append(t, c);
@@ -3773,7 +3914,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       const nm = id === "_rest" ? "אחר" : names[id] || "קטגוריה שנמחקה";
       const row = document.createElement("div");
       const sw = document.createElement("i"); sw.style.background = col;
-      const t = document.createElement("span"); t.className = "nm"; t.textContent = (id === "_rest" ? "➕" : catEmoji(nm)) + " " + nm;
+      const t = document.createElement("span"); t.className = "nm"; t.textContent = (id === "_rest" ? "➕" : emojiOf(id, nm)) + " " + nm;
       const pc = document.createElement("span"); pc.className = "pc"; pc.textContent = Math.round(v / total * 100) + "%";
       row.append(sw, t, pc); legend.append(row);
     });
@@ -3817,7 +3958,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
         moves.forEach(([id, v]) => {
           const sm = document.createElement("small"); const nm = names[id] || "קטגוריה שנמחקה";
           const ar = document.createElement("span"); ar.className = v > 0 ? "up" : "down"; ar.textContent = v > 0 ? "▲ " + fmt(v) : "▼ " + fmt(-v);
-          sm.append(catEmoji(nm) + " " + nm + ": ", ar); d.append(sm);
+          sm.append(emojiOf(id, nm) + " " + nm + ": ", ar); d.append(sm);
         });
         box.append(d);
       }
@@ -3862,7 +4003,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     tile("ימים בתוך התקציב", inb + " מתוך " + days);
     const ul = $("sumList"); ul.innerHTML = "";
     const li = (t) => { const x = document.createElement("li"); x.textContent = t; ul.append(x); };
-    const by = sumBy(list), top = Object.entries(by).sort((a, b) => b[1] - a[1])[0];
+    const by0 = sumBy(list), by = d ? rollup(d.cats || [], by0) : by0, top = Object.entries(by0).sort((a, b) => b[1] - a[1])[0];
     if (top) li("🏷️ הכי הרבה יצא על " + (names[top[0]] || "קטגוריה שנמחקה") + ": " + fmt(top[1]) + " (" + Math.round(top[1] / (spent || 1) * 100) + "%).");
     const overs = (d && d.cats || []).filter((c) => (by[c.id] || 0) > (+c.budget || 0) && +c.budget > 0);
     if (overs.length) li("⛔ חרגת ב" + overs.map((c) => (c.name || "בלי שם") + " (" + fmt(by[c.id] - c.budget) + ")").join(", ") + ".");
@@ -3996,6 +4137,46 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   // ---- Feedback, invite a friend, backup / restore, delete the account ----
   function openDlg(id) { const d = $(id); if (d.showModal) d.showModal(); else d.setAttribute("open", ""); $("userbar").open = false; }
   function closeDlg(id) { const d = $(id); if (d.close) d.close(); else d.removeAttribute("open"); }
+
+  // ---- Emoji album for categories ----
+  let emoFor = null, emoTab = 0;
+  function openEmoji(cat) {
+    emoFor = cat;
+    $("emoFor").textContent = "לקטגוריה ״" + (cat.name || "בלי שם") + "״. עכשיו: " + catIcon(cat) + (cat.emoji ? "" : " (אוטומטי)");
+    $("emoOwn").value = "";
+    renderEmoji();
+    openDlg("emoSheet");
+  }
+  function renderEmoji() {
+    const tabs = $("emoTabs"); tabs.innerHTML = "";
+    EMOJI_ALBUM.forEach(([e, n], k) => {
+      const b = document.createElement("button"); b.type = "button"; b.textContent = e + " " + n;
+      b.setAttribute("aria-pressed", String(k === emoTab));
+      b.addEventListener("click", () => { emoTab = k; renderEmoji(); $("emoGrid").scrollTop = 0; });
+      tabs.append(b);
+    });
+    const g = $("emoGrid"); g.innerHTML = "";
+    EMOJI_ALBUM[emoTab][2].split(" ").forEach((e) => {
+      const b = document.createElement("button"); b.type = "button"; b.textContent = e; b.setAttribute("aria-label", e);
+      b.setAttribute("aria-pressed", String(!!emoFor && emoFor.emoji === e));
+      b.addEventListener("click", () => setCatEmoji(e));
+      g.append(b);
+    });
+  }
+  function setCatEmoji(e) {
+    if (!emoFor) return;
+    if (e) emoFor.emoji = e; else delete emoFor.emoji;
+    closeDlg("emoSheet"); touch(); render();
+  }
+  $("emoCancel").addEventListener("click", () => closeDlg("emoSheet"));
+  $("emoAuto").addEventListener("click", () => setCatEmoji(""));
+  $("emoOwnOk").addEventListener("click", () => {
+    const v = $("emoOwn").value.trim();
+    // Keep the first emoji (or symbol) typed
+    let first = v;
+    try { first = [...new Intl.Segmenter("he", { granularity: "grapheme" }).segment(v)][0].segment; } catch (e) { first = Array.from(v)[0] || ""; }
+    if (first) setCatEmoji(first);
+  });
   let fbKind = "idea";
   $("feedbackBtn").addEventListener("click", () => { $("fbText").value = ""; $("fbErr").hidden = true; openDlg("feedbackSheet"); setTimeout(() => $("fbText").focus(), 50); });
   $("fbCancel").addEventListener("click", () => closeDlg("feedbackSheet"));
@@ -4228,7 +4409,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     if (mem && cats.some((c) => c.id === mem.c)) return mem.c;
     for (const t of [merchant, hint]) {
       const e = catEmoji(t); if (e === "💸") continue;
-      const c = cats.find((x) => catEmoji(x.name) === e); if (c) return c.id;
+      const c = cats.find((x) => catIcon(x) === e || catEmoji(x.name) === e); if (c) return c.id;
     }
     const other = cats.find((c) => /שונות|אחר/.test(c.name || ""));
     return (other || cats[cats.length - 1] || {}).id;
@@ -4246,7 +4427,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       m.append(b, sm);
       const a = document.createElement("span"); a.className = "ca"; a.textContent = fmt(r.amount);
       const sel = document.createElement("select"); sel.setAttribute("aria-label", "קטגוריה ל" + r.merchant);
-      cats.forEach((c) => { const o = document.createElement("option"); o.value = c.id; o.textContent = catEmoji(c.name) + " " + (c.name || "בלי שם"); sel.append(o); });
+      catTree(cats).forEach(({ c, depth }) => { const o = document.createElement("option"); o.value = c.id; o.textContent = (depth ? "↳ " : "") + catIcon(c) + " " + (c.name || "בלי שם"); sel.append(o); });
       sel.value = r.cat; sel.addEventListener("change", () => { r.cat = sel.value; });
       row.append(cb, m, a, sel); box.append(row);
     });
