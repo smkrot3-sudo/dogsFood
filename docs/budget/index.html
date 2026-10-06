@@ -786,6 +786,9 @@ body.layedit .home > details[data-block] { display: block; }
 body.layedit .home > .lay-off { opacity: .4; }
 body.layedit .home > [data-block] > :not(.laytools), body.layedit .home > details[data-block] > summary { pointer-events: none; }
 body.layedit .home > [data-block].dragging { opacity: .85; outline-style: solid; box-shadow: 0 12px 30px rgba(0,0,0,.18); }
+body.layedit .home > [data-block] { cursor: pointer; }
+body.layedit .home > [data-block].laysel { outline: 3px solid var(--brand2); outline-offset: 4px; box-shadow: 0 0 0 8px color-mix(in srgb, var(--brand2) 18%, transparent); }
+body.layedit .home > [data-block]:not(.laysel) > .laytools, body.layedit .home > details[data-block]:not(.laysel) > summary .laytools { display: none; }
 .laytools { position: absolute; top: -20px; inset-inline-end: 12px; z-index: 4; display: flex; gap: 4px; background: var(--surface); border: 1.5px solid var(--brand2); border-radius: 999px; padding: 3px; pointer-events: auto; box-shadow: var(--card-shadow); }
 details[data-block] > summary .laytools { top: -20px; }
 .laytools button { width: 36px; height: 34px; border: 0; border-radius: 999px; background: var(--surface-2); color: var(--fg); font-size: 16px; cursor: pointer; display: grid; place-items: center; padding: 0; }
@@ -903,7 +906,7 @@ body.layedit #fab, body.onsettings #fab { display: none; }
 
   <div id="viewMain">
   <div class="editbar" id="editBar" hidden>
-    <span>✏️ מצב עריכה: הסתר עם 👁️, הזז עם ⠿ או ▲▼</span>
+    <span id="editBarText">✏️ מצב עריכה: לחץ על חלק כדי לערוך אותו</span>
     <button class="okx ok" type="button" id="layOk" aria-label="שמירת השינויים">✓</button>
     <button class="okx no" type="button" id="layNo" aria-label="ביטול כל השינויים">✕</button>
   </div>
@@ -4691,6 +4694,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     rec: "🔁 מנויים וחיובים קבועים", wish: "🤔 אולי אקנה", cmp: "📈 לעומת קודם", hist: "📊 לאורך החודשים", badges: "🏆 הישגים", plan: "📋 התוכנית של החודש" };
   const homeBlocks = () => [...$("homeList").querySelectorAll(":scope > [data-block]")];
   const DEFAULT_ORDER = homeBlocks().map((b) => b.dataset.block);
+  var planWasOpen = false;
   var layEditing = null; // the layout when edit mode started, for ✕ (var: setView may run before this line)
   function layout() {
     const l = (store && store.layout) || {}, known = new Set(DEFAULT_ORDER);
@@ -4733,15 +4737,29 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     });
   }
   $("layReset").addEventListener("click", () => { const before = layout(); saveLayout({ order: DEFAULT_ORDER.slice(), hidden: [] }); snack("דף הבית חזר לסידור המקורי.", () => saveLayout(before)); });
-  $("layEditHome").addEventListener("click", () => { setView("main"); enterLayEdit(); });
+  $("layEditHome").addEventListener("click", () => { setView("main"); enterLayEdit(null); });
 
   // Edit mode on the home page itself
-  function enterLayEdit() {
+  // In edit mode a tap picks the part to edit; only that part shows its buttons
+  function selectBlock(b) {
+    homeBlocks().forEach((x) => x.classList.toggle("laysel", x === b));
+    $("editBarText").textContent = b ? "✏️ עורך את: " + (BLOCK_NAMES[b.dataset.block] || "") : "✏️ מצב עריכה: לחץ על חלק כדי לערוך אותו";
+  }
+  $("homeList").addEventListener("click", (e) => {
+    if (!layEditing || e.target.closest(".laytools")) return;
+    const b = e.target.closest("[data-block]"); if (!b) return;
+    e.preventDefault(); e.stopPropagation();
+    selectBlock(b.classList.contains("laysel") ? null : b);
+  }, true);
+  function enterLayEdit(start) {
     if (layEditing) return;
     layEditing = layout();
     document.body.classList.add("layedit");
     $("editBar").hidden = false; $("layHint").hidden = true;
+    // The month plan is long; closed it fits the editing view
+    planWasOpen = $("planBox").open; $("planBox").open = false;
     homeBlocks().forEach(addLayTools);
+    selectBlock(start || null);
   }
   function exitLayEdit(save) {
     if (!layEditing) return;
@@ -4749,7 +4767,8 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     document.body.classList.remove("layedit");
     $("editBar").hidden = true; $("layHint").hidden = false;
     document.querySelectorAll(".laytools").forEach((x) => x.remove());
-    homeBlocks().forEach((b) => b.classList.remove("dragging"));
+    homeBlocks().forEach((b) => b.classList.remove("dragging", "laysel"));
+    $("planBox").open = planWasOpen;
     if (save) { saveLayout(domLayout()); snack("הסידור של דף הבית נשמר."); } else applyLayout(snap);
   }
   $("layOk").addEventListener("click", () => exitLayEdit(true));
@@ -4794,7 +4813,8 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     if (!e.target.closest("[data-block]")) return;
     const x = e.clientX, y = e.clientY;
     lpCancel();
-    lp = { x, y, t: setTimeout(() => { lp = null; eatClick = true; try { if (navigator.vibrate) navigator.vibrate(30); } catch (er) {} enterLayEdit(); }, 600) };
+    const blk = e.target.closest("[data-block]");
+    lp = { x, y, t: setTimeout(() => { lp = null; eatClick = true; try { if (navigator.vibrate) navigator.vibrate(30); } catch (er) {} enterLayEdit(blk); }, 600) };
   });
   $("homeList").addEventListener("pointermove", (e) => { if (lp && Math.hypot(e.clientX - lp.x, e.clientY - lp.y) > 10) lpCancel(); });
   ["pointerup", "pointercancel"].forEach((ev) => $("homeList").addEventListener(ev, lpCancel));
