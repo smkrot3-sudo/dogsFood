@@ -1188,8 +1188,7 @@ html.bigtext body { zoom: 1.15; }
     <p class="hours" id="txHours" aria-live="polite"></p>
     <fieldset class="chips" id="txCats"><legend>על מה?</legend></fieldset>
     <fieldset class="chips" id="incKinds" hidden><legend>מה זה?</legend></fieldset>
-    <label for="txNote" id="txNoteLbl">פירוט (לא חובה)<input type="text" id="txNote" maxlength="200" placeholder="למשל: שווארמה עם חברים" list="noteList" autocomplete="off"></label>
-    <datalist id="noteList"></datalist>
+    <label for="txNote" id="txNoteLbl">פירוט (לא חובה)<input type="text" id="txNote" maxlength="200" placeholder="למשל: שווארמה עם חברים" autocomplete="off"></label>
     <label for="txDate">מתי?<input type="date" id="txDate"></label>
     <label class="check" id="favRow" for="txFav"><input type="checkbox" id="txFav"> ⭐ שמור ככפתור ״רישום בלחיצה״</label>
     <label class="check" id="repeatRow" for="txRepeat"><input type="checkbox" id="txRepeat"> חוזר כל חודש (ייכנס לבד מעכשיו)</label>
@@ -3662,21 +3661,8 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     Object.entries(memo()).forEach(([k, v]) => { const o = out[k]; out[k] = !o || (v.t || "") >= o.t ? { ...v, n: Math.max(v.n, o ? o.n : 0) } : o; });
     return out;
   }
-  function fillNotes() {
-    const dl = $("noteList"); dl.innerHTML = "";
-    const all = allNotes();
-    Object.keys(all).sort((a, b) => all[b].n - all[a].n).slice(0, 60).forEach((k) => { const o = document.createElement("option"); o.value = k; dl.append(o); });
-  }
-  function applyNote() {
-    if (sheetMode !== "exp" || editing) return;
-    const hit = allNotes()[$("txNote").value.trim()];
-    if (!hit) return;
-    const r = document.querySelector('input[name="txCat"][value="' + hit.c + '"]');
-    if (r) r.checked = true;
-    if (!$("txAmount").value && hit.a) { $("txAmount").value = hit.a; showHours(); }
-  }
-  $("txNote").addEventListener("change", applyNote);
-  $("txNote").addEventListener("input", () => { if (allNotes()[$("txNote").value.trim()]) applyNote(); });
+  // The user asked for no autocomplete in the expense form (2026-10-06): notes are only remembered for the quick buttons
+  function fillNotes() {}
 
   // Buttons: the user's starred ones first, then expenses that keep coming back (3 times or more)
   function quickItems() {
@@ -4519,7 +4505,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   function applyVoice(text) {
     const v = parseVoice(text);
     $("voiceHint").hidden = false; $("voiceHint").textContent = "שמעתי: ״" + text + "״";
-    if (v.note) { $("txNote").value = v.note; applyNote(); }
+    if (v.note) $("txNote").value = v.note;
     if (v.amount > 0) $("txAmount").value = v.amount;
     showHours();
   }
