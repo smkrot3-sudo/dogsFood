@@ -67,6 +67,9 @@ public class MainActivity extends Activity {
         s.setUserAgentString(s.getUserAgentString() + " BudgetApp/" + BuildConfigVersion.NAME);
 
         web.addJavascriptInterface(new Bridge(), "BudgetApp");
+        // Phone notification when a new app version comes out, also while the app is closed
+        UpdateCheck.schedule(this);
+        askNotifications();
         web.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest req) {
@@ -238,6 +241,9 @@ public class MainActivity extends Activity {
 
         @JavascriptInterface
         public int versionCode() { return BuildConfigVersion.CODE; }
+
+        @JavascriptInterface
+        public boolean updateNotes() { return true; }
 
         /** Downloads a newer APK and opens the Android installer for it when the download finishes. */
         @JavascriptInterface

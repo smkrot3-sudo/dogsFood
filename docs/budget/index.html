@@ -1640,6 +1640,8 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     try { mine = app.versionCode ? +app.versionCode() : LEGACY[app.version ? app.version() : "1.0"] || 1; } catch (e) { mine = 1; }
     fetch("app-version.json", { cache: "no-store" }).then((r) => r.json()).then((v) => {
       if (!(v.versionCode > mine)) return;
+      // Apps from 1.8 check for updates by themselves; older ones with notifications get a reminder at 20:00
+      if (!app.updateNotes && app.setNotes) { window.appUpdateWaiting = v; sendAppPlans(); }
       try { if (sessionStorage.getItem("appUpdateLater") === String(v.versionCode)) return; } catch (e) {}
       $("appUpdateText").textContent = "יש גרסה חדשה לאפליקציה (" + v.versionName + ")" + (v.notes ? ": " + v.notes : ".");
       $("appUpdate").hidden = false;
@@ -3837,6 +3839,12 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
         if (st.weekly !== false) notes.push({ id: "weekly", at: weeklyAt(), every: 7, title: "📆 הסיכום השבועי שלך מוכן", text: "כמה הוצאת השבוע לעומת השבוע שעבר? היכנס וראה." });
         const at = st.payGoalKind === "m" && +st.payGoal > 0 && st.goalNote !== false ? goalNoteAt() : 0;
         if (at) notes.push({ id: "goal", at, every: 7, title: "📅 היום קובעים משמרות לשבוע הבא", text: goalNoteText() });
+        const upd = window.appUpdateWaiting;
+        if (upd) {
+          const t = new Date(); t.setHours(20, 0, 0, 0); if (t - Date.now() < 3600e3) t.setDate(t.getDate() + 1);
+          if (t.getDay() === 5 || t.getDay() === 6) t.setDate(t.getDate() + (t.getDay() === 5 ? 2 : 1));
+          notes.push({ id: "update", at: t.getTime(), title: "📲 יש עדכון לאפליקציה (" + upd.versionName + ")", text: "פתח את האפליקציה ולחץ \"עדכון\" בבאנר למעלה." });
+        }
         app.setNotes(JSON.stringify(notes));
       }
     } catch (e) {}
