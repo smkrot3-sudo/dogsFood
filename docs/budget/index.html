@@ -879,6 +879,12 @@ dialog.alarm form { gap: 12px; }
 .alarm .btn { background: #fff; color: #b5121b; font-weight: 800; border: 0; }
 .alarm .btn.ghost { background: transparent; color: #fff; border: 2px solid rgba(255, 255, 255, .7); }
 @keyframes alarmPulse { 50% { transform: scale(1.08); } }
+/* Dim sum style: lantern red and gold, steaming baskets */
+dialog.alarm.dimsum { background: radial-gradient(circle at 50% 0%, #ffcf5c 0, transparent 38%), linear-gradient(170deg, #c8102e, #8a0b1f 70%, #5e0614); }
+.dimsum .signs { animation: steam 2.2s ease-in-out infinite; }
+.dimsum p { border-color: #ffcf5c; border-style: double; border-width: 5px; background: rgba(255, 207, 92, .12); }
+.dimsum .btn { color: #8a0b1f; }
+@keyframes steam { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
 .newsheet li { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: start; background: var(--surface-2); border-radius: 14px; padding: 10px 12px; }
 .newsheet li > span { font-size: 22px; line-height: 1.2; }
 .newsheet li b { display: block; }
@@ -6059,7 +6065,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   async function loadPersonal() {
     if (!sb || !user) return;
     try {
-      const { data } = await sb.from("personal_msgs").select("id, title, body, show_at, notify_at, expires_at, push, action").is("seen_at", null).order("show_at");
+      const { data } = await sb.from("personal_msgs").select("id, title, body, show_at, notify_at, expires_at, push, action, style").is("seen_at", null).order("show_at");
       const now = Date.now(), rows = (data || []).filter((m) => !m.expires_at || new Date(m.expires_at) > now);
       // the phone note goes off at notify_at (or show_at); the popup shows from show_at until expires_at
       pmNotes = rows.filter((m) => m.push && new Date(m.notify_at || m.show_at) > now).map((m) => ({ id: "pm" + m.id, at: new Date(m.notify_at || m.show_at).getTime(), title: m.title || "🚨 תזכורת", text: m.body }));
@@ -6069,7 +6075,12 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       showPersonal(due);
     } catch (e) {}
   }
+  // Each style: the decorations above and below the text
+  const PM_STYLES = { alarm: ["🛑⛔⚠️🚫", "🚧🚨🚧"], dimsum: ["🏮🥟🥢🥟🏮", "🧧 🥡 🍵 🥡 🧧"] };
   function showPersonal(m) {
+    const st = PM_STYLES[m.style] ? m.style : "alarm", deco = $("pmSheet").querySelectorAll(".signs");
+    $("pmSheet").classList.toggle("dimsum", st === "dimsum");
+    deco[0].textContent = PM_STYLES[st][0]; deco[1].textContent = PM_STYLES[st][1];
     if (m.title) $("pmH").textContent = m.title;
     $("pmBody").textContent = m.body;
     const shift = /^shift:(\d{4}-\d{2}-\d{2})$/.exec(m.action || "");
