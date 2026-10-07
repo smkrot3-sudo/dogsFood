@@ -5,6 +5,8 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 
 const OWNER = "75753136-73de-4975-bc7a-5897db6ae434";
 const DAILY_LIMIT = 20;
+// VIP users (owner's pick) ask without a daily limit, like the owner
+const VIP = ["51ee3304-84e8-4ee2-ac0c-c9ac75ed5b6d"];
 // Tried in order; quota, overload, timeout or an unknown model moves on to the next one
 const MODELS = (Deno.env.get("GEMINI_MODEL") || "gemini-3.5-flash,gemini-3.5-flash-lite,gemini-3.1-flash-lite,gemini-3.8-flash").split(",").map((s) => s.trim()).filter(Boolean);
 const cors = {
@@ -151,7 +153,7 @@ Deno.serve(async (req) => {
     const asUser = createClient(url, Deno.env.get("SUPABASE_ANON_KEY")!, { global: { headers: { Authorization: auth } } });
     const { data: u } = await asUser.auth.getUser(auth.replace(/^Bearer\s+/i, ""));
     if (!u?.user) return json({ error: "auth" }, 401);
-    const uid = u.user.id, isOwner = uid === OWNER;
+    const uid = u.user.id, isOwner = uid === OWNER, free = isOwner || VIP.includes(uid);
     const admin = createClient(url, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 
     const body = await req.json();
@@ -166,7 +168,7 @@ Deno.serve(async (req) => {
     if (!PROMPTS[tool]) return json({ error: "tool" }, 400);
     if (tool.startsWith("admin") && !isOwner) return json({ error: "forbidden" }, 403);
 
-    const used = await admin.rpc("ai_bump", { p_user: uid, p_tool: tool, p_limit: isOwner || tool.startsWith("admin") ? 0 : DAILY_LIMIT });
+    const used = await admin.rpc("ai_bump", { p_user: uid, p_tool: tool, p_limit: free || tool.startsWith("admin") ? 0 : DAILY_LIMIT });
     if (used.error) throw new Error(used.error.message);
     if (used.data === -1) return json({ error: "limit", limit: DAILY_LIMIT }, 429);
 
@@ -197,9 +199,9 @@ Deno.serve(async (req) => {
       let parsed: unknown = null;
       try { parsed = JSON.parse(out.text.replace(/^```(?:json)?\s*|\s*```$/g, "")); } catch (_) { /* fall through */ }
       if (!parsed) return json({ error: "parse" }, 502);
-      return json({ data: parsed, left: isOwner ? null : DAILY_LIMIT - used.data });
+      return json({ data: parsed, left: free ? null : DAILY_LIMIT - used.data });
     }
-    return json({ text: out.text, left: isOwner ? null : DAILY_LIMIT - used.data });
+    return json({ text: out.text, left: free ? null : DAILY_LIMIT - used.data });
   } catch (e) {
     const msg = String((e as Error).message || e);
     console.error("ai error", msg);

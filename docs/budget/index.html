@@ -14,7 +14,8 @@ window.BP = (function () {
     ["rose", "ורוד", 340, 75], ["berry", "פטל", 320, 55, 94], ["lavender", "לבנדר", 265, 60], ["violet", "סגול", 280, 50, 92],
     ["sky", "תכלת", 205, 75], ["ocean", "ים", 188, 60, 94], ["navy", "כחול לילה", 225, 45, 93], ["mint", "מנטה", 160, 55],
     ["forest", "ירוק יער", 135, 35, 93], ["lime", "ליים", 80, 55], ["sand", "חול", 42, 35, 94], ["coffee", "קפה", 28, 30, 92],
-    ["gray", "אפור", 220, 8], ["white", "לבן נקי", 0, 0, 97.5], ["black", "שחור", 0, 0, 95]
+    ["gray", "אפור", 220, 8], ["white", "לבן נקי", 0, 0, 97.5], ["black", "שחור", 0, 0, 95],
+    ["gold", "👑 זהב VIP", 45, 95, 94]
   ];
   function hex(h, s, l) {
     s /= 100; l /= 100;
@@ -606,6 +607,7 @@ dialog.sheet::backdrop { background: rgba(40, 20, 50, .45); -webkit-backdrop-fil
 .themes.compact { box-shadow: none; background: var(--surface-2); padding: 3px; }
 .themes.compact button { width: 34px; height: 34px; padding: 0; font-size: 16px; display: grid; place-items: center; }
 .usermenu { position: relative; }
+.vipcrown { position: absolute; top: -13px; inset-inline-end: -7px; font-size: 19px; transform: rotate(18deg); pointer-events: none; filter: drop-shadow(0 1px 2px rgba(0,0,0,.25)); }
 .usermenu summary { list-style: none; cursor: pointer; width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; overflow: hidden; background: var(--brand); color: #fff; font-weight: 800; font-size: 17px; box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px color-mix(in srgb, var(--brand2) 40%, transparent); }
 .usermenu summary::-webkit-details-marker { display: none; }
 .usermenu summary img { width: 100%; height: 100%; object-fit: cover; }
@@ -1100,6 +1102,7 @@ body.nosave .split { grid-template-columns: 1fr; }
       <button class="gearbtn" type="button" id="gearBtn" aria-pressed="false"><span aria-hidden="true">⚙️</span><small>הגדרות</small></button>
       <details class="usermenu" id="userbar" hidden>
         <summary aria-label="החשבון שלי"><img id="userPhoto" alt="" referrerpolicy="no-referrer" hidden><span class="initial" id="userInitial" aria-hidden="true"></span></summary>
+        <span class="vipcrown" id="vipCrown" aria-label="משתמשת VIP" hidden>👑</span>
         <div class="menu">
           <span class="who" id="userName"></span>
           <a class="getapp" href="budget.apk" download hidden>📱 הורדת האפליקציה לאנדרואיד</a>
@@ -1730,6 +1733,19 @@ body.nosave .split { grid-template-columns: 1fr; }
   </form>
 </dialog>
 
+<dialog class="sheet newsheet" id="vipSheet" aria-labelledby="vipH">
+  <form method="dialog">
+    <h2 id="vipH" data-e="👑">קיבלת מעמד VIP</h2>
+    <p class="sub">שמואל בחר לתת לך מעמד מיוחד באפליקציה. הנה מה שמגיע לך:</p>
+    <ul>
+      <li><span>👑</span><div><b>כתר ליד התמונה שלך</b><small>בפס העליון, שכולם ידעו 😉</small></div></li>
+      <li><span>✨</span><div><b>עוזר בלי הגבלה</b><small>אפשר לשאול את העוזר כמה שרוצים, בלי מגבלה יומית.</small></div></li>
+      <li><span>🎨</span><div><b>צבע זהב בלעדי</b><small>בהגדרות &gt; עיצוב וצבעים מחכה לך רקע ״זהב VIP״.</small></div></li>
+      <li><span>🚀</span><div><b>חידושים לפני כולם</b><small>דברים חדשים יגיעו קודם אלייך.</small></div></li>
+    </ul>
+    <div class="foot"><button class="btn primary" type="button" id="vipGold">🎨 לנסות את הזהב</button><button class="btn" type="button" id="vipOk">תודה! 💛</button></div>
+  </form>
+</dialog>
 <dialog class="sheet" id="genderSheet" aria-labelledby="genderH">
   <form method="dialog">
     <h2 id="genderH" data-e="🙋">איך לפנות אליך?</h2>
@@ -5776,6 +5792,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     const box = $("palGrid"), cur = BP.get(), dark = BP.isDark();
     box.innerHTML = "";
     BP.list.forEach(([id, name]) => {
+      if (id === "gold" && !isVip()) return;
       const v = BP.vars(id, dark) || (dark ? { "--bg": "#17121f", "--surface": "#221b2e" } : { "--bg": "#fff6ee", "--surface": "#ffffff" });
       const b = document.createElement("button"); b.type = "button"; b.setAttribute("aria-pressed", String(id === cur));
       const sw = document.createElement("span"); sw.className = "palsw"; sw.style.background = v["--bg"];
@@ -5983,6 +6000,22 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   // ---- Owner tools: which version each user runs, messages to everyone, the admin page ----
   const OWNER_ID = "75753136-73de-4975-bc7a-5897db6ae434";
   const isAdmin = () => !!(user && user.id === OWNER_ID);
+  // VIP users (owner's pick, 2026-10-07: Shani Dahan only): crown, welcome sheet, gold palette, AI without a daily limit
+  // (also in the ai function), first in the admin list. isEarly() gates new features that open to the owner and VIPs first.
+  const VIP_IDS = ["51ee3304-84e8-4ee2-ac0c-c9ac75ed5b6d"];
+  function isVip() { return !!(user && VIP_IDS.includes(user.id)); }
+  const isEarly = () => isAdmin() || isVip();
+  function vipSync() { $("vipCrown").hidden = !isVip(); }
+  function nextIntro() {
+    if (isVip() && !store.vipSeen) { setTimeout(() => openDlg("vipSheet"), 600); return; }
+    setTimeout(() => showNews(false), 1200);
+  }
+  function vipDone() { store.vipSeen = true; persist(); closeDlg("vipSheet"); confetti(); }
+  $("vipOk").addEventListener("click", vipDone);
+  $("vipGold").addEventListener("click", () => {
+    try { localStorage.setItem("budget-palette", "gold"); } catch (e) {}
+    paintTheme(); vipDone();
+  });
   function recordSeen() {
     if (!sb || !user) return;
     let version = "web", platform = /Android/i.test(navigator.userAgent) ? "android-web" : "web";
@@ -6015,9 +6048,10 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     if (u.error) box.textContent = "לא הצלחתי לטעון: " + u.error.message;
     else {
       $("adCount").textContent = u.data.length;
+      u.data.sort((a, c) => VIP_IDS.includes(c.user_id) - VIP_IDS.includes(a.user_id));
       u.data.forEach((r) => {
         const d = document.createElement("div"); d.className = "aduser";
-        const b1 = document.createElement("b"); b1.textContent = r.email || "בלי מייל";
+        const b1 = document.createElement("b"); b1.textContent = (VIP_IDS.includes(r.user_id) ? "👑 VIP · " : "") + (r.email || "בלי מייל");
         const l1 = document.createElement("span"); l1.textContent = (r.provider === "google" ? "🔵 גוגל" : "✉️ מייל וסיסמה") + " · נרשם " + new Date(r.joined).toLocaleDateString("he-IL");
         const l2 = document.createElement("span"); l2.textContent = "פעיל: " + ago(r.last_seen || r.last_sign_in) + " · " + (r.platform === "android-app" ? "📱 אפליקציה " + (r.version || "?") : r.platform === "android-web" ? "🌐 דפדפן בטלפון" : r.platform === "web" ? "💻 דפדפן" : "גרסה לא ידועה (עוד לא נכנס מאז שהתחלנו לרשום)");
         const l3 = document.createElement("span"); l3.textContent = r.expenses + " הוצאות · " + r.shifts + " משמרות" + (r.last_entry ? " · רישום אחרון " + shortDate(r.last_entry) : "");
@@ -6466,7 +6500,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     const b = e.target.closest("[data-g]"); if (!b) return;
     setGender(b.dataset.g); persist(); render(); closeDlg("genderSheet");
     snack(b.dataset.g === "f" ? "מעולה, מעכשיו בלשון נקבה 🙂" : "מעולה, מעכשיו בלשון זכר 🙂");
-    setTimeout(() => showNews(false), 1500);
+    nextIntro();
   });
   function showNews(force) {
     let seen = ""; try { seen = localStorage.getItem("budget-news") || ""; } catch (e) {}
@@ -6560,8 +6594,8 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     applyLayout();
     if (isNewUser()) { openWizard(); try { localStorage.setItem("budget-news", NEWS_ID); } catch (e) {} }
     else if (store.onboarded && !settings().gender) setTimeout(() => { if (!settings().gender) openDlg("genderSheet"); }, 800);
-    else setTimeout(() => showNews(false), 1200);
-    $("openAdmin").hidden = !isAdmin();
+    else nextIntro();
+    $("openAdmin").hidden = !isAdmin(); vipSync();
     aiFabSync();
     recordSeen(); loadBroadcast();
     const ns = new URLSearchParams(location.search).get("newShift");
