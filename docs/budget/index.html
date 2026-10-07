@@ -952,6 +952,39 @@ body.layedit .home > [data-block], body.layedit .home > [data-block] * { user-se
 .home > [data-block], .home > [data-block] * { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
 .home > [data-block] input, .home > [data-block] textarea { -webkit-user-select: text; user-select: text; }
 body.layedit #fab, body.onsettings #fab { display: none; }
+/* ✨ the assistant: a round button on the home page and a tall sheet with the chat */
+.aifab { position: fixed; left: 16px; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); z-index: 5; width: 56px; height: 56px; border: 0; border-radius: 50%;
+  background: linear-gradient(135deg, var(--brand1, #ef5a33), var(--brand2, #db3577) 55%, var(--brand3, #7a46de)); color: #fff; font-size: 26px; box-shadow: 0 10px 26px rgba(122, 70, 222, .4); cursor: pointer; }
+.aifab:active { transform: scale(.94); }
+body.layedit .aifab, body.onsettings .aifab { display: none; }
+dialog.aisheet { height: min(92vh, 860px); }
+.aiwrap { display: flex; flex-direction: column; gap: 10px; height: 100%; padding: 16px 16px calc(14px + env(safe-area-inset-bottom, 0px)); box-sizing: border-box; }
+.aitop { display: flex; align-items: center; gap: 8px; }
+.aitop h2 { flex: 1; }
+.aitools { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; }
+.aitools button, .aistart button { flex: none; font: inherit; font-size: 14px; font-weight: 600; border: 1px solid var(--line); background: var(--surface-2); color: var(--fg); border-radius: 999px; padding: 7px 12px; cursor: pointer; white-space: nowrap; }
+.aistart { display: flex; flex-wrap: wrap; gap: 6px; }
+.aistart button { white-space: normal; text-align: start; }
+.ailog { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; min-height: 120px; }
+.aimsg { max-width: 88%; border-radius: 18px; padding: 10px 14px; font-size: 15.5px; line-height: 1.55; overflow-wrap: anywhere; }
+.aimsg.me { align-self: flex-start; background: color-mix(in srgb, var(--brand2, #db3577) 14%, var(--surface)); }
+.aimsg.ai { align-self: flex-end; background: var(--surface-2); }
+.aimsg.ai p { margin: 0 0 6px; } .aimsg.ai p:last-child { margin: 0; }
+.aimsg.err { align-self: stretch; max-width: none; background: var(--danger-soft); color: var(--danger); font-weight: 600; font-size: 14px; }
+.aimsg .aigo { margin-top: 8px; }
+.aimsg.wait { color: var(--muted); }
+.aimode { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 700; color: var(--brand2, #db3577); }
+.sheet form.aiask { display: flex; gap: 6px; align-items: flex-end; padding: 0; }
+.aiask textarea { flex: 1; min-width: 0; min-height: 46px; box-sizing: border-box; font: inherit; font-size: 16px; padding: 11px 12px; border: 1px solid var(--line); border-radius: 16px; background: var(--bg); color: var(--fg); resize: none; max-height: 120px; }
+.aiask .btn { flex: none; }
+.aiexp { display: grid; gap: 8px; max-height: 46vh; overflow-y: auto; }
+.aierow { display: grid; grid-template-columns: auto 1fr; gap: 6px 8px; align-items: center; background: var(--surface-2); border-radius: 14px; padding: 8px 10px; }
+.aierow .f { display: grid; grid-template-columns: 90px 1fr; gap: 6px; }
+.aierow .f2 { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; grid-column: 2; }
+.aierow input, .aierow select { font: inherit; font-size: 15px; padding: 6px 8px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); color: var(--fg); min-width: 0; }
+.aibody { white-space: pre-wrap; font-size: 15px; line-height: 1.55; }
+.aitotal { font-size: 14px; font-weight: 700; padding: 6px 2px; }
+.aitotal.bad { color: var(--danger); }
 
 .shiftinc { display: flex; justify-content: space-between; gap: 8px; align-items: center; padding: 10px 14px; border-radius: 12px; background: var(--surface-2); font-weight: 600; }
 .shiftinc b { font-variant-numeric: tabular-nums; }
@@ -1380,8 +1413,15 @@ body.nosave .split { grid-template-columns: 1fr; }
       <p class="hint">בלי סכומים: רק מי קיים, איך נכנס, מתי היה פעיל, איזו גרסה מותקנת אצלו וכמה רשומות יש לו.</p>
       <div class="adlist" id="adUsers"></div>
     </section>
+    <section class="panel" aria-labelledby="adAiH">
+      <h2 id="adAiH" class="pc-violet" data-e="✨">העוזר</h2>
+      <p class="hint">כמה פעמים השתמשו בעוזר ב־30 הימים האחרונים. בלי השאלות עצמן.</p>
+      <div class="adlist" id="adAi"></div>
+    </section>
     <section class="panel" aria-labelledby="adFbH">
       <h2 id="adFbH" class="pc-mint" data-e="💬">משובים</h2>
+      <div class="actions"><button class="btn" type="button" id="adFbSum">✨ סיכום המשובים לנושאים</button></div>
+      <div class="aibody" id="adFbSumOut" hidden></div>
       <div class="adlist" id="adFb"></div>
     </section>
   </div>
@@ -1532,6 +1572,33 @@ body.nosave .split { grid-template-columns: 1fr; }
 </div>
 
 <button class="fab" type="button" id="fab" hidden>💸 הוצאה</button>
+<button class="aifab" type="button" id="aiFab" hidden aria-label="העוזר: לשאול על הכסף שלך">✨</button>
+
+<dialog class="sheet aisheet" id="aiSheet" aria-labelledby="aiH">
+  <div class="aiwrap">
+    <div class="aitop">
+      <h2 id="aiH">✨ העוזר</h2>
+      <button class="linkbtn" type="button" id="aiClear">🗑️ ניקוי</button>
+      <button class="btn" type="button" id="aiClose" aria-label="סגירה">✕</button>
+    </div>
+    <div class="aitools" role="group" aria-label="מה העוזר יכול לעשות">
+      <button type="button" data-ai="exp">✍️ כמה הוצאות במשפט</button>
+      <button type="button" data-ai="shift">📷 דוח נוכחות למשמרות</button>
+      <button type="button" data-ai="letter">💌 מכתב החודש</button>
+      <button type="button" data-ai="patterns">🔍 ההרגלים שלי</button>
+    </div>
+    <div class="ailog" id="aiLog" aria-live="polite"></div>
+    <div class="aistart" id="aiStart"></div>
+    <div class="aiexp" id="aiExp" hidden></div>
+    <div class="aimode" id="aiMode" hidden><span id="aiModeTxt"></span><button class="linkbtn" type="button" id="aiModeOff">✕ חזרה לשאלות</button></div>
+    <form class="aiask" id="aiForm" novalidate>
+      <textarea id="aiIn" rows="1" maxlength="1500" placeholder="שאל על הכסף שלך…" autocomplete="off"></textarea>
+      <button class="btn" type="button" id="aiMic" aria-label="להגיד במקום להקליד" hidden>🎤</button>
+      <button class="btn primary" type="submit" id="aiSend">שלח</button>
+    </form>
+    <p class="hint" id="aiFoot">העוזר לא משנה כלום לבד, והשיחה לא נשמרת בשרת.</p>
+  </div>
+</dialog>
 
 <dialog class="sheet" id="sheet" aria-labelledby="sheetH">
   <form id="txForm" method="dialog" novalidate>
@@ -1598,6 +1665,9 @@ body.nosave .split { grid-template-columns: 1fr; }
       <p class="hint">בחילן נט (באתר, לא באפליקציה) פותחים את דוח הנוכחות של החודש, מסמנים את הטבלה עם העכבר, מעתיקים ומדביקים כאן. אם יש כפתור ייצוא לאקסל, אפשר גם להעלות את הקובץ. כל שורה עם תאריך ושתי שעות הופכת למשמרת.</p>
       <label for="impText">הדבקה<textarea id="impText" rows="5" placeholder="01/09 ב׳ 08:00 16:30&#10;02/09 ג׳ 14:00 22:15"></textarea></label>
       <label for="impFile">או קובץ (אקסל, CSV או טקסט)<input type="file" id="impFile" accept=".xlsx,.xls,.csv,.txt,text/plain,text/csv"></label>
+      <button class="btn" type="button" id="impPhotoBtn" hidden>📷 צילום של דוח הנוכחות (העוזר ✨ יקרא אותו)</button>
+      <input type="file" id="impPhoto" accept="image/*" hidden>
+      <p class="hint" id="impAiState" hidden></p>
     </div>
     <div id="impDaysBox" hidden>
       <p class="hint">מסמנים את כל הימים שעבדת באותן שעות. נקודה מסמנת יום שכבר יש בו משמרת.</p>
@@ -1610,6 +1680,7 @@ body.nosave .split { grid-template-columns: 1fr; }
     </div>
     <label for="impBreak">הפסקה שלא משולמת בכל משמרת (דקות)<input type="number" id="impBreak" min="0" max="600" step="5" inputmode="numeric" value="0"></label>
     <fieldset class="chips" id="impKinds"><legend>סוג המשמרות</legend></fieldset>
+    <div class="aitotal" id="impAiTotal" hidden></div>
     <div class="implist" id="impList" aria-live="polite"></div>
     <div class="err" id="impErr" role="alert" hidden></div>
     <div class="foot">
@@ -3750,6 +3821,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 
   // ---- Quick import: paste a Hilan attendance report, a file, or pick many days with the same hours ----
   let impMode = "paste", impRows = [], impPicked = new Set();
+  let impAi = null, impAiTotal = 0; // from a photo of the attendance sheet: per-day unpaid break and note, and the sheet's total minutes
   const XLSX_URL = "https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js";
   // Finds the first date on a line (dd/mm, dd.mm.yy, dd-mm-yyyy or yyyy-mm-dd) and the first two clock times after it.
   // Hilan rows list entry and exit first; later times on the row are totals, so they are ignored.
@@ -3836,7 +3908,8 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     const known = (d) => Object.values(shifts).some((l) => l.some((r) => r.work_date === d.work_date && r.start_time === d.start_time));
     const prev = new Map(impRows.map((r) => [r.work_date + r.start_time, r.on]));
     impRows = impCandidates().map((c) => {
-      const row = { ...c, break_min: br, wage, ...kind, note: "" };
+      const ai = impAi && impAi.get(c.work_date + c.start_time);
+      const row = { ...c, break_min: ai && ai.break_min != null ? ai.break_min : br, wage, ...kind, note: ai ? ai.note : "" };
       const dup = known(c), k = c.work_date + c.start_time;
       return { row, dup, on: prev.has(k) ? prev.get(k) : !dup, pay: shiftPay(row, settings()) };
     });
@@ -3864,6 +3937,14 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   }
   function impFoot() {
     const on = impRows.filter((r) => r.on);
+    const tb = $("impAiTotal");
+    tb.hidden = !(impAiTotal > 0 && impMode === "paste");
+    if (!tb.hidden) {
+      const mine = on.reduce((s, r) => s + r.pay.paidMin, 0);
+      const hm = (m) => "\u2066" + Math.floor(m / 60) + ":" + pad(m % 60) + "\u2069";
+      tb.textContent = "סה״כ שעות בדוח: " + hm(impAiTotal) + " · כאן: " + hm(mine) + (mine === impAiTotal ? " ✓ תואם" : " ⚠️ לא תואם, כדאי לבדוק");
+      tb.className = "aitotal" + (mine === impAiTotal ? "" : " bad");
+    }
     const gross = on.reduce((s, r) => s + r.pay.gross, 0);
     $("impSave").textContent = on.length ? "הוספת " + on.length + " משמרות · " + fmt(gross) + " ברוטו" : "הוספה";
     $("impSave").disabled = !on.length;
@@ -3903,6 +3984,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   function openImport() {
     if (!(+settings().wage > 0)) { $("wage").focus(); snack("קודם תרשום כמה אתה מרוויח לשעה."); return; }
     impRows = []; impPicked = new Set(); $("impText").value = ""; $("impFile").value = ""; $("impErr").hidden = true;
+    impAi = null; impAiTotal = 0; $("impAiState").hidden = true; $("impPhotoBtn").hidden = !aiReady();
     const last = (shifts[month] || [])[0];
     if (last) { $("impStart").value = last.start_time; $("impEnd").value = last.end_time; $("impBreak").value = last.break_min || 0; }
     const box = $("impKinds");
@@ -5449,7 +5531,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     if (v.amount > 0) $("txAmount").value = v.amount;
     showHours();
   }
-  window.onVoice = (text) => { if (text) applyVoice(text); else { $("voiceHint").hidden = false; $("voiceHint").textContent = "לא שמעתי. נסה שוב, למשל: ״קפה שתים עשרה שקל״."; } };
+  window.onVoice = (text) => { if ($("aiSheet").open) { aiHeard(text); return; } if (text) applyVoice(text); else { $("voiceHint").hidden = false; $("voiceHint").textContent = "לא שמעתי. נסה שוב, למשל: ״קפה שתים עשרה שקל״."; } };
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   const voiceApp = () => (window.BudgetApp && BudgetApp.listen ? window.BudgetApp : null);
   $("voiceBtn").hidden = !(voiceApp() || SR);
@@ -5557,6 +5639,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     $("viewCal").hidden = view !== "calendar";
     document.querySelectorAll(".tabs a").forEach((a) => a.setAttribute("aria-current", String(a.dataset.view === view)));
     $("fab").textContent = view === "shifts" ? "⏰ משמרת" : "💸 הוצאה";
+    aiFabSync();
     if (!fromHash) { const h = view === "main" ? "" : "#" + view; if (location.hash !== h) history.replaceState(null, "", location.pathname + h); }
     if (view === "calendar") renderCal();
     if (view === "shifts") renderShifts();
@@ -5836,6 +5919,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       sb.from("feedback").select("kind, body, page, created_at").order("created_at", { ascending: false }).limit(50),
       sb.from("broadcasts").select("id, body, push, active, created_at").order("id", { ascending: false }).limit(10)
     ]);
+    renderAdminAi(u.data);
     const box = $("adUsers"); box.innerHTML = "";
     if (u.error) box.textContent = "לא הצלחתי לטעון: " + u.error.message;
     else {
@@ -5881,6 +5965,399 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   });
 
   // ---- "What's new" after an update ----
+  // ---- ✨ The assistant (Gemini through the "ai" Supabase function; the key never reaches the page) ----
+  // It only answers and suggests: anything it would log shows up as a list to approve first.
+  // The chat stays on this phone only (localStorage), nothing of it is kept on the server.
+  const AI_URL = SUPABASE_URL + "/functions/v1/ai";
+  const AI_ERR = {
+    limit: "הגעת ל־20 שאלות היום. מחר אפשר שוב.",
+    busy: "העוזר עמוס עכשיו (הוא במסלול חינמי). נסה שוב בעוד דקה.",
+    nokey: "העוזר עוד לא מחובר. נסה שוב מאוחר יותר.",
+    parse: "לא הצלחתי להבין את זה. נסה לנסח אחרת.",
+    auth: "צריך להתחבר מחדש לאפליקציה.",
+    offline: "אין אינטרנט כרגע.",
+    fail: "משהו השתבש אצל העוזר. נסה שוב עוד מעט."
+  };
+  const AI_STARTERS = [
+    "כמה הוצאתי החודש על אוכל בחוץ?",
+    "באיזה חודש הכי בזבזתי?",
+    "כמה משמרות חסרות לי ליעד החודש?",
+    "איך מוסיפים מנוי?",
+    "מגיע לי תשלום על עבודה בחג?"
+  ];
+  const AI_GO = {
+    settings: ["⚙️ להגדרות", () => setView("settings")],
+    look: ["🎨 לעיצוב וצבעים", () => setView("look")],
+    home: ["🏠 לדף הבית", () => setView("main")],
+    shifts: ["⏰ ללשונית המשמרות", () => setView("shifts")],
+    calendar: ["📅 ללוח השנה", () => setView("calendar")],
+    add: ["💸 להוספת הוצאה", () => { setView("main"); openSheet(); }],
+    import: ["📥 לייבוא משמרות", () => { setView("shifts"); openImport(); }],
+    feedback: ["💬 לשליחת משוב", () => $("feedbackBtn").click()],
+    rec: ["🔁 למנויים וחיובים קבועים", () => aiGoBlock("rec")],
+    cats: ["🛍️ לקטגוריות", () => aiGoBlock("cats")],
+    goals: ["🎯 ליעדי החיסכון", () => aiGoBlock("goals")],
+    wish: ["🤔 ל״אולי אקנה״", () => aiGoBlock("wish")],
+    quick: ["⚡ לרישום בלחיצה", () => aiGoBlock("quick")],
+    statement: ["🏦 לכל ההוצאות של החודש", () => aiGoBlock("statement")],
+    challenge: ["🏅 לאתגר החודש", () => aiGoBlock("challenge")],
+    habits: ["🧠 להרגלים שלי", () => aiGoBlock("habits")],
+    plan: ["📝 לתוכנית החודש", () => aiGoBlock("plan")]
+  };
+  const AI_GUIDE = "מבנה האפליקציה: למעלה לוגו, גלגל שיניים ⚙ של הגדרות ליד תמונת הפרופיל, ובורר חודש. שלוש לשוניות למעלה: ראשי / משמרות / לוח שנה. בדף הראשי יש אריחים שאפשר לסדר (לחיצה ארוכה על אריח פותחת מצב עריכה: גוררים ⠿, 👁 מסתיר, ✓ שומר; או בהגדרות > פריסת דף הבית). כפתור 💸 הוצאה למטה פותח טופס הוצאה (סכום, קטגוריה, פירוט, תאריך, צריך/רוצה, למה קניתי, ⭐ שמירה ככפתור, חיוב קבוע כל חודש, ״אולי אקנה״ ל־48 שעות). בלשונית משמרות: כפתור ⏰ משמרת, ייבוא משמרות (הדבקה מחילן, כמה ימים ביחד, צילום דוח), הגדרות שכר, יעד הכנסה לחודש. הגדרות > כללי: מתי מתחיל החודש, טון ההודעות, מתי לספור את הכסף מהמשמרות, תזכורת ערב. הגדרות > עיצוב וצבעים: בהיר/כהה, צבע רקע, צבע מבטא, גודל טקסט, רטט וקונפטי. ✨ הוא העוזר עצמו.\n"
+    + "הסברים על כל אריח:\n" + Object.values(HELP).map((t) => "- " + t).join("\n")
+    + "\nיעדים לכפתור [[go:...]]: " + Object.keys(AI_GO).map((k) => k + "=" + AI_GO[k][0]).join(", ");
+  let aiMode = "", aiBusy = false, aiChat = [], aiExpRows = [];
+  var aiOk = null; // var: aiFabSync can run from setView before this block is reached
+  function aiReady() { return !!(sb && user); }
+  const aiKey = () => "budget-ai-" + (user ? user.id : "");
+  // The ✨ button shows only once the server says the assistant is connected (key set and valid)
+  function aiFabSync() {
+    $("aiFab").hidden = !aiReady() || aiOk !== true || view !== "main" || $("app").hidden;
+    if (aiReady() && aiOk === null) {
+      aiOk = false;
+      fetch(SUPABASE_URL + "/functions/v1/ai?ping=1", { method: "POST", headers: { Authorization: "Bearer " + SUPABASE_KEY, apikey: SUPABASE_KEY, "Content-Type": "application/json" }, body: "{}" })
+        .then((r) => r.json()).then((j) => { aiOk = !!(j && j.ok); aiFabSync(); }).catch(() => { aiOk = null; });
+    }
+  }
+  function aiLoadChat() { try { aiChat = JSON.parse(localStorage.getItem(aiKey()) || "[]"); } catch (e) { aiChat = []; } }
+  function aiSaveChat() { try { localStorage.setItem(aiKey(), JSON.stringify(aiChat.slice(-30))); } catch (e) {} }
+  function aiGoBlock(b) {
+    setView("main");
+    const el = document.querySelector('.home > [data-block="' + b + '"]');
+    if (!el || el.hidden || el.classList.contains("layhidden")) { snack("האריח הזה מוסתר. מחזירים אותו בהגדרות > פריסת דף הבית."); return; }
+    setTimeout(() => el.scrollIntoView({ behavior: "smooth", block: "start" }), 60);
+  }
+  function aiErrText(e) { return AI_ERR[(e && e.code) || "fail"] || AI_ERR.fail; }
+  async function aiCall(payload) {
+    if (!navigator.onLine) throw Object.assign(new Error("offline"), { code: "offline" });
+    const { data: s } = await sb.auth.getSession();
+    const tok = s && s.session && s.session.access_token;
+    if (!tok) throw Object.assign(new Error("auth"), { code: "auth" });
+    let r;
+    try {
+      r = await fetch(AI_URL, { method: "POST", headers: { "Content-Type": "application/json", Authorization: "Bearer " + tok, apikey: SUPABASE_KEY }, body: JSON.stringify({ tone: settings().tone || "tough", ...payload }) });
+    } catch (e) { throw Object.assign(new Error("net"), { code: "fail" }); }
+    let j = {}; try { j = await r.json(); } catch (e) {}
+    if (!r.ok || j.error) throw Object.assign(new Error(j.error || "http " + r.status), { code: AI_ERR[j.error] ? j.error : "fail" });
+    if (j.left != null) $("aiFoot").textContent = "נשארו לך היום " + j.left + " שאלות. העוזר לא משנה כלום לבד, והשיחה לא נשמרת בשרת.";
+    return j;
+  }
+  // Everything the assistant knows about this user: the plan, settings and the last ~13 months of expenses, shifts and incomes
+  async function aiContext() {
+    const since = dateAdd(todayStr(), -400);
+    const [e, s, i] = await Promise.all([
+      sb.from("expenses").select("spent_on, amount, category, note, tags").gte("spent_on", since).order("spent_on"),
+      sb.from("shifts").select("work_date, start_time, end_time, break_min, wage, kind, kind_rate, note").gte("work_date", since).order("work_date"),
+      sb.from("incomes").select("received_on, amount, kind, note").gte("received_on", since).order("received_on")
+    ]);
+    const names = catNames(), st = settings();
+    const parentOf = {}; Object.values(store.months).forEach((m) => (m.cats || []).forEach((c) => { if (c.parent) parentOf[c.id] = c.parent; }));
+    const catLabel = (id) => (parentOf[id] && names[parentOf[id]] ? names[parentOf[id]] + " > " : "") + (names[id] || "לא ידוע");
+    const wd = (d) => ["א", "ב", "ג", "ד", "ה", "ו", "ש"][new Date(d + "T12:00").getDay()];
+    const types = {}; shiftTypes().forEach((t) => { types[t.id] = t.name; });
+    const L = [];
+    L.push("היום: " + todayStr() + " (יום " + wd(todayStr()) + "). החודש המוצג באפליקציה: " + month + ". חודש תקציבי מתחיל ב־" + startDay() + " לחודש.");
+    L.push("הגדרות: " + JSON.stringify({ טון: st.tone, שכר_לשעה: st.wage, יום_משכורת: st.payday, יעד_הכנסה_חודשי_ברוטו: st.payGoal, שעות_נוספות_אחרי: st.otAfter, הכסף_מהמשמרות_נספר: { same: "באותו חודש", prev: "בחודש שאחרי", off: "לא נספר" }[shiftIncomeFrom()] }));
+    const p = plan();
+    L.push("\n== החודש המוצג (" + month + ") ==");
+    L.push("הכנסות בתוכנית: " + (p.d.income.map((x) => x.name + " " + x.amount).join(", ") || "אין") + " · מהמשמרות: " + p.shiftInc + " · סה״כ הכנסה: " + p.inc);
+    L.push("חיובים קבועים: " + (p.d.expenses.map((x) => x.name + " " + x.amount).join(", ") || "אין") + " · סה״כ " + p.exp + " · כסף חופשי להוצאות היומיום: " + p.spend);
+    L.push("יעדים לקטגוריות (לא חובה, רק למעקב): " + p.d.cats.map((c) => catLabel(c.id) + " " + (+c.budget || 0)).join(", "));
+    const today = ["todayLbl", "todayVal", "todayFc", "todayLine"].map((id) => $(id) && $(id).textContent.trim()).filter(Boolean).join(" · ");
+    L.push("כרטיס ״מותר לך היום״: " + today + " · " + $("todayMore").textContent.replace(/\s+/g, " ").trim());
+    const extra = {};
+    ["goals", "wishlist", "favs", "challenge", "chalHist", "badges", "noWork"].forEach((k) => { if (store[k] && JSON.stringify(store[k]) !== "[]" && JSON.stringify(store[k]) !== "{}") extra[k] = store[k]; });
+    L.push("עוד נתונים מהאפליקציה (JSON): " + JSON.stringify(extra));
+    const byM = {};
+    const mon = (m) => (byM[m] = byM[m] || { exp: 0, cats: {}, gross: 0, min: 0, n: 0, inc: 0 });
+    L.push("\n== הוצאות (תאריך | יום | ₪ | קטגוריה | פירוט | סימונים) ==");
+    (e.data || []).forEach((r) => {
+      const m = mon(periodOf(r.spent_on)), c = catLabel(r.category);
+      m.exp += +r.amount; m.cats[c] = (m.cats[c] || 0) + +r.amount;
+      const t = r.tags || {};
+      L.push([r.spent_on, wd(r.spent_on), +r.amount, c, r.note || "", [t.nw === "need" ? "צריך" : t.nw === "want" ? "רוצה" : "", t.mood ? "מצב:" + ((moodOf(t.mood) || [])[2] || t.mood) : "", t.regret ? "התחרט" : ""].filter(Boolean).join(" ")].join(" | "));
+    });
+    L.push("\n== משמרות (תאריך | יום | כניסה-יציאה | הפסקה בדקות | שעות לתשלום | ברוטו ₪ | סוג | הערה) ==");
+    (s.data || []).forEach((r) => {
+      const pay = shiftPay(r, st), m = mon(periodOf(r.work_date));
+      m.gross += pay.gross; m.min += pay.paidMin; m.n++;
+      L.push([r.work_date, wd(r.work_date), r.start_time + "-" + r.end_time, r.break_min || 0, (pay.paidMin / 60).toFixed(2), Math.round(pay.gross), types[r.kind] || "רגילה", r.note || ""].join(" | "));
+    });
+    L.push("\n== הכנסות חד־פעמיות (תאריך | ₪ | סוג | הערה) ==");
+    (i.data || []).forEach((r) => { mon(periodOf(r.received_on)).inc += +r.amount; L.push([r.received_on, +r.amount, r.kind || "", r.note || ""].join(" | ")); });
+    L.push("\n== סיכום לפי חודש תקציבי ==");
+    Object.keys(byM).sort().forEach((k) => {
+      const m = byM[k], pl = store.months[k];
+      const planInc = pl ? pl.income.reduce((a, x) => a + (+x.amount || 0), 0) : 0, fixed = pl ? pl.expenses.reduce((a, x) => a + (+x.amount || 0), 0) : 0;
+      L.push(k + ": הוצאות יומיום " + Math.round(m.exp) + " (" + Object.entries(m.cats).sort((a, b) => b[1] - a[1]).map(([c, v]) => c + " " + Math.round(v)).join(", ") + ") · משמרות " + m.n + " (" + (m.min / 60).toFixed(1) + " שעות, " + Math.round(m.gross) + " ברוטו) · הכנסות חד־פעמיות " + Math.round(m.inc) + " · הכנסה בתוכנית " + planInc + " · חיובים קבועים " + fixed);
+    });
+    L.push("\n== מדריך האפליקציה ==\n" + AI_GUIDE);
+    return L.join("\n");
+  }
+  function aiRenderText(el, text) {
+    // Plain paragraphs with **bold**, links, and [[go:x]] turned into a button; built with textContent only
+    const go = [];
+    text = text.replace(/\[\[go:([a-z]+)\]\]/g, (_, k) => { if (AI_GO[k] && !go.includes(k)) go.push(k); return ""; }).trim();
+    text.split(/\n+/).forEach((line) => {
+      if (!line.trim()) return;
+      const p = document.createElement("p");
+      line.split(/(\*\*[^*]+\*\*|https?:\/\/[^\s)]+)/).forEach((part) => {
+        if (/^\*\*[^*]+\*\*$/.test(part)) { const b = document.createElement("b"); b.textContent = part.slice(2, -2); p.append(b); }
+        else if (/^https?:\/\//.test(part)) { const a = document.createElement("a"); a.href = part; a.target = "_blank"; a.rel = "noopener"; a.textContent = part.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, ""); a.addEventListener("click", (ev) => { if (window.BudgetApp && BudgetApp.openExternal) { ev.preventDefault(); BudgetApp.openExternal(part); } }); p.append(a); }
+        else p.append(part.replace(/^\s*[*-]\s+/, "• "));
+      });
+      el.append(p);
+    });
+    go.forEach((k) => {
+      const b = document.createElement("button"); b.type = "button"; b.className = "btn aigo"; b.textContent = AI_GO[k][0];
+      b.addEventListener("click", () => { closeDlg("aiSheet"); AI_GO[k][1](); });
+      el.append(b);
+    });
+  }
+  function aiPaint() {
+    const log = $("aiLog"); log.innerHTML = "";
+    if (!aiChat.length) {
+      const d = document.createElement("div"); d.className = "aimsg ai";
+      aiRenderText(d, say("שאל אותי כל דבר על הכסף שלך: כמה הוצאת, על מה, כמה הרווחת, ואיך עושים משהו באפליקציה. אני רואה את כל הנתונים שלך, אז בלי תירוצים.",
+        "שאל אותי כל דבר על הכסף שלך: כמה הוצאת, על מה, כמה הרווחת, ואיך עושים משהו באפליקציה.",
+        "היי! 😊 אפשר לשאול אותי כל דבר על הכסף שלך: כמה הוצאת, על מה, כמה הרווחת, ואיך עושים משהו באפליקציה."));
+      log.append(d);
+    }
+    aiChat.forEach((m) => {
+      const d = document.createElement("div"); d.className = "aimsg " + (m.role === "ai" ? "ai" : m.role === "err" ? "err" : "me");
+      if (m.role === "ai") aiRenderText(d, m.text); else d.textContent = m.text;
+      log.append(d);
+    });
+    if (aiBusy) { const w = document.createElement("div"); w.className = "aimsg ai wait"; w.textContent = "✨ חושב…"; log.append(w); }
+    const sb0 = $("aiStart"); sb0.innerHTML = "";
+    sb0.hidden = !!aiChat.length || !!aiMode;
+    AI_STARTERS.forEach((q) => { const b = document.createElement("button"); b.type = "button"; b.textContent = q; b.addEventListener("click", () => aiAsk(q)); sb0.append(b); });
+    $("aiMode").hidden = !aiMode;
+    $("aiModeTxt").textContent = aiMode === "exp" ? "✍️ רישום הוצאות: כתוב או אמור כמה הוצאות ביחד" : "";
+    $("aiIn").placeholder = aiMode === "exp" ? "קפה 18, פיצה 60, דלק 200" : "שאל על הכסף שלך…";
+    $("aiSend").disabled = aiBusy;
+    setTimeout(() => { log.scrollTop = log.scrollHeight; }, 0);
+  }
+  function aiPush(role, text) { aiChat.push({ role, text }); if (role !== "err") aiSaveChat(); aiPaint(); }
+  async function aiRun(label, payload, onOk) {
+    if (aiBusy) return;
+    aiBusy = true; aiChat = aiChat.filter((m) => m.role !== "err"); if (label) aiChat.push({ role: "me", text: label }); aiPaint();
+    try {
+      const ctx = payload.tool === "expenses" ? "" : await aiContext();
+      const j = await aiCall({ ...payload, context: payload.context || ctx });
+      aiBusy = false;
+      onOk(j);
+    } catch (e) {
+      aiBusy = false;
+      aiPush("err", aiErrText(e));
+    }
+    aiSaveChat(); aiPaint();
+  }
+  function aiAsk(q) {
+    q = String(q || "").trim(); if (!q) return;
+    $("aiIn").value = "";
+    if (aiMode === "exp") { aiParseExpenses(q); return; }
+    const history = aiChat.filter((m) => m.role === "me" || m.role === "ai").slice(-10);
+    aiRun(q, { tool: "chat", input: q, history }, (j) => aiPush("ai", j.text));
+  }
+  // ---- Several expenses in one sentence: parsed, then shown as a list to fix and approve ----
+  function aiParseExpenses(text) {
+    const cats = data().cats.map((c) => ({ id: c.id, name: catNames()[c.id] }));
+    const ctx = "היום: " + todayStr() + "\nהקטגוריות (id: שם): " + cats.map((c) => c.id + ": " + c.name).join(", ");
+    aiRun("✍️ " + text, { tool: "expenses", input: text, context: ctx }, (j) => {
+      const ids = new Set(cats.map((c) => c.id)), t = todayStr();
+      const items = ((j.data && j.data.items) || []).filter((x) => +x.amount > 0);
+      if (!items.length) { aiPush("ai", "לא מצאתי סכומים במה שכתבת. נסה למשל: ״קפה 18, פיצה 60״."); return; }
+      aiExpRows = items.map((x) => ({ on: true, amount: Math.round(+x.amount * 100) / 100, note: String(x.note || "").slice(0, 200), cat: ids.has(x.cat) ? x.cat : "", date: /^\d{4}-\d\d-\d\d$/.test(x.date) && x.date <= t ? x.date : t }));
+      aiPush("ai", "מצאתי " + aiExpRows.length + (aiExpRows.length === 1 ? " הוצאה" : " הוצאות") + ". בדוק, תקן אם צריך ולחץ ״רישום״.");
+      aiPaintExp();
+    });
+  }
+  function aiPaintExp() {
+    const box = $("aiExp"); box.innerHTML = ""; box.hidden = !aiExpRows.length;
+    if (!aiExpRows.length) return;
+    const cats = data().cats, names = catNames();
+    aiExpRows.forEach((r, i) => {
+      const row = document.createElement("div"); row.className = "aierow";
+      const cb = document.createElement("input"); cb.type = "checkbox"; cb.checked = r.on; cb.setAttribute("aria-label", "לרשום את ההוצאה הזו");
+      cb.addEventListener("change", () => { r.on = cb.checked; aiExpFoot(); });
+      const f = document.createElement("div"); f.className = "f";
+      const am = document.createElement("input"); am.type = "number"; am.inputMode = "decimal"; am.min = "0"; am.step = "0.01"; am.value = r.amount; am.setAttribute("aria-label", "סכום");
+      am.addEventListener("input", () => { r.amount = Math.round((parseFloat(am.value) || 0) * 100) / 100; aiExpFoot(); });
+      const nt = document.createElement("input"); nt.type = "text"; nt.maxLength = 200; nt.value = r.note; nt.autocomplete = "off"; nt.setAttribute("aria-label", "פירוט");
+      nt.addEventListener("input", () => { r.note = nt.value; });
+      f.append(am, nt);
+      const f2 = document.createElement("div"); f2.className = "f2";
+      const sel = document.createElement("select"); sel.setAttribute("aria-label", "קטגוריה");
+      const o0 = document.createElement("option"); o0.value = ""; o0.textContent = "בחר קטגוריה…"; sel.append(o0);
+      cats.forEach((c) => { const o = document.createElement("option"); o.value = c.id; o.textContent = catIcon(c) + " " + (names[c.id] || "בלי שם"); sel.append(o); });
+      sel.value = r.cat; sel.addEventListener("change", () => { r.cat = sel.value; aiExpFoot(); });
+      const dt = document.createElement("input"); dt.type = "date"; dt.value = r.date; dt.max = todayStr(); dt.setAttribute("aria-label", "תאריך");
+      dt.addEventListener("change", () => { r.date = dt.value; });
+      f2.append(sel, dt);
+      row.append(cb, f, document.createElement("span"), f2);
+      row.children[2].hidden = true;
+      box.append(row);
+    });
+    const foot = document.createElement("div"); foot.className = "foot"; foot.style.display = "flex"; foot.style.gap = "8px";
+    const save = document.createElement("button"); save.type = "button"; save.className = "btn primary"; save.id = "aiExpSave";
+    save.addEventListener("click", aiSaveExpenses);
+    const cancel = document.createElement("button"); cancel.type = "button"; cancel.className = "btn"; cancel.textContent = "ביטול";
+    cancel.addEventListener("click", () => { aiExpRows = []; aiPaintExp(); });
+    foot.append(save, cancel); box.append(foot);
+    aiExpFoot();
+  }
+  function aiExpFoot() {
+    const on = aiExpRows.filter((r) => r.on && r.amount > 0), b = $("aiExpSave");
+    if (!b) return;
+    b.textContent = on.length ? "רישום " + (on.length === 1 ? "הוצאה אחת" : on.length + " הוצאות") + " · " + fmt(on.reduce((s, r) => s + r.amount, 0)) : "רישום";
+    b.disabled = !on.length;
+  }
+  function aiSaveExpenses() {
+    const on = aiExpRows.filter((r) => r.on && r.amount > 0);
+    if (!on.length) return;
+    if (on.some((r) => !r.cat)) { aiPush("err", "בחר קטגוריה לכל הוצאה שמסומנת."); return; }
+    if (on.some((r) => !/^\d{4}-\d\d-\d\d$/.test(r.date))) { aiPush("err", "חסר תאריך באחת ההוצאות."); return; }
+    const now = Date.now();
+    const rows = on.map((r, i) => ({ id: uid(), amount: r.amount, category: r.cat, spent_on: r.date, note: r.note.trim().slice(0, 200), tags: null, created_at: new Date(now + i).toISOString() }));
+    if (rows.some((r) => periodOf(r.spent_on) === month)) commit();
+    rows.forEach((r) => { remember(r); addTx(r); });
+    persist();
+    buzz();
+    aiExpRows = []; aiPaintExp();
+    const total = rows.reduce((s, r) => s + r.amount, 0);
+    aiPush("ai", "✓ נרשמו " + (rows.length === 1 ? "הוצאה אחת" : rows.length + " הוצאות") + ", " + fmt(total) + ".");
+    aiMode = ""; aiPaint();
+    showPeriodOf(rows[rows.length - 1].spent_on);
+    snack("נרשמו " + rows.length + " הוצאות, " + fmt(total) + ".", () => { rows.forEach((r) => delTx(r.id)); renderTracking(); });
+    afterSpend(rows[rows.length - 1]);
+  }
+  // ---- Open, tools, voice ----
+  function aiOpen() {
+    if (!aiReady()) return;
+    aiLoadChat(); aiMode = ""; aiExpRows = []; aiPaintExp();
+    $("aiMic").hidden = !(voiceApp() || SR);
+    openDlg("aiSheet"); aiPaint();
+  }
+  function aiHeard(text) {
+    if (!text) { snack("לא שמעתי. נסה שוב."); return; }
+    $("aiIn").value = ($("aiIn").value ? $("aiIn").value + " " : "") + text;
+    $("aiIn").focus();
+  }
+  $("aiFab").addEventListener("click", aiOpen);
+  $("aiClose").addEventListener("click", () => closeDlg("aiSheet"));
+  $("aiClear").addEventListener("click", () => { aiChat = []; aiExpRows = []; try { localStorage.removeItem(aiKey()); } catch (e) {} aiPaintExp(); aiPaint(); });
+  $("aiModeOff").addEventListener("click", () => { aiMode = ""; aiPaint(); });
+  $("aiForm").addEventListener("submit", (e) => { e.preventDefault(); aiAsk($("aiIn").value); });
+  $("aiIn").addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); aiAsk($("aiIn").value); } });
+  $("aiIn").addEventListener("input", () => { const t = $("aiIn"); t.style.height = "auto"; t.style.height = Math.min(120, t.scrollHeight) + "px"; });
+  $("aiMic").addEventListener("click", () => {
+    const app = voiceApp();
+    if (app) { try { app.listen(); } catch (e) {} return; }
+    try {
+      const r = new SR(); r.lang = "he-IL"; r.interimResults = false; r.maxAlternatives = 1;
+      r.onresult = (e) => aiHeard(e.results[0][0].transcript);
+      r.onerror = () => aiHeard("");
+      r.start();
+    } catch (e) { aiHeard(""); }
+  });
+  document.querySelectorAll("#aiSheet [data-ai]").forEach((b) => b.addEventListener("click", () => {
+    const k = b.dataset.ai;
+    if (k === "exp") { aiMode = "exp"; aiPaint(); $("aiIn").focus(); return; }
+    if (k === "shift") {
+      closeDlg("aiSheet"); setView("shifts"); openImport();
+      if ($("importSheet").open || $("importSheet").hasAttribute("open")) $("impPhoto").click();
+      return;
+    }
+    aiMode = ""; 
+    const cur = periodOf(todayStr()) === month;
+    if (k === "letter") aiRun("💌 מכתב על " + monthName(month), { tool: "letter", input: "החודש: " + month + " (" + monthName(month) + ")." + (cur ? " החודש עוד לא נגמר: כתוב על מה שהיה עד היום, והמשימה היא לשאר החודש." : "") }, (j) => aiPush("ai", j.text));
+    if (k === "patterns") aiRun("🔍 ההרגלים הנסתרים שלי", { tool: "patterns" }, (j) => aiPush("ai", j.text));
+  }));
+  // ---- A photo of the attendance sheet becomes rows in "ייבוא משמרות" ----
+  function aiShrink(file) {
+    return new Promise((res, rej) => {
+      const img = new Image(), url = URL.createObjectURL(file);
+      img.onload = () => {
+        const k = Math.min(1, 2000 / Math.max(img.width, img.height));
+        const c = document.createElement("canvas"); c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+        c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+        URL.revokeObjectURL(url);
+        res(c.toDataURL("image/jpeg", 0.85).split(",")[1]);
+      };
+      img.onerror = () => { URL.revokeObjectURL(url); rej(new Error("img")); };
+      img.src = url;
+    });
+  }
+  $("impPhotoBtn").addEventListener("click", () => $("impPhoto").click());
+  $("impPhoto").addEventListener("change", async () => {
+    const f = $("impPhoto").files[0]; if (!f) return;
+    const st = $("impAiState"); st.hidden = false; st.textContent = "✨ העוזר קורא את הדוח… זה לוקח כמה שניות.";
+    $("impPhotoBtn").disabled = true;
+    try {
+      const image = await aiShrink(f);
+      const j = await aiCall({ tool: "shiftsheet", input: "חודש הייחוס (אם השנה או החודש לא כתובים): " + month, image, mime: "image/jpeg" });
+      const rows = (j.data && j.data.rows) || [], lines = [];
+      const hmMin = (v) => { const m = String(v || "").match(/(\d{1,3}):(\d{2})/); return m ? +m[1] * 60 + +m[2] : 0; };
+      impAi = new Map();
+      rows.forEach((r) => {
+        if (!/^\d{4}-\d\d-\d\d$/.test(r.date || "")) return;
+        let a = normTime(r.in || ""), b = normTime(r.out || "");
+        const paid = hmMin(r.hours);
+        let note = String(r.note || "").trim().slice(0, 200);
+        if (!a || !b || a === b) {
+          // A paid day off has no clock times: it goes in as hours equal to the paid time, with a note
+          if (!(paid > 0)) return;
+          a = "08:00"; b = pad(Math.floor((480 + paid) / 60) % 24) + ":" + pad((480 + paid) % 60); note = note || "חופשה";
+        }
+        const span = (toMin(b) - toMin(a) + 1440) % 1440 || 1440;
+        const gap = paid > 0 ? span - paid : 0;
+        impAi.set(r.date + a, { break_min: gap > 0 && gap < 240 ? gap : 0, note });
+        lines.push(r.date + " " + a + " " + b);
+      });
+      impAiTotal = hmMin(j.data && j.data.total);
+      setImpMode("paste");
+      $("impText").value = lines.join("\n");
+      renderImport();
+      st.textContent = lines.length ? "✓ העוזר מצא " + lines.length + " ימים. בדוק את הרשימה ולחץ ״הוספה״." : "לא מצאתי משמרות בתמונה. נסה צילום חד, ישר מלמעלה, שרואים בו את כל הטבלה.";
+    } catch (e) { st.textContent = e.message === "img" ? "לא הצלחתי לפתוח את התמונה." : aiErrText(e); }
+    $("impPhotoBtn").disabled = false;
+    $("impPhoto").value = "";
+  });
+  // ---- Owner: how much the assistant is used, and feedback grouped into topics ----
+  async function renderAdminAi(users) {
+    const box = $("adAi"); box.textContent = "טוען…";
+    try {
+      const j = await aiCall({ tool: "admin_usage" });
+      const rows = j.rows || [];
+      box.innerHTML = "";
+      if (!rows.length) { box.textContent = "עוד אף אחד לא השתמש בעוזר."; return; }
+      const LBL = { chat: "💬 שאלות", expenses: "✍️ רישום הוצאות", shiftsheet: "📷 דוחות נוכחות", letter: "💌 מכתבים", patterns: "🔍 הרגלים", admin_fb: "🛠️ סיכום משובים" };
+      const byTool = {}, byUser = {}, today = new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Jerusalem" });
+      let total = 0, todayN = 0;
+      rows.forEach((r) => { total += r.n; if (r.day === today) todayN += r.n; byTool[r.tool] = (byTool[r.tool] || 0) + r.n; byUser[r.user_id] = (byUser[r.user_id] || 0) + r.n; });
+      const d = document.createElement("div"); d.className = "aduser";
+      const b1 = document.createElement("b"); b1.textContent = total + " שימושים ב־30 יום · " + todayN + " היום";
+      const l1 = document.createElement("span"); l1.textContent = Object.entries(byTool).sort((a, b) => b[1] - a[1]).map(([t, n]) => (LBL[t] || t) + " " + n).join(" · ");
+      const l2 = document.createElement("span"); l2.textContent = "עלות: ₪0 (מסלול חינמי של Gemini)";
+      d.append(b1, l1, l2); box.append(d);
+      const em = {}; (users || []).forEach((u) => { em[u.user_id] = u.email; });
+      Object.entries(byUser).sort((a, b) => b[1] - a[1]).forEach(([id, n]) => {
+        const u = document.createElement("div"); u.className = "aduser";
+        const b = document.createElement("b"); b.textContent = em[id] || "משתמש";
+        const sp = document.createElement("span"); sp.textContent = n + " שימושים";
+        u.append(b, sp); box.append(u);
+      });
+    } catch (e) { box.textContent = aiErrText(e); }
+  }
+  $("adFbSum").addEventListener("click", async () => {
+    const out = $("adFbSumOut"); out.hidden = false; out.textContent = "✨ מסכם…"; $("adFbSum").disabled = true;
+    try { const j = await aiCall({ tool: "admin_fb" }); out.textContent = ""; aiRenderText(out, j.text); }
+    catch (e) { out.textContent = aiErrText(e); }
+    $("adFbSum").disabled = false;
+  });
+
   const NEWS_ID = "2026-10-07-r2";
   const NEWS = [
     ["🧰", "צריך או רוצה?", "בטופס ההוצאה מסמנים בלחיצה ״צריך״ או ״רוצה״, ולמה קנית (משעמם, לחוץ, מבצע…)."],
@@ -5986,6 +6463,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     if (isNewUser()) { openWizard(); try { localStorage.setItem("budget-news", NEWS_ID); } catch (e) {} }
     else setTimeout(() => showNews(false), 1200);
     $("openAdmin").hidden = !isAdmin();
+    aiFabSync();
     recordSeen(); loadBroadcast();
     const ns = new URLSearchParams(location.search).get("newShift");
     if (ns) { history.replaceState(null, "", location.pathname + location.hash); window.openShiftFromApp(ns); }
