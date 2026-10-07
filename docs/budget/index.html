@@ -1334,16 +1334,16 @@ body.nosave .split { grid-template-columns: 1fr; }
           <button type="button" data-tone="soft" aria-pressed="false">💛 עדין</button>
         </div>
       </div>
-      <div class="field"><span>הכסף מהמשמרות נכנס להכנסה של</span>
+      <div class="field"><span>מתי לספור את הכסף מהמשמרות?</span>
         <div class="seg" id="shiftIncSeg" role="group" aria-label="מאיזה חודש לקחת את הכסף מהמשמרות">
-          <button type="button" data-k="same" aria-pressed="false">אותו חודש</button>
-          <button type="button" data-k="prev" aria-pressed="false">החודש הקודם</button>
-          <button type="button" data-k="off" aria-pressed="false">לא להכניס</button>
+          <button type="button" data-k="same" aria-pressed="false">באותו חודש</button>
+          <button type="button" data-k="prev" aria-pressed="false">בחודש שאחרי</button>
+          <button type="button" data-k="off" aria-pressed="false">לא לספור</button>
         </div>
       </div>
-      <p class="hint">״אותו חודש״: ההוצאות של אוקטובר נבדקות מול המשכורת על אוקטובר. ״החודש הקודם״: מול המשכורת על ספטמבר, שנכנסת באוקטובר. הסכום הוא ברוטו לפי המשמרות שרשמת, וגדל עם כל משמרת.</p>
+      <p class="hint" id="shiftIncHint"></p>
       <div class="remind" id="dayCheckRow" hidden>
-        <label class="check" for="dayCheckOn"><input type="checkbox" id="dayCheckOn"> 🧾 סגירת יום: התראה בערב לבדוק שרשמת הכול</label>
+        <label class="check" for="dayCheckOn"><input type="checkbox" id="dayCheckOn"> 🧾 תזכורת בערב לרשום את ההוצאות של היום</label>
         <label class="field" for="dayCheckAt">בשעה<select id="dayCheckAt"><option>20:00</option><option>20:30</option><option>21:00</option><option>21:30</option><option>22:00</option><option>22:30</option><option>23:00</option></select></label>
       </div>
       <div class="actions">
@@ -3290,6 +3290,11 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     const tone = settings().tone || "tough";
     document.querySelectorAll("#toneSeg button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.tone === tone)));
     document.querySelectorAll("#shiftIncSeg button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.k === shiftIncomeFrom())));
+    $("shiftIncHint").textContent = ({
+      same: "המשמרות של החודש נספרות כהכנסה של אותו חודש.",
+      prev: "המשמרות של חודש אחד נספרות כהכנסה של החודש שאחריו, כי אז המשכורת עליהן נכנסת לבנק.",
+      off: "הכסף מהמשמרות לא נספר בהכנסה. רק מה שרשמת בתוכנית."
+    })[shiftIncomeFrom()] || "";
     $("tagline").textContent = say("כל שקל שיוצא נרשם כאן. בלי תירוצים.", "כל שקל שיוצא נרשם כאן.", "יחד נגיע לסוף החודש בשקט 💛");
     renderPaySettings();
   }
