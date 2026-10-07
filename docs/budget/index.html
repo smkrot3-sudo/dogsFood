@@ -6059,9 +6059,10 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   async function loadPersonal() {
     if (!sb || !user) return;
     try {
-      const { data } = await sb.from("personal_msgs").select("id, title, body, show_at, push, action").is("seen_at", null).order("show_at");
-      const now = Date.now(), rows = data || [];
-      pmNotes = rows.filter((m) => m.push && new Date(m.show_at) > now).map((m) => ({ id: "pm" + m.id, at: new Date(m.show_at).getTime(), title: m.title || "🚨 תזכורת", text: m.body }));
+      const { data } = await sb.from("personal_msgs").select("id, title, body, show_at, notify_at, expires_at, push, action").is("seen_at", null).order("show_at");
+      const now = Date.now(), rows = (data || []).filter((m) => !m.expires_at || new Date(m.expires_at) > now);
+      // the phone note goes off at notify_at (or show_at); the popup shows from show_at until expires_at
+      pmNotes = rows.filter((m) => m.push && new Date(m.notify_at || m.show_at) > now).map((m) => ({ id: "pm" + m.id, at: new Date(m.notify_at || m.show_at).getTime(), title: m.title || "🚨 תזכורת", text: m.body }));
       sendAppPlans();
       const due = rows.find((m) => new Date(m.show_at) <= now);
       if (!due) { const next = rows.find((m) => new Date(m.show_at) > now); if (next && new Date(next.show_at) - now < 864e5) setTimeout(loadPersonal, new Date(next.show_at) - now + 2000); return; }
