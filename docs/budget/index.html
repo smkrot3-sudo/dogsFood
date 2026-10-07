@@ -862,6 +862,9 @@ body.nosave .split { grid-template-columns: 1fr; }
 .recadd .acts { grid-column: 1 / -1; display: flex; gap: 8px; flex-wrap: wrap; }
 .recopen { margin-top: 8px; }
 
+.verupd { display: grid; gap: 8px; justify-items: center; text-align: center; padding: 4px 16px 24px; font-size: 13px; color: var(--muted); }
+.verupd .hint { user-select: all; -webkit-user-select: all; word-break: break-all; }
+
 /* Version line at the very bottom */
 .btn.catedit { justify-self: start; font-size: 14.5px; padding: 8px 14px; }
 .chip.newcat span { border-style: dashed; color: var(--brand2); background: none; }
@@ -1622,7 +1625,8 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       $("appUpdateBtn").onclick = () => (app.openExternal ? app.openExternal(apk) : (location.href = apk));
     }
     else if (app.openExternal) app.openExternal(apk);
-    else location.href = apk;
+    // Very old versions can't download inside the app: show the link to open in Chrome instead
+    else $("appUpdateText").textContent = "הגרסה שלך ישנה ולא יודעת להתעדכן לבד. פתח בכרום את הקישור: " + apk.split("?")[0];
   }
   (function checkAppUpdate() {
     const app = window.BudgetApp;
@@ -1659,7 +1663,23 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       span("הגרסה העדכנית: " + v.versionName + (when ? ", שוחררה ב־" + when + " (שעון ישראל)" : ""));
       if (app && v.versionCode > mineCode) {
         const b = document.createElement("button"); b.type = "button"; b.className = "linkbtn"; b.textContent = "⬆️ עדכון";
-        b.addEventListener("click", () => startAppUpdate(v));
+        b.addEventListener("click", () => {
+          startAppUpdate(v);
+          // Say what's happening right here at the bottom, with a browser download as a way out
+          const apk = new URL("budget.apk?v=" + v.versionCode, location.href).href;
+          let st = $("verFootUpd");
+          if (!st) { st = document.createElement("div"); st.id = "verFootUpd"; st.className = "verupd"; box.after(st); }
+          st.innerHTML = "";
+          const t = document.createElement("p");
+          t.textContent = app.installUpdate
+            ? "מוריד את העדכון… כשההורדה תסתיים יופיע מסך ההתקנה (אפשר גם ללחוץ על ההתראה ״ההורדה הושלמה״). לא קרה כלום? הורד דרך הדפדפן:"
+            : "הגרסה שלך ישנה ולא יודעת להתעדכן לבד. העתק את הקישור למטה, פתח אותו בכרום והתקן.";
+          const go = document.createElement("button"); go.type = "button"; go.className = "btn"; go.textContent = "⬇️ הורדה דרך הדפדפן";
+          go.addEventListener("click", () => { try { if (app.openExternal) app.openExternal(apk); } catch (e) {} });
+          go.hidden = !app.openExternal;
+          const link = document.createElement("p"); link.className = "hint"; link.textContent = "או פתח את הקישור הזה בכרום: " + apk.split("?")[0];
+          st.append(t, go, link);
+        });
         box.append(b);
       } else if (app) span("✓ מעודכן");
       else { const a = document.createElement("a"); a.href = "budget.apk?v=" + v.versionCode; a.textContent = "הורדת האפליקציה לאנדרואיד"; box.append(a); }
