@@ -151,8 +151,11 @@ public class MainActivity extends Activity {
     }
 
     @SuppressWarnings("deprecation")
-    private void paintBars(boolean dark) {
-        getWindow().setStatusBarColor(dark ? 0xFF17121F : 0xFFFFF6EE);
+    private void paintBars(boolean dark) { paintBars(dark ? 0xFF17121F : 0xFFFFF6EE, dark); }
+
+    @SuppressWarnings("deprecation")
+    private void paintBars(int color, boolean dark) {
+        getWindow().setStatusBarColor(color);
         if (Build.VERSION.SDK_INT >= 30) {
             WindowInsetsController c = getWindow().getInsetsController();
             if (c != null) c.setSystemBarsAppearance(dark ? 0 : WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS,
@@ -308,6 +311,14 @@ public class MainActivity extends Activity {
         public void setBars(String theme) {
             final boolean dark = "dark".equals(theme);
             runOnUiThread(() -> paintBars(dark));
+        }
+
+        /** The top bar takes the page's background color (the user's palette), with light or dark icons. */
+        @JavascriptInterface
+        public void setBarColor(String hex, boolean dark) {
+            final int c;
+            try { c = 0xFF000000 | Integer.parseInt(hex.replace("#", ""), 16); } catch (Exception e) { return; }
+            runOnUiThread(() -> paintBars(c, dark));
         }
 
         /** A notification right now, e.g. a category that just went over its budget. */

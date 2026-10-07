@@ -6,7 +6,45 @@
 <title>התקציב החודשי שלי</title>
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#fff6ee">
-<script>try { var t = localStorage.getItem("budget-theme"); if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t); if (localStorage.getItem("budget-bigtext") === "1") document.documentElement.classList.add("bigtext"); } catch (e) {}</script>
+<script>
+/* Background palettes (per device). Each one tints the page, cards and lines, in a light and a dark version. */
+window.BP = (function () {
+  var L = [
+    ["orig", "המקורי", 0, 0], ["cream", "שמנת", 38, 60], ["peach", "אפרסק", 20, 85], ["sunset", "שקיעה", 8, 70, 93],
+    ["rose", "ורוד", 340, 75], ["berry", "פטל", 320, 55, 94], ["lavender", "לבנדר", 265, 60], ["violet", "סגול", 280, 50, 92],
+    ["sky", "תכלת", 205, 75], ["ocean", "ים", 188, 60, 94], ["navy", "כחול לילה", 225, 45, 93], ["mint", "מנטה", 160, 55],
+    ["forest", "ירוק יער", 135, 35, 93], ["lime", "ליים", 80, 55], ["sand", "חול", 42, 35, 94], ["coffee", "קפה", 28, 30, 92],
+    ["gray", "אפור", 220, 8], ["white", "לבן נקי", 0, 0, 97.5], ["black", "שחור", 0, 0, 95]
+  ];
+  function hex(h, s, l) {
+    s /= 100; l /= 100;
+    var k = function (n) { return (n + h / 30) % 12; }, a = s * Math.min(l, 1 - l);
+    var f = function (n) { var v = l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1))); return ("0" + Math.round(v * 255).toString(16)).slice(-2); };
+    return "#" + f(0) + f(8) + f(4);
+  }
+  function vars(id, dark) {
+    var p = null; for (var i = 0; i < L.length; i++) if (L[i][0] === id) p = L[i];
+    if (!p || id === "orig") return null;
+    var h = p[2], s = p[3], l = p[4] || 96, bl = function (dh, a) { return "hsla(" + (h + dh) + ", " + (s ? 85 : 0) + "%, 62%, " + a + ")"; };
+    if (dark) {
+      if (id === "black") return { "--bg": "#000000", "--surface": "#111113", "--surface-2": "#1a1a1d", "--line": "#2a2a2e", "--blob1": "transparent", "--blob2": "transparent", "--blob3": "transparent" };
+      return { "--bg": hex(h, s * .8, 9), "--surface": hex(h, s * .6, 14), "--surface-2": hex(h, s * .55, 17.5), "--line": hex(h, s * .45, 25),
+        "--blob1": bl(0, s ? .12 : 0), "--blob2": bl(40, s ? .1 : 0), "--blob3": bl(-40, s ? .07 : 0) };
+    }
+    return { "--bg": hex(h, s, l), "--surface": hex(h, s * .6, 99.4), "--surface-2": hex(h, s, Math.max(l - 2.5, 88)), "--line": hex(h, s * .5, l - 9),
+      "--blob1": bl(0, s ? .2 : 0), "--blob2": bl(40, s ? .14 : 0), "--blob3": bl(-40, s ? .12 : 0) };
+  }
+  function get() { try { return localStorage.getItem("budget-palette") || "orig"; } catch (e) { return "orig"; } }
+  function isDark() { var t = document.documentElement.getAttribute("data-theme"); return t ? t === "dark" : matchMedia("(prefers-color-scheme: dark)").matches; }
+  var KEYS = ["--bg", "--surface", "--surface-2", "--line", "--blob1", "--blob2", "--blob3"];
+  function apply() {
+    var r = document.documentElement.style, v = vars(get(), isDark());
+    KEYS.forEach(function (k) { if (v) r.setProperty(k, v[k]); else r.removeProperty(k); });
+    return v ? v["--bg"] : (isDark() ? "#17121f" : "#fff6ee");
+  }
+  return { list: L, vars: vars, get: get, apply: apply, isDark: isDark };
+})();
+try { var t = localStorage.getItem("budget-theme"); if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t); if (localStorage.getItem("budget-bigtext") === "1") document.documentElement.classList.add("bigtext"); BP.apply(); } catch (e) {}</script>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="התקציב שלי">
 <link rel="apple-touch-icon" href="icon-180.png">
@@ -784,6 +822,23 @@ html.bigtext body { zoom: 1.15; }
 .gearbtn small { font-size: 10.5px; font-weight: 700; line-height: 1; }
 .gearbtn[aria-pressed="true"] { color: var(--brand2); }
 .sethead { display: flex; align-items: center; gap: 12px; }
+.setlink { display: flex; align-items: center; gap: 14px; width: 100%; text-align: start; background: var(--surface); color: var(--fg); border: 0; border-radius: var(--radius); box-shadow: var(--card-shadow); padding: 16px 18px; font: inherit; cursor: pointer; }
+.setlink > span:first-child { font-size: 26px; }
+.setlink > span:nth-child(2) { flex: 1; display: grid; }
+.setlink b { font-size: 17px; }
+.setlink small { color: var(--muted); font-size: 13.5px; }
+.setlink > span:last-child { font-size: 24px; color: var(--muted); }
+.modepick { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.modepick button { display: grid; justify-items: center; gap: 4px; padding: 12px 6px; border-radius: 16px; border: 2px solid var(--line); background: var(--surface-2); color: var(--fg); font: inherit; font-weight: 700; cursor: pointer; }
+.modepick button span { font-size: 24px; }
+.modepick button[aria-pressed="true"] { border-color: var(--brand2); background: color-mix(in srgb, var(--brand2) 12%, var(--surface)); color: var(--brand2); }
+.palgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: 10px; }
+.palgrid button { display: grid; gap: 6px; padding: 6px 6px 8px; border-radius: 16px; border: 2px solid var(--line); background: var(--surface); color: var(--fg); font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
+.palgrid button[aria-pressed="true"] { border-color: var(--brand2); box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand2) 25%, transparent); }
+.palsw { position: relative; height: 58px; border-radius: 11px; overflow: hidden; border: 1px solid rgba(0,0,0,.08); }
+.palsw i { position: absolute; inset: 10px 10px auto; height: 20px; border-radius: 6px; box-shadow: 0 2px 6px rgba(0,0,0,.12); }
+.palsw b { position: absolute; inset: auto 10px 9px; height: 8px; border-radius: 4px; background: var(--brand); }
+.palsw em { position: absolute; top: 4px; inset-inline-start: 4px; font-style: normal; font-size: 13px; }
 .sethead .settitle { margin: 0; font-size: 24px; font-weight: 800; }
 #viewMain { display: grid; gap: 12px; max-width: 760px; width: 100%; margin: 0 auto; }
 .home { display: grid; gap: 24px; min-width: 0; }
@@ -798,6 +853,9 @@ html.bigtext body { zoom: 1.15; }
 body.layedit .home { gap: 8px; }
 body.layedit .home > [data-block] { display: flex !important; align-items: center; gap: 8px; position: relative; padding: 8px 8px 8px 14px; min-height: 0; border-radius: 16px; background: var(--surface); box-shadow: var(--card-shadow); outline: 2px dashed color-mix(in srgb, var(--brand2) 55%, transparent); outline-offset: 0; user-select: none; -webkit-user-select: none; }
 body.layedit .home > [data-block] > :not(.layname):not(.laytools):not(summary) { display: none !important; }
+/* Folded cards hide everything but their title: in edit mode the name and buttons must still show */
+body.layedit .home > [data-block] > .layname { display: block !important; }
+body.layedit .home > [data-block] > .laytools { display: flex !important; }
 body.layedit .home > details[data-block] > summary { display: flex !important; flex: 1 1 auto; align-items: center; gap: 8px; min-width: 0; list-style: none; padding: 0; margin: 0; background: none; font-size: 0; }
 body.layedit .home > details[data-block] > summary::-webkit-details-marker { display: none; }
 body.layedit .home > details[data-block] > summary > :not(.layname):not(.laytools) { display: none !important; }
@@ -932,7 +990,6 @@ body.nosave .split { grid-template-columns: 1fr; }
       </div>
     </div>
     <div class="tools">
-      <div class="themes compact" role="group" aria-label="מצב תצוגה"><button type="button" data-theme-pick="light" aria-pressed="false" aria-label="מצב בהיר" title="מצב בהיר">☀️</button><button type="button" data-theme-pick="dark" aria-pressed="false" aria-label="מצב כהה" title="מצב כהה">🌙</button></div>
       <button class="gearbtn" type="button" id="gearBtn" aria-pressed="false"><span aria-hidden="true">⚙️</span><small>הגדרות</small></button>
       <details class="usermenu" id="userbar" hidden>
         <summary aria-label="החשבון שלי"><img id="userPhoto" alt="" referrerpolicy="no-referrer" hidden><span class="initial" id="userInitial" aria-hidden="true"></span></summary>
@@ -1174,6 +1231,7 @@ body.nosave .split { grid-template-columns: 1fr; }
       <button class="btn" type="button" id="setBack">→ חזרה</button>
       <h2 class="settitle">⚙️ הגדרות</h2>
     </div>
+    <button class="setlink" type="button" id="openLook"><span aria-hidden="true">🎨</span><span><b>עיצוב וצבעים</b><small>מצב בהיר או כהה, וצבע הרקע</small></span><span aria-hidden="true">‹</span></button>
     <section class="panel" aria-labelledby="setH">
       <h2 id="setH" class="pc-gray" data-e="🛠️">כללי</h2>
       <label class="field" for="startDay">החודש שלי מתחיל ב־<select id="startDay"></select></label>
@@ -1207,6 +1265,26 @@ body.nosave .split { grid-template-columns: 1fr; }
         <button class="btn" type="button" id="layEditHome">✏️ עריכה בתוך דף הבית</button>
         <button class="btn" type="button" id="layReset">↺ חזרה לסידור המקורי</button>
       </div>
+    </section>
+  </div>
+
+  <div class="viewcol" id="viewLook" hidden>
+    <div class="sethead">
+      <button class="btn" type="button" id="lookBack">→ חזרה</button>
+      <h2 class="settitle">🎨 עיצוב וצבעים</h2>
+    </div>
+    <section class="panel" aria-labelledby="modeH">
+      <h2 id="modeH" class="pc-violet" data-e="🌗">מצב תצוגה</h2>
+      <div class="modepick" role="group" aria-label="מצב תצוגה">
+        <button type="button" data-theme-pick="light" aria-pressed="false"><span aria-hidden="true">☀️</span>בהיר</button>
+        <button type="button" data-theme-pick="dark" aria-pressed="false"><span aria-hidden="true">🌙</span>כהה</button>
+        <button type="button" data-theme-pick="auto" aria-pressed="false"><span aria-hidden="true">📱</span>לפי הטלפון</button>
+      </div>
+    </section>
+    <section class="panel" aria-labelledby="palH">
+      <h2 id="palH" class="pc-orange" data-e="🎨">צבע הרקע</h2>
+      <p class="hint">הצבע משתנה מיד, ונשמר במכשיר הזה. לכל צבע יש גרסה בהירה וגרסה כהה.</p>
+      <div class="palgrid" id="palGrid"></div>
     </section>
   </div>
 
@@ -1697,16 +1775,23 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   const darkQuery = matchMedia("(prefers-color-scheme: dark)");
   function currentTheme() { return document.documentElement.getAttribute("data-theme") || (darkQuery.matches ? "dark" : "light"); }
   function paintTheme() {
-    const t = currentTheme();
-    document.querySelectorAll("[data-theme-pick]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.themePick === t)));
-    const meta = document.querySelector('meta[name="theme-color"]'); if (meta) meta.content = t === "dark" ? "#17121f" : "#fff6ee";
+    const t = currentTheme(), auto = !document.documentElement.getAttribute("data-theme");
+    document.querySelectorAll("[data-theme-pick]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.themePick === "auto" ? auto : !auto && b.dataset.themePick === t)));
+    const bg = BP.apply();
+    const meta = document.querySelector('meta[name="theme-color"]'); if (meta) meta.content = bg;
     // In the Android app the phone's top bar takes the page's background color
-    try { if (window.BudgetApp && BudgetApp.setBars) BudgetApp.setBars(t); } catch (e) {}
+    try { if (window.BudgetApp && BudgetApp.setBarColor) BudgetApp.setBarColor(bg, t === "dark"); else if (window.BudgetApp && BudgetApp.setBars) BudgetApp.setBars(t); } catch (e) {}
+    if (!$("viewLook").hidden) renderPalettes();
   }
   document.addEventListener("click", (e) => { const m = $("userbar"); if (m.open && !m.contains(e.target)) m.open = false; });
   document.querySelectorAll("[data-theme-pick]").forEach((b) => b.addEventListener("click", () => {
-    document.documentElement.setAttribute("data-theme", b.dataset.themePick);
-    try { localStorage.setItem("budget-theme", b.dataset.themePick); } catch (e) {}
+    if (b.dataset.themePick === "auto") {
+      document.documentElement.removeAttribute("data-theme");
+      try { localStorage.removeItem("budget-theme"); } catch (e) {}
+    } else {
+      document.documentElement.setAttribute("data-theme", b.dataset.themePick);
+      try { localStorage.setItem("budget-theme", b.dataset.themePick); } catch (e) {}
+    }
     paintTheme();
   }));
   darkQuery.addEventListener("change", paintTheme);
@@ -4995,12 +5080,14 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   // ---- Pages ----
   let view = "main";
   function setView(v, fromHash) {
-    view = ["shifts", "calendar", "settings"].includes(v) ? v : "main";
+    view = ["shifts", "calendar", "settings", "look"].includes(v) ? v : "main";
     if (view !== "main" && layEditing) exitLayEdit(false);
     $("viewMain").hidden = view !== "main";
     $("viewSettings").hidden = view !== "settings";
-    $("gearBtn").setAttribute("aria-pressed", String(view === "settings"));
-    document.body.classList.toggle("onsettings", view === "settings");
+    $("viewLook").hidden = view !== "look";
+    if (view === "look") renderPalettes();
+    $("gearBtn").setAttribute("aria-pressed", String(view === "settings" || view === "look"));
+    document.body.classList.toggle("onsettings", view === "settings" || view === "look");
     if (view === "settings") renderLayList();
     $("viewShifts").hidden = view !== "shifts";
     $("viewCal").hidden = view !== "calendar";
@@ -5015,10 +5102,31 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   // ---- Settings screen (the gear at the top) ----
   let viewBeforeSettings = "main";
   $("gearBtn").addEventListener("click", () => {
-    if (view === "settings") { setView(viewBeforeSettings); return; }
+    if (view === "settings" || view === "look") { setView(viewBeforeSettings); return; }
     viewBeforeSettings = view; setView("settings");
   });
   $("setBack").addEventListener("click", () => setView(viewBeforeSettings));
+  $("openLook").addEventListener("click", () => setView("look"));
+  $("lookBack").addEventListener("click", () => setView("settings"));
+  function renderPalettes() {
+    const box = $("palGrid"), cur = BP.get(), dark = BP.isDark();
+    box.innerHTML = "";
+    BP.list.forEach(([id, name]) => {
+      const v = BP.vars(id, dark) || (dark ? { "--bg": "#17121f", "--surface": "#221b2e" } : { "--bg": "#fff6ee", "--surface": "#ffffff" });
+      const b = document.createElement("button"); b.type = "button"; b.setAttribute("aria-pressed", String(id === cur));
+      const sw = document.createElement("span"); sw.className = "palsw"; sw.style.background = v["--bg"];
+      const card = document.createElement("i"); card.style.background = v["--surface"];
+      const bar = document.createElement("b");
+      sw.append(card, bar);
+      if (id === cur) { const ok = document.createElement("em"); ok.textContent = "✅"; sw.append(ok); }
+      b.append(sw, name);
+      b.addEventListener("click", () => {
+        try { if (id === "orig") localStorage.removeItem("budget-palette"); else localStorage.setItem("budget-palette", id); } catch (e) {}
+        paintTheme(); renderPalettes();
+      });
+      box.append(b);
+    });
+  }
 
   // ---- Home layout: each user hides and orders the home page's parts; saved in the account ----
   const BLOCK_NAMES = { today: "😎 מותר לך היום", summary: "📋 סיכום החודש", quick: "⚡ רישום בלחיצה", pay: "💼 המשכורת שלי",
