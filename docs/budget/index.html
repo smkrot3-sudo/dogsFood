@@ -794,20 +794,24 @@ html.bigtext body { zoom: 1.15; }
 .okx { flex: none; width: 44px; height: 44px; border-radius: 50%; border: 0; color: #fff; font-size: 22px; font-weight: 800; cursor: pointer; display: grid; place-items: center; }
 .okx.ok { background: #1e9e5a; }
 .okx.no { background: #d93a3a; }
-body.layedit .home { gap: 30px; }
-body.layedit .home > [data-block] { display: block; position: relative; outline: 2px dashed color-mix(in srgb, var(--brand2) 60%, transparent); outline-offset: 4px; }
-body.layedit .home > details[data-block] { display: block; }
-body.layedit .home > .lay-off { opacity: .4; }
-body.layedit .home > [data-block] > :not(.laytools), body.layedit .home > details[data-block] > summary { pointer-events: none; }
-body.layedit .home > [data-block].dragging { opacity: .85; outline-style: solid; box-shadow: 0 12px 30px rgba(0,0,0,.18); }
-body.layedit .home > [data-block] { cursor: pointer; }
-body.layedit .home > [data-block].laysel { outline: 3px solid var(--brand2); outline-offset: 4px; box-shadow: 0 0 0 8px color-mix(in srgb, var(--brand2) 18%, transparent); }
-body.layedit .home > [data-block]:not(.laysel) > .laytools, body.layedit .home > details[data-block]:not(.laysel) > summary .laytools { display: none; }
-.laytools { position: absolute; top: -20px; inset-inline-end: 12px; z-index: 4; display: flex; gap: 4px; background: var(--surface); border: 1.5px solid var(--brand2); border-radius: 999px; padding: 3px; pointer-events: auto; box-shadow: var(--card-shadow); }
-details[data-block] > summary .laytools { top: -20px; }
-.laytools button { width: 36px; height: 34px; border: 0; border-radius: 999px; background: var(--surface-2); color: var(--fg); font-size: 16px; cursor: pointer; display: grid; place-items: center; padding: 0; }
-.laytools .grip { cursor: grab; touch-action: none; font-size: 20px; }
-.laytools .eye[aria-pressed="false"] { text-decoration: line-through; }
+/* Edit mode: every part shrinks to one row (its name and tools), so reordering is a short list */
+body.layedit .home { gap: 8px; }
+body.layedit .home > [data-block] { display: flex !important; align-items: center; gap: 8px; position: relative; padding: 8px 8px 8px 14px; min-height: 0; border-radius: 16px; background: var(--surface); box-shadow: var(--card-shadow); outline: 2px dashed color-mix(in srgb, var(--brand2) 55%, transparent); outline-offset: 0; user-select: none; -webkit-user-select: none; }
+body.layedit .home > [data-block] > :not(.layname):not(.laytools):not(summary) { display: none !important; }
+body.layedit .home > details[data-block] > summary { display: flex !important; flex: 1 1 auto; align-items: center; gap: 8px; min-width: 0; list-style: none; padding: 0; margin: 0; background: none; font-size: 0; }
+body.layedit .home > details[data-block] > summary::-webkit-details-marker { display: none; }
+body.layedit .home > details[data-block] > summary > :not(.layname):not(.laytools) { display: none !important; }
+body.layedit .home > details[data-block] > summary::before, body.layedit .home > details[data-block] > summary::after { display: none !important; }
+body.layedit .home > [data-block]::before, body.layedit .home > [data-block]::after { display: none !important; }
+body.layedit .home > .lay-off { opacity: .45; }
+body.layedit .home > .lay-off .layname { text-decoration: line-through; }
+body.layedit .home > [data-block].dragging { z-index: 20; outline-style: solid; box-shadow: 0 14px 34px rgba(0,0,0,.25); transition: none; }
+body.layedit .home > [data-block].shift { transition: transform .15s ease; }
+.layname { flex: 1 1 auto; min-width: 0; font-weight: 700; font-size: 15.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.laytools { display: flex; gap: 4px; flex: none; }
+.laytools button { width: 40px; height: 40px; border: 0; border-radius: 12px; background: var(--surface-2); color: var(--fg); font-size: 16px; cursor: pointer; display: grid; place-items: center; padding: 0; }
+.laytools .grip { cursor: grab; touch-action: none; font-size: 22px; }
+.laytools button:disabled { opacity: .35; }
 .laylist { display: grid; gap: 6px; }
 .layrow { display: grid; grid-template-columns: minmax(0, 1fr) auto auto auto; gap: 6px; align-items: center; padding: 6px 10px; border-radius: 12px; background: var(--surface-2); }
 .layrow.off .nm { opacity: .45; text-decoration: line-through; }
@@ -967,7 +971,7 @@ body.nosave .split { grid-template-columns: 1fr; }
 
   <div id="viewMain">
   <div class="editbar" id="editBar" hidden>
-    <span id="editBarText">✏️ מצב עריכה: לחץ על חלק כדי לערוך אותו</span>
+    <span id="editBarText">✏️ גרור ⠿ כדי להזיז, 👁️ כדי להסתיר</span>
     <button class="okx ok" type="button" id="layOk" aria-label="שמירת השינויים">✓</button>
     <button class="okx no" type="button" id="layNo" aria-label="ביטול כל השינויים">✕</button>
   </div>
@@ -5060,70 +5064,86 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   $("layEditHome").addEventListener("click", () => { setView("main"); enterLayEdit(null); });
 
   // Edit mode on the home page itself
-  // In edit mode a tap picks the part to edit; only that part shows its buttons
-  function selectBlock(b) {
-    homeBlocks().forEach((x) => x.classList.toggle("laysel", x === b));
-    $("editBarText").textContent = b ? "✏️ עורך את: " + (BLOCK_NAMES[b.dataset.block] || "") : "✏️ מצב עריכה: לחץ על חלק כדי לערוך אותו";
-  }
-  $("homeList").addEventListener("click", (e) => {
-    if (!layEditing || e.target.closest(".laytools")) return;
-    const b = e.target.closest("[data-block]"); if (!b) return;
-    e.preventDefault(); e.stopPropagation();
-    selectBlock(b.classList.contains("laysel") ? null : b);
-  }, true);
+  // Edit mode: each part is one row with its name, ⠿ to drag, ▲▼ and 👁️
   function enterLayEdit(start) {
     if (layEditing) return;
     layEditing = layout();
     document.body.classList.add("layedit");
     $("editBar").hidden = false; $("layHint").hidden = true;
-    // The month plan is long; closed it fits the editing view
     planWasOpen = $("planBox").open; $("planBox").open = false;
     homeBlocks().forEach(addLayTools);
-    selectBlock(start || null);
+    syncArrows();
+    if (start) start.scrollIntoView({ block: "center" }); else $("editBar").scrollIntoView({ block: "start" });
   }
   function exitLayEdit(save) {
     if (!layEditing) return;
     const snap = layEditing; layEditing = null;
     document.body.classList.remove("layedit");
     $("editBar").hidden = true; $("layHint").hidden = false;
-    document.querySelectorAll(".laytools").forEach((x) => x.remove());
-    homeBlocks().forEach((b) => b.classList.remove("dragging", "laysel"));
+    document.querySelectorAll(".laytools, .layname").forEach((x) => x.remove());
+    homeBlocks().forEach((b) => { b.classList.remove("dragging", "shift"); b.style.transform = ""; });
     $("planBox").open = planWasOpen;
     if (save) { saveLayout(domLayout()); snack("הסידור של דף הבית נשמר."); } else applyLayout(snap);
   }
   $("layOk").addEventListener("click", () => exitLayEdit(true));
   $("layNo").addEventListener("click", () => exitLayEdit(false));
+  // In edit mode taps on a row do nothing except on its buttons
+  $("homeList").addEventListener("click", (e) => {
+    if (!layEditing || e.target.closest(".laytools")) return;
+    if (e.target.closest("[data-block]")) { e.preventDefault(); e.stopPropagation(); }
+  }, true);
+  function syncArrows() {
+    const bs = homeBlocks();
+    bs.forEach((b, i) => { const up = b.querySelector(".laytools .up"), dn = b.querySelector(".laytools .dn"); if (up) up.disabled = i === 0; if (dn) dn.disabled = i === bs.length - 1; });
+  }
   function addLayTools(b) {
-    const t = document.createElement("div"); t.className = "laytools";
     const name = BLOCK_NAMES[b.dataset.block] || "";
+    const nm = document.createElement("span"); nm.className = "layname"; nm.textContent = name;
+    const t = document.createElement("div"); t.className = "laytools";
     const mk = (txt, label, cls) => { const x = document.createElement("button"); x.type = "button"; x.textContent = txt; x.setAttribute("aria-label", label + ": " + name); if (cls) x.className = cls; return x; };
-    const grip = mk("⠿", "גרירה", "grip"), up = mk("▲", "למעלה"), dn = mk("▼", "למטה"), eye = mk("", "הסתרה או החזרה", "eye");
+    const grip = mk("⠿", "גרירה", "grip"), up = mk("▲", "למעלה", "up"), dn = mk("▼", "למטה", "dn"), eye = mk("", "הסתרה או החזרה", "eye");
     const syncEye = () => { const off = b.classList.contains("lay-off"); eye.textContent = off ? "🙈" : "👁️"; eye.setAttribute("aria-pressed", String(!off)); };
     syncEye();
     const stop = (e) => { e.preventDefault(); e.stopPropagation(); };
     eye.addEventListener("click", (e) => { stop(e); b.classList.toggle("lay-off"); syncEye(); });
-    up.addEventListener("click", (e) => { stop(e); const p = b.previousElementSibling; if (p) { p.before(b); b.scrollIntoView({ block: "nearest", behavior: "smooth" }); } });
-    dn.addEventListener("click", (e) => { stop(e); const n = b.nextElementSibling; if (n) { n.after(b); b.scrollIntoView({ block: "nearest", behavior: "smooth" }); } });
+    up.addEventListener("click", (e) => { stop(e); const p = b.previousElementSibling; if (p) { p.before(b); syncArrows(); b.scrollIntoView({ block: "nearest", behavior: "smooth" }); } });
+    dn.addEventListener("click", (e) => { stop(e); const n = b.nextElementSibling; if (n) { n.after(b); syncArrows(); b.scrollIntoView({ block: "nearest", behavior: "smooth" }); } });
     grip.addEventListener("click", stop);
-    // Drag by the grip: the part follows the finger to its new place
+    // Drag by ⠿: the row follows the finger and the others slide aside; it lands in its place on release.
+    // The dragged row stays put in the page during the drag, so the phone doesn't drop the touch.
     grip.addEventListener("pointerdown", (e) => {
       stop(e);
       try { grip.setPointerCapture(e.pointerId); } catch (x) {}
+      const list = homeBlocks(), from = list.indexOf(b);
+      const rects = list.map((x) => x.getBoundingClientRect());
+      const step = rects[Math.min(from + 1, rects.length - 1)].top - rects[from].top || rects[from].height + 8;
+      const startY = e.clientY, startScroll = scrollY;
+      let to = from;
       b.classList.add("dragging");
-      const moveTo = (y) => {
-        const others = homeBlocks().filter((x) => x !== b);
-        const before = others.find((x) => { const r = x.getBoundingClientRect(); return y < r.top + r.height / 2; });
-        if (before) { if (b.nextElementSibling !== before) before.before(b); } else if (b !== $("homeList").lastElementChild) $("homeList").append(b);
-      };
+      list.forEach((x) => { if (x !== b) x.classList.add("shift"); });
       const onMove = (ev) => {
-        if (ev.clientY < 90) window.scrollBy(0, -14); else if (ev.clientY > innerHeight - 90) window.scrollBy(0, 14);
-        moveTo(ev.clientY);
+        if (ev.clientY < 110) window.scrollBy(0, -10); else if (ev.clientY > innerHeight - 110) window.scrollBy(0, 10);
+        const dy = ev.clientY - startY + (scrollY - startScroll);
+        b.style.transform = "translateY(" + dy + "px)";
+        const mid = rects[from].top + rects[from].height / 2 + dy;
+        // Its new place: how many of the other rows have their middle above the dragged row's middle
+        to = rects.reduce((n, r, i) => n + (i !== from && r.top + r.height / 2 < mid ? 1 : 0), 0);
+        list.forEach((x, i) => {
+          if (x === b) return;
+          x.style.transform = from < to && i > from && i <= to ? "translateY(" + -step + "px)" : from > to && i >= to && i < from ? "translateY(" + step + "px)" : "";
+        });
       };
-      const onUp = () => { b.classList.remove("dragging"); grip.removeEventListener("pointermove", onMove); grip.removeEventListener("pointerup", onUp); grip.removeEventListener("pointercancel", onUp); };
+      const onUp = () => {
+        grip.removeEventListener("pointermove", onMove); grip.removeEventListener("pointerup", onUp); grip.removeEventListener("pointercancel", onUp);
+        list.forEach((x) => { x.classList.remove("shift", "dragging"); x.style.transform = ""; });
+        if (to !== from) { const ref = list[to]; if (to > from) ref.after(b); else ref.before(b); }
+        syncArrows();
+      };
       grip.addEventListener("pointermove", onMove); grip.addEventListener("pointerup", onUp); grip.addEventListener("pointercancel", onUp);
     });
     t.append(grip, up, dn, eye);
-    (b.tagName === "DETAILS" ? b.querySelector(":scope > summary") : b).append(t);
+    if (b.tagName === "DETAILS") { const sm = b.querySelector(":scope > summary"); sm.prepend(nm); sm.append(t); }
+    else { b.prepend(nm); b.append(t); }
   }
   // A long press on any part of the home page starts edit mode
   let lp = null, eatClick = false;
