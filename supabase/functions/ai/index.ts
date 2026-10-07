@@ -5,7 +5,8 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 
 const OWNER = "75753136-73de-4975-bc7a-5897db6ae434";
 const DAILY_LIMIT = 20;
-const MODELS = (Deno.env.get("GEMINI_MODEL") || "gemini-flash-latest,gemini-2.5-flash,gemini-flash-lite-latest,gemini-2.5-flash-lite").split(",").map((s) => s.trim()).filter(Boolean);
+// Tried in order; quota, overload, timeout or an unknown model moves on to the next one
+const MODELS = (Deno.env.get("GEMINI_MODEL") || "gemini-3.5-flash,gemini-2.5-flash,gemini-3.5-flash-lite,gemini-2.5-flash-lite").split(",").map((s) => s.trim()).filter(Boolean);
 const cors = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
@@ -61,18 +62,32 @@ const PROMPTS: Record<string, string> = {
 עד 200 מילים.`,
 };
 
-async function gemini(key: string, system: string, contents: unknown[], wantJson: boolean) {
+// Keep "thinking" short so answers come back in seconds
+const thinking = (model: string) =>
+  /^gemini-2\.5/.test(model) ? { thinkingConfig: { thinkingBudget: 0 } } : /^gemini-3/.test(model) ? { thinkingConfig: { thinkingLevel: "low" } } : {};
+
+async function gemini(key: string, system: string, contents: unknown[], wantJson: boolean, timeoutMs = 40000) {
   let last = "";
+  const until = Date.now() + 110000; // stay under the function's own time limit
   for (const model of MODELS) {
-    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "x-goog-api-key": key },
-      body: JSON.stringify({
-        systemInstruction: { parts: [{ text: system }] },
-        contents,
-        generationConfig: { temperature: wantJson ? 0.1 : 0.6, maxOutputTokens: 4096, ...(wantJson ? { responseMimeType: "application/json" } : {}) },
-      }),
-    });
+    if (Date.now() > until) break;
+    let res: Response;
+    try {
+      res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-goog-api-key": key },
+        signal: AbortSignal.timeout(Math.min(timeoutMs, until - Date.now())),
+        body: JSON.stringify({
+          systemInstruction: { parts: [{ text: system }] },
+          contents,
+          generationConfig: { temperature: wantJson ? 0.1 : 0.6, maxOutputTokens: 4096, ...thinking(model), ...(wantJson ? { responseMimeType: "application/json" } : {}) },
+        }),
+      });
+    } catch (e) {
+      last = model + " timeout " + String(e).slice(0, 100);
+      console.error(last);
+      continue;
+    }
     if (res.ok) {
       const j = await res.json();
       const text = (j.candidates?.[0]?.content?.parts || []).filter((p: { thought?: boolean }) => !p.thought).map((p: { text?: string }) => p.text || "").join("").trim();
@@ -80,9 +95,10 @@ async function gemini(key: string, system: string, contents: unknown[], wantJson
       last = "empty";
       continue;
     }
-    last = res.status + " " + (await res.text()).slice(0, 300);
-    // try the next model on "no such model", quota and overload; a bad key won't get better
-    if (![404, 429, 500, 503].includes(res.status)) break;
+    last = res.status + " " + model + " " + (await res.text()).slice(0, 300);
+    console.error(last);
+    // a bad key won't get better; anything else (unknown model, quota, overload, a setting this model rejects) tries the next one
+    if (res.status === 401 || res.status === 403 || /API key not valid/i.test(last)) break;
   }
   throw new Error(last);
 }
@@ -97,6 +113,14 @@ Deno.serve(async (req) => {
       // health check without user data: is the key valid and which models does it see
       const r = await fetch("https://generativelanguage.googleapis.com/v1beta/models?pageSize=200", { headers: { "x-goog-api-key": key } });
       const j = r.ok ? await r.json() : null;
+      if (new URL(req.url).searchParams.get("gen") === "1") {
+        // a tiny generation to check the whole chain end to end (no user data)
+        const t0 = Date.now();
+        try {
+          const out = await gemini(key, BASE("mid", "היום"), [{ role: "user", parts: [{ text: "תגיד שלום במשפט אחד." }] }], false);
+          return json({ ok: true, model: out.model, ms: Date.now() - t0, text: out.text });
+        } catch (e) { return json({ ok: false, ms: Date.now() - t0, error: String((e as Error).message).slice(0, 400) }); }
+      }
       return json({ ok: r.ok, status: r.status, models: (j?.models || []).map((m: { name: string }) => m.name.replace("models/", "")).filter((n: string) => /flash/.test(n)) });
     }
     const auth = req.headers.get("Authorization") || "";
@@ -142,7 +166,9 @@ Deno.serve(async (req) => {
     contents.push({ role: "user", parts });
 
     const wantJson = tool === "expenses" || tool === "shiftsheet";
+    const t0 = Date.now();
     const out = await gemini(key, system, contents, wantJson);
+    console.log("ai ok", tool, out.model, Date.now() - t0, "ms", "context", ctx.length);
     if (wantJson) {
       let parsed: unknown = null;
       try { parsed = JSON.parse(out.text.replace(/^```(?:json)?\s*|\s*```$/g, "")); } catch (_) { /* fall through */ }
@@ -153,6 +179,6 @@ Deno.serve(async (req) => {
   } catch (e) {
     const msg = String((e as Error).message || e);
     console.error("ai error", msg);
-    return json({ error: /^429/.test(msg) ? "busy" : "fail" }, 502);
+    return json({ error: /^429|timeout/.test(msg) ? "busy" : "fail" }, 502);
   }
 });

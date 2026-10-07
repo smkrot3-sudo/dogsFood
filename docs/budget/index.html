@@ -6036,8 +6036,8 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     if (!tok) throw Object.assign(new Error("auth"), { code: "auth" });
     let r;
     try {
-      r = await fetch(AI_URL, { method: "POST", headers: { "Content-Type": "application/json", Authorization: "Bearer " + tok, apikey: SUPABASE_KEY }, body: JSON.stringify({ tone: settings().tone || "tough", ...payload }) });
-    } catch (e) { throw Object.assign(new Error("net"), { code: "fail" }); }
+      r = await fetch(AI_URL, { method: "POST", signal: AbortSignal.timeout ? AbortSignal.timeout(125000) : undefined, headers: { "Content-Type": "application/json", Authorization: "Bearer " + tok, apikey: SUPABASE_KEY }, body: JSON.stringify({ tone: settings().tone || "tough", ...payload }) });
+    } catch (e) { throw Object.assign(new Error("net"), { code: e && e.name === "TimeoutError" ? "busy" : "fail" }); }
     let j = {}; try { j = await r.json(); } catch (e) {}
     if (!r.ok || j.error) throw Object.assign(new Error(j.error || "http " + r.status), { code: AI_ERR[j.error] ? j.error : "fail" });
     if (j.left != null) $("aiFoot").textContent = "נשארו לך היום " + j.left + " שאלות. העוזר לא משנה כלום לבד, והשיחה לא נשמרת בשרת.";
