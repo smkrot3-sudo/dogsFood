@@ -1594,7 +1594,7 @@ body.nosave .split { grid-template-columns: 1fr; }
     <div class="aiexp" id="aiExp" hidden></div>
     <div class="aimode" id="aiMode" hidden><span id="aiModeTxt"></span><button class="linkbtn" type="button" id="aiModeOff">✕ חזרה לשאלות</button></div>
     <form class="aiask" id="aiForm" novalidate>
-      <textarea id="aiIn" rows="1" maxlength="1500" placeholder="שאל על הכסף שלך…" autocomplete="off"></textarea>
+      <textarea id="aiIn" rows="1" enterkeyhint="enter" maxlength="1500" placeholder="שאל על הכסף שלך…" autocomplete="off"></textarea>
       <button class="btn" type="button" id="aiMic" aria-label="להגיד במקום להקליד" hidden>🎤</button>
       <button class="btn primary" type="submit" id="aiSend">שלח</button>
     </form>
@@ -6158,7 +6158,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   }
   function aiAsk(q) {
     q = String(q || "").trim(); if (!q) return;
-    $("aiIn").value = "";
+    $("aiIn").value = ""; $("aiIn").style.height = "";
     if (aiMode === "exp") { aiParseExpenses(q); return; }
     const history = aiChat.filter((m) => m.role === "me" || m.role === "ai").slice(-10);
     aiRun(q, { tool: "chat", input: q, history }, (j) => aiPush("ai", j.text));
@@ -6252,7 +6252,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   $("aiClear").addEventListener("click", () => { aiChat = []; aiExpRows = []; try { localStorage.removeItem(aiKey()); } catch (e) {} aiPaintExp(); aiPaint(); });
   $("aiModeOff").addEventListener("click", () => { aiMode = ""; aiPaint(); });
   $("aiForm").addEventListener("submit", (e) => { e.preventDefault(); aiAsk($("aiIn").value); });
-  $("aiIn").addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); aiAsk($("aiIn").value); } });
+  // Enter adds a new line; only the send button sends (owner's request)
   $("aiIn").addEventListener("input", () => { const t = $("aiIn"); t.style.height = "auto"; t.style.height = Math.min(120, t.scrollHeight) + "px"; });
   $("aiMic").addEventListener("click", () => {
     const app = voiceApp();
