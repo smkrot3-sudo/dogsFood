@@ -6,7 +6,7 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 const OWNER = "75753136-73de-4975-bc7a-5897db6ae434";
 const DAILY_LIMIT = 20;
 // Tried in order; quota, overload, timeout or an unknown model moves on to the next one
-const MODELS = (Deno.env.get("GEMINI_MODEL") || "gemini-3.5-flash,gemini-2.5-flash,gemini-3.5-flash-lite,gemini-2.5-flash-lite").split(",").map((s) => s.trim()).filter(Boolean);
+const MODELS = (Deno.env.get("GEMINI_MODEL") || "gemini-3.5-flash,gemini-3.5-flash-lite,gemini-3.1-flash-lite,gemini-3.8-flash").split(",").map((s) => s.trim()).filter(Boolean);
 const cors = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
@@ -64,43 +64,64 @@ const PROMPTS: Record<string, string> = {
 
 // Keep "thinking" short so answers come back in seconds
 const thinking = (model: string) =>
-  /^gemini-2\.5/.test(model) ? { thinkingConfig: { thinkingBudget: 0 } } : /^gemini-3/.test(model) ? { thinkingConfig: { thinkingLevel: "low" } } : {};
+  /^gemini-2\.5/.test(model) ? { thinkingConfig: { thinkingBudget: 0 } } : /^gemini-3/.test(model) ? { thinkingConfig: { thinkingLevel: "minimal" } } : {};
 
-async function gemini(key: string, system: string, contents: unknown[], wantJson: boolean, timeoutMs = 40000) {
-  let last = "";
-  const until = Date.now() + 110000; // stay under the function's own time limit
-  for (const model of MODELS) {
-    if (Date.now() > until) break;
-    let res: Response;
-    try {
-      res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "x-goog-api-key": key },
-        signal: AbortSignal.timeout(Math.min(timeoutMs, until - Date.now())),
-        body: JSON.stringify({
-          systemInstruction: { parts: [{ text: system }] },
-          contents,
-          generationConfig: { temperature: wantJson ? 0.1 : 0.6, maxOutputTokens: 4096, ...thinking(model), ...(wantJson ? { responseMimeType: "application/json" } : {}) },
-        }),
-      });
-    } catch (e) {
-      last = model + " timeout " + String(e).slice(0, 100);
-      console.error(last);
-      continue;
-    }
+// One model, one try (plus one more without the thinking setting if this model rejects it)
+async function one(key: string, model: string, system: string, contents: unknown[], wantJson: boolean, signal: AbortSignal) {
+  for (const think of [true, false]) {
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-goog-api-key": key },
+      signal,
+      body: JSON.stringify({
+        systemInstruction: { parts: [{ text: system }] },
+        contents,
+        generationConfig: { temperature: wantJson ? 0.1 : 0.6, maxOutputTokens: 4096, ...(think ? thinking(model) : {}), ...(wantJson ? { responseMimeType: "application/json" } : {}) },
+      }),
+    });
     if (res.ok) {
       const j = await res.json();
       const text = (j.candidates?.[0]?.content?.parts || []).filter((p: { thought?: boolean }) => !p.thought).map((p: { text?: string }) => p.text || "").join("").trim();
       if (text) return { text, model };
-      last = "empty";
-      continue;
+      throw new Error("empty " + model);
     }
-    last = res.status + " " + model + " " + (await res.text()).slice(0, 300);
-    console.error(last);
-    // a bad key won't get better; anything else (unknown model, quota, overload, a setting this model rejects) tries the next one
-    if (res.status === 401 || res.status === 403 || /API key not valid/i.test(last)) break;
+    const err = res.status + " " + model + " " + (await res.text()).slice(0, 300);
+    if (!(res.status === 400 && think && /think/i.test(err))) throw new Error(err);
   }
-  throw new Error(last);
+  throw new Error("unreachable");
+}
+
+// The free tier's newest models are often busy or slow, so: start the first model, and if it hasn't answered
+// within a few seconds (or failed), start the next one too. The first answer wins; the rest are cancelled.
+function gemini(key: string, system: string, contents: unknown[], wantJson: boolean, hedgeMs = 6000, models = MODELS): Promise<{ text: string; model: string }> {
+  return new Promise((resolve, reject) => {
+    let next = 0, running = 0, done = false, last = "";
+    let hedge: number | undefined;
+    const ctrls: AbortController[] = [];
+    const finish = (fn: () => void) => { if (done) return; done = true; clearTimeout(hedge); ctrls.forEach((c) => c.abort()); fn(); };
+    const start = () => {
+      if (done) return;
+      if (next >= models.length) { if (!running) finish(() => reject(new Error(last || "no model"))); return; }
+      const model = models[next++];
+      running++;
+      const ac = new AbortController(); ctrls.push(ac);
+      const cap = setTimeout(() => ac.abort(), 30000);
+      one(key, model, system, contents, wantJson, ac.signal).then(
+        (out) => { clearTimeout(cap); running--; finish(() => resolve(out)); },
+        (e) => {
+          clearTimeout(cap); running--;
+          if (done) return;
+          last = String((e as Error).message || e).slice(0, 300);
+          console.error(last);
+          if (/^40[13] |API key not valid/i.test(last)) { finish(() => reject(new Error(last))); return; }
+          start();
+        },
+      );
+      clearTimeout(hedge);
+      hedge = setTimeout(start, hedgeMs);
+    };
+    start();
+  });
 }
 
 Deno.serve(async (req) => {
@@ -117,7 +138,9 @@ Deno.serve(async (req) => {
         // a tiny generation to check the whole chain end to end (no user data)
         const t0 = Date.now();
         try {
-          const out = await gemini(key, BASE("mid", "היום"), [{ role: "user", parts: [{ text: "תגיד שלום במשפט אחד." }] }], false);
+          const pick = new URL(req.url).searchParams.get("m");
+          const big = "נתון לדוגמה: הוצאה 18 ₪ על קפה.\n".repeat(Math.min(400, +(new URL(req.url).searchParams.get("pad") || 0)));
+          const out = await gemini(key, BASE("mid", "היום") + "\n" + big, [{ role: "user", parts: [{ text: "כמה הוצאתי על קפה? משפט אחד." }] }], false, 6000, pick ? [pick] : MODELS);
           return json({ ok: true, model: out.model, ms: Date.now() - t0, text: out.text });
         } catch (e) { return json({ ok: false, ms: Date.now() - t0, error: String((e as Error).message).slice(0, 400) }); }
       }
@@ -167,7 +190,7 @@ Deno.serve(async (req) => {
 
     const wantJson = tool === "expenses" || tool === "shiftsheet";
     const t0 = Date.now();
-    const out = await gemini(key, system, contents, wantJson);
+    const out = await gemini(key, system, contents, wantJson, tool === "shiftsheet" ? 15000 : 6000);
     console.log("ai ok", tool, out.model, Date.now() - t0, "ms", "context", ctx.length);
     if (wantJson) {
       let parsed: unknown = null;
