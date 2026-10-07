@@ -1369,6 +1369,12 @@ body.nosave .split { grid-template-columns: 1fr; }
           <button type="button" data-tone="soft" aria-pressed="false">💛 עדין</button>
         </div>
       </div>
+      <div class="field"><span>איך לפנות אליך</span>
+        <div class="seg gseg" id="genderSeg" role="group" aria-label="לשון פנייה">
+          <button type="button" data-g="m" aria-pressed="false">🙋‍♂️ בלשון זכר</button>
+          <button type="button" data-g="f" aria-pressed="false">🙋‍♀️ בלשון נקבה</button>
+        </div>
+      </div>
       <div class="field"><span>מתי לספור את הכסף מהמשמרות?</span>
         <div class="seg" id="shiftIncSeg" role="group" aria-label="מאיזה חודש לקחת את הכסף מהמשמרות">
           <button type="button" data-k="same" aria-pressed="false">באותו חודש</button>
@@ -1724,6 +1730,16 @@ body.nosave .split { grid-template-columns: 1fr; }
   </form>
 </dialog>
 
+<dialog class="sheet" id="genderSheet" aria-labelledby="genderH">
+  <form method="dialog">
+    <h2 id="genderH" data-e="🙋">איך לפנות אליך?</h2>
+    <p class="sub">מעכשיו האפליקציה יכולה לדבר אליך בלשון זכר או בלשון נקבה. אפשר לשנות את זה בכל רגע בהגדרות.</p>
+    <div class="seg gseg" id="genderAsk" role="group" aria-label="לשון פנייה">
+      <button type="button" data-g="m" aria-pressed="false">🙋‍♂️ בלשון זכר</button>
+      <button type="button" data-g="f" aria-pressed="false">🙋‍♀️ בלשון נקבה</button>
+    </div>
+  </form>
+</dialog>
 <dialog class="sheet newsheet" id="newsSheet" aria-labelledby="newsH">
   <form method="dialog">
     <h2 id="newsH" data-e="✨">מה חדש</h2>
@@ -1794,6 +1810,12 @@ body.nosave .split { grid-template-columns: 1fr; }
     <h2 id="wzH" data-e="👋">ברוכים הבאים!</h2>
     <div class="wzstep" data-step="1">
       <p class="sub">שלוש שאלות קצרות, ואת השאר האפליקציה תחשב בשבילך.</p>
+      <div class="field"><span>איך לפנות אליך?</span>
+        <div class="seg gseg" id="wzGender" role="group" aria-label="לשון פנייה">
+          <button type="button" data-g="m" aria-pressed="false">🙋‍♂️ בלשון זכר</button>
+          <button type="button" data-g="f" aria-pressed="false">🙋‍♀️ בלשון נקבה</button>
+        </div>
+      </div>
       <label for="wzInc">כמה כסף נכנס לך בחודש, אחרי מס?<input type="number" id="wzInc" class="amount-in" inputmode="decimal" min="0" placeholder="₪0"></label>
       <p class="hint">הכנסה משתנה? כתוב את הסכום הנמוך שבטוח ייכנס.</p>
       <label for="wzWage">עובד לפי שעות? שכר לשעה (לא חובה)<input type="number" id="wzWage" inputmode="decimal" min="0" step="0.01" placeholder="₪"></label>
@@ -2079,6 +2101,66 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   function say(tough, mid, soft) {
     const t = store && store.settings && store.settings.tone;
     return t === "soft" ? soft : t === "mid" ? mid : tough;
+  }
+
+  // ---- Masculine or feminine Hebrew: each user picks how the app talks to them (settings.gender m|f) ----
+  // The texts are written in the masculine; for "f" every text the page shows (and the phone notes) goes through
+  // gx(). Phrases first, then single words that in this app always talk to the user.
+  const G_PHRASES = [
+    ["אתה חי", "את חיה"], ["אתה מרוויח", "את מרוויחה"], ["אתה עדיין צריך", "את עדיין צריכה"], ["שאתה עדיין משתמש", "שאת עדיין משתמשת"],
+    ["עדיין צריך את זה", "עדיין צריכה את זה"], ["לא צריך? לחץ", "לא צריכה? לחצי"], ["עובד לפי שעות", "עובדת לפי שעות"],
+    ["שומר שבת", "שומרת שבת"], ["מודע לעצמי", "מודעת לעצמי"], ["להיות מחובר", "להיות מחוברת"], ["חודשים תגיע", "חודשים תגיעי"],
+    ["כתוב את", "כתבי את"], ["כתוב:", "כתבי:"], ["כתוב או אמור", "כתבי או אמרי"], ["כתוב על מה", "כתבי על מה"], ["רשום אותו", "רשמי אותו"],
+    ["איך לפנות אליך", "איך לפנות אלייך"],
+  ];
+  const G_WORDS = { "אתה": "את", "שאתה": "שאת", "הוסף": "הוסיפי", "שאל": "שאלי", "לחץ": "לחצי", "ולחץ": "ולחצי", "בחר": "בחרי", "שמור": "שמרי",
+    "נסה": "נסי", "פתח": "פתחי", "ופתח": "ופתחי", "בדוק": "בדקי", "ורשום": "ורשמי", "היכנס": "היכנסי", "וראה": "וראי", "התחבר": "התחברי",
+    "הכנס": "הכניסי", "סמן": "סמני", "הורד": "הורידי", "גרור": "גררי", "העתק": "העתיקי", "והתקן": "והתקיני", "דלג": "דלגי", "אמור": "אמרי",
+    "תקן": "תקני", "עשה": "עשי", "שלח": "שלחי", "תן": "תני", "תרשום": "תרשמי", "שתרשום": "שתרשמי", "תבדוק": "תבדקי", "תוריד": "תורידי",
+    "ותוריד": "ותורידי", "תחליט": "תחליטי", "תחסוך": "תחסכי", "תוותר": "תוותרי", "ותבטל": "ותבטלי", "תרצה": "תרצי", "שתבחר": "שתבחרי",
+    "שתוציא": "שתוציאי", "תראה": "תראי", "ותראה": "ותראי", "תסיים": "תסיימי", "תאט": "תאטי", "תעביר": "תעבירי", "תרוויח": "תרוויחי" };
+  const G_HEB = "[\\u05d0-\\u05ea]";
+  const G_RE = new RegExp("(?<!" + G_HEB + ")(" + G_PHRASES.map((p) => p[0].replace(/[?:]/g, "\\$&")).concat(Object.keys(G_WORDS)).join("|") + ")(?!" + G_HEB + ")", "g");
+  const G_MAP = Object.assign(Object.fromEntries(G_PHRASES), G_WORDS);
+  const isFem = () => !!(store && store.settings && store.settings.gender === "f");
+  const gx = (t) => (isFem() && t ? String(t).replace(G_RE, (m) => G_MAP[m] || m) : t);
+  const gOrig = new WeakMap(), gOut = new WeakMap(), gAttrs = ["placeholder", "title", "aria-label"];
+  function gNode(n) {
+    if (n.nodeType === 3) {
+      const p = n.parentNode; if (!p || /^(SCRIPT|STYLE|TEXTAREA)$/.test(p.nodeName) || (p.closest && p.closest(".aimsg"))) return;
+      const base = gOut.get(n) === n.data ? gOrig.get(n) : n.data, out = gx(base);
+      gOrig.set(n, base); gOut.set(n, out); if (n.data !== out) n.data = out;
+    } else if (n.nodeType === 1) {
+      let rec = gOrig.get(n); if (!rec) gOrig.set(n, rec = {});
+      gAttrs.forEach((a) => {
+        if (!n.hasAttribute(a)) return;
+        const cur = n.getAttribute(a), r = rec[a], base = r && r.out === cur ? r.base : cur, out = gx(base);
+        rec[a] = { base, out }; if (cur !== out) n.setAttribute(a, out);
+      });
+    }
+  }
+  function gTree(root) {
+    gNode(root);
+    const w = document.createTreeWalker(root, 5); let n;
+    while ((n = w.nextNode())) gNode(n);
+  }
+  function applyGender() {
+    gTree(document.body);
+    document.querySelectorAll(".gseg button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.g === ((store && store.settings && store.settings.gender) || ""))));
+  }
+  let gWasFem = false;
+  new MutationObserver((list) => {
+    if (!isFem() && !gWasFem) return;
+    list.forEach((m) => {
+      if (m.type === "characterData") gNode(m.target);
+      else if (m.type === "attributes") gNode(m.target);
+      else m.addedNodes.forEach((n) => gTree(n));
+    });
+  }).observe(document.body, { subtree: true, childList: true, characterData: true, attributes: true, attributeFilter: gAttrs });
+  function setGender(g) {
+    gWasFem = gWasFem || isFem() || g === "f";
+    store.settings = { ...(store.settings || {}), gender: g };
+    applyGender();
   }
 
   // ---- Dates ----
@@ -3388,6 +3470,11 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     persist(); render(); renderTracking();
     snack(b.dataset.k === "off" ? "הכסף מהמשמרות לא נכנס להכנסה." : "הכסף מהמשמרות של " + (b.dataset.k === "prev" ? "החודש הקודם" : "אותו חודש") + " נכנס להכנסה.");
   });
+  $("genderSeg").addEventListener("click", (e) => {
+    const b = e.target.closest("[data-g]"); if (!b) return;
+    setGender(b.dataset.g); persist(); render();
+    snack(b.dataset.g === "f" ? "מעכשיו האפליקציה פונה אלייך בלשון נקבה." : "מעכשיו האפליקציה פונה אליך בלשון זכר.");
+  });
   $("toneSeg").addEventListener("click", (e) => {
     const b = e.target.closest("[data-tone]"); if (!b) return;
     store.settings = { ...(store.settings || {}), tone: b.dataset.tone };
@@ -4304,7 +4391,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
           notes.push({ id: "update", at: t.getTime(), title: "📲 יש עדכון לאפליקציה (" + upd.versionName + ")", text: "פתח את האפליקציה ולחץ \"עדכון\" בבאנר למעלה." });
         }
         if (st.dayCheck !== false) dayCheckNotes(st).forEach((n) => notes.push(n));
-        app.setNotes(JSON.stringify(notes));
+        app.setNotes(gx(JSON.stringify(notes)));
       }
     } catch (e) {}
   }
@@ -5350,9 +5437,10 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       b.addEventListener("click", () => { const on = b.getAttribute("aria-pressed") !== "true"; b.setAttribute("aria-pressed", String(on)); inp.disabled = !on; if (on) inp.focus(); });
       row.append(b, inp); box.append(row);
     });
-    wzShow();
+    wzShow(); applyGender();
     const d = $("wizard"); if (d.showModal) d.showModal(); else d.setAttribute("open", "");
   }
+  $("wzGender").addEventListener("click", (e) => { const b = e.target.closest("[data-g]"); if (b) { setGender(b.dataset.g); $("wzErr").hidden = true; } });
   ["wzPct", "wzTone"].forEach((id) => $(id).addEventListener("click", (e) => {
     const b = e.target.closest("button"); if (!b) return;
     document.querySelectorAll("#" + id + " button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
@@ -5362,6 +5450,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   $("wzSkip").addEventListener("click", () => { store.onboarded = true; persist(); closeDlg("wizard"); $("planBox").open = true; });
   $("wzForm").addEventListener("submit", (e) => {
     e.preventDefault();
+    if (wzStep === 1 && !settings().gender) { $("wzErr").textContent = "איך לפנות אליך? בחר אחת מהאפשרויות."; $("wzErr").hidden = false; return; }
     if (wzStep === 1 && !(parseFloat($("wzInc").value) > 0)) { $("wzErr").textContent = "כמה נכנס לך בחודש? אפשר גם הערכה."; $("wzErr").hidden = false; $("wzInc").focus(); return; }
     if (wzStep < 3) { wzStep++; wzShow(); return; }
     // Build the plan
@@ -6038,7 +6127,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     if (!tok) throw Object.assign(new Error("auth"), { code: "auth" });
     let r;
     try {
-      r = await fetch(AI_URL, { method: "POST", signal: AbortSignal.timeout ? AbortSignal.timeout(125000) : undefined, headers: { "Content-Type": "application/json", Authorization: "Bearer " + tok, apikey: SUPABASE_KEY }, body: JSON.stringify({ tone: settings().tone || "tough", ...payload }) });
+      r = await fetch(AI_URL, { method: "POST", signal: AbortSignal.timeout ? AbortSignal.timeout(125000) : undefined, headers: { "Content-Type": "application/json", Authorization: "Bearer " + tok, apikey: SUPABASE_KEY }, body: JSON.stringify({ tone: settings().tone || "tough", gender: settings().gender || "m", ...payload }) });
     } catch (e) { throw Object.assign(new Error("net"), { code: e && e.name === "TimeoutError" ? "busy" : "fail" }); }
     let j = {}; try { j = await r.json(); } catch (e) {}
     if (!r.ok || j.error) throw Object.assign(new Error(j.error || "http " + r.status), { code: AI_ERR[j.error] ? j.error : "fail" });
@@ -6373,6 +6462,12 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     ["⏱️", "התקדמות שעות", "בלשונית המשמרות: כמה שעות עבדת עד היום לעומת אותו יום בחודש שעבר."],
     ["🖌️", "צבע מבטא וגודל טקסט", "בהגדרות > עיצוב וצבעים: 12 צבעים לכפתורים, 3 גדלי טקסט, רטט וקונפטי."]
   ];
+  $("genderAsk").addEventListener("click", (e) => {
+    const b = e.target.closest("[data-g]"); if (!b) return;
+    setGender(b.dataset.g); persist(); render(); closeDlg("genderSheet");
+    snack(b.dataset.g === "f" ? "מעולה, מעכשיו בלשון נקבה 🙂" : "מעולה, מעכשיו בלשון זכר 🙂");
+    setTimeout(() => showNews(false), 1500);
+  });
   function showNews(force) {
     let seen = ""; try { seen = localStorage.getItem("budget-news") || ""; } catch (e) {}
     if (!force && seen === NEWS_ID) return;
@@ -6452,6 +6547,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   });
 
   async function afterLoad() {
+    gWasFem = gWasFem || isFem(); applyGender();
     runRecurring();
     syncPlanOpen();
     render();
@@ -6463,6 +6559,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     sendAppPlans();
     applyLayout();
     if (isNewUser()) { openWizard(); try { localStorage.setItem("budget-news", NEWS_ID); } catch (e) {} }
+    else if (store.onboarded && !settings().gender) setTimeout(() => { if (!settings().gender) openDlg("genderSheet"); }, 800);
     else setTimeout(() => showNews(false), 1200);
     $("openAdmin").hidden = !isAdmin();
     aiFabSync();

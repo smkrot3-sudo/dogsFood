@@ -19,11 +19,12 @@ const TONE: Record<string, string> = {
   mid: "דבר ישיר אבל מאוזן: אומר את האמת בעדינות.",
   soft: "דבר רך ומעודד, בלי להאשים.",
 };
-const BASE = (tone: string, today: string) => `אתה "העוזר" בתוך אפליקציית התקציב "התקציב שלי", שנועדה לעזור לאנשים שהכסף נגמר להם לפני סוף החודש.
+const BASE = (tone: string, today: string, gender = "m") => `אתה "העוזר" בתוך אפליקציית התקציב "התקציב שלי", שנועדה לעזור לאנשים שהכסף נגמר להם לפני סוף החודש.
 היום ${today} (שעון ישראל).
 כללים:
 - כתוב רק בעברית, בשפה פשוטה, קצר ולעניין. בלי מונחים פיננסיים מסובכים.
 - ${TONE[tone] || TONE.tough}
+- ${gender === "f" ? "המשתמשת היא אישה: פנה אליה תמיד בלשון נקבה (את, יכולה, הוצאת, תחסכי)." : "פנה אל המשתמש בלשון זכר."}
 - כל המספרים בשקלים (₪). אל תמציא נתונים: אם אין בנתונים תשובה, אמור את זה.
 - אתה לא משנה שום דבר באפליקציה ולא מתחייב שעשית משהו. אתה רק מסביר, עונה ומציע.
 - הכנסה מהמשמרות היא ברוטו לפי שעות ושכר לשעה, כולל תוספות חוק (שעות נוספות, לילה, שבת וחג).
@@ -170,7 +171,7 @@ Deno.serve(async (req) => {
     if (used.data === -1) return json({ error: "limit", limit: DAILY_LIMIT }, 429);
 
     const today = new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Jerusalem" });
-    let system = BASE(String(body.tone || "tough"), today) + "\n\n" + PROMPTS[tool];
+    let system = BASE(String(body.tone || "tough"), today, body.gender === "f" ? "f" : "m") + "\n\n" + PROMPTS[tool];
     const ctx = String(body.context || "").slice(0, 120000);
     if (tool === "admin_fb") {
       const { data } = await admin.from("feedback").select("kind, body, page, created_at").order("created_at", { ascending: false }).limit(200);
