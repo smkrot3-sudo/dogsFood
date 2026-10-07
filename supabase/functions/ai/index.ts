@@ -141,7 +141,7 @@ Deno.serve(async (req) => {
         try {
           const pick = new URL(req.url).searchParams.get("m");
           const big = "נתון לדוגמה: הוצאה 18 ₪ על קפה.\n".repeat(Math.min(400, +(new URL(req.url).searchParams.get("pad") || 0)));
-          const out = await gemini(key, BASE("mid", "היום") + "\n" + big, [{ role: "user", parts: [{ text: "כמה הוצאתי על קפה? משפט אחד." }] }], false, 6000, pick ? [pick] : MODELS);
+          const out = await gemini(key, BASE("mid", "היום", new URL(req.url).searchParams.get("g") === "f" ? "f" : "m") + "\n" + big, [{ role: "user", parts: [{ text: "כמה הוצאתי על קפה? משפט אחד." }] }], false, 6000, pick ? [pick] : MODELS);
           return json({ ok: true, model: out.model, ms: Date.now() - t0, text: out.text });
         } catch (e) { return json({ ok: false, ms: Date.now() - t0, error: String((e as Error).message).slice(0, 400) }); }
       }
