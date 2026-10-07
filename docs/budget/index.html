@@ -42,9 +42,29 @@ window.BP = (function () {
     KEYS.forEach(function (k) { if (v) r.setProperty(k, v[k]); else r.removeProperty(k); });
     return v ? v["--bg"] : (isDark() ? "#17121f" : "#fff6ee");
   }
-  return { list: L, vars: vars, get: get, apply: apply, isDark: isDark };
+  var A = [
+    ["orig", "המקורי", "#ef5a33", "#db3577", "#7a46de"], ["sunset", "שקיעה", "#f59e0b", "#ef5a33", "#d6336c"],
+    ["coral", "אלמוג", "#ff6b6b", "#f0563c", "#e8590c"], ["rose", "ורד", "#f06595", "#e64980", "#c2255c"],
+    ["berry", "פטל", "#d6336c", "#ae3ec9", "#7048e8"], ["lavender", "לבנדר", "#a78bfa", "#8b5cf6", "#6d28d9"],
+    ["royal", "מלכותי", "#4c6ef5", "#6741d9", "#9c36b5"], ["ocean", "ים", "#0ea5b7", "#2477d6", "#4c4fd8"],
+    ["teal", "טורקיז", "#14b8a6", "#0d9488", "#0f766e"], ["forest", "יער", "#2f9e5b", "#15885f", "#1f6f8b"],
+    ["lime", "ליים", "#84cc16", "#4d9e1a", "#2f855a"], ["gold", "זהב", "#eab308", "#d98a1c", "#c2410c"]
+  ];
+  function accent() { try { return localStorage.getItem("budget-accent") || "orig"; } catch (e) { return "orig"; } }
+  function applyAccent() {
+    var r = document.documentElement.style, a = null, id = accent();
+    for (var i = 0; i < A.length; i++) if (A[i][0] === id) a = A[i];
+    if (!a || id === "orig") { r.removeProperty("--brand1"); r.removeProperty("--brand2"); r.removeProperty("--brand3"); return; }
+    r.setProperty("--brand1", a[2]); r.setProperty("--brand2", a[3]); r.setProperty("--brand3", a[4]);
+  }
+  function textSize() {
+    var v = "1"; try { v = localStorage.getItem("budget-textsize") || (localStorage.getItem("budget-bigtext") === "1" ? "2" : "1"); } catch (e) {}
+    var c = document.documentElement.classList; c.toggle("bigtext", v === "2"); c.toggle("hugetext", v === "3");
+    return v;
+  }
+  return { list: L, vars: vars, get: get, apply: apply, isDark: isDark, accents: A, accent: accent, applyAccent: applyAccent, textSize: textSize };
 })();
-try { var t = localStorage.getItem("budget-theme"); if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t); if (localStorage.getItem("budget-bigtext") === "1") document.documentElement.classList.add("bigtext"); BP.apply(); } catch (e) {}</script>
+try { var t = localStorage.getItem("budget-theme"); if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t); BP.textSize(); BP.applyAccent(); BP.apply(); } catch (e) {}</script>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="התקציב שלי">
 <link rel="apple-touch-icon" href="icon-180.png">
@@ -641,7 +661,8 @@ dialog.sheet::backdrop { background: rgba(40, 20, 50, .45); -webkit-backdrop-fil
 .timein.bad { border-color: var(--danger) !important; background: var(--danger-soft) !important; }
 
 /* Bigger text (per device) */
-html.bigtext body { zoom: 1.15; }
+html.bigtext body { zoom: 1.12; }
+html.hugetext body { zoom: 1.25; }
 /* Card tools: "?" help and fold */
 .panel h2 { flex-wrap: wrap; row-gap: 6px; }
 .panel h2 > .h2t, .panel h2 > #shTitle, .panel h2 > #calTitle { flex: 1 1 0; min-width: 0; }
@@ -838,6 +859,57 @@ html.bigtext body { zoom: 1.15; }
 .palsw { position: relative; height: 58px; border-radius: 11px; overflow: hidden; border: 1px solid rgba(0,0,0,.08); }
 .palsw i { position: absolute; inset: 10px 10px auto; height: 20px; border-radius: 6px; box-shadow: 0 2px 6px rgba(0,0,0,.12); }
 .palsw b { position: absolute; inset: auto 10px 9px; height: 8px; border-radius: 4px; background: var(--brand); }
+.accgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(76px, 1fr)); gap: 10px; }
+.accgrid button { display: grid; justify-items: center; gap: 6px; padding: 8px 4px; border-radius: 16px; border: 2px solid var(--line); background: var(--surface); color: var(--fg); font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
+.accgrid button[aria-pressed="true"] { border-color: var(--fg); }
+.accgrid i { width: 40px; height: 40px; border-radius: 50%; box-shadow: 0 3px 8px rgba(0,0,0,.18); display: grid; place-items: center; font-style: normal; color: #fff; font-size: 18px; }
+.confetti { position: fixed; inset: 0; pointer-events: none; z-index: 100; }
+.newsheet ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 10px; }
+.newsheet li { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: start; background: var(--surface-2); border-radius: 14px; padding: 10px 12px; }
+.newsheet li > span { font-size: 22px; line-height: 1.2; }
+.newsheet li b { display: block; }
+.newsheet li small { color: var(--muted); font-size: 13.5px; }
+.tagrow { display: flex; flex-wrap: wrap; gap: 8px; }
+.tagbtn { flex: 1 1 0; min-width: 0; padding: 9px 10px; border-radius: 14px; border: 1.5px solid var(--line); background: var(--surface-2); color: var(--fg); font: inherit; font-weight: 700; font-size: 15px; cursor: pointer; }
+.tagbtn[aria-pressed="true"] { border-color: var(--brand2); color: var(--brand2); background: color-mix(in srgb, var(--brand2) 12%, var(--surface)); }
+.tagbtn.regret[aria-pressed="true"], #txRegret[aria-pressed="true"] { border-color: var(--danger); color: var(--danger); background: var(--danger-soft); }
+.moodrow { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.moodrow > span { font-size: 13.5px; color: var(--muted); font-weight: 600; margin-inline-end: 2px; }
+.moodrow button { padding: 5px 10px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--fg); font: inherit; font-size: 13.5px; cursor: pointer; }
+.moodrow button[aria-pressed="true"] { border-color: var(--brand2); background: color-mix(in srgb, var(--brand2) 14%, var(--surface)); font-weight: 700; }
+.srow .tg { font-size: 12px; margin-inline-start: 4px; }
+.habit { display: grid; gap: 12px; }
+.nwbar { display: flex; height: 14px; border-radius: 999px; overflow: hidden; background: var(--surface-2); }
+.nwbar i { display: block; height: 100%; }
+.nwbar .n { background: var(--accent); } .nwbar .w { background: var(--brand2); } .nwbar .u { background: var(--line); }
+.nwleg { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 13.5px; color: var(--muted); }
+.nwleg b { color: var(--fg); }
+.hrow { display: flex; justify-content: space-between; gap: 10px; font-size: 14.5px; padding: 6px 0; border-bottom: 1px solid var(--line); }
+.hrow:last-child { border-bottom: 0; }
+.hsub { font-weight: 700; font-size: 14.5px; margin: 4px 0 0; }
+.fcline { font-size: 13.5px; font-weight: 600; opacity: .92; margin-top: -4px; }
+.chal { display: grid; gap: 10px; }
+.chalpick { display: grid; gap: 8px; }
+.chalpick button { text-align: start; display: grid; gap: 2px; padding: 10px 12px; border-radius: 14px; border: 1.5px solid var(--line); background: var(--surface-2); color: var(--fg); font: inherit; cursor: pointer; }
+.chalpick button b { font-size: 15px; } .chalpick button small { color: var(--muted); font-size: 13px; }
+.chalnow { background: var(--surface-2); border-radius: 16px; padding: 12px 14px; display: grid; gap: 8px; }
+.chalnow .ct { font-weight: 800; font-size: 16px; }
+.chalnow .pgbar { height: 10px; border-radius: 99px; background: color-mix(in srgb, var(--fg) 10%, transparent); overflow: hidden; }
+.chalnow .pgbar i { display: block; height: 100%; border-radius: 99px; background: var(--brand); }
+.chalnow.won .pgbar i { background: var(--accent); } .chalnow.lost .pgbar i { background: var(--danger); }
+.chalnow.won { background: var(--accent-soft); }
+.chalnow.lost { background: var(--danger-soft); }
+.catchips { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
+.catchips::-webkit-scrollbar { display: none; }
+.catchips button { flex: none; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--fg); font: inherit; font-size: 13.5px; cursor: pointer; white-space: nowrap; }
+.catchips button[aria-pressed="true"] { background: var(--brand); color: #fff; border-color: transparent; font-weight: 700; }
+.bcast { display: flex; align-items: start; gap: 10px; max-width: 760px; margin: 0 auto 4px; background: var(--surface); border: 2px solid var(--brand2); border-radius: 18px; padding: 12px 14px; box-shadow: var(--card-shadow); }
+.bcast .bci { font-size: 22px; } .bcast p { flex: 1; margin: 0; white-space: pre-wrap; } .bcast .linkbtn { flex: none; }
+.adlist { display: grid; gap: 8px; }
+.aduser { background: var(--surface-2); border-radius: 14px; padding: 10px 12px; display: grid; gap: 2px; font-size: 13.5px; }
+.aduser b { font-size: 15px; overflow-wrap: anywhere; } .aduser span { color: var(--muted); }
+.aduser .row2 { display: flex; justify-content: space-between; gap: 10px; align-items: center; }
+.shareimg { width: 100%; max-width: 360px; justify-self: center; border-radius: 16px; box-shadow: var(--card-shadow); display: block; margin: 0 auto; }
 .palsw em { position: absolute; top: 4px; inset-inline-start: 4px; font-style: normal; font-size: 13px; }
 .sethead .settitle { margin: 0; font-size: 24px; font-weight: 800; }
 #viewMain { display: grid; gap: 12px; max-width: 760px; width: 100%; margin: 0 auto; }
@@ -1026,6 +1098,10 @@ body.nosave .split { grid-template-columns: 1fr; }
     <a href="#calendar" data-view="calendar">📅 לוח שנה</a>
   </nav>
 
+  <div class="bcast" id="bcast" role="status" hidden>
+    <span class="bci" aria-hidden="true">📣</span><p id="bcastText"></p>
+    <button class="linkbtn" type="button" id="bcastOk">הבנתי</button>
+  </div>
   <div id="viewMain">
   <div class="editbar" id="editBar" hidden>
     <span id="editBarText">✏️ גרור ⠿ כדי להזיז, 👁️ כדי להסתיר</span>
@@ -1037,6 +1113,7 @@ body.nosave .split { grid-template-columns: 1fr; }
       <section data-block="today" class="panel today" aria-labelledby="todayLbl">
         <span class="lbl" id="todayLbl">מותר לך להוציא היום</span>
         <span class="big" id="todayVal">₪0</span>
+        <span class="fcline" id="todayFc" hidden></span>
         <button type="button" class="todaymore" id="todayMoreBtn" aria-expanded="false" aria-controls="todayMore">פרטים ▾</button>
         <div class="todaybox" id="todayMore" hidden>
         <span class="line" id="todayLine"></span>
@@ -1052,6 +1129,7 @@ body.nosave .split { grid-template-columns: 1fr; }
       <section data-block="statement" class="panel" aria-labelledby="stmH">
         <h2 id="stmH" class="pc-blue" data-e="🏦">כל ההוצאות של החודש</h2>
         <div class="actions"><button class="btn" type="button" id="addIncome">💰 הכנסה חד־פעמית</button><button class="btn" type="button" id="cardImport">💳 ייבוא מכרטיס אשראי</button></div>
+        <div class="catchips" id="stmCats" role="group" aria-label="סינון לפי קטגוריה"></div>
         <div class="findbar">
           <input type="search" id="findText" placeholder="🔎 חיפוש: וולט, קפה, נעליים" aria-label="חיפוש הוצאות" autocomplete="off">
           <select id="findRange" aria-label="תקופה">
@@ -1105,6 +1183,16 @@ body.nosave .split { grid-template-columns: 1fr; }
         <div class="cats" id="catList"></div>
       </section>
 
+      <section data-block="habits" class="panel" aria-labelledby="habitsH">
+        <h2 id="habitsH" class="pc-violet" data-e="🧠">ההרגלים שלי החודש</h2>
+        <div class="habit" id="habitBox"></div>
+      </section>
+
+      <section data-block="challenge" class="panel" aria-labelledby="chalH">
+        <h2 id="chalH" class="pc-orange" data-e="🏅">אתגר החודש</h2>
+        <div class="chal" id="chalBox"></div>
+      </section>
+
       <section data-block="goals" class="panel" aria-labelledby="goalsH">
         <h2 id="goalsH" class="pc-mint" data-e="🎯">יעדי חיסכון</h2>
         <div class="goals" id="goalList"></div>
@@ -1141,6 +1229,7 @@ body.nosave .split { grid-template-columns: 1fr; }
         <div class="hist" id="histChart"></div>
         <p class="histnote" id="histNote"></p>
         <p class="histnote" id="histTop"></p>
+        <div class="actions"><button class="btn" type="button" id="shareMonth">📸 שיתוף החודש כתמונה</button></div>
       </section>
 
     <section data-block="badges" class="panel" aria-labelledby="badgeH" id="badgeBox">
@@ -1231,6 +1320,8 @@ body.nosave .split { grid-template-columns: 1fr; }
       <button class="btn" type="button" id="setBack">→ חזרה</button>
       <h2 class="settitle">⚙️ הגדרות</h2>
     </div>
+    <button class="setlink" type="button" id="openAdmin" hidden><span aria-hidden="true">🛠️</span><span><b>לוח מנהל</b><small>משתמשים, גרסאות, משובים והודעה לכולם</small></span><span aria-hidden="true">‹</span></button>
+    <button class="setlink" type="button" id="openNews"><span aria-hidden="true">✨</span><span><b>מה חדש</b><small>מה נוסף לאפליקציה לאחרונה</small></span><span aria-hidden="true">‹</span></button>
     <button class="setlink" type="button" id="openLook"><span aria-hidden="true">🎨</span><span><b>עיצוב וצבעים</b><small>מצב בהיר או כהה, וצבע הרקע</small></span><span aria-hidden="true">‹</span></button>
     <section class="panel" aria-labelledby="setH">
       <h2 id="setH" class="pc-gray" data-e="🛠️">כללי</h2>
@@ -1251,7 +1342,10 @@ body.nosave .split { grid-template-columns: 1fr; }
         </div>
       </div>
       <p class="hint">״אותו חודש״: ההוצאות של אוקטובר נבדקות מול המשכורת על אוקטובר. ״החודש הקודם״: מול המשכורת על ספטמבר, שנכנסת באוקטובר. הסכום הוא ברוטו לפי המשמרות שרשמת, וגדל עם כל משמרת.</p>
-      <label class="check" for="bigText"><input type="checkbox" id="bigText"> 🔠 טקסט גדול (במכשיר הזה)</label>
+      <div class="remind" id="dayCheckRow" hidden>
+        <label class="check" for="dayCheckOn"><input type="checkbox" id="dayCheckOn"> 🧾 סגירת יום: התראה בערב לבדוק שרשמת הכול</label>
+        <label class="field" for="dayCheckAt">בשעה<select id="dayCheckAt"><option>20:00</option><option>20:30</option><option>21:00</option><option>21:30</option><option>22:00</option><option>22:30</option><option>23:00</option></select></label>
+      </div>
       <div class="actions">
         <button class="btn" type="button" id="expTx">📤 ייצוא ההוצאות לאקסל</button>
         <button class="btn" type="button" id="expPlan">📤 ייצוא התוכנית לאקסל</button>
@@ -1265,6 +1359,30 @@ body.nosave .split { grid-template-columns: 1fr; }
         <button class="btn" type="button" id="layEditHome">✏️ עריכה בתוך דף הבית</button>
         <button class="btn" type="button" id="layReset">↺ חזרה לסידור המקורי</button>
       </div>
+    </section>
+  </div>
+
+  <div class="viewcol" id="viewAdmin" hidden>
+    <div class="sethead">
+      <button class="btn" type="button" id="adminBack">→ חזרה</button>
+      <h2 class="settitle">🛠️ לוח מנהל</h2>
+    </div>
+    <section class="panel" aria-labelledby="bcH">
+      <h2 id="bcH" class="pc-orange" data-e="📣">הודעה לכל המשתמשים</h2>
+      <label for="bcText">ההודעה<textarea id="bcText" rows="3" maxlength="1000" placeholder="למשל: יצא עדכון חשוב, כדאי לעדכן את האפליקציה"></textarea></label>
+      <label class="check" for="bcPush"><input type="checkbox" id="bcPush" checked> 🔔 גם כהתראה בטלפון (באפליקציה מגרסה 2.0)</label>
+      <div class="actions"><button class="btn primary" type="button" id="bcSend">📣 שליחה לכולם</button></div>
+      <p class="hint" id="bcState"></p>
+      <div class="adlist" id="bcList"></div>
+    </section>
+    <section class="panel" aria-labelledby="adUsersH">
+      <h2 id="adUsersH" class="pc-blue" data-e="👥">משתמשים <span class="sum" id="adCount"></span></h2>
+      <p class="hint">בלי סכומים: רק מי קיים, איך נכנס, מתי היה פעיל, איזו גרסה מותקנת אצלו וכמה רשומות יש לו.</p>
+      <div class="adlist" id="adUsers"></div>
+    </section>
+    <section class="panel" aria-labelledby="adFbH">
+      <h2 id="adFbH" class="pc-mint" data-e="💬">משובים</h2>
+      <div class="adlist" id="adFb"></div>
     </section>
   </div>
 
@@ -1285,6 +1403,25 @@ body.nosave .split { grid-template-columns: 1fr; }
       <h2 id="palH" class="pc-orange" data-e="🎨">צבע הרקע</h2>
       <p class="hint">הצבע משתנה מיד, ונשמר במכשיר הזה. לכל צבע יש גרסה בהירה וגרסה כהה.</p>
       <div class="palgrid" id="palGrid"></div>
+    </section>
+    <section class="panel" aria-labelledby="accH">
+      <h2 id="accH" class="pc-pink" data-e="🖌️">צבע מבטא</h2>
+      <p class="hint">הצבע של הכפתורים, הלשוניות והכותרות.</p>
+      <div class="accgrid" id="accGrid"></div>
+    </section>
+    <section class="panel" aria-labelledby="sizeH">
+      <h2 id="sizeH" class="pc-blue" data-e="🔠">גודל טקסט</h2>
+      <div class="modepick" id="sizePick" role="group" aria-label="גודל טקסט">
+        <button type="button" data-size="1" aria-pressed="false"><span aria-hidden="true" style="font-size:18px">א</span>רגיל</button>
+        <button type="button" data-size="2" aria-pressed="false"><span aria-hidden="true" style="font-size:24px">א</span>גדול</button>
+        <button type="button" data-size="3" aria-pressed="false"><span aria-hidden="true" style="font-size:30px">א</span>גדול מאוד</button>
+      </div>
+    </section>
+    <section class="panel" aria-labelledby="feelH">
+      <h2 id="feelH" class="pc-mint" data-e="✨">תחושה</h2>
+      <label class="check" for="hapticOn"><input type="checkbox" id="hapticOn"> 📳 רטט קצר כשרושמים הוצאה או משמרת</label>
+      <label class="check" for="confettiOn"><input type="checkbox" id="confettiOn"> 🎉 קונפטי כשמשהו טוב קורה (הישג, יעד, אתגר)</label>
+      <p class="hint">נשמר במכשיר הזה.</p>
     </section>
   </div>
 
@@ -1307,6 +1444,7 @@ body.nosave .split { grid-template-columns: 1fr; }
         <span class="igline" id="igHours"></span>
         <label class="check" for="goalNoteOn" id="goalNoteRow" hidden><input type="checkbox" id="goalNoteOn"> 📅 התראה בכל יום חמישי ב־13:00, כשקובעים משמרות לשבוע הבא</label>
       </div>
+      <span class="igline" id="igPace" hidden></span>
     </section>
 
     <section class="panel pay" aria-labelledby="shTitle">
@@ -1411,6 +1549,12 @@ body.nosave .split { grid-template-columns: 1fr; }
     <fieldset class="chips" id="incKinds" hidden><legend>מה זה?</legend></fieldset>
     <label for="txNote" id="txNoteLbl">פירוט (לא חובה)<input type="text" id="txNote" maxlength="200" placeholder="למשל: שווארמה עם חברים" autocomplete="off"></label>
     <label for="txDate">מתי?<input type="date" id="txDate"></label>
+    <div class="tagrow" role="group" aria-label="צריך או רוצה">
+      <button type="button" class="tagbtn" id="txNeed" aria-pressed="false">🧰 צריך</button>
+      <button type="button" class="tagbtn" id="txWant" aria-pressed="false">🎁 רוצה</button>
+      <button type="button" class="tagbtn" id="txRegret" aria-pressed="false" hidden>😣 התחרטתי</button>
+    </div>
+    <div class="moodrow" id="txMoods" role="group" aria-label="למה קניתי? (לא חובה)"></div>
     <label class="check" id="favRow" for="txFav"><input type="checkbox" id="txFav"> ⭐ שמור ככפתור ״רישום בלחיצה״</label>
     <label class="check" id="repeatRow" for="txRepeat"><input type="checkbox" id="txRepeat"> חיוב קבוע כל חודש (יירד מראש מההכנסה)</label>
     <div class="err" id="txErr" role="alert" hidden></div>
@@ -1503,6 +1647,27 @@ body.nosave .split { grid-template-columns: 1fr; }
     <div class="foot">
       <button class="btn" type="button" id="emoAuto">✨ אוטומטי לפי השם</button>
       <button class="btn" type="button" id="emoCancel">סגירה</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog class="sheet newsheet" id="newsSheet" aria-labelledby="newsH">
+  <form method="dialog">
+    <h2 id="newsH" data-e="✨">מה חדש</h2>
+    <ul id="newsList"></ul>
+    <div class="foot"><button class="btn primary" type="button" id="newsOk">יופי, הבנתי</button></div>
+  </form>
+</dialog>
+
+<dialog class="sheet" id="shareSheet" aria-labelledby="shareH">
+  <form method="dialog">
+    <h2 id="shareH" data-e="📸">שיתוף החודש</h2>
+    <img id="shareImg" alt="תמונת סיכום החודש" class="shareimg">
+    <label class="check" for="shareAmounts"><input type="checkbox" id="shareAmounts"> להראות סכומים (בלי זה רואים רק אחוזים)</label>
+    <p class="hint" id="shareHint" hidden>אפשר גם ללחוץ לחיצה ארוכה על התמונה כדי לשמור אותה.</p>
+    <div class="foot">
+      <button class="btn primary" type="button" id="shareGo">📤 שיתוף</button>
+      <button class="btn" type="button" id="shareClose">סגירה</button>
     </div>
   </form>
 </dialog>
@@ -1800,6 +1965,33 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     document.querySelectorAll(".getapp").forEach((a) => (a.hidden = false));
   paintTheme();
 
+  // ---- Feel: a short vibration when logging, confetti for wins (per device, both on by default) ----
+  function feelOn(k) { try { return localStorage.getItem("budget-" + k) !== "0"; } catch (e) { return true; } }
+  function buzz() {
+    if (!feelOn("haptic")) return;
+    try { if (window.BudgetApp && BudgetApp.vibrate) { BudgetApp.vibrate(18); return; } } catch (e) {}
+    try { if (navigator.vibrate) navigator.vibrate(18); } catch (e) {}
+  }
+  function confetti() {
+    if (!feelOn("confetti") || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const c = document.createElement("canvas"); c.className = "confetti"; c.setAttribute("aria-hidden", "true");
+    const W = (c.width = innerWidth * 2), H = (c.height = innerHeight * 2), g = c.getContext("2d");
+    document.body.append(c);
+    const cs = getComputedStyle(document.documentElement);
+    const colors = ["--brand1", "--brand2", "--brand3"].map((k) => cs.getPropertyValue(k).trim()).concat(["#ffd43b", "#38d9a9", "#4dabf7"]);
+    const bits = Array.from({ length: 140 }, () => ({ x: W / 2 + (Math.random() - .5) * W * .3, y: H * .35, vx: (Math.random() - .5) * 34, vy: -Math.random() * 38 - 12,
+      s: 10 + Math.random() * 14, r: Math.random() * 6, vr: (Math.random() - .5) * .4, col: colors[Math.floor(Math.random() * colors.length)] }));
+    const t0 = performance.now();
+    (function frame(t) {
+      const k = (t - t0) / 1800;
+      g.clearRect(0, 0, W, H);
+      bits.forEach((b) => { b.vy += 1.3; b.vx *= .985; b.x += b.vx; b.y += b.vy; b.r += b.vr;
+        g.save(); g.globalAlpha = Math.max(0, 1 - k * k); g.translate(b.x, b.y); g.rotate(b.r); g.fillStyle = b.col; g.fillRect(-b.s / 2, -b.s / 4, b.s, b.s / 2); g.restore(); });
+      if (k < 1) requestAnimationFrame(frame); else c.remove();
+    })(t0);
+    buzz();
+  }
+
   function lsGet(k) { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } }
   function lsSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
   function lsDel(k) { try { localStorage.removeItem(k); } catch (e) {} }
@@ -2071,7 +2263,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     }
     const start = periodStart(m), end = periodEnd(m);
     const { data: rows, error } = await sb.from("expenses")
-      .select("id, spent_on, amount, category, note, created_at")
+      .select("id, spent_on, amount, category, note, tags, created_at")
       .gte("spent_on", start).lte("spent_on", end)
       .order("spent_on", { ascending: false }).order("created_at", { ascending: false });
     if (error) throw error;
@@ -2138,6 +2330,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     if (tx[m]) tx[m] = sortTx(tx[m].concat([{ ...row, pending: !!sb }]));
     cacheTx();
     flushOutbox();
+    try { sendAppPlans(); } catch (e) {}
   }
   function updateTx(before, after) {
     if (!sb || !user) {
@@ -2362,6 +2555,11 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       $("todayVal").classList.toggle("neg", left < 0);
       $("todayLine").textContent = "נשארו " + fmt(Math.max(spend - spent, 0)) + " כסף חופשי ל־" + daysLeft + " ימים (כולל היום)";
       const rate = spent / dayNum;
+      // Display only: where the month ends if spending keeps this pace (the daily number isn't affected)
+      const fc = spend - rate * days;
+      $("todayFc").hidden = !(dayNum >= 3 && spent > 0 && spend > 0);
+      $("todayFc").textContent = fc >= 0 ? "📈 בקצב הזה תסיים את החודש עם בערך " + fmt(Math.round(fc / 10) * 10) + " בצד"
+        : "📉 בקצב הזה תסיים את החודש במינוס של בערך " + fmt(Math.round(-fc / 10) * 10);
       const runOut = rate > 0 ? Math.ceil(spend / rate) : Infinity;
       const X = (n) => fmt(n);
       if (spend <= 0) setV("bad", say("אין לך כסף חופשי החודש. כל שקל שתוציא יבוא מהחיסכון.", "אין כסף חופשי החודש. כל הוצאה תבוא מהחיסכון.", "החודש אין כסף חופשי. כדאי לעבור על התוכנית ולמצוא קצת מרווח 💛"));
@@ -2372,6 +2570,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       else if (!list.length) setV("warn", say("עוד לא רשמת אף הוצאה החודש. כל שקל שיוצא נרשם כאן, גם הקפה.", "עוד לא רשמת הוצאות החודש. כדאי לרשום כל הוצאה, גם קטנה.", "עוד לא רשמת הוצאות החודש. כל הוצאה שתרשום תעזור לראות את התמונה 🙂"));
       else setV("good", say("אתה בתוך התקציב. זו לא סיבה להתפנק.", "אתה בתוך התקציב. ככה ממשיכים.", "כל הכבוד, אתה בתוך התקציב! 🎉"));
     } else if (isPast) {
+      $("todayFc").hidden = true;
       const left = spend - spent;
       $("todayLbl").textContent = left >= 0 ? "נשאר בסוף " + monthName(month) : "חריגה ב" + monthName(month);
       $("todayVal").textContent = fmt(Math.abs(left));
@@ -2380,6 +2579,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       if (left < 0) setV("bad", say("החודש הזה נגמר בחריגה של " + fmt(-left) + ". תבדוק איזו קטגוריה ברחה ותוריד לה תקציב.", "החודש נגמר בחריגה של " + fmt(-left) + ". כדאי לבדוק איזו קטגוריה עברה את התקציב.", "החודש נגמר בחריגה של " + fmt(-left) + ". בחודש הבא נשים לב לקטגוריה שהכי ברחה 💛"));
       else setV("good", say("סיימת את החודש בלי חריגה. " + (left > 0 ? "את ה־" + fmt(left) + " שנשארו תעביר לחיסכון, לא לחודש הבא." : ""), "סיימת את החודש בלי חריגה." + (left > 0 ? " נשארו " + fmt(left) + ", כדאי להעביר אותם לחיסכון." : ""), "סיימת את החודש בלי חריגה, כל הכבוד! 🎉" + (left > 0 ? " נשארו " + fmt(left) + " לחיסכון." : "")));
     } else {
+      $("todayFc").hidden = true;
       $("todayLbl").textContent = "הכסף החופשי ל" + monthName(month);
       $("todayVal").textContent = fmt(spend);
       $("todayVal").classList.remove("neg");
@@ -2488,17 +2688,30 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 
   // ---- "All the month's expenses": a bank-statement style list with quick inline editing ----
   let stmOpen = null;
+  let stmCat = null;
   function renderStatement() {
     if (!store) return;
     const names = catNames(), box = $("stmList"); box.innerHTML = "";
     const searching = !!($("findText").value.trim() || $("findCat").value);
     box.hidden = $("stmSum").hidden = searching;
-    const exp = monthTx(), inc = monthInc();
+    const d0 = data(), topOf = (id) => { const c = d0.cats.find((x) => x.id === id); return c && isSub(c, d0.cats) ? c.parent : id; };
+    const allExp = monthTx();
+    // Category chips: one per main category with spending this month
+    const byTop = {}; allExp.forEach((r) => { const k = topOf(r.category); byTop[k] = (byTop[k] || 0) + r.amount; });
+    if (stmCat && !byTop[stmCat]) stmCat = null;
+    const chips = $("stmCats"); chips.innerHTML = ""; chips.hidden = searching || Object.keys(byTop).length < 2;
+    const chip = (id, label) => {
+      const b = document.createElement("button"); b.type = "button"; b.textContent = label; b.setAttribute("aria-pressed", String(stmCat === id));
+      b.addEventListener("click", () => { stmCat = id; stmOpen = null; renderStatement(); }); chips.append(b);
+    };
+    chip(null, "הכול");
+    Object.entries(byTop).sort((a, b) => b[1] - a[1]).forEach(([id, v]) => chip(id, (names[id] ? emojiOf(id, names[id]) + " " + names[id] : "🗑️ נמחקה") + " " + fmt(v)));
+    const exp = stmCat ? allExp.filter((r) => topOf(r.category) === stmCat) : allExp, inc = stmCat ? [] : monthInc();
     const list = exp.concat(inc.map((r) => ({ ...r, spent_on: r.received_on, _inc: r })))
       .sort((a, b) => b.spent_on.localeCompare(a.spent_on) || String(b.created_at).localeCompare(String(a.created_at)));
     const total = exp.reduce((s, r) => s + r.amount, 0), incTotal = inc.reduce((s, r) => s + r.amount, 0);
     $("stmSum").innerHTML = "";
-    const l = document.createElement("span"); l.textContent = exp.length + " הוצאות ב" + monthName(month);
+    const l = document.createElement("span"); l.textContent = exp.length + " הוצאות ב" + monthName(month) + (stmCat ? " ב" + (names[stmCat] || "קטגוריה") : "");
     const t = document.createElement("span"); t.append("סה״כ "); const tb = document.createElement("b"); tb.textContent = fmt(total); t.append(tb);
     if (incTotal) { const ib = document.createElement("b"); ib.className = "pos"; ib.textContent = "+" + fmt(incTotal); t.append(" · הכנסות ", ib); }
     $("stmSum").append(l, t);
@@ -2518,6 +2731,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       const tt = document.createElement("span"); tt.className = "tt";
       const b = document.createElement("b"); b.textContent = r.note || names[r.category] || "הוצאה";
       const sm = document.createElement("small"); sm.textContent = (names[r.category] || "קטגוריה שנמחקה") + (r.pending ? " · ממתין לחיבור" : "");
+      if (tagMark(r.tags)) { const tg = document.createElement("span"); tg.className = "tg"; tg.textContent = tagMark(r.tags); sm.append(tg); }
       tt.append(b, sm);
       const am = document.createElement("span"); am.className = "am"; am.textContent = "\u2066−" + fmt(r.amount) + "\u2069";
       row.append(ic, tt, am);
@@ -2553,6 +2767,19 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     cat.value = r.category;
     const note = document.createElement("input"); note.type = "text"; note.maxLength = 200; note.value = r.note || ""; note.autocomplete = "off"; note.placeholder = "על מה";
     field("סכום", amt); field("תאריך", date); field("קטגוריה", cat, true); field("פירוט", note, true);
+    // Need / want / regret in one tap
+    const tg = { ...(r.tags || {}) };
+    const trow = document.createElement("div"); trow.className = "tagrow full";
+    const tb = (label, cls, on, flip) => {
+      const b = document.createElement("button"); b.type = "button"; b.className = "tagbtn " + cls; b.textContent = label;
+      b._paint = () => b.setAttribute("aria-pressed", String(on()));
+      b.addEventListener("click", () => { flip(); trow.querySelectorAll("button").forEach((x) => x._paint()); });
+      b._paint(); trow.append(b);
+    };
+    tb("🧰 צריך", "", () => tg.nw === "need", () => { tg.nw = tg.nw === "need" ? undefined : "need"; });
+    tb("🎁 רוצה", "", () => tg.nw === "want", () => { tg.nw = tg.nw === "want" ? undefined : "want"; });
+    tb("😣 התחרטתי", "regret", () => !!tg.regret, () => { tg.regret = !tg.regret || undefined; });
+    f.append(trow);
     const acts = document.createElement("div"); acts.className = "acts";
     const ok = document.createElement("button"); ok.type = "submit"; ok.className = "btn primary"; ok.textContent = "שמירה";
     const no = document.createElement("button"); no.type = "button"; no.className = "btn"; no.textContent = "ביטול";
@@ -2560,7 +2787,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     acts.append(ok, no, gone); f.append(acts);
     no.addEventListener("click", () => { stmOpen = null; renderStatement(); });
     gone.addEventListener("click", () => {
-      const copy = { id: r.id, spent_on: r.spent_on, amount: r.amount, category: r.category, note: r.note, created_at: r.created_at };
+      const copy = { id: r.id, spent_on: r.spent_on, amount: r.amount, category: r.category, note: r.note, tags: r.tags || null, created_at: r.created_at };
       stmOpen = null; delTx(r.id); renderTracking();
       snack("נמחקה הוצאה של " + fmt(r.amount), () => { addTx({ ...copy, id: uid() }); renderTracking(); });
     });
@@ -2570,7 +2797,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       if (!(a > 0)) { amt.focus(); snack("צריך סכום גדול מאפס."); return; }
       if (!/^\d{4}-\d{2}-\d{2}$/.test(date.value)) { date.focus(); return; }
       const before = { ...r }; delete before.pending;
-      const after = { ...before, amount: a, spent_on: date.value, category: cat.value, note: note.value.trim() };
+      const after = { ...before, amount: a, spent_on: date.value, category: cat.value, note: note.value.trim(), tags: cleanTags(tg) };
       stmOpen = null;
       updateTx(before, after);
       showPeriodOf(after.spent_on);
@@ -2626,6 +2853,9 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       lab.append(sp); box.append(lab);
     }
     $("txAmount").value = edit ? edit.amount : ""; $("txNote").value = edit ? edit.note || "" : "";
+    sheetTags = edit && edit.tags ? { ...edit.tags } : {};
+    $("txRegret").hidden = !edit;
+    paintTags();
     const cur = thisMonth();
     $("txDate").value = edit ? edit.spent_on : month === cur ? todayStr() : month < cur ? periodEnd(month) : periodStart(month);
     $("txErr").hidden = true;
@@ -2646,6 +2876,30 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   $("addIncome").addEventListener("click", () => openIncome());
   $("txCancel").addEventListener("click", closeSheet);
 
+  const MOODS = [["bored", "🥱", "משעמם"], ["stress", "😰", "לחוץ"], ["sad", "😢", "עצוב"], ["party", "🎉", "חגיגה"], ["gift", "🎁", "מתנה"], ["deal", "🏷️", "מבצע"], ["just", "🤷", "סתם"]];
+  let sheetTags = {};
+  function paintTags() {
+    $("txNeed").setAttribute("aria-pressed", String(sheetTags.nw === "need"));
+    $("txWant").setAttribute("aria-pressed", String(sheetTags.nw === "want"));
+    $("txRegret").setAttribute("aria-pressed", String(!!sheetTags.regret));
+    const box = $("txMoods"); box.innerHTML = "";
+    const l = document.createElement("span"); l.textContent = "למה קניתי?"; box.append(l);
+    MOODS.forEach(([k, e, n]) => {
+      const b = document.createElement("button"); b.type = "button"; b.textContent = e + " " + n;
+      b.setAttribute("aria-pressed", String(sheetTags.mood === k));
+      b.addEventListener("click", () => { sheetTags.mood = sheetTags.mood === k ? undefined : k; paintTags(); });
+      box.append(b);
+    });
+  }
+  $("txNeed").addEventListener("click", () => { sheetTags.nw = sheetTags.nw === "need" ? undefined : "need"; paintTags(); });
+  $("txWant").addEventListener("click", () => { sheetTags.nw = sheetTags.nw === "want" ? undefined : "want"; paintTags(); });
+  $("txRegret").addEventListener("click", () => { sheetTags.regret = !sheetTags.regret || undefined; paintTags(); });
+  function cleanTags(t) {
+    const o = {}; if (t && (t.nw === "need" || t.nw === "want")) o.nw = t.nw; if (t && t.mood) o.mood = t.mood; if (t && t.regret) o.regret = true;
+    return Object.keys(o).length ? o : null;
+  }
+  const moodOf = (k) => MOODS.find((m) => m[0] === k);
+  const tagMark = (t) => (t ? (t.regret ? "😣" : "") + (t.nw === "want" ? "🎁" : t.nw === "need" ? "🧰" : "") + (t.mood && moodOf(t.mood) ? moodOf(t.mood)[1] : "") : "");
   function readSheet() {
     const amount = Math.round((parseFloat($("txAmount").value) || 0) * 100) / 100;
     const picked = document.querySelector('input[name="txCat"]:checked');
@@ -2654,7 +2908,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     if (!(amount > 0)) { $("txAmount").focus(); return err("כמה זה עלה? רשמו סכום גדול מאפס."); }
     if (!picked) return err("בחרו קטגוריה.");
     if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return err("בחרו תאריך.");
-    return { amount, category: picked.value, spent_on: date, note: $("txNote").value.trim().slice(0, 200) };
+    return { amount, category: picked.value, spent_on: date, note: $("txNote").value.trim().slice(0, 200), tags: cleanTags(sheetTags) };
   }
 
   function showPeriodOf(date) {
@@ -2694,6 +2948,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     remember(row);
     persist();
     addTx(row);
+    buzz();
     closeSheet();
     showPeriodOf(row.spent_on);
     afterSpend(row);
@@ -3036,7 +3291,6 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     document.querySelectorAll("#toneSeg button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.tone === tone)));
     document.querySelectorAll("#shiftIncSeg button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.k === shiftIncomeFrom())));
     $("tagline").textContent = say("כל שקל שיוצא נרשם כאן. בלי תירוצים.", "כל שקל שיוצא נרשם כאן.", "יחד נגיע לסוף החודש בשקט 💛");
-    $("bigText").checked = document.documentElement.classList.contains("bigtext");
     renderPaySettings();
   }
   $("startDay").addEventListener("change", () => {
@@ -3062,10 +3316,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     persist(); render();
     snack(say("טון קשוח. בלי הנחות.", "טון מאוזן.", "טון עדין 💛"));
   });
-  $("bigText").addEventListener("change", () => {
-    document.documentElement.classList.toggle("bigtext", $("bigText").checked);
-    try { localStorage.setItem("budget-bigtext", $("bigText").checked ? "1" : "0"); } catch (e) {}
-  });
+
 
   // ---- Dated records kept in their own tables (shifts, one-off incomes) ----
   // Each keeps a per-month cache, goes through the offline outbox, and falls back to the browser without accounts.
@@ -3383,7 +3634,8 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     const m = periodOf(row.work_date);
     if (m !== month) goMonth(m); else { renderPay(); renderCal(); }
     const p = shiftPay(row, settings());
-    snack((before ? "המשמרת עודכנה: " : "נרשמה משמרת: ") + hrs(p.paidMin) + " שעות, " + fmt(p.gross) + " ברוטו",
+    if (!before) buzz();
+    snack((before ? "המשמרת עודכנה: " : "נרשמה משמרת של ") + hrs(p.paidMin) + " שעות. היא שווה " + fmt(p.gross) + " ברוטו" + (p.gross > 0 && +settings().wage > 0 ? " (" + fmt(Math.round(p.gross / (p.paidMin / 60 || 1))) + " לשעה בממוצע)" : ""),
       () => { if (before) saveShift(before); else delShift(row.id); renderPay(); renderCal(); });
   });
 
@@ -3839,12 +4091,26 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     persist(); renderPayExtras(); renderIncGoal();
   });
   // The shifts page goal card: how close this month's shifts are to the money goal, and how many hours are left
+  // Hours worked so far this month next to the same point last month
+  function renderHoursPace(st) {
+    const el = $("igPace"), cur = thisMonth();
+    if (month !== cur || !shifts[cur]) { el.hidden = true; return; }
+    const n = daysBetween(periodStart(cur), todayStr());
+    const hoursUpTo = (m, last) => (shifts[m] || []).filter((r) => r.work_date <= last).reduce((a, r) => a + (r._p || shiftPay(r, st)).paidMin, 0) / 60;
+    const now = hoursUpTo(cur, todayStr());
+    const pm = prevMonth(cur), had = shifts[pm] ? hoursUpTo(pm, dateAdd(periodStart(pm), n)) : null;
+    if (!now && !had) { el.hidden = true; return; }
+    const r1 = (x) => (Math.round(x * 2) / 2).toLocaleString("he-IL");
+    el.textContent = "⏱️ עבדת עד היום " + r1(now) + " שעות החודש" + (had != null ? (had ? ". בחודש שעבר, עד אותו יום: " + r1(had) + (now > had ? " ▲" : now < had ? " ▼" : "") : ". בחודש שעבר עד אותו יום עוד לא עבדת") : "") + ".";
+    el.hidden = false;
+  }
   function renderIncGoal() {
     if (!store) return;
     const st = settings(), goal = st.payGoalKind === "m" ? +st.payGoal || 0 : 0;
     sendAppPlans();   // keeps the Thursday note's numbers current
     if (document.activeElement !== $("pgVal")) $("pgVal").value = goal > 0 ? goal : "";
     $("incGoalBox").hidden = !(goal > 0);
+    renderHoursPace(st);
     if (!(goal > 0)) return;
     const list = shifts[month] || [];
     const all = list.reduce((a, r) => { const p = r._p || shiftPay(r, st); a.min += p.paidMin; a.gross += p.gross; return a; }, { min: 0, gross: 0 });
@@ -3854,6 +4120,10 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     $("igBar").style.width = Math.min(have / goal, 1) * 100 + "%";
     $("goalNoteRow").hidden = !(window.BudgetApp && BudgetApp.setNotes);
     $("goalNoteOn").checked = st.goalNote !== false;
+    if (!left && month === thisMonth()) {
+      const done = (store.goalHit = store.goalHit || {});
+      if (!done[month]) { done[month] = todayStr(); persist(); if (list.length) setTimeout(confetti, 300); }
+    }
     if (!left) { $("igLeft").textContent = "🎉 הגעת ליעד של החודש!"; $("igHours").textContent = have > goal ? "ואפילו עברת אותו ב־" + fmt(have - goal) + "." : ""; return; }
     $("igLeft").textContent = "חסרים עוד " + fmt(left) + " כדי להגיע ליעד.";
     // Hours left at the base wage; with overtime it can be a bit less
@@ -3914,6 +4184,20 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     return "חסרות לך עוד " + h.toLocaleString("he-IL") + " שעות ליעד של " + fmt(goal) + " החודש" +
       (weeks > 1 ? ", בערך " + Math.ceil(h / weeks) + " שעות בשבוע." : ". שווה לקחת אותן בשבוע הבא.");
   }
+  // Evening "close the day" note for the next 7 days; today's says how much was logged
+  function dayCheckNotes(st) {
+    const T = toMin(st.dayCheckAt || "21:00"), today = todayStr(), out = [];
+    const spentToday = allTx().filter((r) => r.spent_on === today && !isRecurringRow(r)).reduce((a, r) => a + r.amount, 0);
+    for (let i = 0; i < 7; i++) {
+      const day = dateAdd(today, i), [y, m, d] = day.split("-").map(Number), at = new Date(y, m - 1, d, Math.floor(T / 60), T % 60).getTime();
+      if (at < Date.now() + 60000) continue;
+      if (keepsShabbat() && isRestMinute(day, T)) continue;
+      out.push({ id: "day" + i, at, title: "🧾 סגירת יום", text: i === 0
+        ? (spentToday > 0 ? "היום רשמת הוצאות של " + fmt(spentToday) + ". שכחת משהו?" : "עוד לא רשמת הוצאות היום. באמת לא יצא כלום?")
+        : "רשמת את כל ההוצאות של היום? 20 שניות וזה סגור." });
+    }
+    return out;
+  }
   function sendAppPlans() {
     const app = window.BudgetApp;
     if (!app || !store) return;
@@ -3930,6 +4214,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
           if (t.getDay() === 5 || t.getDay() === 6) t.setDate(t.getDate() + (t.getDay() === 5 ? 2 : 1));
           notes.push({ id: "update", at: t.getTime(), title: "📲 יש עדכון לאפליקציה (" + upd.versionName + ")", text: "פתח את האפליקציה ולחץ \"עדכון\" בבאנר למעלה." });
         }
+        if (st.dayCheck !== false) dayCheckNotes(st).forEach((n) => notes.push(n));
         app.setNotes(JSON.stringify(notes));
       }
     } catch (e) {}
@@ -3937,6 +4222,8 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   $("goalNoteOn").addEventListener("change", () => { setSetting("goalNote", $("goalNoteOn").checked); sendAppPlans(); });
   $("shabbatOn").addEventListener("change", () => { setSetting("shabbat", $("shabbatOn").checked); sendAppPlans(); renderMissing(); });
   $("weeklyOn").addEventListener("change", () => { setSetting("weekly", $("weeklyOn").checked); sendAppPlans(); });
+  $("dayCheckOn").addEventListener("change", () => { setSetting("dayCheck", $("dayCheckOn").checked); sendAppPlans(); });
+  $("dayCheckAt").addEventListener("change", () => { setSetting("dayCheckAt", $("dayCheckAt").value); sendAppPlans(); });
 
   // ---- Pay settings ----
   function renderPaySettings() {
@@ -3950,6 +4237,9 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     $("shabbatOn").checked = st.shabbat !== false;
     $("weeklyRow").hidden = !(window.BudgetApp && BudgetApp.setNotes);
     $("weeklyOn").checked = st.weekly !== false;
+    $("dayCheckRow").hidden = !(window.BudgetApp && BudgetApp.setNotes);
+    $("dayCheckOn").checked = st.dayCheck !== false;
+    $("dayCheckAt").value = st.dayCheckAt || "21:00";
 
     $("payday").value = +st.payday > 0 ? String(st.payday) : "";
     renderTypes();
@@ -4213,6 +4503,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     if (periodOf(row.spent_on) === month) commit();
     remember(row); persist();
     addTx(row);
+    buzz();
     showPeriodOf(row.spent_on);
     afterSpend(row);
   }
@@ -4260,7 +4551,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     let rows;
     if (!sb || !user) rows = (store.tx || []).filter((r) => r.spent_on >= from);
     else {
-      let qq = sb.from("expenses").select("id, spent_on, amount, category, note, created_at").gte("spent_on", from).order("spent_on", { ascending: false }).limit(5000);
+      let qq = sb.from("expenses").select("id, spent_on, amount, category, note, tags, created_at").gte("spent_on", from).order("spent_on", { ascending: false }).limit(5000);
       if (cat) qq = qq.eq("category", cat);
       const { data: r, error } = await qq;
       if (seq !== findSeq) return;
@@ -4567,7 +4858,9 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     ["goaldone", "🎉", "הגעתי!", "הגעת ליעד חיסכון"],
     ["shift1", "⏰", "משמרת ראשונה", "רשמת משמרת"],
     ["shift20", "💪", "20 משמרות", "רשמת 20 משמרות בחודש אחד או בשניים"],
-    ["subs", "🔍", "בדקתי מנויים", "אישרת שאתה עדיין צריך מנוי"]
+    ["subs", "🔍", "בדקתי מנויים", "אישרת שאתה עדיין צריך מנוי"],
+    ["chal", "🏅", "עמדתי באתגר", "הצלחת באתגר חודשי"],
+    ["nw", "🧠", "מודע לעצמי", "סימנת ״צריך״ או ״רוצה״ ב־10 הוצאות"]
   ];
   function earnedNow() {
     const out = new Set(), all = allTx();
@@ -4587,6 +4880,8 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     if (sh) out.add("shift1");
     if (sh >= 20) out.add("shift20");
     if (store.subsChecked) out.add("subs");
+    if (store.chalWon) out.add("chal");
+    if (all.filter((r) => r.tags && r.tags.nw).length >= 10) out.add("nw");
     return out;
   }
   function renderBadges() {
@@ -4597,7 +4892,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       const first = Object.keys(have).length === 0 && fresh.length > 2; // first run with old data: record quietly
       fresh.forEach((id) => { have[id] = todayStr(); });
       persist();
-      if (!first) { const b = BADGES.find((x) => x[0] === fresh[0]); if (b) setTimeout(() => snack("🏆 הישג חדש: " + b[1] + " " + b[2] + (fresh.length > 1 ? " (ועוד " + (fresh.length - 1) + ")" : "")), 4200); }
+      if (!first) { const b = BADGES.find((x) => x[0] === fresh[0]); if (b) setTimeout(() => { snack("🏆 הישג חדש: " + b[1] + " " + b[2] + (fresh.length > 1 ? " (ועוד " + (fresh.length - 1) + ")" : "")); confetti(); }, 4200); }
     }
     const box = $("badgeList"); box.innerHTML = "";
     BADGES.forEach(([id, e, name, how]) => {
@@ -4609,7 +4904,166 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     });
     $("badgeSum").textContent = Object.keys(have).filter((k) => BADGES.some((x) => x[0] === k)).length + "/" + BADGES.length;
   }
-  function renderInsights() { renderStreak(); renderDonut(); renderCompare(); renderSummary(); renderGoals(); renderBadges(); }
+  function renderInsights() { renderStreak(); renderDonut(); renderCompare(); renderSummary(); renderGoals(); renderHabits(); renderChallenge(); renderBadges(); }
+
+  // ---- Habits: need vs want, regrets, and why I bought ----
+  function renderHabits() {
+    if (!store) return;
+    const box = $("habitBox"); box.innerHTML = "";
+    const list = monthTx().filter((r) => !isRecurringRow(r));
+    const sum = (f) => list.filter(f).reduce((a, r) => a + r.amount, 0);
+    const need = sum((r) => r.tags && r.tags.nw === "need"), want = sum((r) => r.tags && r.tags.nw === "want"), all = sum(() => true);
+    const tagged = list.some((r) => r.tags);
+    if (!tagged) {
+      const p = document.createElement("p"); p.className = "hint";
+      p.textContent = "כשרושמים הוצאה אפשר לסמן ״🧰 צריך״ או ״🎁 רוצה״ ולמה קנית. אחר כך, בלחיצה על הוצאה ברשימה, אפשר לסמן ״😣 התחרטתי״. כאן תראה לאן הכסף שלך באמת הולך.";
+      box.append(p); return;
+    }
+    const other = Math.max(all - need - want, 0);
+    const bar = document.createElement("div"); bar.className = "nwbar"; bar.setAttribute("aria-hidden", "true");
+    [["n", need], ["w", want], ["u", other]].forEach(([c, v]) => { if (v > 0) { const i = document.createElement("i"); i.className = c; i.style.width = (v / all) * 100 + "%"; bar.append(i); } });
+    const leg = document.createElement("div"); leg.className = "nwleg";
+    const li = (label, v) => { const sp = document.createElement("span"); sp.append(label + " "); const b = document.createElement("b"); b.textContent = fmt(v); sp.append(b); leg.append(sp); };
+    li("🧰 צריך", need); li("🎁 רוצה", want); if (other) li("בלי סימון", other);
+    box.append(bar, leg);
+    const reg = list.filter((r) => r.tags && r.tags.regret);
+    if (reg.length) {
+      const h = document.createElement("p"); h.className = "hsub"; h.textContent = "😣 התחרטת על " + fmt(reg.reduce((a, r) => a + r.amount, 0)) + " החודש"; box.append(h);
+      const names = catNames(), wrap = document.createElement("div");
+      reg.slice().sort((a, b) => b.amount - a.amount).slice(0, 5).forEach((r) => {
+        const row = document.createElement("div"); row.className = "hrow";
+        const a = document.createElement("span"); a.textContent = r.note || names[r.category] || "הוצאה";
+        const b = document.createElement("b"); b.textContent = fmt(r.amount);
+        row.append(a, b); wrap.append(row);
+      });
+      box.append(wrap);
+    }
+    const byMood = {};
+    list.forEach((r) => { if (r.tags && r.tags.mood && moodOf(r.tags.mood)) byMood[r.tags.mood] = (byMood[r.tags.mood] || 0) + r.amount; });
+    const moods = Object.entries(byMood).sort((a, b) => b[1] - a[1]);
+    if (moods.length) {
+      const h = document.createElement("p"); h.className = "hsub"; h.textContent = "למה קנית"; box.append(h);
+      const wrap = document.createElement("div");
+      moods.forEach(([k, v]) => {
+        const m = moodOf(k), row = document.createElement("div"); row.className = "hrow";
+        const a = document.createElement("span"); a.textContent = m[1] + " " + m[2];
+        const b = document.createElement("b"); b.textContent = fmt(v);
+        row.append(a, b); wrap.append(row);
+      });
+      box.append(wrap);
+    }
+  }
+
+  // ---- Monthly challenge ----
+  const CHALS = [
+    ["nospend", "🧘 ימים בלי הוצאה", "לסיים את החודש עם כמה ימים בלי אף הוצאה"],
+    ["nocat", "🚫 לוותר על קטגוריה", "לא להוציא כלום על קטגוריה אחת עד סוף החודש"],
+    ["capcat", "🎯 תקרה לקטגוריה", "להוציא על קטגוריה אחת פחות מסכום שתבחר"],
+    ["nowant", "🎁 שבוע בלי ״רוצה״", "7 ימים ברצף בלי הוצאה שסימנת ״רוצה״"]
+  ];
+  let chalSetup = null;
+  function catIds(id) { const cats = data().cats; return [id, ...cats.filter((c) => c.parent === id && isSub(c, cats)).map((c) => c.id)]; }
+  function chalState(c) {
+    const cur = thisMonth(), list = tx[c.month] || [], today = todayStr(), end = periodEnd(c.month), over = c.month < cur;
+    const lastDay = over ? end : today;
+    const daysLeft = over ? 0 : daysBetween(today, end);
+    if (c.k === "nospend") {
+      const spentDays = new Set(list.filter((r) => !isRecurringRow(r) && r.spent_on <= lastDay).map((r) => r.spent_on));
+      const passed = daysBetween(periodStart(c.month), lastDay) + (over ? 1 : 0);   // today still open
+      const free = Math.max(passed - [...spentDays].filter((d) => d < (over ? "9999" : today)).length, 0);
+      if (free >= c.n) return { st: "won", line: free + " ימים בלי הוצאה מתוך " + c.n, frac: 1 };
+      if (free + daysLeft + (over ? 0 : 1) < c.n) return { st: "lost", line: "כבר אי אפשר להגיע ל־" + c.n + " ימים החודש (" + free + " עד עכשיו)", frac: free / c.n };
+      return { st: "on", line: free + " מתוך " + c.n + " ימים בלי הוצאה", frac: free / c.n };
+    }
+    if (c.k === "nocat" || c.k === "capcat") {
+      const ids = catIds(c.cat), nm = catNames()[c.cat] || "הקטגוריה";
+      const sp = list.filter((r) => ids.includes(r.category) && r.spent_on >= c.start).reduce((a, r) => a + r.amount, 0);
+      if (c.k === "nocat") {
+        if (sp > 0) return { st: "lost", line: "יצאו " + fmt(sp) + " על " + nm, frac: 0 };
+        return over ? { st: "won", line: "לא הוצאת כלום על " + nm + " 👏", frac: 1 } : { st: "on", line: "עדיין ₪0 על " + nm + ". נשארו " + daysLeft + " ימים", frac: 1 - daysLeft / periodDays(c.month) };
+      }
+      if (sp >= c.amount) return { st: "lost", line: "יצאו " + fmt(sp) + " על " + nm + ", מעל התקרה של " + fmt(c.amount), frac: 1 };
+      return over ? { st: "won", line: fmt(sp) + " על " + nm + ", מתחת לתקרה של " + fmt(c.amount), frac: sp / c.amount }
+        : { st: "on", line: fmt(sp) + " מתוך " + fmt(c.amount) + " על " + nm + ". נשארו " + fmt(c.amount - sp), frac: sp / c.amount };
+    }
+    if (c.k === "nowant") {
+      const stop = dateAdd(c.start, 6);
+      const bad = allTx().find((r) => r.tags && r.tags.nw === "want" && r.spent_on >= c.start && r.spent_on <= stop);
+      if (bad) return { st: "lost", line: "נרשמה הוצאת ״רוצה״ ב־" + shortDate(bad.spent_on), frac: 0 };
+      const done = Math.min(daysBetween(c.start, today) + 1, 7);
+      if (today > stop) return { st: "won", line: "שבוע שלם בלי ״רוצה״ 👏", frac: 1 };
+      return { st: "on", line: "יום " + done + " מתוך 7", frac: done / 7 };
+    }
+    return { st: "on", line: "", frac: 0 };
+  }
+  function renderChallenge() {
+    if (!store) return;
+    const box = $("chalBox"); box.innerHTML = "";
+    const cur = thisMonth();
+    let c = store.challenge && store.challenge.month === month ? store.challenge : (store.chalHist || []).find((h) => h.month === month);
+    if (c && (tx[c.month] || c.k === "nowant")) {
+      const s2 = chalState(c), meta = CHALS.find((x) => x[0] === c.k) || ["", "אתגר", ""];
+      if (s2.st === "won" && !c.won) { c.won = todayStr(); store.chalWon = (store.chalWon || 0) + 1; persist(); setTimeout(confetti, 300); }
+      const card = document.createElement("div"); card.className = "chalnow" + (s2.st === "won" ? " won" : s2.st === "lost" ? " lost" : "");
+      const t = document.createElement("span"); t.className = "ct"; t.textContent = meta[1] + (c.k === "nospend" ? ": " + c.n + " ימים" : "");
+      const bar = document.createElement("div"); bar.className = "pgbar"; const i = document.createElement("i"); i.style.width = Math.min(Math.max(s2.frac, 0), 1) * 100 + "%"; bar.append(i);
+      const l = document.createElement("span"); l.textContent = (s2.st === "won" ? "🏆 הצלחת! " : s2.st === "lost" ? "😕 לא הפעם. " : "") + s2.line;
+      card.append(t, bar, l);
+      box.append(card);
+      if (month === cur) {
+        const acts = document.createElement("div"); acts.className = "actions";
+        const b = document.createElement("button"); b.type = "button"; b.className = s2.st === "on" ? "linkbtn" : "btn";
+        b.textContent = s2.st === "on" ? "ביטול האתגר" : "🏅 אתגר חדש";
+        b.addEventListener("click", () => { if (s2.st !== "on") store.chalHist = (store.chalHist || []).concat([c]); store.challenge = null; chalSetup = null; persist(); renderChallenge(); });
+        acts.append(b); box.append(acts);
+      }
+      return;
+    }
+    if (month !== cur) { const p = document.createElement("p"); p.className = "hint"; p.textContent = "לא היה אתגר בחודש הזה."; box.append(p); return; }
+    if (!chalSetup) {
+      const p = document.createElement("p"); p.className = "hint"; p.textContent = "בוחרים אתגר אחד לחודש:"; box.append(p);
+      const pick = document.createElement("div"); pick.className = "chalpick";
+      CHALS.forEach(([k, t, d]) => {
+        const b = document.createElement("button"); b.type = "button";
+        const bb = document.createElement("b"); bb.textContent = t; const sm = document.createElement("small"); sm.textContent = d;
+        b.append(bb, sm); b.addEventListener("click", () => { chalSetup = { k }; if (k === "nowant") startChal(); else renderChallenge(); });
+        pick.append(b);
+      });
+      box.append(pick); return;
+    }
+    // Second step: the challenge's details
+    const f = document.createElement("form"); f.className = "chal"; f.noValidate = true;
+    const meta = CHALS.find((x) => x[0] === chalSetup.k);
+    const h = document.createElement("b"); h.textContent = meta[1]; f.append(h);
+    let sel = null, num = null;
+    if (chalSetup.k === "nospend") {
+      sel = document.createElement("select");
+      [4, 6, 8, 10, 12].forEach((n) => { const o = document.createElement("option"); o.value = n; o.textContent = n + " ימים בלי הוצאה"; sel.append(o); });
+      sel.value = "6"; f.append(sel);
+    } else {
+      sel = document.createElement("select");
+      catTree(data().cats).filter(({ depth }) => !depth).forEach(({ c }) => { const o = document.createElement("option"); o.value = c.id; o.textContent = catIcon(c) + " " + (c.name || "בלי שם"); sel.append(o); });
+      f.append(sel);
+      if (chalSetup.k === "capcat") { num = document.createElement("input"); num.type = "number"; num.min = "1"; num.inputMode = "decimal"; num.placeholder = "תקרה בש״ח, למשל 300"; f.append(num); }
+    }
+    const acts = document.createElement("div"); acts.className = "actions";
+    const ok = document.createElement("button"); ok.type = "submit"; ok.className = "btn primary"; ok.textContent = "🏁 מתחילים";
+    const no = document.createElement("button"); no.type = "button"; no.className = "btn"; no.textContent = "חזרה";
+    no.addEventListener("click", () => { chalSetup = null; renderChallenge(); });
+    acts.append(ok, no); f.append(acts);
+    f.addEventListener("submit", (e) => {
+      e.preventDefault();
+      if (chalSetup.k === "nospend") chalSetup.n = +sel.value;
+      else { chalSetup.cat = sel.value; if (num) { const v = parseFloat(num.value); if (!(v > 0)) { num.focus(); return; } chalSetup.amount = v; } }
+      startChal();
+    });
+    box.append(f);
+  }
+  function startChal() {
+    store.challenge = { ...chalSetup, month: thisMonth(), start: todayStr() };
+    chalSetup = null; persist(); renderChallenge();
+    snack("האתגר התחיל. בהצלחה! 💪");
+  }
 
 
   // ---- Feedback, invite a friend, backup / restore, delete the account ----
@@ -4704,7 +5158,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       await flushOutbox();
       const b = {
         app: "budget", v: 1, exported: new Date().toISOString(), store,
-        expenses: await allRows("expenses", "id, spent_on, amount, category, note, created_at"),
+        expenses: await allRows("expenses", "id, spent_on, amount, category, note, tags, created_at"),
         shifts: await allRows("shifts", "id, work_date, start_time, end_time, break_min, wage, kind, kind_rate, note, created_at"),
         incomes: await allRows("incomes", "id, received_on, amount, kind, note, created_at")
       };
@@ -5023,6 +5477,8 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     sumH: "תמונה של חודש שנגמר: כמה יצא, כמה נשאר, איפה חרגת, ומה כדאי לעשות בחודש הבא. מופיע ב־5 הימים הראשונים של חודש חדש, ותמיד כשמסתכלים על חודש שעבר.",
     goalsH: "חוסכים בשביל משהו? פותחים יעד עם סכום, ובכל פעם שמעבירים כסף לחיסכון לוחצים ״הפקדתי״. רואים כמה חסר ובעוד כמה חודשים תגיע לפי החיסכון החודשי שתכננת.",
     cmpH: "משווים את החודש עד היום לאותם ימים בחודש שעבר, ואת השבוע הזה לשבוע שעבר. ▲ אדום: הוצאת יותר. ▼ ירוק: הוצאת פחות.",
+    habitsH: "כמה מההוצאות היו ״צריך״ וכמה ״רוצה״, על מה התחרטת, ומה גרם לך לקנות. מסמנים את זה בטופס ההוצאה או בלחיצה על הוצאה ברשימה.",
+    chalH: "אתגר אחד לחודש, כדי שיהיה מעניין לחסוך: ימים בלי הוצאה, ויתור על קטגוריה, תקרה לקטגוריה או שבוע בלי ״רוצה״. מצליחים? מקבלים הישג.",
     badgeH: "הישגים קטנים שנפתחים כשמתמידים: רצף ימים בתוך התקציב, ויתור על קנייה, הגעה ליעד. האפורים עוד לא נפתחו, ומתחתם כתוב איך פותחים אותם.",
     setH: "מתי החודש שלך מתחיל, איך ההודעות נשמעות, גודל הטקסט וייצוא לאקסל.",
     shH: "כל המשמרות של החודש והשכר עליהן. לחיצה על משמרת פותחת אותה לעריכה, ו־× מוחק.",
@@ -5080,14 +5536,17 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   // ---- Pages ----
   let view = "main";
   function setView(v, fromHash) {
-    view = ["shifts", "calendar", "settings", "look"].includes(v) ? v : "main";
+    view = ["shifts", "calendar", "settings", "look", "admin"].includes(v) ? v : "main";
     if (view !== "main" && layEditing) exitLayEdit(false);
     $("viewMain").hidden = view !== "main";
     $("viewSettings").hidden = view !== "settings";
     $("viewLook").hidden = view !== "look";
-    if (view === "look") renderPalettes();
-    $("gearBtn").setAttribute("aria-pressed", String(view === "settings" || view === "look"));
-    document.body.classList.toggle("onsettings", view === "settings" || view === "look");
+    $("viewAdmin").hidden = view !== "admin";
+    if (view === "admin") renderAdmin();
+    $("bcast").hidden = view !== "main" || !bcastShown;
+    if (view === "look") { renderPalettes(); renderAccents(); }
+    $("gearBtn").setAttribute("aria-pressed", String(["settings", "look", "admin"].includes(view)));
+    document.body.classList.toggle("onsettings", ["settings", "look", "admin"].includes(view));
     if (view === "settings") renderLayList();
     $("viewShifts").hidden = view !== "shifts";
     $("viewCal").hidden = view !== "calendar";
@@ -5102,12 +5561,38 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   // ---- Settings screen (the gear at the top) ----
   let viewBeforeSettings = "main";
   $("gearBtn").addEventListener("click", () => {
-    if (view === "settings" || view === "look") { setView(viewBeforeSettings); return; }
+    if (["settings", "look", "admin"].includes(view)) { setView(viewBeforeSettings); return; }
     viewBeforeSettings = view; setView("settings");
   });
   $("setBack").addEventListener("click", () => setView(viewBeforeSettings));
   $("openLook").addEventListener("click", () => setView("look"));
   $("lookBack").addEventListener("click", () => setView("settings"));
+  $("openAdmin").addEventListener("click", () => setView("admin"));
+  $("adminBack").addEventListener("click", () => setView("settings"));
+  $("openNews").addEventListener("click", () => showNews(true));
+  function renderAccents() {
+    const box = $("accGrid"), cur = BP.accent(); box.innerHTML = "";
+    BP.accents.forEach(([id, name, a, b, c]) => {
+      const btn = document.createElement("button"); btn.type = "button"; btn.setAttribute("aria-pressed", String(id === cur));
+      const dot = document.createElement("i"); dot.style.background = "linear-gradient(135deg," + a + "," + b + " 55%," + c + ")"; if (id === cur) dot.textContent = "✓";
+      btn.append(dot, name);
+      btn.addEventListener("click", () => {
+        try { if (id === "orig") localStorage.removeItem("budget-accent"); else localStorage.setItem("budget-accent", id); } catch (e) {}
+        BP.applyAccent(); renderAccents(); renderPalettes();
+      });
+      box.append(btn);
+    });
+    const sz = BP.textSize();
+    document.querySelectorAll("#sizePick button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.size === sz)));
+    $("hapticOn").checked = feelOn("haptic");
+    $("confettiOn").checked = feelOn("confetti");
+  }
+  document.querySelectorAll("#sizePick button").forEach((b) => b.addEventListener("click", () => {
+    try { localStorage.setItem("budget-textsize", b.dataset.size); localStorage.removeItem("budget-bigtext"); } catch (e) {}
+    BP.textSize(); renderAccents();
+  }));
+  $("hapticOn").addEventListener("change", () => { try { localStorage.setItem("budget-haptic", $("hapticOn").checked ? "1" : "0"); } catch (e) {} if ($("hapticOn").checked) buzz(); });
+  $("confettiOn").addEventListener("change", () => { try { localStorage.setItem("budget-confetti", $("confettiOn").checked ? "1" : "0"); } catch (e) {} if ($("confettiOn").checked) confetti(); });
   function renderPalettes() {
     const box = $("palGrid"), cur = BP.get(), dark = BP.isDark();
     box.innerHTML = "";
@@ -5131,7 +5616,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   // ---- Home layout: each user hides and orders the home page's parts; saved in the account ----
   const BLOCK_NAMES = { today: "😎 מותר לך היום", summary: "📋 סיכום החודש", quick: "⚡ רישום בלחיצה", pay: "💼 המשכורת שלי",
     statement: "🏦 כל ההוצאות של החודש", cats: "🛍️ לפי קטגוריות", goals: "🎯 יעדי חיסכון", 
-    rec: "🔁 מנויים וחיובים קבועים", wish: "🤔 אולי אקנה", cmp: "📈 לעומת קודם", hist: "📊 לאורך החודשים", badges: "🏆 הישגים", plan: "📋 התוכנית של החודש" };
+    rec: "🔁 מנויים וחיובים קבועים", habits: "🧠 ההרגלים שלי", challenge: "🏅 אתגר החודש", wish: "🤔 אולי אקנה", cmp: "📈 לעומת קודם", hist: "📊 לאורך החודשים", badges: "🏆 הישגים", plan: "📋 התוכנית של החודש" };
   const homeBlocks = () => [...$("homeList").querySelectorAll(":scope > [data-block]")];
   const DEFAULT_ORDER = homeBlocks().map((b) => b.dataset.block);
   var planWasOpen = false;
@@ -5316,6 +5801,172 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   }
 
   // Once the month's expenses are in: log due recurring items, then draw everything
+  // ---- Owner tools: which version each user runs, messages to everyone, the admin page ----
+  const OWNER_ID = "75753136-73de-4975-bc7a-5897db6ae434";
+  const isAdmin = () => !!(user && user.id === OWNER_ID);
+  function recordSeen() {
+    if (!sb || !user) return;
+    let version = "web", platform = /Android/i.test(navigator.userAgent) ? "android-web" : "web";
+    try { if (window.BudgetApp) { version = BudgetApp.version ? BudgetApp.version() : "1.0"; platform = "android-app"; } } catch (e) {}
+    sb.from("app_seen").upsert({ user_id: user.id, version, platform, last_seen: new Date().toISOString() }).then(() => {}, () => {});
+  }
+  let bcastShown = false;
+  async function loadBroadcast() {
+    if (!sb || !user) return;
+    try {
+      const { data } = await sb.from("broadcasts").select("id, body, created_at").eq("active", true).order("id", { ascending: false }).limit(1);
+      const m = data && data[0];
+      let seen = 0; try { seen = +localStorage.getItem("budget-bcast-" + user.id) || 0; } catch (e) {}
+      if (!m || m.id <= seen) return;
+      $("bcastText").textContent = m.body; bcastShown = true; $("bcast").hidden = view !== "main";
+      $("bcastOk").onclick = () => { bcastShown = false; $("bcast").hidden = true; try { localStorage.setItem("budget-bcast-" + user.id, String(m.id)); } catch (e) {} };
+    } catch (e) {}
+  }
+  const ago = (iso) => { if (!iso) return "אף פעם"; const d = (Date.now() - new Date(iso)) / 864e5; return d < 1 / 24 ? "עכשיו" : d < 1 ? "היום" : d < 2 ? "אתמול" : "לפני " + Math.floor(d) + " ימים"; };
+  async function renderAdmin() {
+    if (!isAdmin()) return;
+    $("adUsers").textContent = "טוען…"; $("adFb").textContent = "טוען…";
+    const [u, f, b] = await Promise.all([
+      sb.rpc("admin_overview"),
+      sb.from("feedback").select("kind, body, page, created_at").order("created_at", { ascending: false }).limit(50),
+      sb.from("broadcasts").select("id, body, push, active, created_at").order("id", { ascending: false }).limit(10)
+    ]);
+    const box = $("adUsers"); box.innerHTML = "";
+    if (u.error) box.textContent = "לא הצלחתי לטעון: " + u.error.message;
+    else {
+      $("adCount").textContent = u.data.length;
+      u.data.forEach((r) => {
+        const d = document.createElement("div"); d.className = "aduser";
+        const b1 = document.createElement("b"); b1.textContent = r.email || "בלי מייל";
+        const l1 = document.createElement("span"); l1.textContent = (r.provider === "google" ? "🔵 גוגל" : "✉️ מייל וסיסמה") + " · נרשם " + new Date(r.joined).toLocaleDateString("he-IL");
+        const l2 = document.createElement("span"); l2.textContent = "פעיל: " + ago(r.last_seen || r.last_sign_in) + " · " + (r.platform === "android-app" ? "📱 אפליקציה " + (r.version || "?") : r.platform === "android-web" ? "🌐 דפדפן בטלפון" : r.platform === "web" ? "💻 דפדפן" : "גרסה לא ידועה (עוד לא נכנס מאז שהתחלנו לרשום)");
+        const l3 = document.createElement("span"); l3.textContent = r.expenses + " הוצאות · " + r.shifts + " משמרות" + (r.last_entry ? " · רישום אחרון " + shortDate(r.last_entry) : "");
+        d.append(b1, l1, l2, l3); box.append(d);
+      });
+    }
+    const fb = $("adFb"); fb.innerHTML = "";
+    if (f.error) fb.textContent = "לא הצלחתי לטעון: " + f.error.message;
+    else if (!f.data.length) fb.textContent = "עוד אין משובים.";
+    else f.data.forEach((r) => {
+      const d = document.createElement("div"); d.className = "aduser";
+      const b1 = document.createElement("b"); b1.textContent = ({ idea: "💡 רעיון", bug: "🐞 תקלה" }[r.kind] || "💬 אחר") + " · " + new Date(r.created_at).toLocaleDateString("he-IL");
+      const t = document.createElement("span"); t.style.color = "var(--fg)"; t.style.whiteSpace = "pre-wrap"; t.textContent = r.body;
+      d.append(b1, t); fb.append(d);
+    });
+    const bl = $("bcList"); bl.innerHTML = "";
+    if (!b.error) b.data.filter((m) => m.active).forEach((m) => {
+      const d = document.createElement("div"); d.className = "aduser";
+      const row = document.createElement("div"); row.className = "row2";
+      const t = document.createElement("span"); t.textContent = new Date(m.created_at).toLocaleString("he-IL", { dateStyle: "short", timeStyle: "short" }) + (m.push ? " · 🔔" : "");
+      const off = document.createElement("button"); off.type = "button"; off.className = "linkbtn"; off.textContent = "הסרה";
+      off.addEventListener("click", async () => { await sb.from("broadcasts").update({ active: false }).eq("id", m.id); renderAdmin(); });
+      row.append(t, off);
+      const body = document.createElement("b"); body.style.whiteSpace = "pre-wrap"; body.textContent = m.body;
+      d.append(body, row); bl.append(d);
+    });
+  }
+  $("bcSend").addEventListener("click", async () => {
+    const body = $("bcText").value.trim();
+    if (!body) { $("bcText").focus(); return; }
+    $("bcSend").disabled = true; $("bcState").textContent = "שולח…";
+    const { error } = await sb.from("broadcasts").insert({ body, push: $("bcPush").checked });
+    $("bcSend").disabled = false;
+    $("bcState").textContent = error ? "השליחה נכשלה: " + error.message : "✓ נשלח. כל מי שיפתח את האפליקציה יראה את ההודעה" + ($("bcPush").checked ? ", ובאפליקציה 2.0 ומעלה תגיע גם התראה תוך כמה שעות." : ".");
+    if (!error) { $("bcText").value = ""; renderAdmin(); }
+  });
+
+  // ---- "What's new" after an update ----
+  const NEWS_ID = "2026-10-07-r2";
+  const NEWS = [
+    ["🧰", "צריך או רוצה?", "בטופס ההוצאה מסמנים בלחיצה ״צריך״ או ״רוצה״, ולמה קנית (משעמם, לחוץ, מבצע…)."],
+    ["😣", "התחרטתי", "לחיצה על הוצאה ברשימה ואז ״התחרטתי״. בסוף החודש רואים על כמה התחרטת."],
+    ["🧠", "ההרגלים שלי", "אריח חדש: כמה הלך על ״צריך״ וכמה על ״רוצה״, על מה התחרטת ולמה קנית."],
+    ["🏅", "אתגר החודש", "אריח חדש: בוחרים אתגר (ימים בלי הוצאה, ויתור על קטגוריה, תקרה, שבוע בלי ״רוצה״) ומקבלים הישג."],
+    ["📈", "תחזית לסוף החודש", "שורה קטנה מתחת ל״מותר לך היום״: איך תסיים את החודש בקצב הנוכחי."],
+    ["🧾", "סגירת יום", "התראה בערב (21:00) לבדוק שרשמת הכול. אפשר לכבות או לשנות שעה בהגדרות > כללי."],
+    ["🏷️", "סינון לפי קטגוריה", "ברשימת ההוצאות של החודש: לחיצה על קטגוריה מראה רק אותה."],
+    ["📸", "שיתוף החודש כתמונה", "באריח ״לאורך החודשים״. אפשר עם סכומים או רק באחוזים."],
+    ["⏱️", "התקדמות שעות", "בלשונית המשמרות: כמה שעות עבדת עד היום לעומת אותו יום בחודש שעבר."],
+    ["🖌️", "צבע מבטא וגודל טקסט", "בהגדרות > עיצוב וצבעים: 12 צבעים לכפתורים, 3 גדלי טקסט, רטט וקונפטי."]
+  ];
+  function showNews(force) {
+    let seen = ""; try { seen = localStorage.getItem("budget-news") || ""; } catch (e) {}
+    if (!force && seen === NEWS_ID) return;
+    const ul = $("newsList"); ul.innerHTML = "";
+    NEWS.forEach(([e, t, d]) => {
+      const li = document.createElement("li");
+      const a = document.createElement("span"); a.textContent = e; a.setAttribute("aria-hidden", "true");
+      const w = document.createElement("div"); const b = document.createElement("b"); b.textContent = t; const sm = document.createElement("small"); sm.textContent = d;
+      w.append(b, sm); li.append(a, w); ul.append(li);
+    });
+    openDlg("newsSheet");
+    setTimeout(() => { $("newsSheet").scrollTop = 0; const f = $("newsSheet").querySelector("form"); if (f) f.scrollTop = 0; }, 30);
+  }
+  $("newsOk").addEventListener("click", () => { try { localStorage.setItem("budget-news", NEWS_ID); } catch (e) {} closeDlg("newsSheet"); });
+
+  // ---- Share the month as a picture ----
+  async function drawMonthCard(withAmounts) {
+    const { spend: planned } = plan(); const spend = planned + incTotal();
+    const list = monthTx(), spent = list.reduce((a, r) => a + r.amount, 0);
+    const names = catNames(), d0 = data(), topOf = (id) => { const cc = d0.cats.find((x) => x.id === id); return cc && isSub(cc, d0.cats) ? cc.parent : id; };
+    const byTop = {}; list.forEach((r) => { const k = topOf(r.category); byTop[k] = (byTop[k] || 0) + r.amount; });
+    const top = Object.entries(byTop).sort((a, b) => b[1] - a[1]).slice(0, 3);
+    const pct = (x) => Math.round(x * 100) + "%";
+    const free = (() => { const st = month === thisMonth() ? streakInfo() : null; return st ? st.free : 0; })();
+    const need = list.filter((r) => r.tags && r.tags.nw === "need").reduce((a, r) => a + r.amount, 0), want = list.filter((r) => r.tags && r.tags.nw === "want").reduce((a, r) => a + r.amount, 0);
+    const facts = [];
+    if (free) facts.push("🧘 " + free + " ימים בלי הוצאה");
+    if (need + want > 0) facts.push("🧰 " + pct(need / (need + want)) + " צריך · 🎁 " + pct(want / (need + want)) + " רוצה");
+    const ch = store.challenge && store.challenge.month === month ? chalState(store.challenge) : null;
+    if (ch) facts.push((ch.st === "won" ? "🏅 עמדתי באתגר: " : "🏅 באתגר: ") + (CHALS.find((x) => x[0] === store.challenge.k) || ["", ""])[1].replace(/^\S+\s/, ""));
+    const badges = Object.keys(store.badges || {}).length; if (badges) facts.push("🏆 " + badges + " הישגים");
+    const contentEnd = 330 + 110 + (withAmounts && spend > 0 ? 60 : 0) + 90 + 70 * top.length + (facts.length ? 60 + 70 * facts.length : 0);
+    const W = 1080, H = Math.max(1080, contentEnd + 200), c = document.createElement("canvas"); c.width = W; c.height = H;
+    const g = c.getContext("2d"), cs = getComputedStyle(document.documentElement), v = (k) => cs.getPropertyValue(k).trim();
+    try { await document.fonts.load("800 80px Rubik"); await document.fonts.load("500 40px Rubik"); } catch (e) {}
+    const F = (w, px) => w + " " + px + "px Rubik, Assistant, Arial, sans-serif";
+    const grad = g.createLinearGradient(0, 0, W, H); grad.addColorStop(0, v("--brand1")); grad.addColorStop(.55, v("--brand2")); grad.addColorStop(1, v("--brand3"));
+    g.fillStyle = grad; g.fillRect(0, 0, W, H);
+    g.fillStyle = "rgba(255,255,255,.95)";
+    const rr = (x, y, w, h, r) => { g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); };
+    rr(60, 230, W - 120, H - 330, 48); g.fill();
+    g.direction = "rtl"; g.textAlign = "right";
+    g.fillStyle = "#fff"; g.font = F(800, 74); g.fillText("החודש שלי · " + monthName(month), W - 70, 120);
+    g.font = F(500, 38); g.fillText("💰 התקציב החודשי שלי", W - 70, 180);
+    let y = 330; const R = W - 120, L = 120;
+    g.fillStyle = "#6e6481"; g.font = F(500, 38); g.fillText(withAmounts ? "הוצאתי החודש" : "השתמשתי בכסף החופשי", R, y);
+    y += 110; g.fillStyle = "#2b2238"; g.font = F(800, 110); g.fillText(withAmounts ? fmt(spent) : spend > 0 ? pct(spent / spend) : "—", R, y);
+    if (withAmounts && spend > 0) { y += 60; g.fillStyle = "#6e6481"; g.font = F(500, 36); g.fillText("מתוך " + fmt(spend) + " כסף חופשי (" + pct(spent / spend) + ")", R, y); }
+    y += 90; g.fillStyle = "#2b2238"; g.font = F(700, 42); g.fillText("על מה הכי הוצאתי", R, y);
+    top.forEach(([id, amt]) => {
+      y += 70; g.font = F(500, 40); g.fillStyle = "#2b2238"; g.textAlign = "right";
+      g.fillText((names[id] ? emojiOf(id, names[id]) + " " + names[id] : "קטגוריה"), R, y);
+      g.textAlign = "left"; g.font = F(700, 40); g.fillText(withAmounts ? fmt(amt) : pct(amt / (spent || 1)), L, y); g.textAlign = "right";
+    });
+    if (facts.length) y += 60;
+    facts.forEach((t) => { y += 70; g.fillStyle = "#2b2238"; g.font = F(500, 40); g.fillText(t, R, y); });
+    g.fillStyle = "#fff"; g.font = F(500, 34); g.textAlign = "center"; g.fillText("smkrot3-sudo.github.io/dogsFood/budget", W / 2, H - 40);
+    return c.toDataURL("image/png");
+  }
+  let shareUrl = "";
+  async function refreshShare() { $("shareImg").src = shareUrl = await drawMonthCard($("shareAmounts").checked); }
+  $("shareMonth").addEventListener("click", async () => {
+    $("shareHint").hidden = !!(window.BudgetApp && BudgetApp.shareImage);
+    openDlg("shareSheet"); await refreshShare();
+  });
+  $("shareAmounts").addEventListener("change", refreshShare);
+  $("shareClose").addEventListener("click", () => closeDlg("shareSheet"));
+  $("shareGo").addEventListener("click", async () => {
+    const text = "החודש שלי ב״התקציב החודשי שלי״ 💰";
+    try { if (window.BudgetApp && BudgetApp.shareImage) { BudgetApp.shareImage(shareUrl, text); return; } } catch (e) {}
+    try {
+      const blob = await (await fetch(shareUrl)).blob(), file = new File([blob], "my-month.png", { type: "image/png" });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], text }); return; }
+    } catch (e) { if (e && e.name === "AbortError") return; }
+    const a = document.createElement("a"); a.href = shareUrl; a.download = "my-month.png"; document.body.append(a); a.click(); a.remove();
+    $("shareHint").hidden = false;
+  });
+
   async function afterLoad() {
     runRecurring();
     syncPlanOpen();
@@ -5327,7 +5978,10 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     ensurePrev(month);
     sendAppPlans();
     applyLayout();
-    if (isNewUser()) openWizard();
+    if (isNewUser()) { openWizard(); try { localStorage.setItem("budget-news", NEWS_ID); } catch (e) {} }
+    else setTimeout(() => showNews(false), 1200);
+    $("openAdmin").hidden = !isAdmin();
+    recordSeen(); loadBroadcast();
     const ns = new URLSearchParams(location.search).get("newShift");
     if (ns) { history.replaceState(null, "", location.pathname + location.hash); window.openShiftFromApp(ns); }
   }

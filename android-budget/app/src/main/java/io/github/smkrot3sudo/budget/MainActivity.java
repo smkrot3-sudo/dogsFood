@@ -346,6 +346,42 @@ public class MainActivity extends Activity {
             });
         }
 
+        /** A short vibration when something is logged. */
+        @JavascriptInterface
+        public void vibrate(int ms) {
+            try {
+                android.os.Vibrator v = (android.os.Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+                if (v == null || !v.hasVibrator()) return;
+                int d = Math.max(5, Math.min(ms, 200));
+                if (Build.VERSION.SDK_INT >= 26) v.vibrate(android.os.VibrationEffect.createOneShot(d, android.os.VibrationEffect.DEFAULT_AMPLITUDE));
+                else v.vibrate(d);
+            } catch (Exception e) { /* no vibration */ }
+        }
+
+        /** Shares a picture the page drew (PNG as base64): saved to the gallery, then the phone's share menu. */
+        @JavascriptInterface
+        public void shareImage(String base64, String text) {
+            if (base64 == null) return;
+            final byte[] bytes;
+            try { bytes = android.util.Base64.decode(base64.replaceFirst("^data:image/png;base64,", ""), android.util.Base64.DEFAULT); } catch (Exception e) { return; }
+            runOnUiThread(() -> {
+                if (Build.VERSION.SDK_INT < 29) { toast("בגרסת אנדרואיד הזו אפשר לשמור את התמונה בלחיצה ארוכה עליה"); return; }
+                try {
+                    ContentValues v = new ContentValues();
+                    v.put(MediaStore.Images.Media.DISPLAY_NAME, "budget-" + System.currentTimeMillis() + ".png");
+                    v.put(MediaStore.Images.Media.MIME_TYPE, "image/png");
+                    v.put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/התקציב שלי");
+                    Uri uri = getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, v);
+                    if (uri == null) throw new IllegalStateException("no uri");
+                    try (OutputStream o = getContentResolver().openOutputStream(uri)) { o.write(bytes); }
+                    Intent sh = new Intent(Intent.ACTION_SEND).setType("image/png").putExtra(Intent.EXTRA_STREAM, uri)
+                        .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                    if (text != null && !text.isEmpty()) sh.putExtra(Intent.EXTRA_TEXT, text);
+                    startActivity(Intent.createChooser(sh, "שיתוף"));
+                } catch (Exception e) { toast("השיתוף נכשל"); }
+            });
+        }
+
         /** The phone's share menu (WhatsApp and the like) with a ready text. */
         @JavascriptInterface
         public void share(String text) {

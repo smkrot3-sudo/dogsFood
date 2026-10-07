@@ -7,6 +7,8 @@
     <!-- Daily shift reminder: show the notification, and set the alarm again after a restart -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <!-- A short buzz when an expense or shift is logged -->
+    <uses-permission android:name="android.permission.VIBRATE" />
 
     <!-- Hebrew speech to text for logging an expense by voice -->
     <queries>
