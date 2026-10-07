@@ -5073,6 +5073,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 
   // Edit mode on the home page itself
   // Edit mode: each part is one row with its name, ⠿ to drag, ▲▼ and 👁️
+  let layWatch = null;
   function enterLayEdit(start) {
     if (layEditing) return;
     layEditing = layout();
@@ -5081,11 +5082,19 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     planWasOpen = $("planBox").open; $("planBox").open = false;
     homeBlocks().forEach(addLayTools);
     syncArrows();
+    // A tile that redraws itself (data arriving from the cloud) loses its name and buttons: put them back
+    layWatch = new MutationObserver(() => {
+      let fixed = false;
+      homeBlocks().forEach((b) => { if (!b.querySelector(".laytools")) { addLayTools(b); fixed = true; } });
+      if (fixed) syncArrows();
+    });
+    layWatch.observe($("homeList"), { childList: true, subtree: true });
     if (start) start.scrollIntoView({ block: "center" }); else $("editBar").scrollIntoView({ block: "start" });
   }
   function exitLayEdit(save) {
     if (!layEditing) return;
     const snap = layEditing; layEditing = null;
+    if (layWatch) { layWatch.disconnect(); layWatch = null; }
     document.body.classList.remove("layedit");
     $("editBar").hidden = true; $("layHint").hidden = false;
     document.querySelectorAll(".laytools, .layname").forEach((x) => x.remove());
