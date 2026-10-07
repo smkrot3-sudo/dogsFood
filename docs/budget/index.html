@@ -869,6 +869,16 @@ html.hugetext body { zoom: 1.25; }
 .accgrid i { width: 40px; height: 40px; border-radius: 50%; box-shadow: 0 3px 8px rgba(0,0,0,.18); display: grid; place-items: center; font-style: normal; color: #fff; font-size: 18px; }
 .confetti { position: fixed; inset: 0; pointer-events: none; z-index: 100; }
 .newsheet ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 10px; }
+/* A personal reminder from the owner: loud red, with road signs */
+dialog.alarm { background: linear-gradient(160deg, #e5383b, #b5121b); color: #fff; border: 0; text-align: center; }
+dialog.alarm form { gap: 12px; }
+.alarm .signs { font-size: 40px; letter-spacing: 6px; line-height: 1.2; animation: alarmPulse 1s ease-in-out infinite; }
+.alarm h2 { color: #fff; font-size: 30px; margin: 0; justify-content: center; }
+.alarm h2::before { display: none; }
+.alarm p { font-size: 20px; font-weight: 800; line-height: 1.45; margin: 0; white-space: pre-wrap; background: rgba(0, 0, 0, .18); border: 3px dashed #ffd43b; border-radius: 18px; padding: 14px; }
+.alarm .btn { background: #fff; color: #b5121b; font-weight: 800; border: 0; }
+.alarm .btn.ghost { background: transparent; color: #fff; border: 2px solid rgba(255, 255, 255, .7); }
+@keyframes alarmPulse { 50% { transform: scale(1.08); } }
 .newsheet li { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: start; background: var(--surface-2); border-radius: 14px; padding: 10px 12px; }
 .newsheet li > span { font-size: 22px; line-height: 1.2; }
 .newsheet li b { display: block; }
@@ -1733,6 +1743,15 @@ body.nosave .split { grid-template-columns: 1fr; }
   </form>
 </dialog>
 
+<dialog class="sheet alarm" id="pmSheet" aria-labelledby="pmH">
+  <form method="dialog">
+    <div class="signs" aria-hidden="true">🛑⛔⚠️🚫</div>
+    <h2 id="pmH">עצרי רגע!</h2>
+    <p id="pmBody"></p>
+    <div class="signs" aria-hidden="true">🚧🚨🚧</div>
+    <div class="foot"><button class="btn" type="button" id="pmAct" hidden></button><button class="btn ghost" type="button" id="pmOk">הבנתי 👍</button></div>
+  </form>
+</dialog>
 <dialog class="sheet newsheet" id="vipSheet" aria-labelledby="vipH">
   <form method="dialog">
     <h2 id="vipH" data-e="👑">קיבלת מעמד VIP</h2>
@@ -4397,6 +4416,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     try {
       if (app.setNotes) {
         const st = settings(), notes = [];
+        pmNotes.forEach((n) => notes.push(n));
         if (st.weekly !== false) notes.push({ id: "weekly", at: weeklyAt(), every: 7, title: "📆 הסיכום השבועי שלך מוכן", text: "כמה הוצאת השבוע לעומת השבוע שעבר? היכנס וראה." });
         const at = st.payGoalKind === "m" && +st.payGoal > 0 && st.goalNote !== false ? goalNoteAt() : 0;
         if (at) notes.push({ id: "goal", at, every: 7, title: "📅 היום קובעים משמרות לשבוע הבא", text: goalNoteText() });
@@ -6034,6 +6054,36 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       $("bcastOk").onclick = () => { bcastShown = false; $("bcast").hidden = true; try { localStorage.setItem("budget-bcast-" + user.id, String(m.id)); } catch (e) {} };
     } catch (e) {}
   }
+  // ---- Personal messages the owner sends one user (table personal_msgs): a phone note at show_at, then a one-time red popup ----
+  let pmNotes = [];
+  async function loadPersonal() {
+    if (!sb || !user) return;
+    try {
+      const { data } = await sb.from("personal_msgs").select("id, title, body, show_at, push, action").is("seen_at", null).order("show_at");
+      const now = Date.now(), rows = data || [];
+      pmNotes = rows.filter((m) => m.push && new Date(m.show_at) > now).map((m) => ({ id: "pm" + m.id, at: new Date(m.show_at).getTime(), title: m.title || "🚨 תזכורת", text: m.body }));
+      sendAppPlans();
+      const due = rows.find((m) => new Date(m.show_at) <= now);
+      if (!due) { const next = rows.find((m) => new Date(m.show_at) > now); if (next && new Date(next.show_at) - now < 864e5) setTimeout(loadPersonal, new Date(next.show_at) - now + 2000); return; }
+      showPersonal(due);
+    } catch (e) {}
+  }
+  function showPersonal(m) {
+    if (m.title) $("pmH").textContent = m.title;
+    $("pmBody").textContent = m.body;
+    const shift = /^shift:(\d{4}-\d{2}-\d{2})$/.exec(m.action || "");
+    $("pmAct").hidden = !shift; $("pmAct").textContent = "✍️ להכניס עכשיו";
+    const done = async (then) => {
+      closeDlg("pmSheet");
+      if (m.id) try { await sb.from("personal_msgs").update({ seen_at: new Date().toISOString() }).eq("id", m.id); } catch (e) {}
+      if (then) then(); else if (m.id) loadPersonal();
+    };
+    $("pmOk").onclick = () => done();
+    $("pmAct").onclick = () => done(() => window.openShiftFromApp(shift[1]));
+    document.querySelectorAll("dialog[open]").forEach((d) => { if (d.id !== "pmSheet") closeDlg(d.id); });
+    openDlg("pmSheet"); buzz();
+  }
+  window.previewPersonal = showPersonal;
   const ago = (iso) => { if (!iso) return "אף פעם"; const d = (Date.now() - new Date(iso)) / 864e5; return d < 1 / 24 ? "עכשיו" : d < 1 ? "היום" : d < 2 ? "אתמול" : "לפני " + Math.floor(d) + " ימים"; };
   async function renderAdmin() {
     if (!isAdmin()) return;
@@ -6597,7 +6647,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     else nextIntro();
     $("openAdmin").hidden = !isAdmin(); vipSync();
     aiFabSync();
-    recordSeen(); loadBroadcast();
+    recordSeen(); loadBroadcast(); setTimeout(loadPersonal, 2500);
     const ns = new URLSearchParams(location.search).get("newShift");
     if (ns) { history.replaceState(null, "", location.pathname + location.hash); window.openShiftFromApp(ns); }
   }
