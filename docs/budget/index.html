@@ -1014,6 +1014,7 @@ body.nosave .split { grid-template-columns: 1fr; }
       <section data-block="quick" class="panel" aria-labelledby="quickH">
         <h2 id="quickH" class="pc-yellow" data-e="⚡">רישום בלחיצה <button class="linkbtn" type="button" id="quickEdit" hidden>עריכה</button></h2>
         <div class="quick" id="quickList"></div>
+        <div id="quickAddBox"></div>
       </section>
 
       <section data-block="pay" class="panel pay" aria-labelledby="payH">
@@ -1062,6 +1063,7 @@ body.nosave .split { grid-template-columns: 1fr; }
         <h2 id="wishH" class="pc-yellow" data-e="🤔">אולי אקנה</h2>
         <div class="verdict good" id="wishSaved" hidden></div>
         <div class="log" id="wishList"></div>
+        <div id="wishAddBox"></div>
       </section>
 
       <section data-block="cmp" class="panel" aria-labelledby="cmpH">
@@ -2625,9 +2627,16 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     const saved = skipped.reduce((s, w) => s + w.amount, 0);
     $("wishSaved").hidden = !skipped.length;
     $("wishSaved").textContent = "החודש ויתרת על " + (skipped.length === 1 ? "דבר אחד" : skipped.length + " דברים") + " בשווי " + fmt(saved) + ".";
+    inlineAdd("wishAddBox", { empty: !list.length, open: "＋ משהו שבא לי לקנות", nameLabel: "מה בא לך לקנות", placeholder: "למשל אוזניות", withCat: true, submit: "🤔 לחכות 48 שעות",
+      onAdd: (n, a, c) => {
+        store.wishlist = (store.wishlist || []).concat([{ id: catId(), note: n, amount: a, category: c, addedAt: new Date().toISOString(), outcome: null }]);
+        persist(); renderWish();
+        const when = new Date(Date.now() + WAIT_MS);
+        snack("נכנס לרשימת ״אולי אקנה״. תחליט ב־" + when.toLocaleDateString("he-IL", { weekday: "long" }) + " ב־" + when.toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" }) + ".");
+      } });
     if (!list.length) {
       const e = document.createElement("p"); e.className = "empty";
-      e.textContent = "בא לך לקנות משהו? לחצו ״+ הוצאה״ ובחרו ״אולי אקנה״ במקום לקנות עכשיו. אחרי 48 שעות תחליט אם זה באמת שווה את זה.";
+      e.textContent = "בא לך לקנות משהו? רשום אותו כאן במקום לקנות עכשיו. אחרי 48 שעות תחליט אם הוא באמת שווה את זה.";
       box.append(e);
       return;
     }
@@ -2719,6 +2728,42 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     if (blank) { blank.name = name; blank.amount = amount; blank.checked = todayStr(); }
     else d.expenses.push({ name, amount, checked: todayStr() });
     touch(); render();
+  }
+
+  // A small add form inside a tile: name, amount and (optionally) category. Open while empty, behind a button otherwise
+  const addOpen = {};
+  function inlineAdd(boxId, o) {
+    const box = $(boxId); box.innerHTML = "";
+    if (!o.empty && !addOpen[boxId]) {
+      const b = document.createElement("button"); b.type = "button"; b.className = "btn recopen"; b.textContent = o.open;
+      b.addEventListener("click", () => { addOpen[boxId] = true; inlineAdd(boxId, o); box.querySelector("input").focus(); });
+      box.append(b); return;
+    }
+    const f = document.createElement("form"); f.className = "recadd"; f.noValidate = true;
+    const field = (label, el, cls) => { const l = document.createElement("label"); if (cls) l.className = cls; l.append(label, el); f.append(l); return el; };
+    const name = document.createElement("input"); name.type = "text"; name.maxLength = 200; name.autocomplete = "off"; name.placeholder = o.placeholder || "";
+    const amt = document.createElement("input"); amt.type = "number"; amt.min = "0"; amt.step = "0.1"; amt.inputMode = "decimal"; amt.placeholder = "₪";
+    field(o.nameLabel || "על מה", name); field("סכום", amt);
+    let cat = null;
+    if (o.withCat) {
+      cat = document.createElement("select");
+      catTree(data().cats).forEach(({ c, depth }) => { const op = document.createElement("option"); op.value = c.id; op.textContent = (depth ? "↳ " : "") + catIcon(c) + " " + (c.name || "בלי שם"); cat.append(op); });
+      field("קטגוריה", cat, "full");
+    }
+    const acts = document.createElement("div"); acts.className = "acts";
+    const ok = document.createElement("button"); ok.type = "submit"; ok.className = "btn primary"; ok.textContent = o.submit || "＋ הוספה";
+    acts.append(ok);
+    if (!o.empty) { const no = document.createElement("button"); no.type = "button"; no.className = "btn"; no.textContent = "ביטול"; no.addEventListener("click", () => { addOpen[boxId] = false; inlineAdd(boxId, o); }); acts.append(no); }
+    f.append(acts);
+    f.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const n = name.value.trim(), a = Math.round((parseFloat(amt.value) || 0) * 100) / 100;
+      if (o.needName !== false && !n) { name.focus(); snack("מה השם?"); return; }
+      if (!(a > 0)) { amt.focus(); snack("צריך סכום גדול מאפס."); return; }
+      addOpen[boxId] = false;
+      o.onAdd(n, a, cat ? cat.value : null);
+    });
+    box.append(f);
   }
 
   // Add a subscription or fixed bill right in its card
@@ -4012,9 +4057,15 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     $("quickEdit").textContent = quickEditing ? "סיום" : "עריכה";
     if (!items.length) {
       const e = document.createElement("p"); e.className = "empty";
-      e.textContent = "כאן יופיעו כפתורים להוצאות שחוזרות אצלך, כמו הקפה של הבוקר. לחיצה אחת והן נרשמות. אפשר גם לסמן ⭐ כשרושמים הוצאה.";
+      e.textContent = "הוסף כאן הוצאה שחוזרת אצלך, כמו הקפה של הבוקר. אחר כך לחיצה אחת על הכפתור רושמת אותה.";
       box.append(e); quickEditing = false;
     }
+    inlineAdd("quickAddBox", { empty: !items.length, open: "＋ כפתור חדש", nameLabel: "שם הכפתור", placeholder: "למשל קפה בבוקר", withCat: true, submit: "⭐ הוספת כפתור",
+      onAdd: (n, a, c) => {
+        store.favs = (store.favs || []).filter((f) => f.note !== n).concat([{ note: n, amount: a, category: c }]);
+        persist(); renderQuick();
+        snack("נוסף כפתור ״" + n + "״. לחיצה עליו רושמת " + fmt(a) + ".");
+      } });
     items.forEach((it) => {
       const b = qButton(it, names);
       b.addEventListener("click", () => {
