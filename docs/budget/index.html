@@ -668,6 +668,11 @@ dialog.sheet::backdrop { background: rgba(40, 20, 50, .45); -webkit-backdrop-fil
 /* Bigger text (per device) */
 html.bigtext body { zoom: 1.12; }
 html.hugetext body { zoom: 1.25; }
+/* zoom also scales vh, so sheets measured in vh grew taller than the screen and their top (title, ✕) was cut off */
+html.bigtext dialog.sheet { max-height: calc(92vh / 1.12); }
+html.hugetext dialog.sheet { max-height: calc(92vh / 1.25); }
+html.bigtext dialog.aisheet { height: min(calc(92vh / 1.12), 860px); }
+html.hugetext dialog.aisheet { height: min(calc(92vh / 1.25), 860px); }
 /* Card tools: "?" help and fold */
 .panel h2 { flex-wrap: wrap; row-gap: 6px; }
 .panel h2 > .h2t, .panel h2 > #shTitle, .panel h2 > #calTitle { flex: 1 1 0; min-width: 0; }
@@ -985,8 +990,20 @@ dialog.aisheet { height: min(92vh, 860px); }
 .aitools { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; }
 .aitools button, .aistart button { flex: none; font: inherit; font-size: 14px; font-weight: 600; border: 1px solid var(--line); background: var(--surface-2); color: var(--fg); border-radius: 999px; padding: 7px 12px; cursor: pointer; white-space: nowrap; }
 .aistart { display: flex; flex-wrap: wrap; gap: 6px; }
+.aimsg .ailocal { display: block; margin-top: 4px; font-size: 12px; color: var(--muted); }
 .aistart button { white-space: normal; text-align: start; }
-.ailog { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; min-height: 120px; }
+.ailog { flex: 1 1 0; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; min-height: 90px; }
+/* Big text on small phones: only the conversation scrolls; the title, tools and the input box stay in place */
+dialog.aisheet { overflow: hidden; }
+.aiwrap > * { flex: none; }
+.aiwrap > .ailog { flex: 1 1 0; }
+.aitop { flex-wrap: wrap; }
+.aitop h2 { white-space: nowrap; }
+.aiask textarea { min-width: 40%; }
+html.hugetext .aitop h2 { font-size: 18px; } html.hugetext .aitop { gap: 6px; }
+html.hugetext .aiask .btn { padding-inline: 12px; min-width: 0; }
+.aistart { max-height: 34%; overflow-y: auto; }
+.aiexp { max-height: 45%; overflow-y: auto; }
 .aimsg { max-width: 88%; border-radius: 18px; padding: 10px 14px; font-size: 15.5px; line-height: 1.55; overflow-wrap: anywhere; }
 .aimsg.me { align-self: flex-start; background: color-mix(in srgb, var(--brand2, #db3577) 14%, var(--surface)); }
 .aimsg.ai { align-self: flex-end; background: var(--surface-2); }
@@ -1607,6 +1624,7 @@ body.nosave .split { grid-template-columns: 1fr; }
   <div class="aiwrap">
     <div class="aitop">
       <h2 id="aiH">✨ העוזר</h2>
+      <button class="linkbtn" type="button" id="aiIdeas">💡 רעיונות</button>
       <button class="linkbtn" type="button" id="aiClear">🗑️ ניקוי</button>
       <button class="btn" type="button" id="aiClose" aria-label="סגירה">✕</button>
     </div>
@@ -6168,13 +6186,15 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     offline: "אין אינטרנט כרגע.",
     fail: "משהו השתבש אצל העוזר. נסה שוב עוד מעט."
   };
-  const AI_STARTERS = [
-    "כמה הוצאתי החודש על אוכל בחוץ?",
-    "באיזה חודש הכי בזבזתי?",
-    "כמה משמרות חסרות לי ליעד החודש?",
-    "איך מוסיפים מנוי?",
-    "מגיע לי תשלום על עבודה בחג?"
-  ];
+  // Ready questions, by the tab the assistant was opened from (the owner's pick: people don't know what to ask)
+  function aiStarters() {
+    if (aiFrom === "shifts") return ["כמה הרווחתי החודש מהמשמרות?", "כמה משמרות עשיתי החודש?", "כמה משמרות חסרות לי ליעד החודש?", "איזו משמרת הכי משתלמת לי?", "כמה שעות נוספות עשיתי החודש?", "מגיע לי תשלום על עבודה בחג?"];
+    if (aiFrom === "calendar") return ["באיזה יום בשבוע אני מוציא הכי הרבה?", "איזה יום החודש היה הכי יקר?", "כמה ימים בלי הוצאות היו לי החודש?", "כמה הוצאתי בשבוע האחרון?"];
+    const list = tx[thisMonth()] || [], by = {};
+    list.forEach((r) => { by[r.category] = (by[r.category] || 0) + r.amount; });
+    const top = Object.entries(by).sort((a, b) => b[1] - a[1])[0], topName = top && catNames()[top[0]];
+    return ["כמה מותר לי להוציא היום?", "כמה הוצאתי החודש?", topName ? "כמה הוצאתי על " + topName + " החודש?" : "", "על מה הכי הוצאתי החודש?", "מה ההוצאה הכי גדולה שלי החודש?", "באיזה חודש הכי בזבזתי?", "איך מוסיפים מנוי?"].filter(Boolean);
+  }
   const AI_GO = {
     settings: ["⚙️ להגדרות", () => setView("settings")],
     look: ["🎨 לעיצוב וצבעים", () => setView("look")],
@@ -6197,13 +6217,15 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   const AI_GUIDE = "מבנה האפליקציה: למעלה לוגו, גלגל שיניים ⚙ של הגדרות ליד תמונת הפרופיל, ובורר חודש. שלוש לשוניות למעלה: ראשי / משמרות / לוח שנה. בדף הראשי יש אריחים שאפשר לסדר (לחיצה ארוכה על אריח פותחת מצב עריכה: גוררים ⠿, 👁 מסתיר, ✓ שומר; או בהגדרות > פריסת דף הבית). כפתור 💸 הוצאה למטה פותח טופס הוצאה (סכום, קטגוריה, פירוט, תאריך, צריך/רוצה, למה קניתי, ⭐ שמירה ככפתור, חיוב קבוע כל חודש, ״אולי אקנה״ ל־48 שעות). בלשונית משמרות: כפתור ⏰ משמרת, ייבוא משמרות (הדבקה מחילן, כמה ימים ביחד, צילום דוח), הגדרות שכר, יעד הכנסה לחודש. הגדרות > כללי: מתי מתחיל החודש, טון ההודעות, מתי לספור את הכסף מהמשמרות, תזכורת ערב. הגדרות > עיצוב וצבעים: בהיר/כהה, צבע רקע, צבע מבטא, גודל טקסט, רטט וקונפטי. ✨ הוא העוזר עצמו.\n"
     + "הסברים על כל אריח:\n" + Object.values(HELP).map((t) => "- " + t).join("\n")
     + "\nיעדים לכפתור [[go:...]]: " + Object.keys(AI_GO).map((k) => k + "=" + AI_GO[k][0]).join(", ");
-  let aiMode = "", aiBusy = false, aiChat = [], aiExpRows = [];
+  let aiMode = "", aiBusy = false, aiChat = [], aiExpRows = [], aiFrom = "main", aiIdeas = false, aiWait = "", aiLast = null;
+  const AI_TABS = { main: "ראשי", shifts: "משמרות", calendar: "לוח שנה" };
+  const AI_STREAM = { chat: 1, letter: 1, patterns: 1 };
   var aiOk = null; // var: aiFabSync can run from setView before this block is reached
   function aiReady() { return !!(sb && user); }
   const aiKey = () => "budget-ai-" + (user ? user.id : "");
   // The ✨ button shows only once the server says the assistant is connected (key set and valid)
   function aiFabSync() {
-    $("aiFab").hidden = !aiReady() || aiOk !== true || view !== "main" || $("app").hidden;
+    $("aiFab").hidden = !aiReady() || aiOk !== true || !["main", "shifts", "calendar"].includes(view) || $("app").hidden;
     if (aiReady() && aiOk === null) {
       aiOk = false;
       fetch(SUPABASE_URL + "/functions/v1/ai?ping=1", { method: "POST", headers: { Authorization: "Bearer " + SUPABASE_KEY, apikey: SUPABASE_KEY, "Content-Type": "application/json" }, body: "{}" })
@@ -6219,15 +6241,38 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     setTimeout(() => el.scrollIntoView({ behavior: "smooth", block: "start" }), 60);
   }
   function aiErrText(e) { return AI_ERR[(e && e.code) || "fail"] || AI_ERR.fail; }
-  async function aiCall(payload) {
+  async function aiCall(payload, onText) {
     if (!navigator.onLine) throw Object.assign(new Error("offline"), { code: "offline" });
     const { data: s } = await sb.auth.getSession();
     const tok = s && s.session && s.session.access_token;
     if (!tok) throw Object.assign(new Error("auth"), { code: "auth" });
     let r;
     try {
-      r = await fetch(AI_URL, { method: "POST", signal: AbortSignal.timeout ? AbortSignal.timeout(125000) : undefined, headers: { "Content-Type": "application/json", Authorization: "Bearer " + tok, apikey: SUPABASE_KEY }, body: JSON.stringify({ tone: settings().tone || "tough", gender: settings().gender || "m", ...payload }) });
+      r = await fetch(AI_URL, { method: "POST", signal: AbortSignal.timeout ? AbortSignal.timeout(125000) : undefined, headers: { "Content-Type": "application/json", Authorization: "Bearer " + tok, apikey: SUPABASE_KEY }, body: JSON.stringify({ tone: settings().tone || "tough", gender: settings().gender || "m", ...payload, stream: !!onText }) });
     } catch (e) { throw Object.assign(new Error("net"), { code: e && e.name === "TimeoutError" ? "busy" : "fail" }); }
+    // The answer arrives word by word: each piece is shown as it comes
+    if (onText && r.ok && /event-stream/.test(r.headers.get("content-type") || "")) {
+      const rd = r.body.getReader(), dec = new TextDecoder();
+      let buf = "", all = "", end = null;
+      try {
+        for (;;) {
+          const { value, done } = await rd.read();
+          if (done) break;
+          buf += dec.decode(value, { stream: true });
+          const parts = buf.split("\n\n"); buf = parts.pop();
+          parts.forEach((p) => {
+            if (!p.startsWith("data:")) return;
+            let o; try { o = JSON.parse(p.slice(5)); } catch (e) { return; }
+            if (o.t) { all += o.t; onText(all); }
+            if (o.error) throw Object.assign(new Error(o.error), { code: "fail" });
+            if (o.done) end = o;
+          });
+        }
+      } catch (e) { throw e && e.code ? e : Object.assign(new Error("net"), { code: "fail" }); }
+      if (!end) throw Object.assign(new Error("cut"), { code: "fail" });
+      if (end.left != null) $("aiFoot").textContent = "נשארו לך היום " + end.left + " שאלות. העוזר לא משנה כלום לבד, והשיחה לא נשמרת בשרת.";
+      return { text: all, left: end.left };
+    }
     let j = {}; try { j = await r.json(); } catch (e) {}
     if (!r.ok || j.error) throw Object.assign(new Error(j.error || "http " + r.status), { code: AI_ERR[j.error] ? j.error : "fail" });
     if (j.left != null) $("aiFoot").textContent = "נשארו לך היום " + j.left + " שאלות. העוזר לא משנה כלום לבד, והשיחה לא נשמרת בשרת.";
@@ -6247,6 +6292,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     const wd = (d) => ["א", "ב", "ג", "ד", "ה", "ו", "ש"][new Date(d + "T12:00").getDay()];
     const types = {}; shiftTypes().forEach((t) => { types[t.id] = t.name; });
     const L = [];
+    L.push("העוזר נפתח מהלשונית: " + (AI_TABS[aiFrom] || "ראשי") + ".");
     L.push("היום: " + todayStr() + " (יום " + wd(todayStr()) + "). החודש המוצג באפליקציה: " + month + ". חודש תקציבי מתחיל ב־" + startDay() + " לחודש.");
     L.push("הגדרות: " + JSON.stringify({ טון: st.tone, שכר_לשעה: st.wage, יום_משכורת: st.payday, יעד_הכנסה_חודשי_ברוטו: st.payGoal, שעות_נוספות_אחרי: st.otAfter, הכסף_מהמשמרות_נספר: { same: "באותו חודש", prev: "בחודש שאחרי", off: "לא נספר" }[shiftIncomeFrom()] }));
     const p = plan();
@@ -6282,7 +6328,56 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       const planInc = pl ? pl.income.reduce((a, x) => a + (+x.amount || 0), 0) : 0, fixed = pl ? pl.expenses.reduce((a, x) => a + (+x.amount || 0), 0) : 0;
       L.push(k + ": הוצאות יומיום " + Math.round(m.exp) + " (" + Object.entries(m.cats).sort((a, b) => b[1] - a[1]).map(([c, v]) => c + " " + Math.round(v)).join(", ") + ") · משמרות " + m.n + " (" + (m.min / 60).toFixed(1) + " שעות, " + Math.round(m.gross) + " ברוטו) · הכנסות חד־פעמיות " + Math.round(m.inc) + " · הכנסה בתוכנית " + planInc + " · חיובים קבועים " + fixed);
     });
+    L.push(aiFacts(e.data || [], s.data || [], byM));
     L.push("\n== מדריך האפליקציה ==\n" + AI_GUIDE);
+    return L.join("\n");
+  }
+  // Exact numbers the app works out itself, so the assistant explains them instead of adding up rows (and getting it wrong)
+  function aiFacts(exps, shs, byM) {
+    const cur = thisMonth(), t = todayStr(), names = catNames(), st = settings();
+    const parentOf = {}; Object.values(store.months).forEach((m) => (m.cats || []).forEach((c) => { if (c.parent) parentOf[c.id] = c.parent; }));
+    const catOf = (id) => names[parentOf[id]] || names[id] || "לא ידוע";
+    const r0 = (n) => Math.round(n);
+    const WD = ["ראשון", "שני", "שלישי", "רביעי", "חמישי", "שישי", "שבת"];
+    const wdOf = (d) => new Date(d + "T12:00").getDay();
+    const L = ["\n== מספרים מוכנים (חושבו בדיוק על ידי האפליקציה) =="];
+    const start = periodStart(cur), end = periodEnd(cur), dayNum = daysBetween(start, t) + 1;
+    L.push("החודש התקציבי הנוכחי: " + cur + " (" + monthName(cur) + "), מ־" + start + " עד " + end + ". זה היום ה־" + dayNum + " מתוך " + periodDays(cur) + ", נשארו " + (periodDays(cur) - dayNum + 1) + " ימים כולל היום.");
+    const curE = exps.filter((r) => periodOf(r.spent_on) === cur && r.spent_on <= t);
+    const sum = (l) => r0(l.reduce((a, r) => a + +r.amount, 0));
+    L.push("הוצאות יומיום החודש עד היום: " + sum(curE) + " ב־" + curE.length + " הוצאות. היום: " + sum(curE.filter((r) => r.spent_on === t)) + ". אתמול: " + sum(exps.filter((r) => r.spent_on === dateAdd(t, -1))) + ".");
+    L.push("7 הימים האחרונים: " + sum(exps.filter((r) => r.spent_on > dateAdd(t, -7) && r.spent_on <= t)) + ". 30 הימים האחרונים: " + sum(exps.filter((r) => r.spent_on > dateAdd(t, -30) && r.spent_on <= t)) + ".");
+    const byCat = {}; curE.forEach((r) => { const c = catOf(r.category); byCat[c] = (byCat[c] || 0) + +r.amount; });
+    L.push("החודש לפי קטגוריה ראשית: " + (Object.entries(byCat).sort((a, b) => b[1] - a[1]).map(([c, v]) => c + " " + r0(v)).join(", ") || "אין"));
+    const nw = { need: 0, want: 0 }; curE.forEach((r) => { const k = r.tags && r.tags.nw; if (nw[k] != null) nw[k] += +r.amount; });
+    L.push("החודש לפי צריך/רוצה: צריך " + r0(nw.need) + ", רוצה " + r0(nw.want) + ", לא סומן " + r0(sum(curE) - nw.need - nw.want) + ".");
+    L.push("5 ההוצאות הכי גדולות החודש: " + (curE.slice().sort((a, b) => b.amount - a.amount).slice(0, 5).map((r) => r.spent_on + " " + r0(r.amount) + " " + (r.note || catOf(r.category))).join(" · ") || "אין"));
+    const days = new Set(curE.map((r) => r.spent_on)); let zero = 0;
+    for (let d = start; d <= t && d <= end; d = dateAdd(d, 1)) if (!days.has(d)) zero++;
+    L.push("ימים בלי אף הוצאה החודש עד היום: " + zero + ".");
+    const byDay = {}; curE.forEach((r) => { byDay[r.spent_on] = (byDay[r.spent_on] || 0) + +r.amount; });
+    const topDay = Object.entries(byDay).sort((a, b) => b[1] - a[1])[0];
+    if (topDay) L.push("היום הכי יקר החודש: " + topDay[0] + " (יום " + WD[wdOf(topDay[0])] + ") עם " + r0(topDay[1]) + ".");
+    const last90 = exps.filter((r) => r.spent_on > dateAdd(t, -90) && r.spent_on <= t);
+    const wdS = WD.map(() => 0), wdN = WD.map(() => 0);
+    last90.forEach((r) => { wdS[wdOf(r.spent_on)] += +r.amount; wdN[wdOf(r.spent_on)]++; });
+    L.push("90 הימים האחרונים לפי יום בשבוע (סכום, מספר הוצאות): " + WD.map((n, i) => n + " " + r0(wdS[i]) + " (" + wdN[i] + ")").join(", ") + ".");
+    const notes = {}; last90.forEach((r) => { const k = String(r.note || "").trim().toLowerCase(); if (!k) return; const o = (notes[k] = notes[k] || { n: 0, s: 0 }); o.n++; o.s += +r.amount; });
+    L.push("פירוטים שחוזרים ב־90 הימים האחרונים (פירוט: פעמים, סכום): " + (Object.entries(notes).filter(([, o]) => o.n > 1).sort((a, b) => b[1].s - a[1].s).slice(0, 15).map(([k, o]) => k + ": " + o.n + ", " + r0(o.s)).join(" · ") || "אין"));
+    const full = Object.keys(byM).filter((k) => k < cur && byM[k].exp > 0);
+    if (full.length) {
+      const srt = full.slice().sort((a, b) => byM[b].exp - byM[a].exp);
+      L.push("החודשים שנגמרו, מהכי בזבזני: " + srt.map((k) => k + " (" + monthName(k) + ") " + r0(byM[k].exp)).join(", ") + ". ממוצע לחודש: " + r0(full.reduce((a, k) => a + byM[k].exp, 0) / full.length) + ".");
+    }
+    const curS = shs.filter((r) => periodOf(r.work_date) === cur);
+    if (shs.length) {
+      let g = 0, min = 0, ot = 0;
+      curS.forEach((r) => { const p = shiftPay(r, st); g += p.gross; min += p.paidMin; ot += Math.max(0, p.paidMin - (+st.otAfter || 8.6) * 60); });
+      L.push("משמרות החודש: " + curS.length + " משמרות, " + (min / 60).toFixed(1) + " שעות לתשלום, " + r0(g) + " ברוטו" + (curS.length ? " (ממוצע " + r0(g / curS.length) + " למשמרת)" : "") + ". שעות מעבר ל־" + (+st.otAfter || 8.6) + " ביום (שעות נוספות בערך): " + (ot / 60).toFixed(1) + ".");
+      if (+st.payGoal) L.push("יעד הכנסה חודשי ברוטו: " + +st.payGoal + ". הושג החודש: " + r0(g) + ". חסר: " + Math.max(0, r0(+st.payGoal - g)) + (curS.length && g < +st.payGoal ? " (בערך " + Math.ceil((+st.payGoal - g) / (g / curS.length)) + " משמרות כמו הממוצע שלך)" : "") + ".");
+      const kind = {}; shs.filter((r) => r.work_date > dateAdd(t, -120)).forEach((r) => { const p = shiftPay(r, st), k = WD[wdOf(r.work_date)]; const o = (kind[k] = kind[k] || { n: 0, g: 0, m: 0 }); o.n++; o.g += p.gross; o.m += p.paidMin; });
+      L.push("משמרות ב־120 הימים האחרונים לפי יום בשבוע (מספר, ממוצע ברוטו למשמרת, ממוצע לשעה): " + Object.entries(kind).map(([k, o]) => k + " " + o.n + ", " + r0(o.g / o.n) + ", " + (o.m ? r0(o.g / (o.m / 60)) : 0)).join(" · ") + ".");
+    }
     return L.join("\n");
   }
   function aiRenderText(el, text) {
@@ -6317,37 +6412,97 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     aiChat.forEach((m) => {
       const d = document.createElement("div"); d.className = "aimsg " + (m.role === "ai" ? "ai" : m.role === "err" ? "err" : "me");
       if (m.role === "ai") aiRenderText(d, m.text); else d.textContent = m.text;
+      if (m.local) { const k = document.createElement("small"); k.className = "ailocal"; k.textContent = "⚡ תשובה מיידית מהאפליקציה, לא נספרה במכסה"; d.append(k); }
+      if (m.role === "err" && aiLast && !aiBusy) { const b = document.createElement("button"); b.type = "button"; b.className = "btn aigo"; b.textContent = "🔄 נסה שוב (לא נספר במכסה)"; b.addEventListener("click", aiRetry); d.append(b); }
       log.append(d);
     });
-    if (aiBusy) { const w = document.createElement("div"); w.className = "aimsg ai wait"; w.textContent = "✨ חושב…"; log.append(w); }
+    const streaming = aiBusy && aiChat.length && aiChat[aiChat.length - 1].role === "ai";
+    if (aiBusy && !streaming) { const w = document.createElement("div"); w.className = "aimsg ai wait"; w.textContent = aiWait || "✨ חושב…"; log.append(w); }
     const sb0 = $("aiStart"); sb0.innerHTML = "";
-    sb0.hidden = !!aiChat.length || !!aiMode;
-    AI_STARTERS.forEach((q) => { const b = document.createElement("button"); b.type = "button"; b.textContent = q; b.addEventListener("click", () => aiAsk(q)); sb0.append(b); });
+    sb0.hidden = (!!aiChat.length && !aiIdeas) || !!aiMode || aiBusy;
+    $("aiIdeas").hidden = !aiChat.length || !!aiMode;
+    $("aiIdeas").textContent = aiIdeas ? "✕ סגור" : "💡 רעיונות";
+    aiStarters().forEach((q) => { const b = document.createElement("button"); b.type = "button"; b.textContent = q; b.addEventListener("click", () => aiAsk(q)); sb0.append(b); });
     $("aiMode").hidden = !aiMode;
     $("aiModeTxt").textContent = aiMode === "exp" ? "✍️ רישום הוצאות: כתוב או אמור כמה הוצאות ביחד" : "";
     $("aiIn").placeholder = aiMode === "exp" ? "קפה 18, פיצה 60, דלק 200" : "שאל על הכסף שלך…";
     $("aiSend").disabled = aiBusy;
     setTimeout(() => { log.scrollTop = log.scrollHeight; }, 0);
   }
-  function aiPush(role, text) { aiChat.push({ role, text }); if (role !== "err") aiSaveChat(); aiPaint(); }
+  function aiPush(role, text, local) { aiChat.push(local ? { role, text, local: 1 } : { role, text }); if (role !== "err") aiSaveChat(); aiPaint(); }
   async function aiRun(label, payload, onOk) {
     if (aiBusy) return;
+    aiLast = { label, payload, onOk };
     aiBusy = true; aiChat = aiChat.filter((m) => m.role !== "err"); if (label) aiChat.push({ role: "me", text: label }); aiPaint();
+    let live = null;
+    const drop = () => { if (live) { aiChat = aiChat.filter((m) => m !== live); live = null; } };
+    const onText = AI_STREAM[payload.tool] ? (t) => { if (!live) { live = { role: "ai", text: "" }; aiChat.push(live); } live.text = t; aiPaint(); } : null;
     try {
       const ctx = payload.tool === "expenses" ? "" : await aiContext();
-      const j = await aiCall({ ...payload, context: payload.context || ctx });
-      aiBusy = false;
-      onOk(j);
+      let j;
+      // Google's free tier is often busy: one quiet retry before showing an error (a failed try doesn't count)
+      for (let n = 0; ; n++) {
+        try { j = await aiCall({ ...payload, context: payload.context || ctx }, onText); break; }
+        catch (e) {
+          if (n || !["busy", "fail"].includes(e.code)) throw e;
+          drop(); aiWait = "✨ עוד רגע…"; aiPaint();
+          await new Promise((r) => setTimeout(r, 1500));
+        }
+      }
+      aiBusy = false; aiWait = "";
+      if (!live) onOk(j);
     } catch (e) {
-      aiBusy = false;
+      aiBusy = false; aiWait = ""; drop();
       aiPush("err", aiErrText(e));
     }
     aiSaveChat(); aiPaint();
+  }
+  function aiRetry() {
+    if (!aiLast || aiBusy) return;
+    const { label, payload, onOk } = aiLast;
+    aiChat = aiChat.filter((m) => m.role !== "err");
+    const last = aiChat[aiChat.length - 1];
+    if (label && last && last.role === "me" && last.text === label) aiChat.pop();
+    aiRun(label, payload, onOk);
+  }
+  // Simple questions get an instant answer from the app itself: no waiting, and they don't count toward the daily limit
+  function aiLocal(q) {
+    const cur = thisMonth(), t = todayStr();
+    const n = q.replace(/[?？!.,״"׳']/g, " ").replace(/(^|\s)(בבקשה|תגיד לי|תגיד)(?=\s|$)/g, " ").replace(/\s+/g, " ").trim();
+    const list = tx[cur];
+    if (!list) return null;
+    const mine = list.filter((r) => r.spent_on <= t), sum = (l) => l.reduce((a, r) => a + r.amount, 0);
+    if (/^כמה (מותר לי|אני יכול|נשאר לי)( להוציא)? היום$/.test(n) && month === cur) {
+      return "**" + $("todayLbl").textContent + ": " + $("todayVal").textContent + "**\n" + $("todayLine").textContent + ".";
+    }
+    if (/^כמה (כסף )?(נשאר לי|נשאר)( להוציא)?( עד סוף החודש| החודש| לסוף החודש)?$/.test(n) && month === cur) return $("todayLine").textContent + ".";
+    if (/^כמה הוצאתי היום$/.test(n)) { const l = mine.filter((r) => r.spent_on === t); return l.length ? "**היום הוצאת " + fmt(sum(l)) + "** (" + (l.length === 1 ? "הוצאה אחת" : l.length + " הוצאות") + ")." : "היום עוד לא רשמת אף הוצאה."; }
+    if (/^כמה הוצאתי (החודש|עד עכשיו החודש|החודש עד עכשיו)$/.test(n)) return "**ב" + monthName(cur) + " הוצאת עד עכשיו " + fmt(sum(mine)) + "** על הוצאות יומיום (" + mine.length + " הוצאות). החיובים הקבועים לא בפנים.";
+    let m = n.match(/^כמה הוצאתי (?:החודש )?על (.+?)(?: החודש)?$/);
+    if (m) {
+      const want = m[1].replace(/^ה(?=\S{3,})/, "");
+      const names = catNames(), cats = data().cats;
+      const hit = cats.find((c) => { const nm = String(names[c.id] || "").trim(); return nm && (nm === m[1] || nm === want || nm.replace(/^ה/, "") === want); });
+      if (!hit) return null;
+      const ids = new Set([hit.id].concat(cats.filter((c) => c.parent === hit.id).map((c) => c.id)));
+      const l = mine.filter((r) => ids.has(r.category));
+      return "**על " + names[hit.id] + " הוצאת ב" + monthName(cur) + " " + fmt(sum(l)) + "**" + (l.length ? " (" + (l.length === 1 ? "הוצאה אחת" : l.length + " הוצאות") + ")." : ".") + (+hit.budget > 0 ? " היעד: " + fmt(+hit.budget) + "." : "");
+    }
+    const sh = shifts[cur];
+    if (sh && /^כמה (הרווחתי|כסף הרווחתי)( מה?משמרות| מהעבודה| בעבודה)?( החודש)?$/.test(n)) {
+      let g = 0, min = 0; sh.forEach((r) => { const p = shiftPay(r, settings()); g += p.gross; min += p.paidMin; });
+      return sh.length ? "**ב" + monthName(cur) + " הרווחת " + fmt(Math.round(g)) + " ברוטו** מ" + (sh.length === 1 ? "משמרת אחת" : "־" + sh.length + " משמרות") + " (" + (min / 60).toFixed(1) + " שעות)." : "החודש עוד לא רשמת משמרות.";
+    }
+    if (sh && /^כמה משמרות (עשיתי|עבדתי|היו לי)( החודש)?$/.test(n)) return sh.length ? "**החודש עשית " + (sh.length === 1 ? "משמרת אחת" : sh.length + " משמרות") + ".**" : "החודש עוד לא רשמת משמרות.";
+    return null;
   }
   function aiAsk(q) {
     q = String(q || "").trim(); if (!q) return;
     $("aiIn").value = ""; $("aiIn").style.height = "";
     if (aiMode === "exp") { aiParseExpenses(q); return; }
+    aiIdeas = false;
+    const quick = !aiBusy && aiLocal(q);
+    if (quick) { aiChat = aiChat.filter((m) => m.role !== "err"); aiChat.push({ role: "me", text: q }); aiPush("ai", quick, true); return; }
     const history = aiChat.filter((m) => m.role === "me" || m.role === "ai").slice(-10);
     aiRun(q, { tool: "chat", input: q, history }, (j) => aiPush("ai", j.text));
   }
@@ -6426,7 +6581,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   // ---- Open, tools, voice ----
   function aiOpen() {
     if (!aiReady()) return;
-    aiLoadChat(); aiMode = ""; aiExpRows = []; aiPaintExp();
+    aiLoadChat(); aiMode = ""; aiExpRows = []; aiIdeas = false; aiFrom = AI_TABS[view] ? view : "main"; aiPaintExp();
     $("aiMic").hidden = !(voiceApp() || SR);
     openDlg("aiSheet"); aiPaint();
   }
@@ -6436,6 +6591,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     $("aiIn").focus();
   }
   $("aiFab").addEventListener("click", aiOpen);
+  $("aiIdeas").addEventListener("click", () => { aiIdeas = !aiIdeas; aiPaint(); if (aiIdeas) setTimeout(() => $("aiStart").scrollIntoView({ block: "nearest" }), 0); });
   $("aiClose").addEventListener("click", () => closeDlg("aiSheet"));
   $("aiClear").addEventListener("click", () => { aiChat = []; aiExpRows = []; try { localStorage.removeItem(aiKey()); } catch (e) {} aiPaintExp(); aiPaint(); });
   $("aiModeOff").addEventListener("click", () => { aiMode = ""; aiPaint(); });

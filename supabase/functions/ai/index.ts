@@ -28,13 +28,15 @@ const BASE = (tone: string, today: string, gender = "m") => `אתה "העוזר"
 - ${TONE[tone] || TONE.tough}
 - ${gender === "f" ? "המשתמשת היא אישה: פנה אליה תמיד בלשון נקבה (את, יכולה, הוצאת, תחסכי)." : "פנה אל המשתמש בלשון זכר."}
 - כל המספרים בשקלים (₪). אל תמציא נתונים: אם אין בנתונים תשובה, אמור את זה.
+- מספרים: האפליקציה כבר חישבה סכומים מדויקים (בחלקים ״מספרים מוכנים״ ו״סיכום לפי חודש״). השתמש בהם כמו שהם ואל תחבר שורות בעצמך כשיש שם תשובה.
 - אתה לא משנה שום דבר באפליקציה ולא מתחייב שעשית משהו. אתה רק מסביר, עונה ומציע.
 - הכנסה מהמשמרות היא ברוטו לפי שעות ושכר לשעה, כולל תוספות חוק (שעות נוספות, לילה, שבת וחג).
 - אל תשתמש בטבלאות Markdown. מותר להשתמש ברשימות קצרות ובהדגשה **כך**.`;
 
 const PROMPTS: Record<string, string> = {
   chat: `ענה על שאלת המשתמש לפי הנתונים שלו שמופיעים למטה ולפי מדריך האפליקציה.
-- שאלה על הכסף שלו: חשב מתוך הנתונים ותן מספר ברור ומשפט אחד של הסבר.
+- שאלה על הכסף שלו: קח את המספר מ״מספרים מוכנים״ או מ״סיכום לפי חודש״ ותן מספר ברור ומשפט אחד של הסבר. רק אם אין שם תשובה, חשב מהשורות וכתוב בקצרה שזה חישוב שלך.
+- ״החודש״ הוא החודש התקציבי הנוכחי כפי שמופיע ב״מספרים מוכנים״.
 - שאלה איך עושים משהו באפליקציה: הסבר בצעדים קצרים לפי המדריך. אם יש מקום מתאים ברשימת היעדים, הוסף בסוף שורה בפורמט [[go:מפתח]] (מפתח אחד מהרשימה בלבד), והאפליקציה תציג כפתור שלוקח לשם.
 - תכנון משמרות ליעד הכנסה: השתמש ביעד, בשכר לשעה ובמה שכבר הרוויח החודש. הזכר ששבת וחג משתלמים יותר (150%).
 - שאלות על זכויות עובדים בישראל: תשובה כללית ותמציתית לפי החוק, הפניה ל"כל זכות" (https://www.kolzchut.org.il), ומשפט שזה לא ייעוץ משפטי.
@@ -96,12 +98,12 @@ async function one(key: string, model: string, system: string, contents: unknown
 
 // The free tier's newest models are often busy or slow, so: start the first model, and if it hasn't answered
 // within a few seconds (or failed), start the next one too. The first answer wins; the rest are cancelled.
-function gemini(key: string, system: string, contents: unknown[], wantJson: boolean, hedgeMs = 6000, models = MODELS): Promise<{ text: string; model: string }> {
+function race<T>(run: (model: string, ac: AbortController) => Promise<T>, hedgeMs = 6000, models = MODELS): Promise<T> {
   return new Promise((resolve, reject) => {
     let next = 0, running = 0, done = false, last = "";
     let hedge: number | undefined;
     const ctrls: AbortController[] = [];
-    const finish = (fn: () => void) => { if (done) return; done = true; clearTimeout(hedge); ctrls.forEach((c) => c.abort()); fn(); };
+    const finish = (fn: () => void, keep?: AbortController) => { if (done) return; done = true; clearTimeout(hedge); ctrls.forEach((c) => c !== keep && c.abort()); fn(); };
     const start = () => {
       if (done) return;
       if (next >= models.length) { if (!running) finish(() => reject(new Error(last || "no model"))); return; }
@@ -109,8 +111,8 @@ function gemini(key: string, system: string, contents: unknown[], wantJson: bool
       running++;
       const ac = new AbortController(); ctrls.push(ac);
       const cap = setTimeout(() => ac.abort(), 30000);
-      one(key, model, system, contents, wantJson, ac.signal).then(
-        (out) => { clearTimeout(cap); running--; finish(() => resolve(out)); },
+      run(model, ac).then(
+        (out) => { clearTimeout(cap); running--; finish(() => resolve(out), ac); },
         (e) => {
           clearTimeout(cap); running--;
           if (done) return;
@@ -125,6 +127,46 @@ function gemini(key: string, system: string, contents: unknown[], wantJson: bool
     };
     start();
   });
+}
+const gemini = (key: string, system: string, contents: unknown[], wantJson: boolean, hedgeMs = 6000, models = MODELS) =>
+  race((model, ac) => one(key, model, system, contents, wantJson, ac.signal), hedgeMs, models);
+
+// Streaming: the answer goes to the page word by word. A model "wins" when its first words arrive.
+async function* sseTexts(body: ReadableStream<Uint8Array>) {
+  const reader = body.getReader(), dec = new TextDecoder();
+  let buf = "";
+  for (;;) {
+    const { value, done } = await reader.read();
+    if (done) break;
+    buf += dec.decode(value, { stream: true });
+    const lines = buf.split(/\r?\n/);
+    buf = lines.pop() || "";
+    for (const line of lines) {
+      if (!line.startsWith("data:")) continue;
+      let j; try { j = JSON.parse(line.slice(5)); } catch (_) { continue; }
+      const t = (j.candidates?.[0]?.content?.parts || []).filter((p: { thought?: boolean }) => !p.thought).map((p: { text?: string }) => p.text || "").join("");
+      if (t) yield t;
+    }
+  }
+}
+async function firstWords(key: string, model: string, system: string, contents: unknown[], ac: AbortController) {
+  for (const think of [true, false]) {
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-goog-api-key": key },
+      signal: ac.signal,
+      body: JSON.stringify({ systemInstruction: { parts: [{ text: system }] }, contents, generationConfig: { temperature: 0.6, maxOutputTokens: 4096, ...(think ? thinking(model) : {}) } }),
+    });
+    if (res.ok && res.body) {
+      const it = sseTexts(res.body);
+      const n = await it.next();
+      if (n.done) throw new Error("empty " + model);
+      return { model, first: n.value as string, it, ac };
+    }
+    const err = res.status + " " + model + " " + (await res.text()).slice(0, 300);
+    if (!(res.status === 400 && think && /think/i.test(err))) throw new Error(err);
+  }
+  throw new Error("unreachable");
 }
 
 Deno.serve(async (req) => {
@@ -143,6 +185,13 @@ Deno.serve(async (req) => {
         try {
           const pick = new URL(req.url).searchParams.get("m");
           const big = "נתון לדוגמה: הוצאה 18 ₪ על קפה.\n".repeat(Math.min(400, +(new URL(req.url).searchParams.get("pad") || 0)));
+          if (new URL(req.url).searchParams.get("stream") === "1") {
+            const st = await race((model, ac) => firstWords(key, model, BASE("mid", "היום") + "\n" + big, [{ role: "user", parts: [{ text: "תן 3 טיפים קצרים לחיסכון." }] }], ac));
+            const first = Date.now() - t0;
+            let text = st.first, chunks = 1;
+            for await (const t of st.it) { text += t; chunks++; }
+            return json({ ok: true, model: st.model, msFirst: first, ms: Date.now() - t0, chunks, text });
+          }
           const out = await gemini(key, BASE("mid", "היום", new URL(req.url).searchParams.get("g") === "f" ? "f" : "m") + "\n" + big, [{ role: "user", parts: [{ text: "כמה הוצאתי על קפה? משפט אחד." }] }], false, 6000, pick ? [pick] : MODELS);
           return json({ ok: true, model: out.model, ms: Date.now() - t0, text: out.text });
         } catch (e) { return json({ ok: false, ms: Date.now() - t0, error: String((e as Error).message).slice(0, 400) }); }
@@ -192,16 +241,44 @@ Deno.serve(async (req) => {
     contents.push({ role: "user", parts });
 
     const wantJson = tool === "expenses" || tool === "shiftsheet";
+    const left = free ? null : DAILY_LIMIT - used.data;
+    // A question that failed doesn't count toward the daily limit, so "try again" is free
+    const refund = () => admin.rpc("ai_refund", { p_user: uid, p_tool: tool }).then(() => {}, () => {});
     const t0 = Date.now();
-    const out = await gemini(key, system, contents, wantJson, tool === "shiftsheet" ? 15000 : 6000);
+    if (body.stream && !wantJson) {
+      let st: Awaited<ReturnType<typeof firstWords>>;
+      try { st = await race((model, ac) => firstWords(key, model, system, contents, ac)); }
+      catch (e) { await refund(); throw e; }
+      const enc = new TextEncoder();
+      const stream = new ReadableStream({
+        async start(c) {
+          const send = (o: unknown) => c.enqueue(enc.encode("data: " + JSON.stringify(o) + "\n\n"));
+          const kill = setTimeout(() => st.ac.abort(), 90000);
+          try {
+            send({ t: st.first });
+            for await (const t of st.it) send({ t });
+            send({ done: true, left });
+            console.log("ai ok stream", tool, st.model, Date.now() - t0, "ms", "context", ctx.length);
+          } catch (e) {
+            console.error("ai stream broke", st.model, String((e as Error).message || e).slice(0, 200));
+            await refund();
+            send({ error: "fail" });
+          } finally { clearTimeout(kill); c.close(); }
+        },
+      });
+      return new Response(stream, { headers: { ...cors, "Content-Type": "text/event-stream", "Cache-Control": "no-cache" } });
+    }
+    let out: { text: string; model: string };
+    try { out = await gemini(key, system, contents, wantJson, tool === "shiftsheet" ? 15000 : 6000); }
+    catch (e) { await refund(); throw e; }
     console.log("ai ok", tool, out.model, Date.now() - t0, "ms", "context", ctx.length);
     if (wantJson) {
       let parsed: unknown = null;
       try { parsed = JSON.parse(out.text.replace(/^```(?:json)?\s*|\s*```$/g, "")); } catch (_) { /* fall through */ }
-      if (!parsed) return json({ error: "parse" }, 502);
-      return json({ data: parsed, left: free ? null : DAILY_LIMIT - used.data });
+      if (!parsed) { await refund(); return json({ error: "parse" }, 502); }
+      return json({ data: parsed, left });
     }
-    return json({ text: out.text, left: free ? null : DAILY_LIMIT - used.data });
+    return json({ text: out.text, left });
   } catch (e) {
     const msg = String((e as Error).message || e);
     console.error("ai error", msg);
