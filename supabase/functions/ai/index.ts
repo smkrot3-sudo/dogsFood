@@ -29,7 +29,7 @@ const BASE = (tone: string, today: string, gender = "m") => `אתה "העוזר"
 - ${gender === "f" ? "המשתמשת היא אישה: פנה אליה תמיד בלשון נקבה (את, יכולה, הוצאת, תחסכי)." : "פנה אל המשתמש בלשון זכר."}
 - כל המספרים בשקלים (₪). אל תמציא נתונים: אם אין בנתונים תשובה, אמור את זה.
 - מספרים: האפליקציה כבר חישבה סכומים מדויקים (בחלקים ״מספרים מוכנים״ ו״סיכום לפי חודש״). השתמש בהם כמו שהם ואל תחבר שורות בעצמך כשיש שם תשובה.
-- אתה לא משנה שום דבר באפליקציה ולא מתחייב שעשית משהו. אתה רק מסביר, עונה ומציע.
+- אתה לא משנה שום דבר בעצמך ולא כותב שעשית משהו. אתה מסביר, עונה ומציע; כל שינוי המשתמש מאשר בעצמו בכרטיס באפליקציה.
 - הכנסה מהמשמרות היא ברוטו לפי שעות ושכר לשעה, כולל תוספות חוק (שעות נוספות, לילה, שבת וחג).
 - אל תשתמש בטבלאות Markdown. מותר להשתמש ברשימות קצרות ובהדגשה **כך**.`;
 
@@ -41,7 +41,23 @@ const PROMPTS: Record<string, string> = {
 - תכנון משמרות ליעד הכנסה: השתמש ביעד, בשכר לשעה ובמה שכבר הרוויח החודש. הזכר ששבת וחג משתלמים יותר (150%).
 - שאלות על זכויות עובדים בישראל: תשובה כללית ותמציתית לפי החוק, הפניה ל"כל זכות" (https://www.kolzchut.org.il), ומשפט שזה לא ייעוץ משפטי.
 - שאלה שלא קשורה לכסף, לעבודה או לאפליקציה: ענה בקצרה שאתה עוזר רק בנושאים האלה.
+- בקשה לעשות משהו באפליקציה (לרשום או למחוק הוצאה, להוסיף או להסיר חיוב קבוע/מנוי, לשנות יעד לקטגוריה, לרשום משמרת, לרשום הכנסה חד־פעמית, ״תזכיר לי…״): כתוב משפט אחד קצר מה מוצע, למשל ״הנה, תאשר בכרטיס למטה:״. ובשורה האחרונה בלבד הוסף [[act:JSON]] כשה־JSON הוא {"a":[...]} ובו פעולה אחת או יותר מהסוגים:
+  {"t":"exp_add","amount":מספר,"note":"פירוט","cat":"id של קטגוריה","date":"YYYY-MM-DD"}
+  {"t":"exp_del","date":"YYYY-MM-DD","amount":מספר,"note":"פירוט"} (הוצאה קיימת מהרשימה)
+  {"t":"fixed_add","name":"שם","amount":מספר} (חיוב קבוע או מנוי כל חודש)
+  {"t":"fixed_del","name":"שם כמו שמופיע בחיובים הקבועים"}
+  {"t":"target","cat":"id של קטגוריה","amount":מספר} (יעד חודשי לקטגוריה; 0 = בלי יעד)
+  {"t":"shift_add","date":"YYYY-MM-DD","start":"HH:MM","end":"HH:MM","break":דקות הפסקה}
+  {"t":"income_add","date":"YYYY-MM-DD","amount":מספר,"note":"פירוט","kind":"מתנה|החזר מחבר|מכירה|אחר"}
+  {"t":"remind","at":"YYYY-MM-DD HH:MM","text":"על מה להזכיר"} (בלי שעה: 10:00)
+  תאריכים: היום אלא אם נאמר אחרת (״אתמול״, ״ביום ראשון״). הוצאה, משמרת והכנסה לא בעתיד. אם חסר פרט חיוני (סכום, שעות המשמרת), שאל במקום להציע. אל תכתוב [[act]] כשרק שואלים שאלה.
 התשובה עד 120 מילים, אלא אם ביקשו פירוט.`,
+  challenge: `הצע למשתמש אתגר אחד לחודש הנוכחי שמתאים להרגלים שלו לפי הנתונים. סוגי אתגרים אפשריים בלבד:
+- nospend: מספר ימים בלי אף הוצאה עד סוף החודש (n אחד מ־4, 6, 8, 10, 12; שיהיה אפשרי לפי הימים שנשארו).
+- nocat: לא להוציא כלום על קטגוריה אחת עד סוף החודש (cat = id).
+- capcat: להוציא על קטגוריה אחת פחות מתקרה (cat = id, amount = תקרה בשקלים, מאתגרת אבל אפשרית).
+- nowant: 7 ימים ברצף בלי הוצאה שסומנה ״רוצה״ (רק אם המשתמש מסמן צריך/רוצה).
+החזר JSON בלבד: {"k":"nospend|nocat|capcat|nowant","n":מספר או null,"cat":"id או ריק","amount":מספר או null,"why":"משפט אחד קצר למה דווקא האתגר הזה, עם מספר מהנתונים"}`,
   expenses: `המשתמש כתב או אמר כמה הוצאות במשפט אחד. פרק אותן לרשימה.
 החזר JSON בלבד בצורה: {"items":[{"amount":number,"note":"string","cat":"מזהה קטגוריה או ריק","date":"YYYY-MM-DD"}]}
 - amount: הסכום בשקלים (מספרים במילים כמו "שתים עשרה" הופכים ל־12).
@@ -185,6 +201,13 @@ Deno.serve(async (req) => {
         try {
           const pick = new URL(req.url).searchParams.get("m");
           const big = "נתון לדוגמה: הוצאה 18 ₪ על קפה.\n".repeat(Math.min(400, +(new URL(req.url).searchParams.get("pad") || 0)));
+          const q = new URL(req.url).searchParams.get("q");
+          if (q) {
+            // the chat prompt on made-up data, to check how the model answers (and proposes actions)
+            const fake = "\n\n=== הנתונים של המשתמש ===\nמזהי קטגוריות לפעולות (id: שם): food: אוכל, car: רכב, fun: בילויים\nחיובים קבועים: דיסני 40\n== הוצאות ==\n2026-10-08 | ה | 18 | אוכל | קפה |";
+            const out = await gemini(key, BASE("mid", new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Jerusalem" })) + "\n\n" + PROMPTS.chat + fake, [{ role: "user", parts: [{ text: q.slice(0, 300) }] }], false);
+            return json({ ok: true, model: out.model, ms: Date.now() - t0, text: out.text });
+          }
           if (new URL(req.url).searchParams.get("stream") === "1") {
             const st = await race((model, ac) => firstWords(key, model, BASE("mid", "היום") + "\n" + big, [{ role: "user", parts: [{ text: "תן 3 טיפים קצרים לחיסכון." }] }], ac));
             const first = Date.now() - t0;
@@ -236,11 +259,11 @@ Deno.serve(async (req) => {
       const hist = Array.isArray(body.history) ? body.history.slice(-10) : [];
       hist.forEach((m: { role: string; text: string }) => contents.push({ role: m.role === "ai" ? "model" : "user", parts: [{ text: String(m.text || "").slice(0, 2000) }] }));
     }
-    const parts: unknown[] = [{ text: String(body.input || (tool === "letter" ? "כתוב את המכתב." : tool === "patterns" ? "מה ההרגלים הנסתרים שלי?" : tool === "admin_fb" ? "סכם את המשובים." : "")).slice(0, 4000) }];
+    const parts: unknown[] = [{ text: String(body.input || (tool === "letter" ? "כתוב את המכתב." : tool === "patterns" ? "מה ההרגלים הנסתרים שלי?" : tool === "challenge" ? "איזה אתגר מתאים לי החודש?" : tool === "admin_fb" ? "סכם את המשובים." : "")).slice(0, 4000) }];
     if (tool === "shiftsheet" && body.image && body.mime) parts.push({ inlineData: { mimeType: String(body.mime), data: String(body.image) } });
     contents.push({ role: "user", parts });
 
-    const wantJson = tool === "expenses" || tool === "shiftsheet";
+    const wantJson = tool === "expenses" || tool === "shiftsheet" || tool === "challenge";
     const left = free ? null : DAILY_LIMIT - used.data;
     // A question that failed doesn't count toward the daily limit, so "try again" is free
     const refund = () => admin.rpc("ai_refund", { p_user: uid, p_tool: tool }).then(() => {}, () => {});

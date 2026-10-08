@@ -991,6 +991,12 @@ dialog.aisheet { height: min(92vh, 860px); }
 .aitools button, .aistart button { flex: none; font: inherit; font-size: 14px; font-weight: 600; border: 1px solid var(--line); background: var(--surface-2); color: var(--fg); border-radius: 999px; padding: 7px 12px; cursor: pointer; white-space: nowrap; }
 .aistart { display: flex; flex-wrap: wrap; gap: 6px; }
 .aimsg .ailocal { display: block; margin-top: 4px; font-size: 12px; color: var(--muted); }
+.aiact { display: grid; gap: 6px; margin-top: 8px; }
+.aiact .aiarow { display: flex; flex-direction: row; gap: 8px; align-items: flex-start; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 8px 10px; cursor: pointer; }
+.aiact .aiarow > input { flex: none; margin: 3px 0 0; width: 18px; height: 18px; } .aiact .aiarow > span { flex: 1; display: grid; gap: 2px; text-align: start; } .aiarow small { color: var(--muted); font-size: 13px; }
+.aiarow.off { opacity: .6; cursor: default; }
+.aiact .actions { display: flex; gap: 8px; }
+.chalai { margin-bottom: 8px; }
 .aistart button { white-space: normal; text-align: start; }
 .ailog { flex: 1 1 0; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; min-height: 90px; }
 /* Big text on small phones: only the conversation scrolls; the title, tools and the input box stay in place */
@@ -4438,6 +4444,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   }
   function sendAppPlans() {
     const app = window.BudgetApp;
+    if (store) try { remCheck(); } catch (e) {}
     if (!app || !store) return;
     try { if (app.setReminderPlan) app.setReminderPlan(remindPlan()); } catch (e) {}
     try {
@@ -4454,6 +4461,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
           notes.push({ id: "update", at: t.getTime(), title: "📲 יש עדכון לאפליקציה (" + upd.versionName + ")", text: "פתח את האפליקציה ולחץ \"עדכון\" בבאנר למעלה." });
         }
         if (st.dayCheck !== false) dayCheckNotes(st).forEach((n) => notes.push(n));
+        (store.reminders || []).filter((r) => r.at > Date.now()).forEach((r) => notes.push({ id: "rem-" + r.id, at: r.at, title: "🔔 תזכורת", text: r.text }));
         app.setNotes(gx(JSON.stringify(notes)));
       }
     } catch (e) {}
@@ -5200,7 +5208,22 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     ["capcat", "🎯 תקרה לקטגוריה", "להוציא על קטגוריה אחת פחות מסכום שתבחר"],
     ["nowant", "🎁 שבוע בלי ״רוצה״", "7 ימים ברצף בלי הוצאה שסימנת ״רוצה״"]
   ];
-  let chalSetup = null;
+  let chalSetup = null, chalAI = null;
+  // The assistant picks one of the four challenges for this user's habits; nothing starts until "מתחילים"
+  async function aiChallenge(btn) {
+    btn.disabled = true; btn.textContent = "✨ חושב…";
+    try {
+      const j = await aiCall({ tool: "challenge", context: await aiContext() });
+      const o = j.data || {}, cats = data().cats.filter((c) => !isSub(c, data().cats));
+      if (!CHALS.some((x) => x[0] === o.k)) throw Object.assign(new Error("k"), { code: "parse" });
+      const c = { k: o.k, why: String(o.why || "").slice(0, 200) };
+      if (o.k === "nospend") c.n = [4, 6, 8, 10, 12].includes(+o.n) ? +o.n : 6;
+      if (o.k === "nocat" || o.k === "capcat") { c.cat = cats.some((x) => x.id === o.cat) ? o.cat : null; if (!c.cat) throw Object.assign(new Error("cat"), { code: "parse" }); }
+      if (o.k === "capcat") { c.amount = Math.round(+o.amount || 0); if (!(c.amount > 0)) throw Object.assign(new Error("amt"), { code: "parse" }); }
+      chalAI = c;
+    } catch (e) { snack(aiErrText(e)); }
+    renderChallenge();
+  }
   function catIds(id) { const cats = data().cats; return [id, ...cats.filter((c) => c.parent === id && isSub(c, cats)).map((c) => c.id)]; }
   function chalState(c) {
     const cur = thisMonth(), list = tx[c.month] || [], today = todayStr(), end = periodEnd(c.month), over = c.month < cur;
@@ -5259,8 +5282,27 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       return;
     }
     if (month !== cur) { const p = document.createElement("p"); p.className = "hint"; p.textContent = "לא היה אתגר בחודש הזה."; box.append(p); return; }
+    if (chalAI) {
+      const meta = CHALS.find((x) => x[0] === chalAI.k), nm = catNames()[chalAI.cat] || "";
+      const card = document.createElement("div"); card.className = "chalnow";
+      const t = document.createElement("span"); t.className = "ct";
+      t.textContent = "✨ " + meta[1] + (chalAI.k === "nospend" ? ": " + chalAI.n + " ימים" : chalAI.k === "nocat" ? ": " + nm : chalAI.k === "capcat" ? ": " + nm + " עד " + fmt(chalAI.amount) : "");
+      const w = document.createElement("span"); w.textContent = chalAI.why || meta[2];
+      card.append(t, w); box.append(card);
+      const acts = document.createElement("div"); acts.className = "actions";
+      const ok = document.createElement("button"); ok.type = "button"; ok.className = "btn primary"; ok.textContent = "🏁 מתחילים";
+      ok.addEventListener("click", () => { chalSetup = { k: chalAI.k, n: chalAI.n, cat: chalAI.cat, amount: chalAI.amount }; chalAI = null; startChal(); });
+      const no = document.createElement("button"); no.type = "button"; no.className = "btn"; no.textContent = "לא, אבחר לבד";
+      no.addEventListener("click", () => { chalAI = null; renderChallenge(); });
+      acts.append(ok, no); box.append(acts);
+      return;
+    }
     if (!chalSetup) {
       const p = document.createElement("p"); p.className = "hint"; p.textContent = "בוחרים אתגר אחד לחודש:"; box.append(p);
+      if (aiReady() && aiOk === true) {
+        const ai = document.createElement("button"); ai.type = "button"; ai.className = "btn chalai"; ai.textContent = "✨ שהעוזר יציע לי אתגר";
+        ai.addEventListener("click", () => aiChallenge(ai)); box.append(ai);
+      }
       const pick = document.createElement("div"); pick.className = "chalpick";
       CHALS.forEach(([k, t, d]) => {
         const b = document.createElement("button"); b.type = "button";
@@ -6300,6 +6342,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     L.push("הכנסות בתוכנית: " + (p.d.income.map((x) => x.name + " " + x.amount).join(", ") || "אין") + " · מהמשמרות: " + p.shiftInc + " · סה״כ הכנסה: " + p.inc);
     L.push("חיובים קבועים: " + (p.d.expenses.map((x) => x.name + " " + x.amount).join(", ") || "אין") + " · סה״כ " + p.exp + " · כסף חופשי להוצאות היומיום: " + p.spend);
     L.push("יעדים לקטגוריות (לא חובה, רק למעקב): " + p.d.cats.map((c) => catLabel(c.id) + " " + (+c.budget || 0)).join(", "));
+    L.push("מזהי קטגוריות לפעולות (id: שם): " + p.d.cats.map((c) => c.id + ": " + catLabel(c.id)).join(", "));
     const today = ["todayLbl", "todayVal", "todayFc", "todayLine"].map((id) => $(id) && $(id).textContent.trim()).filter(Boolean).join(" · ");
     L.push("כרטיס ״מותר לך היום״: " + today + " · " + $("todayMore").textContent.replace(/\s+/g, " ").trim());
     const extra = {};
@@ -6380,6 +6423,134 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     }
     return L.join("\n");
   }
+  // ---- Actions in words: the assistant proposes, the user saves (or cancels) on a card ----
+  function aiActParse(m) {
+    const i = m.text.indexOf("[[act:");
+    if (i < 0) return;
+    let raw = m.text.slice(i + 6); raw = raw.slice(0, raw.lastIndexOf("}") + 1);
+    m.text = m.text.slice(0, i).trim() || "הנה, תאשר בכרטיס:";
+    try { const o = JSON.parse(raw); const a = Array.isArray(o) ? o : o.a || o.actions || []; if (a.length) { m.act = a.slice(0, 12); m.actSt = ""; } } catch (e) {}
+  }
+  const AI_NIGHT = [23, 8];
+  // When a reminder goes off: never on Shabbat or a holiday (for those who keep them) and not at night
+  function aiRemAt(s) {
+    const mm = String(s || "").match(/^(\d{4}-\d\d-\d\d)[ T](\d\d?):(\d\d)/);
+    if (!mm) return 0;
+    let day = mm[1], min = +mm[2] * 60 + +mm[3];
+    if (min >= AI_NIGHT[0] * 60) { day = dateAdd(day, 1); min = AI_NIGHT[1] * 60; } else if (min < AI_NIGHT[1] * 60) min = AI_NIGHT[1] * 60;
+    for (let i = 0; i < 4 && keepsShabbat() && isRestMinute(day, min); i++) {
+      if (!restName(dateAdd(day, 1))) { min = sunset(day) + 40 + 15; break; }
+      day = dateAdd(day, 1); min = 10 * 60;
+    }
+    const [y, mo, d] = day.split("-").map(Number);
+    return new Date(y, mo - 1, d, Math.floor(min / 60), min % 60).getTime();
+  }
+  function aiActPlan(a) {
+    const t = todayStr(), names = catNames(), cur = thisMonth();
+    const curD = () => (month === cur ? data() : store.months[cur] || data());
+    const toCur = () => { if (month !== cur) goMonth(cur); };
+    const day = (d, future) => (/^\d{4}-\d\d-\d\d$/.test(d || "") && (future || d <= t) ? d : t);
+    const amt = (v) => Math.round((parseFloat(v) || 0) * 100) / 100;
+    const catOk = (id) => data().cats.some((c) => c.id === id);
+    const bad = (txt, sub) => ({ txt, sub, ok: false });
+    switch (a && a.t) {
+      case "exp_add": {
+        const amount = amt(a.amount), date = day(a.date), cats = data().cats;
+        const cat = catOk(a.cat) ? a.cat : (cats.find((c) => /שונות/.test(c.name || "")) || cats[0] || {}).id;
+        if (!(amount > 0) || !cat) return bad("💸 הוצאה בלי סכום", "חסר סכום או קטגוריה");
+        const note = String(a.note || "").trim().slice(0, 200);
+        return { ok: true, txt: "💸 הוצאה " + fmt(amount) + (note ? " · " + note : ""), sub: catIcon(data().cats.find((c) => c.id === cat)) + " " + (names[cat] || "") + " · " + shortDate(date),
+          run: () => { const row = { id: uid(), amount, category: cat, spent_on: date, note, tags: null, created_at: new Date().toISOString() }; if (periodOf(date) === month) commit(); remember(row); addTx(row); persist(); return "הוצאה של " + fmt(amount); } };
+      }
+      case "exp_del": {
+        const amount = amt(a.amount), note = String(a.note || "").trim();
+        let l = allTx().filter((r) => (!a.date || r.spent_on === a.date) && (!(amount > 0) || Math.abs(r.amount - amount) < 0.01));
+        if (note && l.length > 1) { const n2 = l.filter((r) => (r.note || "").includes(note)); if (n2.length) l = n2; }
+        const r = l[0];
+        if (!r) return bad("🗑️ מחיקת הוצאה" + (amount > 0 ? " של " + fmt(amount) : "") + (note ? " · " + note : ""), "לא מצאתי הוצאה כזו ברשימה");
+        return { ok: true, txt: "🗑️ מחיקת הוצאה " + fmt(r.amount) + (r.note ? " · " + r.note : ""), sub: (names[r.category] || "") + " · " + shortDate(r.spent_on) + (l.length > 1 ? " (יש עוד " + (l.length - 1) + " כאלה, תימחק רק אחת)" : ""),
+          run: () => { delTx(r.id); renderTracking(); return "מחיקת הוצאה"; } };
+      }
+      case "fixed_add": {
+        const amount = amt(a.amount), name = String(a.name || "").trim().slice(0, 80);
+        if (!(amount > 0) || !name) return bad("📌 חיוב קבוע", "חסר שם או סכום");
+        return { ok: true, txt: "📌 חיוב קבוע כל חודש: " + name + " " + fmt(amount), sub: "יורד מראש מההכנסה, מהחודש הזה והלאה",
+          run: () => { toCur(); addFixed(name, amount); return name + " נוסף לחיובים הקבועים"; } };
+      }
+      case "fixed_del": {
+        const name = String(a.name || "").trim();
+        const find = (d) => d.expenses.find((x) => (x.name || "").trim() === name) || d.expenses.find((x) => name && (x.name || "").includes(name));
+        const x = find(curD());
+        if (!x) return bad("✖️ הסרת חיוב קבוע: " + name, "אין חיוב קבוע בשם הזה");
+        return { ok: true, txt: "✖️ הסרת חיוב קבוע: " + x.name + " " + fmt(+x.amount || 0), sub: "מהחודש הזה והלאה",
+          run: () => { toCur(); commit(); const d = data(), y = find(d); if (y) { d.expenses.splice(d.expenses.indexOf(y), 1); touch(); render(); } return x.name + " הוסר"; } };
+      }
+      case "target": {
+        const amount = Math.max(0, amt(a.amount));
+        if (!catOk(a.cat)) return bad("🎯 יעד לקטגוריה", "לא מצאתי את הקטגוריה");
+        return { ok: true, txt: "🎯 יעד ל" + names[a.cat] + ": " + (amount ? fmt(amount) + " בחודש" : "בלי יעד"), sub: "מהחודש הזה",
+          run: () => { toCur(); commit(); const c = data().cats.find((x) => x.id === a.cat); if (c) { c.budget = amount; touch(); render(); } return "היעד עודכן"; } };
+      }
+      case "shift_add": {
+        const date = day(a.date), st = normTime(String(a.start || "")), en = normTime(String(a.end || ""));
+        if (!/^\d\d:\d\d$/.test(st) || !/^\d\d:\d\d$/.test(en) || st === en) return bad("⏰ משמרת", "חסרות שעת כניסה ושעת יציאה");
+        const row = { id: uid(), work_date: date, start_time: st, end_time: en, break_min: Math.max(0, Math.min(600, Math.round(+a.break || 0))), wage: +settings().wage, kind: "", kind_rate: 100, note: "", created_at: new Date().toISOString() };
+        const p = shiftPay(row, settings());
+        return { ok: true, txt: "⏰ משמרת " + shortDate(date) + " · " + st + " עד " + en + (row.break_min ? " (הפסקה " + row.break_min + " דק׳)" : ""), sub: hrs(p.paidMin) + " שעות · " + fmt(p.gross) + " ברוטו",
+          run: () => { saveShift(row); renderPay(); renderCal(); return "משמרת של " + hrs(p.paidMin) + " שעות"; } };
+      }
+      case "income_add": {
+        const amount = amt(a.amount), date = day(a.date);
+        if (!(amount > 0)) return bad("💰 הכנסה", "חסר סכום");
+        const kind = INC_KINDS.includes(a.kind) ? a.kind : "אחר", note = String(a.note || "").trim().slice(0, 200);
+        return { ok: true, txt: "💰 הכנסה " + fmt(amount) + (note ? " · " + note : ""), sub: kind + " · " + shortDate(date),
+          run: () => { INC.save({ id: uid(), received_on: date, amount, kind, note, created_at: new Date().toISOString() }); renderPay(); renderCal(); renderTracking(); return "הכנסה של " + fmt(amount); } };
+      }
+      case "remind": {
+        const at = aiRemAt(a.at), text = String(a.text || "").trim().slice(0, 160);
+        if (!at || at < Date.now() + 60000 || !text) return bad("⏰ תזכורת" + (text ? ": " + text : ""), "חסר זמן עתידי או על מה להזכיר");
+        const dt = new Date(at), when = shortDate(dt.toLocaleDateString("en-CA")) + " ב־" + String(dt.getHours()).padStart(2, "0") + ":" + String(dt.getMinutes()).padStart(2, "0");
+        return { ok: true, txt: "🔔 תזכורת " + when + ": " + text, sub: window.BudgetApp && BudgetApp.setNotes ? "תגיע כהתראה בטלפון" : "תגיע כהתראה רק באפליקציה בטלפון. באתר היא תופיע כשתיכנס אחרי הזמן",
+          run: () => { store.reminders = (store.reminders || []).filter((r) => r.at > Date.now() - 7 * 864e5).concat([{ id: uid(), at, text }]); persist(); sendAppPlans(); return "תזכורת ל־" + when; } };
+      }
+    }
+    return bad("פעולה שאני לא מכיר", "");
+  }
+  function aiActCard(m) {
+    const box = document.createElement("div"); box.className = "aiact";
+    if (m.actSt) { const p = document.createElement("small"); p.className = "ailocal"; p.textContent = m.actSt; box.append(p); return box; }
+    const plans = m.act.map(aiActPlan), on = plans.map((p) => p.ok);
+    plans.forEach((p, i) => {
+      const row = document.createElement("label"); row.className = "aiarow" + (p.ok ? "" : " off");
+      const cb = document.createElement("input"); cb.type = "checkbox"; cb.checked = p.ok; cb.disabled = !p.ok;
+      cb.addEventListener("change", () => { on[i] = cb.checked; save.disabled = !on.some(Boolean); });
+      const w = document.createElement("span"); const b = document.createElement("b"); b.textContent = p.txt; w.append(b);
+      if (p.sub) { const sm = document.createElement("small"); sm.textContent = p.sub; w.append(sm); }
+      row.append(cb, w); box.append(row);
+    });
+    const acts = document.createElement("div"); acts.className = "actions";
+    const save = document.createElement("button"); save.type = "button"; save.className = "btn primary"; save.textContent = "✓ שמור";
+    save.disabled = !on.some(Boolean);
+    const no = document.createElement("button"); no.type = "button"; no.className = "btn"; no.textContent = "בטל";
+    save.addEventListener("click", () => {
+      const done = [];
+      plans.forEach((p, i) => { if (on[i] && p.run) { try { done.push(p.run()); } catch (e) { console.error(e); } } });
+      m.actSt = done.length ? "✓ נשמר: " + done.join(", ") : "לא נשמר כלום";
+      if (done.length) buzz();
+      aiSaveChat(); aiPaint();
+    });
+    no.addEventListener("click", () => { m.actSt = "בוטל, לא נשמר כלום"; aiSaveChat(); aiPaint(); });
+    acts.append(save, no); box.append(acts);
+    return box;
+  }
+  // Reminders that came due while the app wasn't open show once inside the app
+  function remCheck() {
+    const due = (store.reminders || []).filter((r) => r.at <= Date.now() && !r.shown);
+    if (!due.length) return;
+    due.forEach((r) => { r.shown = 1; });
+    persist();
+    setTimeout(() => snack("🔔 תזכורת: " + due.map((r) => r.text).join(" · ")), 1500);
+  }
   function aiRenderText(el, text) {
     // Plain paragraphs with **bold**, links, and [[go:x]] turned into a button; built with textContent only
     const go = [];
@@ -6411,7 +6582,8 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     }
     aiChat.forEach((m) => {
       const d = document.createElement("div"); d.className = "aimsg " + (m.role === "ai" ? "ai" : m.role === "err" ? "err" : "me");
-      if (m.role === "ai") aiRenderText(d, m.text); else d.textContent = m.text;
+      if (m.role === "ai") aiRenderText(d, m.text.replace(/\[\[act[\s\S]*$/, "")); else d.textContent = m.text;
+      if (m.act) d.append(aiActCard(m));
       if (m.local) { const k = document.createElement("small"); k.className = "ailocal"; k.textContent = "⚡ תשובה מיידית מהאפליקציה, לא נספרה במכסה"; d.append(k); }
       if (m.role === "err" && aiLast && !aiBusy) { const b = document.createElement("button"); b.type = "button"; b.className = "btn aigo"; b.textContent = "🔄 נסה שוב (לא נספר במכסה)"; b.addEventListener("click", aiRetry); d.append(b); }
       log.append(d);
@@ -6429,7 +6601,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     $("aiSend").disabled = aiBusy;
     setTimeout(() => { log.scrollTop = log.scrollHeight; }, 0);
   }
-  function aiPush(role, text, local) { aiChat.push(local ? { role, text, local: 1 } : { role, text }); if (role !== "err") aiSaveChat(); aiPaint(); }
+  function aiPush(role, text, local) { const m = local ? { role, text, local: 1 } : { role, text }; if (role === "ai") aiActParse(m); aiChat.push(m); if (role !== "err") aiSaveChat(); aiPaint(); }
   async function aiRun(label, payload, onOk) {
     if (aiBusy) return;
     aiLast = { label, payload, onOk };
@@ -6450,7 +6622,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
         }
       }
       aiBusy = false; aiWait = "";
-      if (!live) onOk(j);
+      if (live) aiActParse(live); else onOk(j);
     } catch (e) {
       aiBusy = false; aiWait = ""; drop();
       aiPush("err", aiErrText(e));
