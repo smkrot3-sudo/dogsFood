@@ -619,6 +619,7 @@ dialog.sheet::backdrop { background: rgba(40, 20, 50, .45); -webkit-backdrop-fil
 .monthbar .month { width: 100%; max-width: 420px; display: grid; grid-template-columns: 44px minmax(0, 1fr) 44px; gap: 8px; }
 .monthbar .month .step { width: 44px; height: 44px; font-size: 20px; background: var(--surface); border: 0; box-shadow: var(--card-shadow); }
 .monthbar input[type="month"] { width: 100%; height: 44px; text-align: center; font-weight: 700; font-size: 17px; background: var(--surface); border: 0; box-shadow: var(--card-shadow); }
+.monthbar .backnow { min-height: 36px; padding: 6px 16px; font-size: 14px; font-weight: 700; }
 .monthmeta { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 12px; font-size: 13px; color: var(--muted); min-height: 1.2em; }
 .monthmeta .saving { min-height: 0; }
 .monthmeta .saving:not(:empty)::before { content: "☁️ "; }
@@ -1137,6 +1138,7 @@ body.nosave .split { grid-template-columns: 1fr; }
       <input type="month" id="month" aria-label="חודש">
       <button class="step" type="button" id="nextM" aria-label="החודש הבא">‹</button>
     </div>
+    <button class="btn backnow" type="button" id="backNow" hidden>📍 חזרה לחודש הנוכחי</button>
     <div class="monthmeta"><span class="period" id="periodLbl" hidden></span><span class="saving" id="saving" role="status"></span></div>
   </div>
 
@@ -2629,6 +2631,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   function render() {
     const d = data();
     $("month").value = month;
+    $("backNow").hidden = month === thisMonth();
     $("periodLbl").hidden = startDay() === 1;
     $("periodLbl").textContent = "מ־" + shortDate(periodStart(month)) + " עד " + shortDate(periodEnd(month));
     const inc = $("incRows"); inc.innerHTML = "";
@@ -6665,6 +6668,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   }
   let hilanStarted = false;
   $("month").addEventListener("change", (e) => goMonth(e.target.value));
+  $("backNow").addEventListener("click", () => goMonth(thisMonth()));
   $("prevM").addEventListener("click", () => goMonth(shiftMonth(month, -1)));
   $("nextM").addEventListener("click", () => goMonth(shiftMonth(month, 1)));
   $("addInc").addEventListener("click", () => { data().income.push({ name: "", amount: 0 }); touch(); render(); focusLast("incRows"); });
