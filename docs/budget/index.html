@@ -1092,6 +1092,88 @@ body.nosave .split { grid-template-columns: 1fr; }
 .chip.newcat span { border-style: dashed; color: var(--brand2); background: none; }
 .verfoot { border-top: 1px solid var(--line); margin-top: 8px; padding-top: 12px; color: var(--muted); font-size: 11.5px; line-height: 1.6; text-align: center; display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 4px 10px; }
 .verfoot .linkbtn, .verfoot a { font-size: 11.5px; color: var(--brand2); font-weight: 700; padding: 0; }
+/* ---- Look 3 (design round 2026-10-08) ---- */
+/* Each card carries its own color as a stripe on its start edge */
+#app .panel:not(.today):has(> h2.pc-mint) { --pc3: #10b981; } #app .panel:not(.today):has(> h2.pc-orange) { --pc3: #f97316; }
+#app .panel:not(.today):has(> h2.pc-pink) { --pc3: #ec4899; } #app .panel:not(.today):has(> h2.pc-violet) { --pc3: #8b5cf6; }
+#app .panel:not(.today):has(> h2.pc-blue) { --pc3: #3b82f6; } #app .panel:not(.today):has(> h2.pc-yellow) { --pc3: #f5b400; }
+#app .panel:not(.today):has(> h2.pc-gray) { --pc3: #94a3b8; }
+#app .panel:not(.today) { border-inline-start: 5px solid var(--pc3, color-mix(in srgb, var(--brand2) 45%, transparent)); }
+/* Quieter ? and ▾ */
+.panel h2 .helpbtn, .panel h2 .foldbtn { width: 26px; height: 28px; background: transparent; border-color: transparent; opacity: .55; font-size: 14px; }
+.panel h2 .helpbtn[aria-expanded="true"] { opacity: 1; }
+/* A folded card says what's inside */
+.panel h2 > .fsum { font-weight: 700; font-size: 15px; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.panel:not(.folded) h2 > .fsum { display: none; }
+/* Two folded cards share a row */
+.home { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 12px; }
+.home > * { grid-column: 1 / -1; }
+.home > .panel.folded.half { grid-column: auto; padding: 14px 12px; min-width: 0; overflow: hidden; }
+.home > .panel.folded.half > h2 { flex-wrap: wrap; gap: 4px 6px; }
+.home > .panel.folded.half > h2::before { width: 32px; height: 32px; font-size: 18px; }
+.home > .panel.folded.half > h2 > .h2t { order: 5; flex: 1 1 100%; font-size: 16px !important; white-space: normal; line-height: 1.2; }
+.home > .panel.folded.half > h2 > .h2tools { margin-inline-start: auto; }
+.home > .panel.folded.half > h2 > .fsum, .home > .panel.folded.half > h2 > .sum { order: 9; flex-basis: 100%; margin: 0; padding: 0; background: none; font-size: 14px; color: var(--muted); }
+.home > .panel.folded.half .helpbtn { display: none; }
+body.layedit .home > * { grid-column: 1 / -1 !important; }
+/* Today: a ring around the face shows what's left of today's money */
+.today .ring3 { position: absolute; inset-inline-end: 9px; top: 6px; width: 64px; height: 64px; pointer-events: none; transform: scaleX(-1); }
+.today .ring3 circle { fill: none; stroke-width: 6; }
+.today .ring3 .tr { stroke: rgba(255, 255, 255, .25); }
+.today .ring3 .fl { stroke: #fff; stroke-linecap: round; transition: stroke-dashoffset .6s ease; }
+/* Today: a small line of the month so far */
+.today .spark3 { display: block; width: 100%; height: 34px; overflow: visible; transform: scaleX(-1); }
+.today .spark3 .ln { fill: none; stroke: #fff; stroke-width: 2.2; stroke-linejoin: round; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+.today .spark3 .ar { fill: rgba(255, 255, 255, .16); }
+.today .spark3 .pl { fill: none; stroke: rgba(255, 255, 255, .6); stroke-width: 1.4; stroke-dasharray: 4 4; vector-effect: non-scaling-stroke; }
+/* Category bars: thicker, in the category's color, red only past the target */
+.cats .pace .track { height: 12px; border-radius: 7px; }
+.cats .pace .fill { border-radius: 7px; }
+.cats .pace .fill[style*="--cc"]:not(.bad) { background: var(--cc); }
+/* Calendar: the more spent, the deeper the color */
+.cday.heat { background: color-mix(in srgb, var(--spend) var(--heat), var(--surface)); }
+.cday.heat .neg { color: var(--fg) !important; }
+/* The add button shrinks to + while scrolling down */
+.fab { transition: padding .2s ease, width .2s ease, font-size .15s ease; }
+.fab.mini { width: 58px; height: 58px; padding: 0; font-size: 0; display: grid; place-items: center; }
+.fab.mini::before { content: "+"; font-size: 32px; font-weight: 700; line-height: 1; }
+/* Month in Hebrew on every phone */
+.month { position: relative; }
+.month .mlabel { position: absolute; inset-inline: 46px; top: 50%; transform: translateY(-50%); text-align: center; font-weight: 800; font-size: clamp(15px, 4.6vw, 20px); pointer-events: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--fg); }
+.month input[type="month"].heb { color: transparent; }
+.month input[type="month"].heb::-webkit-datetime-edit { color: transparent; }
+.month input[type="month"].heb::-webkit-calendar-picker-indicator { opacity: 0; }
+html.bigtext .month .mlabel, html.hugetext .month .mlabel { font-size: 16px; }
+html.bigtext .tabs a, html.hugetext .tabs a { font-size: 14px; padding-inline: 2px; }
+/* Titles and tabs stay on one line */
+.tabs a { white-space: nowrap; overflow: hidden; text-overflow: clip; }
+.tabs a .tw2 { display: none; }
+@media (min-width: 371px) { html:not(.bigtext):not(.hugetext) .tabs a .tw2 { display: inline; } }
+.panel h2 > .h2t.fit { white-space: nowrap; min-width: 0; }
+.panel h2:has(> .h2t.fit) { flex-wrap: nowrap; }
+.panel h2 > .fsum { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.panel.folded:not(.half) > h2 { flex-wrap: nowrap; }
+.panel.folded:not(.half) > h2 > .h2t { flex: 0 1 auto; min-width: 3em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.panel.folded .helpbtn { display: none; }
+.panel.folded:not(.half) > h2 > .fsum { flex: 1 100 auto; text-align: end; }
+header h1.fit { white-space: nowrap; overflow: hidden; }
+header.topbar .brand { flex: 1 1 auto; } header.topbar .brandtext { min-width: 0; flex: 1 1 auto; }
+/* Loading: the page's shape instead of a blank screen */
+.loading .skel { display: grid; gap: 14px; width: min(560px, 100%); padding: 20px 16px; align-self: start; }
+.loading:has(.skel) { padding-block: 0; }
+.loading:has(#retryBtn:not([hidden])) .skel { display: none; }
+.loading:has(.skel) > .spin { display: none; }
+.loading:has(#retryBtn[hidden]) > #loadingText { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+.skel i { display: block; border-radius: 18px; background: linear-gradient(90deg, var(--line) 0, color-mix(in srgb, var(--line) 40%, var(--surface)) 40%, var(--line) 80%); background-size: 300% 100%; animation: skel 1.3s ease-in-out infinite; }
+@keyframes skel { from { background-position: 100% 0; } to { background-position: 0 0; } }
+@media (prefers-reduced-motion: reduce) { .skel i { animation: none; } }
+/* Holidays and Friday: a small greeting above the home cards */
+.season3 { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 10px 14px; border-radius: 18px; font-weight: 800; font-size: 18px;
+  background: linear-gradient(120deg, color-mix(in srgb, #f5b400 22%, var(--surface)), color-mix(in srgb, var(--brand2) 14%, var(--surface))); box-shadow: var(--card-shadow); }
+.season3 svg { width: 92px; height: 28px; flex: none; }
+.season3 .se, .season3 .st { white-space: nowrap; }
+html.hugetext .season3 svg { width: 70px; height: 21px; }
+.season3 .se { font-size: 24px; line-height: 1; }
 </style>
 </head>
 <body>
@@ -1101,7 +1183,7 @@ body.nosave .split { grid-template-columns: 1fr; }
   <button class="linkbtn" type="button" id="appUpdateLater">אחר כך</button>
 </div>
 
-<div class="loading" id="loading"><span class="spin" aria-hidden="true">🪙</span><span id="loadingText">טוען…</span><button class="btn" type="button" id="retryBtn" hidden>נסו שוב</button></div>
+<div class="loading" id="loading"><div class="skel" aria-hidden="true"><i style="height:64px"></i><i style="height:52px"></i><i style="height:52px;border-radius:999px"></i><i style="height:190px;border-radius:22px"></i><i style="height:110px"></i><i style="height:110px"></i></div><span class="spin" aria-hidden="true">🪙</span><span id="loadingText">טוען…</span><button class="btn" type="button" id="retryBtn" hidden>נסו שוב</button></div>
 
 <div class="auth" id="authScreen" hidden>
   <a class="getapp" href="budget.apk" download hidden>📱 הורדת האפליקציה לאנדרואיד</a><div class="themes" role="group" aria-label="מצב תצוגה"><button type="button" data-theme-pick="light" aria-pressed="false">☀️ בהיר</button><button type="button" data-theme-pick="dark" aria-pressed="false">🌙 כהה</button></div>
@@ -1276,7 +1358,7 @@ body.nosave .split { grid-template-columns: 1fr; }
       </section>
 
       <section data-block="habits" class="panel" aria-labelledby="habitsH">
-        <h2 id="habitsH" class="pc-violet" data-e="🧠">ההרגלים שלי החודש</h2>
+        <h2 id="habitsH" class="pc-violet" data-e="🧠">ההרגלים שלי</h2>
         <div class="habit" id="habitBox"></div>
       </section>
 
@@ -1296,7 +1378,7 @@ body.nosave .split { grid-template-columns: 1fr; }
       </section>
 
       <section data-block="rec" class="panel" aria-labelledby="recH">
-        <h2 id="recH" class="pc-blue" data-e="🔁">מנויים וחיובים קבועים <span class="sum" id="recSum">₪0</span></h2>
+        <h2 id="recH" class="pc-blue" data-e="🔁">חיובים קבועים <span class="sum" id="recSum">₪0</span></h2>
         <p class="hint" id="recYear"></p>
         <div class="log" id="recList"></div>
         <div id="recAddBox"></div>
@@ -2858,6 +2940,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     rows.forEach((c) => {
       const b = document.createElement("button");
       b.type = "button"; b.className = "cat" + (c.sub ? " sub" : "");
+      if (c.id) b.dataset.cat = c.id;
       if (c.id) b.addEventListener("click", () => openSheet(c.id)); else b.disabled = true;
       const top = document.createElement("div"); top.className = "top";
       const nm = document.createElement("span"); nm.className = "name"; nm.textContent = (c.id ? c.icon : "🗑️") + " " + c.name;
@@ -2898,6 +2981,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     renderQuick();
     renderRecurring();
     fillFindCats();
+    look3();
     renderInsights();
   }
 
@@ -4639,6 +4723,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     $("calNote").textContent = "הכנסות: משמרות (ברוטו) והכנסות חד־פעמיות. הוצאות: מה שרשמת, בלי החשבונות הקבועים של " + fmt(plan().exp) + ".";
 
     const grid = $("calGrid"); grid.innerHTML = "";
+    const maxSpent = Math.max(1, ...all.map((o) => o.spent));
     const first = periodStart(month), last = periodEnd(month);
     const [fy, fm, fd] = first.split("-").map(Number);
     const lead = new Date(fy, fm - 1, fd).getDay();
@@ -4655,7 +4740,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       const n = document.createElement("span"); n.className = "dn"; n.textContent = +d.slice(8);
       b.append(n);
       if (o && o.earned) { const s = document.createElement("span"); s.className = "pos"; s.textContent = "+" + compact(o.earned); b.append(s); }
-      if (o && o.spent) { const s = document.createElement("span"); s.className = "neg"; s.textContent = "−" + compact(o.spent); b.append(s); }
+      if (o && o.spent) { const s = document.createElement("span"); s.className = "neg"; s.textContent = "−" + compact(o.spent); b.append(s); b.classList.add("heat"); b.style.setProperty("--heat", Math.round(14 + 50 * o.spent / maxSpent) + "%"); }
       b.setAttribute("aria-label", dayLabel(d) + (o ? ": הכנסת " + fmt(o.earned) + ", הוצאת " + fmt(o.spent) : ": אין תנועות"));
       b.addEventListener("click", () => { calDay = d; renderCal(); });
       grid.append(b);
@@ -5851,6 +5936,201 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     });
   }
   setupCards();
+
+  // ---- Look 3 (design round 2026-10-08): card summaries, paired folded cards, today's ring and line,
+  // category colors, Hebrew month, titles that fit, the shrinking add button, and holiday/Friday greetings ----
+  const L3NS = "http://www.w3.org/2000/svg";
+  const l3el = (tag, at) => { const n = document.createElementNS(L3NS, tag); Object.entries(at || {}).forEach(([k, v]) => n.setAttribute(k, v)); return n; };
+  const l3reduce = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
+  // What a folded card shows next to its title
+  function l3sum(block) {
+    const d = data(), list = monthTx();
+    switch (block) {
+      case "statement": { const s = list.reduce((a, r) => a + r.amount, 0); return list.length ? fmt(s) + " · " + list.length + " הוצאות" : "אין הוצאות"; }
+      case "quick": { const n = (store.favs || []).length; return n ? n + " כפתורים" : ""; }
+      case "pay": { const t = $("payNet") && !$("payBody").hidden ? $("payNet").textContent : ""; return t && t !== "₪0" ? t : ""; }
+      case "goals": { const g = store.goals || d.goals || []; if (!g.length) return ""; const sv = g.reduce((a, x) => a + (+x.saved || 0), 0), tg = g.reduce((a, x) => a + (+x.target || 0), 0); return fmt(sv) + " נחסכו"; }
+      case "wish": { const n = (store.wishlist || []).filter((w) => !w.outcome).length; return n ? n + " מחכים" : ""; }
+      case "challenge": { const c = store.challenge; return c && c.month === month ? "🎯 פעיל" : "לא נבחר"; }
+      default: return "";
+    }
+  }
+  function l3cards() {
+    const home = $("homeList");
+    home.querySelectorAll(":scope > .panel").forEach((p) => {
+      const h = p.querySelector(":scope > h2"); if (!h) return;
+      let s = h.querySelector(":scope > .fsum");
+      const txt = h.querySelector(":scope > .sum") ? "" : l3sum(p.dataset.block);
+      if (!txt) { if (s) s.remove(); return; }
+      if (!s) { s = document.createElement("span"); s.className = "fsum"; const tools = h.querySelector(":scope > .h2tools"); h.insertBefore(s, tools); }
+      s.textContent = txt;
+    });
+    // Two folded cards in a row share it, unless the text is big or the screen narrow
+    const kids = [...home.children].filter((k) => !k.hidden && !k.classList.contains("lay-off") && getComputedStyle(k).display !== "none");
+    kids.forEach((k) => k.classList.remove("half"));
+    const can = innerWidth >= 340 && !document.documentElement.classList.contains("hugetext");
+    // A card with a button in its title (like ⏰ משמרת) needs the whole row
+    const pairable = (k) => k.classList.contains("panel") && k.classList.contains("folded") && !k.classList.contains("today") && !k.querySelector(":scope > h2 > .btn");
+    for (let i = 0; can && i < kids.length - 1; i++) {
+      const a = kids[i], b = kids[i + 1];
+      if (pairable(a) && pairable(b)) {
+        a.classList.add("half"); b.classList.add("half"); i++;
+      }
+    }
+  }
+  // Today's ring (what's left of today's money) and the month-so-far line
+  function l3today() {
+    const panel = document.querySelector(".panel.today"); if (!panel) return;
+    const cur = !$("todayWhyBtn").hidden && todayWhy;
+    let ring = panel.querySelector(".ring3");
+    if (!ring) {
+      ring = l3el("svg", { class: "ring3", viewBox: "0 0 64 64", "aria-hidden": "true" });
+      ring.append(l3el("circle", { class: "tr", cx: 32, cy: 32, r: 28 }), l3el("circle", { class: "fl", cx: 32, cy: 32, r: 28, transform: "rotate(-90 32 32)" }));
+      panel.append(ring);
+    }
+    const C = 2 * Math.PI * 28, frac = cur && todayWhy.allowance > 0 ? Math.min(Math.max(todayWhy.left / todayWhy.allowance, 0), 1) : 0;
+    const fl = ring.querySelector(".fl"); fl.setAttribute("stroke-dasharray", C); fl.setAttribute("stroke-dashoffset", C * (1 - frac));
+    ring.style.display = cur ? "" : "none";
+    let sp = panel.querySelector(".spark3");
+    if (!sp) {
+      sp = l3el("svg", { class: "spark3", viewBox: "0 0 100 34", preserveAspectRatio: "none", role: "img" });
+      $("todayFc").after(sp);
+    }
+    sp.innerHTML = "";
+    const list = monthTx();
+    if (!cur || !todayWhy.spend || !list.length) { sp.style.display = "none"; return; }
+    sp.style.display = "";
+    const first = periodStart(month), last = periodEnd(month), today = todayStr();
+    const days = []; for (let x = first; x <= last; x = dateAdd(x, 1)) days.push(x);
+    const by = {}; list.forEach((r) => { by[r.spent_on] = (by[r.spent_on] || 0) + r.amount; });
+    let cum = 0; const pts = [];
+    const top = Math.max(todayWhy.spend, list.reduce((a, r) => a + r.amount, 0)) || 1;
+    const X = (i) => (days.length > 1 ? i / (days.length - 1) : 0) * 100, Y = (v) => 33 - (v / top) * 31;
+    days.forEach((x, i) => { if (x > today) return; cum += by[x] || 0; pts.push([X(i), Y(cum)]); });
+    const line = pts.map((p, i) => (i ? "L" : "M") + p[0].toFixed(2) + " " + p[1].toFixed(2)).join(" ");
+    sp.append(l3el("path", { class: "ar", d: line + " L" + pts[pts.length - 1][0].toFixed(2) + " 33 L0 33 Z" }));
+    sp.append(l3el("line", { class: "pl", x1: 0, y1: 33, x2: 100, y2: Y(todayWhy.spend) }));
+    sp.append(l3el("path", { class: "ln", d: line }));
+    sp.setAttribute("aria-label", "הוצאת עד היום " + fmt(cum) + ". הקו המקווקו הוא קצב שמגיע בדיוק לסוף החודש.");
+  }
+  // The amount runs to its new value
+  let l3last = null, l3busy = false;
+  const l3num = (t) => { const m = (t || "").replace(/[^\d]/g, ""); return m ? +m : null; };
+  new MutationObserver(() => {
+    if (l3busy) return;
+    const el = $("todayVal"), final = el.textContent, to = l3num(final), from = l3last;
+    l3last = to;
+    if (from == null || to == null || from === to || l3reduce() || !final.startsWith("₪")) return;
+    const t0 = performance.now(), dur = 650;
+    l3busy = true;
+    const step = (now) => {
+      const k = Math.min((now - t0) / dur, 1), e = 1 - Math.pow(1 - k, 3);
+      el.textContent = k < 1 ? fmt(from + (to - from) * e) : final;
+      if (k < 1) requestAnimationFrame(step); else l3busy = false;
+    };
+    requestAnimationFrame(step);
+  }).observe($("todayVal"), { childList: true, characterData: true, subtree: true });
+  // Categories take their color from the pie
+  function l3cats() {
+    const by = {}; monthTx().forEach((r) => { by[r.category] = (by[r.category] || 0) + r.amount; });
+    const ids = Object.entries(by).sort((a, b) => b[1] - a[1]).map(([id]) => id), many = ids.length > 6;
+    document.querySelectorAll("#catList .cat[data-cat]").forEach((b) => {
+      const i = ids.indexOf(b.dataset.cat), fill = b.querySelector(".fill");
+      if (fill && i >= 0) fill.style.setProperty("--cc", PIE[many && i >= 5 ? 5 : i % PIE.length]);
+    });
+  }
+  // The month in Hebrew, whatever language the phone's month field speaks
+  function l3month() {
+    const inp = $("month"); let lb = inp.parentNode.querySelector(".mlabel");
+    if (!lb) {
+      lb = document.createElement("span"); lb.className = "mlabel"; lb.setAttribute("aria-hidden", "true"); inp.after(lb); inp.classList.add("heb");
+      inp.addEventListener("click", () => { try { inp.showPicker(); } catch (e) {} });
+    }
+    lb.textContent = monthName(month) + " " + month.slice(0, 4);
+  }
+  // Titles shrink a little before they would break onto a second line
+  function l3fit(el, min) {
+    if (!el || !el.clientWidth || el.closest(".half")) return;
+    el.style.fontSize = ""; el.classList.add("fit");
+    let size = parseFloat(getComputedStyle(el).fontSize);
+    while (el.scrollWidth > el.clientWidth + 1 && size > min) { size -= 1; el.style.fontSize = size + "px"; }
+    if (el.scrollWidth > el.clientWidth + 1) el.classList.remove("fit");
+  }
+  const l3ro = new ResizeObserver((ents) => requestAnimationFrame(() => ents.forEach((e) => l3fit(e.target, e.target.tagName === "H1" ? 12 : 13))));
+  function l3titles() { document.querySelectorAll("#app .panel h2 > .h2t, #app > header h1").forEach((el) => { l3ro.observe(el); l3fit(el, el.tagName === "H1" ? 12 : 13); }); }
+  // Calendar tab: just "לוח" when there's no room for "לוח שנה"
+  (function () {
+    const a = document.querySelector('.tabs a[data-view="calendar"]');
+    if (a && /לוח שנה/.test(a.textContent)) { a.textContent = "📅 לוח"; const s = document.createElement("span"); s.className = "tw2"; s.textContent = " שנה"; a.append(s); }
+  })();
+  // The add button shrinks to + while scrolling down and comes back on the way up
+  (function () {
+    let y0 = scrollY;
+    addEventListener("scroll", () => {
+      const y = scrollY, f = $("fab");
+      if (y > y0 + 6 && y > 160) f.classList.add("mini"); else if (y < y0 - 6 || y < 160) f.classList.remove("mini");
+      y0 = y;
+    }, { passive: true });
+  })();
+  // Fridays and holidays: a small greeting at the top of the home page
+  // Two braided challot, drawn so they look the same on every phone
+  const CHALLAH = (() => {
+    const loaf = (x0) => {
+      const k = [[6, 6.2], [15, 8.4], [25.5, 9.4], [36, 8.4], [45, 6.2]];
+      return '<g transform="translate(' + x0 + ' 0)">'
+        + '<ellipse cx="25.5" cy="27" rx="24" ry="3" fill="rgba(0,0,0,.12)"/>'
+        + k.map(([x, r], i) => '<ellipse cx="' + x + '" cy="' + (17 + (i % 2 ? -1 : 1)) + '" rx="' + (r * 0.78) + '" ry="' + r + '" transform="rotate(' + (i % 2 ? 24 : -24) + ' ' + x + ' 17)" fill="url(#chg)" stroke="#8a4f17" stroke-width=".9"/>').join("")
+        + k.map(([x], i) => '<path d="M' + (x - 3) + ' ' + (12 + i % 2) + ' q3 -2 6 0" fill="none" stroke="#ffe2a8" stroke-width="1.1" stroke-linecap="round" opacity=".8"/>').join("")
+        + [9, 19, 24, 31, 40].map((x, i) => '<circle cx="' + x + '" cy="' + (11 + (i % 3)) + '" r=".8" fill="#fff6dc"/>').join("")
+        + "</g>";
+    };
+    return '<svg viewBox="0 0 106 32" aria-hidden="true"><defs><radialGradient id="chg" cx=".4" cy=".3" r=".8"><stop offset="0" stop-color="#f7c46e"/><stop offset=".6" stop-color="#d98a32"/><stop offset="1" stop-color="#a65d1c"/></radialGradient></defs>' + loaf(2) + loaf(54) + "</svg>";
+  })();
+  let l3heb = null;
+  function l3hebDay(s) {
+    const [y, m, d] = s.split("-").map(Number);
+    try {
+      l3heb = l3heb || new Intl.DateTimeFormat("en-u-ca-hebrew", { day: "numeric", month: "long", timeZone: "UTC" });
+      const p = l3heb.formatToParts(Date.UTC(y, m - 1, d));
+      return { m: (p.find((x) => x.type === "month") || {}).value, d: +(p.find((x) => x.type === "day") || {}).value };
+    } catch (e) { return null; }
+  }
+  function l3season(s) {
+    const h = l3hebDay(s), nx = l3hebDay(dateAdd(s, 1)), wd = new Date(s + "T12:00:00").getDay();
+    const is = (o, mm, a, b) => o && o.m === mm && o.d >= a && o.d <= (b || a);
+    if (h) {
+      if (is(h, "Tishri", 1, 2) || is(nx, "Tishri", 1)) return { e: "🍎🍯", t: "שנה טובה ומתוקה" };
+      if (is(h, "Tishri", 9, 10)) return { e: "🕊️", t: "גמר חתימה טובה" };
+      if (is(h, "Tishri", 14, 21)) return { e: "🌿🍋", t: "חג סוכות שמח" };
+      if (is(h, "Tishri", 22)) return { e: "📜", t: "חג שמח" };
+      if (is(h, "Kislev", 24, 30) || is(h, "Tevet", 1, 2)) return { e: "🕎", t: "חנוכה שמח" };
+      if (is(h, "Shevat", 15)) return { e: "🌳", t: "ט״ו בשבט שמח" };
+      if (is(h, "Adar", 14) || is(h, "Adar II", 14)) return { e: "🎭", t: "פורים שמח" };
+      if (is(h, "Nisan", 14, 21)) return { e: "🍷", t: "חג פסח שמח" };
+      if (restName(s) === "יום העצמאות") return { e: "🇮🇱", t: "יום עצמאות שמח" };
+      if (is(h, "Sivan", 5, 6)) return { e: "🌾", t: "חג שבועות שמח" };
+    }
+    if (wd === 5) return { challah: true, e: "🕯️🕯️", t: "שבת שלום" };
+    return null;
+  }
+  function l3greet() {
+    let el = $("season3");
+    const s = month === thisMonth() ? l3season(todayStr()) : null;
+    if (!s) { if (el) el.remove(); return; }
+    if (!el) { el = document.createElement("div"); el.id = "season3"; el.className = "season3"; el.setAttribute("role", "note"); $("layHint").after(el); }
+    el.innerHTML = (s.challah ? CHALLAH : "") + '<span class="se" aria-hidden="true"></span><span class="st"></span>';
+    el.querySelector(".se").textContent = s.e; el.querySelector(".st").textContent = s.t;
+  }
+  function look3() {
+    try { l3month(); } catch (e) {}
+    try { l3today(); } catch (e) {}
+    try { l3cats(); } catch (e) {}
+    try { l3cards(); } catch (e) {}
+    try { l3greet(); } catch (e) {}
+    try { l3titles(); } catch (e) {}
+  }
+  document.addEventListener("click", (e) => { if (e.target.closest(".panel h2, .tabs a")) setTimeout(() => { try { l3cards(); l3titles(); } catch (x) {} }, 0); });
+  addEventListener("resize", () => { try { l3cards(); } catch (e) {} });
 
   // ---- Pages ----
   let view = "main";
@@ -7093,18 +7373,16 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     $("adFbSum").disabled = false;
   });
 
-  const NEWS_ID = "2026-10-07-r2";
+  const NEWS_ID = "2026-10-08-look3";
   const NEWS = [
-    ["🧰", "צריך או רוצה?", "בטופס ההוצאה מסמנים בלחיצה ״צריך״ או ״רוצה״, ולמה קנית (משעמם, לחוץ, מבצע…)."],
-    ["😣", "התחרטתי", "לחיצה על הוצאה ברשימה ואז ״התחרטתי״. בסוף החודש רואים על כמה התחרטת."],
-    ["🧠", "ההרגלים שלי", "אריח חדש: כמה הלך על ״צריך״ וכמה על ״רוצה״, על מה התחרטת ולמה קנית."],
-    ["🏅", "אתגר החודש", "אריח חדש: בוחרים אתגר (ימים בלי הוצאה, ויתור על קטגוריה, תקרה, שבוע בלי ״רוצה״) ומקבלים הישג."],
-    ["📈", "תחזית לסוף החודש", "שורה קטנה מתחת ל״מותר לך היום״: איך תסיים את החודש בקצב הנוכחי."],
-    ["🧾", "סגירת יום", "התראה בערב (21:00) לבדוק שרשמת הכול. אפשר לכבות או לשנות שעה בהגדרות > כללי."],
-    ["🏷️", "סינון לפי קטגוריה", "ברשימת ההוצאות של החודש: לחיצה על קטגוריה מראה רק אותה."],
-    ["📸", "שיתוף החודש כתמונה", "באריח ״לאורך החודשים״. אפשר עם סכומים או רק באחוזים."],
-    ["⏱️", "התקדמות שעות", "בלשונית המשמרות: כמה שעות עבדת עד היום לעומת אותו יום בחודש שעבר."],
-    ["🖌️", "צבע מבטא וגודל טקסט", "בהגדרות > עיצוב וצבעים: 12 צבעים לכפתורים, 3 גדלי טקסט, רטט וקונפטי."]
+    ["🎨", "עיצוב מסודר יותר", "לכל אריח פס צבע משלו, וכפתורי ? ו־▾ קטנים ושקטים יותר."],
+    ["⭕", "טבעת סביב הפרצוף", "בכרטיס ״מותר לך היום״: הטבעת מתרוקנת ככל שמוציאים היום."],
+    ["📉", "גרף קטן של החודש", "מתחת לסכום של היום. הקו המקווקו הוא הקצב שמגיע בדיוק לסוף החודש."],
+    ["🛍️", "קטגוריות צבעוניות", "הפסים עבים יותר ובצבע של הקטגוריה בעוגה. נהיים אדומים רק כשעוברים את היעד."],
+    ["📦", "אריחים סגורים", "אריח סגור מראה שורת סיכום, ושני אריחים סגורים עומדים זה ליד זה."],
+    ["📅", "לוח שנה צבוע", "ככל שהוצאת יותר ביום, הריבוע שלו כהה יותר. והחודש למעלה כתוב בעברית."],
+    ["➕", "כפתור הוצאה", "כשגוללים למטה הוא מתכווץ ל־+ כדי לא להסתיר, וחוזר כשגוללים למעלה."],
+    ["🕯️", "שבת שלום", "ביום שישי מחכות חלות בדף הבית, ובחגים ברכה של החג."]
   ];
   $("genderAsk").addEventListener("click", (e) => {
     const b = e.target.closest("[data-g]"); if (!b) return;
