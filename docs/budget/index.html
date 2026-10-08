@@ -1016,6 +1016,17 @@ html.hugetext .aiask .btn { padding-inline: 12px; min-width: 0; }
 .aimsg.ai p { margin: 0 0 6px; } .aimsg.ai p:last-child { margin: 0; }
 .aimsg.err { align-self: stretch; max-width: none; background: var(--danger-soft); color: var(--danger); font-weight: 600; font-size: 14px; }
 .aimsg .aigo { margin-top: 8px; }
+.aibar { display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 6px; }
+.aibar button { font: inherit; font-size: 13px; font-weight: 600; background: none; border: 0; padding: 4px 0; color: var(--brand, #7c3aed); cursor: pointer; }
+.airows { margin: 6px 0 0; padding: 0; list-style: none; font-size: 13.5px; color: var(--muted); display: grid; gap: 2px; }
+.aimem { display: grid; gap: 6px; margin-top: 8px; }
+.aimem > div { display: flex; gap: 8px; align-items: center; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 6px 10px; }
+.aimem > div > span { flex: 1; }
+.aimem button { flex: none; font: inherit; background: none; border: 0; color: var(--muted); font-size: 16px; padding: 4px 6px; cursor: pointer; }
+.todaywhy { margin: 4px 0 0; font-size: 14px; line-height: 1.55; color: inherit; opacity: .92; white-space: pre-line; text-align: start; }
+#todayWhyBtn { color: inherit; text-decoration: underline; font-weight: 600; }
+.sedit .aiitem { display: flex; flex-wrap: wrap; gap: 6px; }
+.sedit .aiitem button { font: inherit; font-size: 13px; font-weight: 600; border: 1px solid var(--line); background: var(--surface-2); color: var(--fg); border-radius: 999px; padding: 6px 10px; cursor: pointer; }
 .aimsg.wait { color: var(--muted); }
 .aimode { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 700; color: var(--brand2, #db3577); }
 .sheet form.aiask { display: flex; gap: 6px; align-items: flex-end; padding: 0; }
@@ -1196,6 +1207,8 @@ body.nosave .split { grid-template-columns: 1fr; }
         <button type="button" class="todaymore" id="todayMoreBtn" aria-expanded="false" aria-controls="todayMore">פרטים ▾</button>
         <div class="todaybox" id="todayMore" hidden>
         <span class="line" id="todayLine"></span>
+        <button type="button" class="linkbtn" id="todayWhyBtn" aria-expanded="false" hidden>❓ למה המספר הזה?</button>
+        <p class="todaywhy" id="todayWhy" hidden></p>
         <div class="pace" id="pace">
           <div class="track"><div class="fill" id="paceFill"></div><div class="mark" id="paceMark"></div></div>
           <div class="cap"><span id="paceSpent"></span><span id="paceDay"></span></div>
@@ -1465,6 +1478,13 @@ body.nosave .split { grid-template-columns: 1fr; }
       <p class="hint">בלי סכומים: רק מי קיים, איך נכנס, מתי היה פעיל, איזו גרסה מותקנת אצלו וכמה רשומות יש לו.</p>
       <div class="adlist" id="adUsers"></div>
     </section>
+    <section class="panel" aria-labelledby="adWeekH">
+      <h2 id="adWeekH" class="pc-orange" data-e="📅">השבוע באפליקציה</h2>
+      <p class="hint">7 הימים האחרונים. על מה שאלו את העוזר: רק נושא כללי, בלי השאלות עצמן.</p>
+      <div class="adlist" id="adWeek"></div>
+      <div class="actions"><button class="btn" type="button" id="adWeekFb">✨ מה ביקשו במשובים השבוע</button></div>
+      <div class="aibody" id="adWeekFbOut" hidden></div>
+    </section>
     <section class="panel" aria-labelledby="adAiH">
       <h2 id="adAiH" class="pc-violet" data-e="✨">העוזר</h2>
       <p class="hint">כמה פעמים השתמשו בעוזר ב־30 הימים האחרונים. בלי השאלות עצמן.</p>
@@ -1639,7 +1659,11 @@ body.nosave .split { grid-template-columns: 1fr; }
       <button type="button" data-ai="shift">📷 דוח נוכחות למשמרות</button>
       <button type="button" data-ai="letter">💌 מכתב החודש</button>
       <button type="button" data-ai="patterns">🔍 ההרגלים שלי</button>
+      <button type="button" data-ai="receipt">🧾 צילום קבלה</button>
+      <button type="button" data-ai="subs">🔁 מנויים שפספסתי</button>
+      <button type="button" data-ai="mem">🧠 מה אני זוכר</button>
     </div>
+    <input type="file" id="aiRcpt" accept="image/*" hidden>
     <div class="ailog" id="aiLog" aria-live="polite"></div>
     <div class="aistart" id="aiStart"></div>
     <div class="aiexp" id="aiExp" hidden></div>
@@ -2773,6 +2797,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       const pool = spend - spentBefore - spentFuture;
       const allowance = Math.max(pool, 0) / daysLeft;
       const left = allowance - spentToday;
+      todayWhy = { spend, oneOff: incTotal(), spentBefore, spentFuture, spentToday, pool, daysLeft, allowance, left };
       $("todayLbl").textContent = left >= 0 ? "מותר לך להוציא היום" : "חרגת היום ב־";
       $("todayVal").textContent = fmt(Math.abs(left));
       $("todayVal").classList.toggle("neg", left < 0);
@@ -2809,6 +2834,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       $("todayLine").textContent = "בערך " + fmt(spend / days) + " ליום";
       setV("good", say("החודש עוד לא התחיל. זה הזמן לתכנן אותו, לא לבזבז אותו מראש.", "החודש עוד לא התחיל. זה הזמן לתכנן אותו.", "החודש עוד לא התחיל. זה זמן טוב לתכנן אותו 🙂"));
     }
+    $("todayWhyBtn").hidden = !isCur; if (!isCur) $("todayWhy").hidden = true; else if (!$("todayWhy").hidden) whyPaint();
     if (!$("pace").hidden) {
       const frac = spend > 0 ? spent / spend : 0;
       const fill = $("paceFill");
@@ -3003,6 +3029,15 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     tb("🎁 רוצה", "", () => tg.nw === "want", () => { tg.nw = tg.nw === "want" ? undefined : "want"; });
     tb("😣 התחרטתי", "regret", () => !!tg.regret, () => { tg.regret = !tg.regret || undefined; });
     f.append(trow);
+    if (aiReady() && aiOk === true) {
+      // "Ask about this": the assistant opens with a question about this very expense
+      const ai = document.createElement("div"); ai.className = "aiitem full";
+      [["✨ כמה הוצאתי על זה החודש?", "sum"], ["✨ זה יותר מהרגיל?", "usual"]].forEach(([t, k]) => {
+        const b = document.createElement("button"); b.type = "button"; b.textContent = t;
+        b.addEventListener("click", () => aiAskItem(r, k)); ai.append(b);
+      });
+      f.append(ai);
+    }
     const acts = document.createElement("div"); acts.className = "acts";
     const ok = document.createElement("button"); ok.type = "submit"; ok.className = "btn primary"; ok.textContent = "שמירה";
     const no = document.createElement("button"); no.type = "button"; no.className = "btn"; no.textContent = "ביטול";
@@ -4462,6 +4497,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
         }
         if (st.dayCheck !== false) dayCheckNotes(st).forEach((n) => notes.push(n));
         (store.reminders || []).filter((r) => r.at > Date.now()).forEach((r) => notes.push({ id: "rem-" + r.id, at: r.at, title: "🔔 תזכורת", text: r.text }));
+        if (user && user.id === "75753136-73de-4975-bc7a-5897db6ae434") notes.push({ id: "admin-weekly", at: weeklyAt() + 30 * 60e3, every: 7, title: "📅 סיכום השבוע של האפליקציה", text: "כמה היו פעילים, על מה שאלו את העוזר ומה ביקשו במשובים. בלוח המנהל." });
         app.setNotes(gx(JSON.stringify(notes)));
       }
     } catch (e) {}
@@ -6168,7 +6204,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       sb.from("feedback").select("kind, body, page, created_at").order("created_at", { ascending: false }).limit(50),
       sb.from("broadcasts").select("id, body, push, active, created_at").order("id", { ascending: false }).limit(10)
     ]);
-    renderAdminAi(u.data);
+    renderAdminAi(u.data, f.data);
     const box = $("adUsers"); box.innerHTML = "";
     if (u.error) box.textContent = "לא הצלחתי לטעון: " + u.error.message;
     else {
@@ -6230,12 +6266,12 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   };
   // Ready questions, by the tab the assistant was opened from (the owner's pick: people don't know what to ask)
   function aiStarters() {
-    if (aiFrom === "shifts") return ["כמה הרווחתי החודש מהמשמרות?", "כמה משמרות עשיתי החודש?", "כמה משמרות חסרות לי ליעד החודש?", "איזו משמרת הכי משתלמת לי?", "כמה שעות נוספות עשיתי החודש?", "מגיע לי תשלום על עבודה בחג?"];
+    if (aiFrom === "shifts") return ["כמה הרווחתי החודש מהמשמרות?", "כמה משמרות עשיתי החודש?", "כמה משמרות חסרות לי ליעד החודש?", "מה אם אעבוד עוד 2 משמרות החודש?", "איזו משמרת הכי משתלמת לי?", "כמה שעות נוספות עשיתי החודש?", "מגיע לי תשלום על עבודה בחג?"];
     if (aiFrom === "calendar") return ["באיזה יום בשבוע אני מוציא הכי הרבה?", "איזה יום החודש היה הכי יקר?", "כמה ימים בלי הוצאות היו לי החודש?", "כמה הוצאתי בשבוע האחרון?"];
     const list = tx[thisMonth()] || [], by = {};
     list.forEach((r) => { by[r.category] = (by[r.category] || 0) + r.amount; });
     const top = Object.entries(by).sort((a, b) => b[1] - a[1])[0], topName = top && catNames()[top[0]];
-    return ["כמה מותר לי להוציא היום?", "כמה הוצאתי החודש?", topName ? "כמה הוצאתי על " + topName + " החודש?" : "", "על מה הכי הוצאתי החודש?", "מה ההוצאה הכי גדולה שלי החודש?", "באיזה חודש הכי בזבזתי?", "איך מוסיפים מנוי?"].filter(Boolean);
+    return ["כמה מותר לי להוציא היום?", "כמה הוצאתי החודש?", topName ? "כמה הוצאתי על " + topName + " החודש?" : "", "על מה הכי הוצאתי החודש?", "מה ההוצאה הכי גדולה שלי החודש?", "מה אם אוציא היום 200 ₪?", "באיזה חודש הכי בזבזתי?", "איך מוסיפים מנוי?"].filter(Boolean);
   }
   const AI_GO = {
     settings: ["⚙️ להגדרות", () => setView("settings")],
@@ -6259,7 +6295,22 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   const AI_GUIDE = "מבנה האפליקציה: למעלה לוגו, גלגל שיניים ⚙ של הגדרות ליד תמונת הפרופיל, ובורר חודש. שלוש לשוניות למעלה: ראשי / משמרות / לוח שנה. בדף הראשי יש אריחים שאפשר לסדר (לחיצה ארוכה על אריח פותחת מצב עריכה: גוררים ⠿, 👁 מסתיר, ✓ שומר; או בהגדרות > פריסת דף הבית). כפתור 💸 הוצאה למטה פותח טופס הוצאה (סכום, קטגוריה, פירוט, תאריך, צריך/רוצה, למה קניתי, ⭐ שמירה ככפתור, חיוב קבוע כל חודש, ״אולי אקנה״ ל־48 שעות). בלשונית משמרות: כפתור ⏰ משמרת, ייבוא משמרות (הדבקה מחילן, כמה ימים ביחד, צילום דוח), הגדרות שכר, יעד הכנסה לחודש. הגדרות > כללי: מתי מתחיל החודש, טון ההודעות, מתי לספור את הכסף מהמשמרות, תזכורת ערב. הגדרות > עיצוב וצבעים: בהיר/כהה, צבע רקע, צבע מבטא, גודל טקסט, רטט וקונפטי. ✨ הוא העוזר עצמו.\n"
     + "הסברים על כל אריח:\n" + Object.values(HELP).map((t) => "- " + t).join("\n")
     + "\nיעדים לכפתור [[go:...]]: " + Object.keys(AI_GO).map((k) => k + "=" + AI_GO[k][0]).join(", ");
-  let aiMode = "", aiBusy = false, aiChat = [], aiExpRows = [], aiFrom = "main", aiIdeas = false, aiWait = "", aiLast = null;
+  // "Why this number?" under today's allowance: the same parts render() used, in two plain lines
+  var todayWhy; // var without a value: render() may fill it before this line runs
+  function whyPaint() {
+    const w = todayWhy, el = $("todayWhy"); if (!w) return;
+    const l1 = "יש לך החודש " + fmt(Math.round(w.spend)) + " כסף חופשי: ההכנסה פחות החיובים הקבועים" + (w.oneOff ? ", כולל הכנסות חד־פעמיות" : "") + ". לפני היום הוצאת " + fmt(Math.round(w.spentBefore)) + (w.spentFuture ? " (ועוד " + fmt(Math.round(w.spentFuture)) + " רשומים לימים הבאים)" : "") + ".";
+    const l2 = w.pool <= 0 ? "לא נשאר כסף חופשי לשאר החודש, ולכן היום מותר 0."
+      : "את מה שנשאר, " + fmt(Math.round(w.pool)) + ", מחלקים ל־" + w.daysLeft + " ימים כולל היום: " + fmt(Math.round(w.allowance)) + " ליום." + (w.spentToday ? " היום כבר הוצאת " + fmt(Math.round(w.spentToday)) + ", אז " + (w.left >= 0 ? "נשארו " + fmt(Math.round(w.left)) + "." : "עברת ב־" + fmt(Math.round(-w.left)) + ".") : "");
+    el.textContent = l1 + "\n" + l2;
+  }
+  $("todayWhyBtn").addEventListener("click", () => {
+    const el = $("todayWhy"), open = el.hidden;
+    el.hidden = !open; $("todayWhyBtn").setAttribute("aria-expanded", String(open));
+    $("todayWhyBtn").textContent = open ? "✕ סגור הסבר" : "❓ למה המספר הזה?";
+    if (open) whyPaint();
+  });
+  let aiMode = "", aiBusy = false, aiChat = [], aiExpRows = [], aiFrom = "main", aiIdeas = false, aiWait = "", aiLast = null, aiRows = null, aiSpeaking = null;
   const AI_TABS = { main: "ראשי", shifts: "משמרות", calendar: "לוח שנה" };
   const AI_STREAM = { chat: 1, letter: 1, patterns: 1 };
   var aiOk = null; // var: aiFabSync can run from setView before this block is reached
@@ -6348,6 +6399,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     const extra = {};
     ["goals", "wishlist", "favs", "challenge", "chalHist", "badges", "noWork"].forEach((k) => { if (store[k] && JSON.stringify(store[k]) !== "[]" && JSON.stringify(store[k]) !== "{}") extra[k] = store[k]; });
     L.push("עוד נתונים מהאפליקציה (JSON): " + JSON.stringify(extra));
+    if ((store.aiNotes || []).length) L.push("זיכרון (דברים שהמשתמש ביקש שתזכור): " + store.aiNotes.map((n) => n.text).join(" · "));
     const byM = {};
     const mon = (m) => (byM[m] = byM[m] || { exp: 0, cats: {}, gross: 0, min: 0, n: 0, inc: 0 });
     L.push("\n== הוצאות (תאריך | יום | ₪ | קטגוריה | פירוט | סימונים) ==");
@@ -6386,6 +6438,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     const L = ["\n== מספרים מוכנים (חושבו בדיוק על ידי האפליקציה) =="];
     const start = periodStart(cur), end = periodEnd(cur), dayNum = daysBetween(start, t) + 1;
     L.push("החודש התקציבי הנוכחי: " + cur + " (" + monthName(cur) + "), מ־" + start + " עד " + end + ". זה היום ה־" + dayNum + " מתוך " + periodDays(cur) + ", נשארו " + (periodDays(cur) - dayNum + 1) + " ימים כולל היום.");
+    if (todayWhy) L.push("כסף חופשי החודש (הכנסה פחות חיובים קבועים, כולל הכנסות חד־פעמיות): " + r0(todayWhy.spend) + ". הוצא לפני היום: " + r0(todayWhy.spentBefore) + ". נשאר לשאר החודש: " + r0(Math.max(0, todayWhy.pool)) + " ל־" + todayWhy.daysLeft + " ימים, כלומר " + r0(todayWhy.allowance) + " ליום. היום הוצא: " + r0(todayWhy.spentToday) + ". בסוף החודש בקצב הנוכחי: " + ($("todayFc").hidden ? "אין עדיין תחזית" : $("todayFc").textContent) + ".");
     const curE = exps.filter((r) => periodOf(r.spent_on) === cur && r.spent_on <= t);
     const sum = (l) => r0(l.reduce((a, r) => a + +r.amount, 0));
     L.push("הוצאות יומיום החודש עד היום: " + sum(curE) + " ב־" + curE.length + " הוצאות. היום: " + sum(curE.filter((r) => r.spent_on === t)) + ". אתמול: " + sum(exps.filter((r) => r.spent_on === dateAdd(t, -1))) + ".");
@@ -6474,7 +6527,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       case "fixed_add": {
         const amount = amt(a.amount), name = String(a.name || "").trim().slice(0, 80);
         if (!(amount > 0) || !name) return bad("📌 חיוב קבוע", "חסר שם או סכום");
-        return { ok: true, txt: "📌 חיוב קבוע כל חודש: " + name + " " + fmt(amount), sub: "יורד מראש מההכנסה, מהחודש הזה והלאה",
+        return { ok: true, txt: "📌 חיוב קבוע כל חודש: " + name + " " + fmt(amount), sub: a.why || "יורד מראש מההכנסה, מהחודש הזה והלאה",
           run: () => { toCur(); addFixed(name, amount); return name + " נוסף לחיובים הקבועים"; } };
       }
       case "fixed_del": {
@@ -6506,6 +6559,18 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
         return { ok: true, txt: "💰 הכנסה " + fmt(amount) + (note ? " · " + note : ""), sub: kind + " · " + shortDate(date),
           run: () => { INC.save({ id: uid(), received_on: date, amount, kind, note, created_at: new Date().toISOString() }); renderPay(); renderCal(); renderTracking(); return "הכנסה של " + fmt(amount); } };
       }
+      case "note_add": {
+        const text = String(a.text || "").trim().slice(0, 200);
+        if (!text) return bad("🧠 לזכור", "חסר מה לזכור");
+        return { ok: true, txt: "🧠 לזכור: " + text, sub: "נשמר בחשבון שלך. אפשר למחוק ב״🧠 מה אני זוכר״",
+          run: () => { store.aiNotes = (store.aiNotes || []).concat([{ id: uid(), text, at: todayStr() }]).slice(-30); persist(); return "אזכור את זה"; } };
+      }
+      case "note_del": {
+        const want = String(a.text || "").trim(), n = (store.aiNotes || []).find((x) => x.text === want) || (store.aiNotes || []).find((x) => want && (x.text.includes(want) || want.includes(x.text)));
+        if (!n) return bad("🧠 לשכוח: " + want, "אין דבר כזה בזיכרון");
+        return { ok: true, txt: "🧠 לשכוח: " + n.text, sub: "",
+          run: () => { store.aiNotes = (store.aiNotes || []).filter((x) => x.id !== n.id); persist(); return "שכחתי את זה"; } };
+      }
       case "remind": {
         const at = aiRemAt(a.at), text = String(a.text || "").trim().slice(0, 160);
         if (!at || at < Date.now() + 60000 || !text) return bad("⏰ תזכורת" + (text ? ": " + text : ""), "חסר זמן עתידי או על מה להזכיר");
@@ -6519,10 +6584,10 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   function aiActCard(m) {
     const box = document.createElement("div"); box.className = "aiact";
     if (m.actSt) { const p = document.createElement("small"); p.className = "ailocal"; p.textContent = m.actSt; box.append(p); return box; }
-    const plans = m.act.map(aiActPlan), on = plans.map((p) => p.ok);
+    const plans = m.act.map(aiActPlan), on = plans.map((p) => p.ok && !m.actOff);
     plans.forEach((p, i) => {
       const row = document.createElement("label"); row.className = "aiarow" + (p.ok ? "" : " off");
-      const cb = document.createElement("input"); cb.type = "checkbox"; cb.checked = p.ok; cb.disabled = !p.ok;
+      const cb = document.createElement("input"); cb.type = "checkbox"; cb.checked = on[i]; cb.disabled = !p.ok;
       cb.addEventListener("change", () => { on[i] = cb.checked; save.disabled = !on.some(Boolean); });
       const w = document.createElement("span"); const b = document.createElement("b"); b.textContent = p.txt; w.append(b);
       if (p.sub) { const sm = document.createElement("small"); sm.textContent = p.sub; w.append(sm); }
@@ -6580,11 +6645,27 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
         "היי! 😊 אפשר לשאול אותי כל דבר על הכסף שלך: כמה הוצאת, על מה, כמה הרווחת, ואיך עושים משהו באפליקציה."));
       log.append(d);
     }
+    const lastAi = aiChat.filter((m) => m.role === "ai").pop();
     aiChat.forEach((m) => {
       const d = document.createElement("div"); d.className = "aimsg " + (m.role === "ai" ? "ai" : m.role === "err" ? "err" : "me");
       if (m.role === "ai") aiRenderText(d, m.text.replace(/\[\[act[\s\S]*$/, "")); else d.textContent = m.text;
       if (m.act) d.append(aiActCard(m));
+      if (m.mem) d.append(aiMemList());
+      if (m.rows && m.showRows) {
+        const ul = document.createElement("ul"); ul.className = "airows";
+        m.rows.forEach((r) => { const li = document.createElement("li"); li.textContent = shortDate(r[0]) + " · " + fmt(r[1]) + (r[2] ? " · " + r[2] : ""); ul.append(li); });
+        if (m.rowsN > m.rows.length) { const li = document.createElement("li"); li.textContent = "ועוד " + (m.rowsN - m.rows.length); ul.append(li); }
+        d.append(ul);
+      }
       if (m.local) { const k = document.createElement("small"); k.className = "ailocal"; k.textContent = "⚡ תשובה מיידית מהאפליקציה, לא נספרה במכסה"; d.append(k); }
+      if (m.role === "ai" && !(aiBusy && m === aiChat[aiChat.length - 1])) {
+        const bar = document.createElement("div"); bar.className = "aibar";
+        const btn = (t, fn) => { const b = document.createElement("button"); b.type = "button"; b.textContent = t; b.addEventListener("click", fn); bar.append(b); };
+        if (m.rows && m.rows.length) btn(m.showRows ? "🔎 הסתר" : "🔎 מאיפה זה?", () => { m.showRows = !m.showRows; aiSaveChat(); aiPaint(); });
+        else if (!m.local && !m.act && !m.mem && m === lastAi && /\d/.test(m.text) && !aiBusy) btn("🔎 איך הגעת לזה?", () => aiAsk("איך הגעת לזה?", "showwork"));
+        if (window.speechSynthesis && window.SpeechSynthesisUtterance) btn(aiSpeaking === m ? "⏹️ עצור" : "🔊 הקרא", () => aiSpeak(m));
+        if (bar.childNodes.length) d.append(bar);
+      }
       if (m.role === "err" && aiLast && !aiBusy) { const b = document.createElement("button"); b.type = "button"; b.className = "btn aigo"; b.textContent = "🔄 נסה שוב (לא נספר במכסה)"; b.addEventListener("click", aiRetry); d.append(b); }
       log.append(d);
     });
@@ -6601,7 +6682,13 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     $("aiSend").disabled = aiBusy;
     setTimeout(() => { log.scrollTop = log.scrollHeight; }, 0);
   }
-  function aiPush(role, text, local) { const m = local ? { role, text, local: 1 } : { role, text }; if (role === "ai") aiActParse(m); aiChat.push(m); if (role !== "err") aiSaveChat(); aiPaint(); }
+  function aiPush(role, text, local) {
+    const m = local ? { role, text, local: 1 } : { role, text };
+    if (role === "ai") aiActParse(m);
+    if (local && aiRows) { const names = catNames(); m.rowsN = aiRows.length; m.rows = aiRows.slice().sort((a, b) => (b.spent_on > a.spent_on ? 1 : -1)).slice(0, 25).map((r) => [r.spent_on, r.amount, r.note || names[r.category] || ""]); }
+    aiRows = null;
+    aiChat.push(m); if (role !== "err") aiSaveChat(); aiPaint();
+  }
   async function aiRun(label, payload, onOk) {
     if (aiBusy) return;
     aiLast = { label, payload, onOk };
@@ -6610,7 +6697,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     const drop = () => { if (live) { aiChat = aiChat.filter((m) => m !== live); live = null; } };
     const onText = AI_STREAM[payload.tool] ? (t) => { if (!live) { live = { role: "ai", text: "" }; aiChat.push(live); } live.text = t; aiPaint(); } : null;
     try {
-      const ctx = payload.tool === "expenses" ? "" : await aiContext();
+      const ctx = payload.tool === "expenses" || payload.context ? "" : await aiContext();
       let j;
       // Google's free tier is often busy: one quiet retry before showing an error (a failed try doesn't count)
       for (let n = 0; ; n++) {
@@ -6648,8 +6735,8 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       return "**" + $("todayLbl").textContent + ": " + $("todayVal").textContent + "**\n" + $("todayLine").textContent + ".";
     }
     if (/^כמה (כסף )?(נשאר לי|נשאר)( להוציא)?( עד סוף החודש| החודש| לסוף החודש)?$/.test(n) && month === cur) return $("todayLine").textContent + ".";
-    if (/^כמה הוצאתי היום$/.test(n)) { const l = mine.filter((r) => r.spent_on === t); return l.length ? "**היום הוצאת " + fmt(sum(l)) + "** (" + (l.length === 1 ? "הוצאה אחת" : l.length + " הוצאות") + ")." : "היום עוד לא רשמת אף הוצאה."; }
-    if (/^כמה הוצאתי (החודש|עד עכשיו החודש|החודש עד עכשיו)$/.test(n)) return "**ב" + monthName(cur) + " הוצאת עד עכשיו " + fmt(sum(mine)) + "** על הוצאות יומיום (" + mine.length + " הוצאות). החיובים הקבועים לא בפנים.";
+    if (/^כמה הוצאתי היום$/.test(n)) { const l = mine.filter((r) => r.spent_on === t); aiRows = l; return l.length ? "**היום הוצאת " + fmt(sum(l)) + "** (" + (l.length === 1 ? "הוצאה אחת" : l.length + " הוצאות") + ")." : "היום עוד לא רשמת אף הוצאה."; }
+    if (/^כמה הוצאתי (החודש|עד עכשיו החודש|החודש עד עכשיו)$/.test(n)) return (aiRows = mine),  "**ב" + monthName(cur) + " הוצאת עד עכשיו " + fmt(sum(mine)) + "** על הוצאות יומיום (" + mine.length + " הוצאות). החיובים הקבועים לא בפנים.";
     let m = n.match(/^כמה הוצאתי (?:החודש )?על (.+?)(?: החודש)?$/);
     if (m) {
       const want = m[1].replace(/^ה(?=\S{3,})/, "");
@@ -6658,6 +6745,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       if (!hit) return null;
       const ids = new Set([hit.id].concat(cats.filter((c) => c.parent === hit.id).map((c) => c.id)));
       const l = mine.filter((r) => ids.has(r.category));
+      aiRows = l;
       return "**על " + names[hit.id] + " הוצאת ב" + monthName(cur) + " " + fmt(sum(l)) + "**" + (l.length ? " (" + (l.length === 1 ? "הוצאה אחת" : l.length + " הוצאות") + ")." : ".") + (+hit.budget > 0 ? " היעד: " + fmt(+hit.budget) + "." : "");
     }
     const sh = shifts[cur];
@@ -6668,7 +6756,17 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     if (sh && /^כמה משמרות (עשיתי|עבדתי|היו לי)( החודש)?$/.test(n)) return sh.length ? "**החודש עשית " + (sh.length === 1 ? "משמרת אחת" : sh.length + " משמרות") + ".**" : "החודש עוד לא רשמת משמרות.";
     return null;
   }
-  function aiAsk(q) {
+  // A one-word topic for the owner's weekly summary (the question itself never leaves the phone for that)
+  function aiTopic(q) {
+    if (/מה אם|ואם א/.test(q)) return "whatif";
+    if (/איך (עושים|מוסיפים|משנים|מוחקים|רואים|מסתירים|מחזירים|מבטלים)|איפה (יש|אני|רואים|זה)|באפליקציה/.test(q)) return "app";
+    if (/זכאי|זכאית|מגיע לי|זכויות|חוק|פיצויים|דמי (מחלה|הבראה)|חופשה שנתית/.test(q)) return "rights";
+    if (/(^|\s)(תוסיף|תוסיפי|תרשום|תרשמי|תמחק|תמחקי|תזכיר|תזכירי|תזכור|תזכרי|קניתי|עבדתי|קיבלתי|שילמתי)(?=\s|$)/.test(q)) return "action";
+    if (/משמרת|משמרות|שעות|שכר|הרווחתי|משכורת/.test(q)) return "shifts";
+    if (/הוצאתי|הוצאה|הוצאות|כסף|נשאר|תקציב|חיסכון|קטגוריה|בזבזתי/.test(q)) return "money";
+    return "other";
+  }
+  function aiAsk(q, topic) {
     q = String(q || "").trim(); if (!q) return;
     $("aiIn").value = ""; $("aiIn").style.height = "";
     if (aiMode === "exp") { aiParseExpenses(q); return; }
@@ -6676,8 +6774,87 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     const quick = !aiBusy && aiLocal(q);
     if (quick) { aiChat = aiChat.filter((m) => m.role !== "err"); aiChat.push({ role: "me", text: q }); aiPush("ai", quick, true); return; }
     const history = aiChat.filter((m) => m.role === "me" || m.role === "ai").slice(-10);
-    aiRun(q, { tool: "chat", input: q, history }, (j) => aiPush("ai", j.text));
+    aiRun(q, { tool: "chat", input: q, history, topic: topic || aiTopic(q) }, (j) => aiPush("ai", j.text));
   }
+  // ---- Read an answer aloud (where the phone's browser can) ----
+  function aiSpeak(m) {
+    const s = window.speechSynthesis;
+    try {
+      const again = aiSpeaking === m;
+      s.cancel(); aiSpeaking = null;
+      if (!again) {
+        const text = m.text.replace(/\[\[[\s\S]*?\]\]/g, "").replace(/\*\*/g, "").replace(/https?:\/\/\S+/g, "").replace(/₪\s?([\d,.]+)/g, "$1 שקלים").replace(/([\d,.]+)\s?₪/g, "$1 שקלים");
+        const u = new SpeechSynthesisUtterance(text);
+        u.lang = "he-IL";
+        const v = s.getVoices().find((x) => /^(he|iw)/i.test(x.lang)); if (v) u.voice = v;
+        u.onend = u.onerror = () => { if (aiSpeaking === m) { aiSpeaking = null; aiPaint(); } };
+        aiSpeaking = m; s.speak(u);
+      }
+    } catch (e) { aiSpeaking = null; snack("הטלפון לא מצליח להקריא כאן."); }
+    aiPaint();
+  }
+  // ---- "Ask about this" from a row in the month's expenses ----
+  function aiAskItem(r, k) {
+    if (!aiReady()) return;
+    aiOpen();
+    const names = catNames(), cat = names[r.category] || "בלי קטגוריה", note = String(r.note || "").trim();
+    if (k === "sum") {
+      const per = periodOf(r.spent_on), list = tx[per] || [], key = note.toLowerCase();
+      const same = note ? list.filter((x) => String(x.note || "").trim().toLowerCase() === key) : [];
+      const inCat = list.filter((x) => x.category === r.category), sum = (l) => l.reduce((a, x) => a + x.amount, 0);
+      aiChat.push({ role: "me", text: "כמה הוצאתי על " + (note ? "״" + note + "״" : cat) + " ב" + monthName(per) + "?" });
+      aiRows = same.length ? same : inCat;
+      aiPush("ai", gx((same.length ? "**על ״" + note + "״ הוצאת ב" + monthName(per) + " " + fmt(sum(same)) + "** (" + (same.length === 1 ? "פעם אחת" : same.length + " פעמים") + ").\n" : "") + (same.length ? "ובכל " : "**על ") + cat + " " + (same.length ? "" : "הוצאת ב" + monthName(per) + " ") + fmt(sum(inCat)) + (same.length ? "" : "**") + " (" + (inCat.length === 1 ? "הוצאה אחת" : inCat.length + " הוצאות") + ")."), true);
+      return;
+    }
+    aiAsk("ההוצאה של " + fmt(r.amount) + " על " + (note ? "״" + note + "״" : cat) + " (" + cat + ") ב־" + shortDate(r.spent_on) + ": זה יותר מהרגיל אצלי?", "item");
+  }
+  // ---- What the assistant remembers (only what the user approved on a card) ----
+  function aiMemList() {
+    const box = document.createElement("div"); box.className = "aimem";
+    const list = store.aiNotes || [];
+    if (!list.length) { const p = document.createElement("p"); p.textContent = gx("עוד לא ביקשת שאזכור כלום. פשוט ספר לי, למשל ״תזכור שהמשכורת נכנסת ב־10״ או ״אני חוסך לטיסה ביולי״."); box.append(p); return box; }
+    list.forEach((n) => {
+      const row = document.createElement("div");
+      const t = document.createElement("span"); t.textContent = n.text;
+      const x = document.createElement("button"); x.type = "button"; x.textContent = "✕"; x.setAttribute("aria-label", "לשכוח את זה");
+      x.addEventListener("click", () => { store.aiNotes = (store.aiNotes || []).filter((y) => y.id !== n.id); persist(); aiPaint(); });
+      row.append(t, x); box.append(row);
+    });
+    return box;
+  }
+  // ---- Subscription hunt: expenses that come back every month but aren't in the fixed charges ----
+  async function aiSubHunt() {
+    if (aiBusy) return;
+    aiChat.push({ role: "me", text: "🔁 יש לי מנויים שפספסתי?" }); aiBusy = true; aiWait = "🔎 מחפש…"; aiPaint();
+    let rows = [];
+    try { const r = await sb.from("expenses").select("spent_on, amount, category, note").gte("spent_on", dateAdd(todayStr(), -130)); rows = r.data || []; } catch (e) {}
+    aiBusy = false; aiWait = "";
+    const fixed = ((store.months[thisMonth()] || data()).expenses || []).map((x) => String(x.name || "").trim().toLowerCase()).filter(Boolean);
+    const g = {};
+    rows.forEach((r) => { const k = String(r.note || "").trim().toLowerCase(); if (k.length < 2) return; (g[k] = g[k] || { name: String(r.note).trim(), l: [] }).l.push(r); });
+    const found = Object.values(g).map((o) => {
+      const months = new Set(o.l.map((r) => periodOf(r.spent_on))), am = o.l.map((r) => +r.amount).sort((a, b) => a - b);
+      return { ...o, months: months.size, amount: am[Math.floor(am.length / 2)], steady: am[am.length - 1] <= am[0] * 1.25 + 1 };
+    }).filter((o) => o.months >= 2 && o.l.length <= o.months + 1 && o.steady && !fixed.some((f) => f.includes(o.name.toLowerCase()) || o.name.toLowerCase().includes(f)))
+      .sort((a, b) => b.amount - a.amount).slice(0, 8);
+    if (!found.length) { aiPush("ai", gx("לא מצאתי הוצאות שחוזרות כל חודש ועוד לא ברשימת החיובים הקבועים. 👍"), true); return; }
+    aiChat.push({ role: "ai", local: 1, actOff: 1, actSt: "", text: gx("מצאתי " + (found.length === 1 ? "הוצאה אחת שחוזרת" : found.length + " הוצאות שחוזרות") + " כל חודש ועוד לא ברשימת החיובים הקבועים. סמן מה שבאמת מנוי ולחץ ״שמור״. אחרי זה לא צריך לרשום אותו יותר כהוצאה."),
+      act: found.map((o) => ({ t: "fixed_add", name: o.name, amount: o.amount, why: "שולם ב־" + o.months + " חודשים, בערך " + fmt(o.amount) + " בכל פעם" })) });
+    aiSaveChat(); aiPaint();
+  }
+  // ---- A photo of a receipt becomes an expense card to approve ----
+  $("aiRcpt").addEventListener("change", async () => {
+    const f = $("aiRcpt").files[0]; $("aiRcpt").value = ""; if (!f || aiBusy) return;
+    let image; try { image = await aiShrink(f); } catch (e) { aiPush("err", "לא הצלחתי לפתוח את התמונה."); return; }
+    const cats = data().cats.map((c) => c.id + ": " + catNames()[c.id]).join(", ");
+    aiRun("🧾 צילום קבלה", { tool: "receipt", image, mime: "image/jpeg", input: "היום: " + todayStr() + "\nהקטגוריות (id: שם): " + cats, context: "-" }, (j) => {
+      const d = j.data || {};
+      if (!(+d.amount > 0)) { aiPush("ai", gx("לא מצאתי סכום בתמונה. נסה צילום חד וישר של כל הקבלה.")); return; }
+      aiChat.push({ role: "ai", text: gx("מצאתי בקבלה. בדוק ולחץ ״שמור״:"), actSt: "", act: [{ t: "exp_add", amount: +d.amount, note: d.note || "", cat: d.cat || "", date: d.date || todayStr() }] });
+      aiSaveChat(); aiPaint();
+    });
+  });
   // ---- Several expenses in one sentence: parsed, then shown as a list to fix and approve ----
   function aiParseExpenses(text) {
     const cats = data().cats.map((c) => ({ id: c.id, name: catNames()[c.id] }));
@@ -6765,6 +6942,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   $("aiFab").addEventListener("click", aiOpen);
   $("aiIdeas").addEventListener("click", () => { aiIdeas = !aiIdeas; aiPaint(); if (aiIdeas) setTimeout(() => $("aiStart").scrollIntoView({ block: "nearest" }), 0); });
   $("aiClose").addEventListener("click", () => closeDlg("aiSheet"));
+  $("aiSheet").addEventListener("close", () => { if (aiSpeaking) { try { speechSynthesis.cancel(); } catch (e) {} aiSpeaking = null; } });
   $("aiClear").addEventListener("click", () => { aiChat = []; aiExpRows = []; try { localStorage.removeItem(aiKey()); } catch (e) {} aiPaintExp(); aiPaint(); });
   $("aiModeOff").addEventListener("click", () => { aiMode = ""; aiPaint(); });
   $("aiForm").addEventListener("submit", (e) => { e.preventDefault(); aiAsk($("aiIn").value); });
@@ -6783,6 +6961,9 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   document.querySelectorAll("#aiSheet [data-ai]").forEach((b) => b.addEventListener("click", () => {
     const k = b.dataset.ai;
     if (k === "exp") { aiMode = "exp"; aiPaint(); $("aiIn").focus(); return; }
+    if (k === "receipt") { aiMode = ""; $("aiRcpt").click(); return; }
+    if (k === "subs") { aiMode = ""; aiIdeas = false; aiSubHunt(); return; }
+    if (k === "mem") { aiMode = ""; aiIdeas = false; aiChat.push({ role: "ai", local: 1, mem: 1, text: gx("🧠 מה אני זוכר עליך (רק מה שאישרת):") }); aiSaveChat(); aiPaint(); return; }
     if (k === "shift") {
       closeDlg("aiSheet"); setView("shifts"); openImport();
       if ($("importSheet").open || $("importSheet").hasAttribute("open")) $("impPhoto").click();
@@ -6844,14 +7025,15 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     $("impPhoto").value = "";
   });
   // ---- Owner: how much the assistant is used, and feedback grouped into topics ----
-  async function renderAdminAi(users) {
-    const box = $("adAi"); box.textContent = "טוען…";
+  async function renderAdminAi(users, fbs) {
+    const box = $("adAi"); box.textContent = "טוען…"; $("adWeek").textContent = "טוען…";
+    aiCall({ tool: "admin_health" }).then((h) => renderAdminHealth(h.rows || [], users || [], fbs || [])).catch((e) => { $("adWeek").textContent = aiErrText(e); });
     try {
       const j = await aiCall({ tool: "admin_usage" });
       const rows = j.rows || [];
       box.innerHTML = "";
       if (!rows.length) { box.textContent = "עוד אף אחד לא השתמש בעוזר."; return; }
-      const LBL = { chat: "💬 שאלות", expenses: "✍️ רישום הוצאות", shiftsheet: "📷 דוחות נוכחות", letter: "💌 מכתבים", patterns: "🔍 הרגלים", admin_fb: "🛠️ סיכום משובים" };
+      const LBL = AI_LBL;
       const byTool = {}, byUser = {}, today = new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Jerusalem" });
       let total = 0, todayN = 0;
       rows.forEach((r) => { total += r.n; if (r.day === today) todayN += r.n; byTool[r.tool] = (byTool[r.tool] || 0) + r.n; byUser[r.user_id] = (byUser[r.user_id] || 0) + r.n; });
@@ -6869,6 +7051,41 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       });
     } catch (e) { box.textContent = aiErrText(e); }
   }
+  const AI_LBL = { chat: "💬 שאלות", expenses: "✍️ רישום הוצאות", shiftsheet: "📷 דוחות נוכחות", receipt: "🧾 קבלות", challenge: "🏅 אתגרים", letter: "💌 מכתבים", patterns: "🔍 הרגלים", admin_fb: "🛠️ סיכום משובים" };
+  const AI_TOPIC = { money: "💸 הוצאות וכסף", shifts: "⏰ משמרות ושכר", action: "✍️ בקשות לרשום", app: "📱 איך עושים באפליקציה", rights: "⚖️ זכויות", whatif: "🔮 מה אם", showwork: "🔎 איך הגעת לזה", item: "🧾 על הוצאה מסוימת", other: "💬 אחר" };
+  // Owner: is the assistant healthy (failures, speed, which Google model answered) and a weekly picture of the app
+  function renderAdminHealth(rows, users, fbs) {
+    const wk = Date.now() - 7 * 864e5, w = rows.filter((r) => new Date(r.at) >= wk), prev = rows.filter((r) => new Date(r.at) < wk);
+    const line = (b, ...spans) => { const d = document.createElement("div"); d.className = "aduser"; const x = document.createElement("b"); x.textContent = b; d.append(x); spans.filter(Boolean).forEach((t) => { const s = document.createElement("span"); s.textContent = t; d.append(s); }); return d; };
+    const count = (l, k) => { const o = {}; l.forEach((r) => { const v = r[k] || "?"; o[v] = (o[v] || 0) + 1; }); return Object.entries(o).sort((a, b) => b[1] - a[1]); };
+    // Weekly
+    const wb = $("adWeek"); wb.innerHTML = "";
+    const active = users.filter((u) => u.last_seen && new Date(u.last_seen) >= wk).length;
+    const aiUsers = new Set(w.map((r) => r.user_id)).size, prevUsers = new Set(prev.map((r) => r.user_id)).size;
+    const fbW = fbs.filter((f) => new Date(f.created_at) >= wk);
+    const ppl = (n) => (n === 1 ? "משתמש אחד" : n + " משתמשים"), times = (n) => (n === 1 ? "פעם אחת" : n + " פעמים");
+    wb.append(line("👥 " + ppl(active) + " " + (active === 1 ? "פתח" : "פתחו") + " את האפליקציה", "מתוך " + users.length + " רשומים"));
+    wb.append(line("✨ " + ppl(aiUsers) + " " + (aiUsers === 1 ? "השתמש" : "השתמשו") + " בעוזר, " + times(w.length), "בשבוע שלפני: " + ppl(prevUsers) + ", " + times(prev.length)));
+    const top = count(w.filter((r) => r.topic), "topic");
+    if (top.length) wb.append(line("על מה שאלו", top.map(([k, n]) => (AI_TOPIC[k] || k) + " " + n).join(" · ")));
+    wb.append(line("💬 " + fbW.length + " משובים השבוע", fbW.length ? fbW.map((f) => ({ idea: "💡", bug: "🐞" }[f.kind] || "💬")).join(" ") : ""));
+    // Health
+    const box = $("adAi"), d = document.createElement("div"); d.className = "aduser";
+    const bad = w.filter((r) => !r.ok), okMs = w.filter((r) => r.ok && r.ms).map((r) => r.ms).sort((a, b) => a - b);
+    const med = okMs.length ? okMs[Math.floor(okMs.length / 2)] : 0;
+    const h = line((bad.length / Math.max(1, w.length) > 0.2 ? "🔴" : bad.length ? "🟡" : "🟢") + " בריאות העוזר השבוע: " + (w.length - bad.length) + " הצליחו, " + bad.length + " נכשלו",
+      okMs.length ? "זמן תשובה רגיל: " + (med / 1000).toFixed(1) + " שניות · האיטית: " + (okMs[okMs.length - 1] / 1000).toFixed(1) + " שניות" : "",
+      w.length ? "מי ענה: " + count(w.filter((r) => r.ok), "model").map(([k, n]) => k.replace(/^gemini-/, "") + " " + n).join(" · ") : "",
+      bad.length ? "תקלות אחרונות: " + bad.slice(0, 3).map((r) => new Date(r.at).toLocaleString("he-IL", { dateStyle: "short", timeStyle: "short" }) + " " + (AI_LBL[r.tool] || r.tool) + " (" + String(r.err || "").slice(0, 40) + ")").join(" · ") : "");
+    const wait = () => { if (box.firstChild && box.textContent !== "טוען…") box.prepend(h); else setTimeout(wait, 300); };
+    wait();
+  }
+  $("adWeekFb").addEventListener("click", async () => {
+    const out = $("adWeekFbOut"); out.hidden = false; out.textContent = "✨ מסכם…"; $("adWeekFb").disabled = true;
+    try { const j = await aiCall({ tool: "admin_fb", days: 7, input: "סכם את המשובים של השבוע האחרון." }); out.textContent = ""; aiRenderText(out, j.text); }
+    catch (e) { out.textContent = aiErrText(e); }
+    $("adWeekFb").disabled = false;
+  });
   $("adFbSum").addEventListener("click", async () => {
     const out = $("adFbSumOut"); out.hidden = false; out.textContent = "✨ מסכם…"; $("adFbSum").disabled = true;
     try { const j = await aiCall({ tool: "admin_fb" }); out.textContent = ""; aiRenderText(out, j.text); }

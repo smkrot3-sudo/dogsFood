@@ -50,8 +50,17 @@ const PROMPTS: Record<string, string> = {
   {"t":"shift_add","date":"YYYY-MM-DD","start":"HH:MM","end":"HH:MM","break":דקות הפסקה}
   {"t":"income_add","date":"YYYY-MM-DD","amount":מספר,"note":"פירוט","kind":"מתנה|החזר מחבר|מכירה|אחר"}
   {"t":"remind","at":"YYYY-MM-DD HH:MM","text":"על מה להזכיר"} (בלי שעה: 10:00)
+  {"t":"note_add","text":"עובדה קצרה על המשתמש בגוף שלישי"} (כשהמשתמש מספר משהו קבוע על עצמו או מבקש ״תזכור ש…״, למשל ״חוסך לטיסה ביולי״, ״המשכורת נכנסת ב־10״)
+  {"t":"note_del","text":"הטקסט כמו שמופיע בזיכרון"}
   תאריכים: היום אלא אם נאמר אחרת (״אתמול״, ״ביום ראשון״). הוצאה, משמרת והכנסה לא בעתיד. אם חסר פרט חיוני (סכום, שעות המשמרת), שאל במקום להציע. אל תכתוב [[act]] כשרק שואלים שאלה.
+- ״מה אם…״ (עוד משמרות, הוצאה גדולה, לוותר על משהו): חשב לפי המספרים המוכנים מה ישתנה בכסף החופשי, במותר ליום ובסוף החודש. כתוב בבירור שזה רק חישוב ושום דבר לא השתנה, ובלי [[act]].
+- ״איך הגעת לזה?״ על תשובה קודמת: פרט מאילו שורות יצא המספר (תאריך, סכום, פירוט; עד 10 שורות, ואם יש יותר כתוב כמה עוד) או מאיזה מספר מוכן.
+- ״זיכרון״ (אם מופיע בנתונים): דברים שהמשתמש ביקש שתזכור. התחשב בהם.
 התשובה עד 120 מילים, אלא אם ביקשו פירוט.`,
+  receipt: `בתמונה קבלה או חשבונית. חלץ ממנה את ההוצאה.
+החזר JSON בלבד: {"amount":number,"note":"שם החנות או מה נקנה, קצר","cat":"id של הקטגוריה הכי מתאימה מהרשימה או ריק","date":"YYYY-MM-DD או ריק"}
+- amount: הסכום הכולל לתשלום (״סה״כ״, ״לתשלום״), לא שורה בודדת. אם אין קבלה בתמונה, amount = 0.
+- date: התאריך שעל הקבלה; אם לא כתוב, ריק. לא תאריך עתידי.`,
   challenge: `הצע למשתמש אתגר אחד לחודש הנוכחי שמתאים להרגלים שלו לפי הנתונים. סוגי אתגרים אפשריים בלבד:
 - nospend: מספר ימים בלי אף הוצאה עד סוף החודש (n אחד מ־4, 6, 8, 10, 12; שיהיה אפשרי לפי הימים שנשארו).
 - nocat: לא להוציא כלום על קטגוריה אחת עד סוף החודש (cat = id).
@@ -231,6 +240,13 @@ Deno.serve(async (req) => {
     const body = await req.json();
     const tool = String(body.tool || "");
     if (tool === "status") return json({ ok: true });
+    if (tool === "admin_health") {
+      // The owner's view of how the assistant is doing: counts, failures, speed, models and topics. No content.
+      if (!isOwner) return json({ error: "forbidden" }, 403);
+      const since = new Date(Date.now() - 14 * 864e5).toISOString();
+      const { data } = await admin.from("ai_log").select("at, user_id, tool, topic, model, ms, ok, err").gte("at", since).order("at", { ascending: false }).limit(5000);
+      return json({ rows: data || [] });
+    }
     if (tool === "admin_usage") {
       if (!isOwner) return json({ error: "forbidden" }, 403);
       const since = new Date(Date.now() - 30 * 864e5).toISOString().slice(0, 10);
@@ -248,7 +264,10 @@ Deno.serve(async (req) => {
     let system = BASE(String(body.tone || "tough"), today, body.gender === "f" ? "f" : "m") + "\n\n" + PROMPTS[tool];
     const ctx = String(body.context || "").slice(0, 120000);
     if (tool === "admin_fb") {
-      const { data } = await admin.from("feedback").select("kind, body, page, created_at").order("created_at", { ascending: false }).limit(200);
+      let q = admin.from("feedback").select("kind, body, page, created_at").order("created_at", { ascending: false }).limit(200);
+      if (+body.days > 0) q = q.gte("created_at", new Date(Date.now() - +body.days * 864e5).toISOString());
+      const { data } = await q;
+      if (+body.days > 0 && !(data || []).length) return json({ text: "השבוע לא הגיעו משובים.", left: null });
       system += "\n\nהמשובים:\n" + (data || []).map((f) => `- [${f.created_at.slice(0, 10)}] ${f.kind || ""}: ${(f.body || "").replace(/\s+/g, " ").slice(0, 400)}`).join("\n");
     } else if (ctx) {
       system += "\n\n=== הנתונים של המשתמש ===\n" + ctx;
@@ -260,18 +279,23 @@ Deno.serve(async (req) => {
       hist.forEach((m: { role: string; text: string }) => contents.push({ role: m.role === "ai" ? "model" : "user", parts: [{ text: String(m.text || "").slice(0, 2000) }] }));
     }
     const parts: unknown[] = [{ text: String(body.input || (tool === "letter" ? "כתוב את המכתב." : tool === "patterns" ? "מה ההרגלים הנסתרים שלי?" : tool === "challenge" ? "איזה אתגר מתאים לי החודש?" : tool === "admin_fb" ? "סכם את המשובים." : "")).slice(0, 4000) }];
-    if (tool === "shiftsheet" && body.image && body.mime) parts.push({ inlineData: { mimeType: String(body.mime), data: String(body.image) } });
+    if ((tool === "shiftsheet" || tool === "receipt") && body.image && body.mime) parts.push({ inlineData: { mimeType: String(body.mime), data: String(body.image) } });
     contents.push({ role: "user", parts });
 
-    const wantJson = tool === "expenses" || tool === "shiftsheet" || tool === "challenge";
+    const wantJson = tool === "expenses" || tool === "shiftsheet" || tool === "challenge" || tool === "receipt";
     const left = free ? null : DAILY_LIMIT - used.data;
     // A question that failed doesn't count toward the daily limit, so "try again" is free
     const refund = () => admin.rpc("ai_refund", { p_user: uid, p_tool: tool }).then(() => {}, () => {});
+    // Health log for the owner: which tool, a topic word the page picked, model, time, ok or not. Never the question or the answer.
+    const TOPICS = ["money", "shifts", "action", "app", "rights", "whatif", "showwork", "item", "other"];
+    const topic = TOPICS.includes(String(body.topic)) ? String(body.topic) : null;
+    const log = (ok: boolean, model: string | null, err?: string) =>
+      admin.from("ai_log").insert({ user_id: uid, tool, topic, model, ms: Date.now() - t0, ok, err: err ? err.replace(/\s+/g, " ").slice(0, 120) : null }).then(() => {}, () => {});
     const t0 = Date.now();
     if (body.stream && !wantJson) {
       let st: Awaited<ReturnType<typeof firstWords>>;
       try { st = await race((model, ac) => firstWords(key, model, system, contents, ac)); }
-      catch (e) { await refund(); throw e; }
+      catch (e) { await refund(); await log(false, null, String((e as Error).message || e)); throw e; }
       const enc = new TextEncoder();
       const stream = new ReadableStream({
         async start(c) {
@@ -282,9 +306,11 @@ Deno.serve(async (req) => {
             for await (const t of st.it) send({ t });
             send({ done: true, left });
             console.log("ai ok stream", tool, st.model, Date.now() - t0, "ms", "context", ctx.length);
+            await log(true, st.model);
           } catch (e) {
             console.error("ai stream broke", st.model, String((e as Error).message || e).slice(0, 200));
             await refund();
+            await log(false, st.model, "stream broke");
             send({ error: "fail" });
           } finally { clearTimeout(kill); c.close(); }
         },
@@ -292,15 +318,17 @@ Deno.serve(async (req) => {
       return new Response(stream, { headers: { ...cors, "Content-Type": "text/event-stream", "Cache-Control": "no-cache" } });
     }
     let out: { text: string; model: string };
-    try { out = await gemini(key, system, contents, wantJson, tool === "shiftsheet" ? 15000 : 6000); }
-    catch (e) { await refund(); throw e; }
+    try { out = await gemini(key, system, contents, wantJson, tool === "shiftsheet" || tool === "receipt" ? 15000 : 6000); }
+    catch (e) { await refund(); await log(false, null, String((e as Error).message || e)); throw e; }
     console.log("ai ok", tool, out.model, Date.now() - t0, "ms", "context", ctx.length);
     if (wantJson) {
       let parsed: unknown = null;
       try { parsed = JSON.parse(out.text.replace(/^```(?:json)?\s*|\s*```$/g, "")); } catch (_) { /* fall through */ }
-      if (!parsed) { await refund(); return json({ error: "parse" }, 502); }
+      if (!parsed) { await refund(); await log(false, out.model, "parse"); return json({ error: "parse" }, 502); }
+      await log(true, out.model);
       return json({ data: parsed, left });
     }
+    await log(true, out.model);
     return json({ text: out.text, left });
   } catch (e) {
     const msg = String((e as Error).message || e);
