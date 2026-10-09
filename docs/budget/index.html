@@ -5957,7 +5957,27 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   const NO_FOLD = new Set(["calH", "calDayH", "missH"]);
   let folded = new Set();
   try { folded = new Set(JSON.parse(localStorage.getItem("budget-folded") || "[]")); } catch (e) {}
-  function saveFolded() { try { localStorage.setItem("budget-folded", JSON.stringify([...folded])); } catch (e) {} }
+  // Closed cards are kept on the phone and in the account, so another phone shows the same ones
+  function saveFolded() {
+    try { localStorage.setItem("budget-folded", JSON.stringify([...folded])); } catch (e) {}
+    if (store && !loadingFolded) { store.folded = [...folded]; persist(); }
+  }
+  let loadingFolded = false;
+  function applyFolded() {
+    if (!store) return;
+    if (Array.isArray(store.folded)) folded = new Set(store.folded);
+    else if (folded.size) { store.folded = [...folded]; persist(); }
+    loadingFolded = true;
+    document.querySelectorAll("#app .panel > h2.foldable").forEach((h) => {
+      const panel = h.parentElement, on = folded.has(h.id);
+      panel.classList.toggle("folded", on);
+      const f = h.querySelector(".foldbtn");
+      if (f) { f.setAttribute("aria-expanded", String(!on)); f.setAttribute("aria-label", on ? "פתיחת הכרטיס" : "קיפול הכרטיס"); }
+    });
+    loadingFolded = false;
+    try { localStorage.setItem("budget-folded", JSON.stringify([...folded])); } catch (e) {}
+    try { l3cards(); } catch (e) {}
+  }
   function helpFor(key, anchor, holder) {
     const btn = document.createElement("button"); btn.type = "button"; btn.className = "helpbtn"; btn.textContent = "?";
     btn.setAttribute("aria-label", "הסבר"); btn.setAttribute("aria-expanded", "false");
@@ -7566,7 +7586,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     takeAppOffDays(); renderMissing();
     ensurePrev(month);
     sendAppPlans();
-    applyLayout();
+    applyLayout(); applyFolded();
     if (isNewUser()) { openWizard(); try { localStorage.setItem("budget-news", NEWS_ID); } catch (e) {} }
     else if (store.onboarded && !settings().gender) setTimeout(() => { if (!settings().gender) openDlg("genderSheet"); }, 800);
     else nextIntro();
