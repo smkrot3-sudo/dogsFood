@@ -1167,6 +1167,44 @@ header.topbar .brand { flex: 1 1 auto; } header.topbar .brandtext { min-width: 0
 .skel i { display: block; border-radius: 18px; background: linear-gradient(90deg, var(--line) 0, color-mix(in srgb, var(--line) 40%, var(--surface)) 40%, var(--line) 80%); background-size: 300% 100%; animation: skel 1.3s ease-in-out infinite; }
 @keyframes skel { from { background-position: 100% 0; } to { background-position: 0 0; } }
 @media (prefers-reduced-motion: reduce) { .skel i { animation: none; } }
+/* A small picture of the home screen, drawn from the live colors (login page and the colors screen) */
+.mini3 { width: 100%; max-width: 280px; justify-self: center; display: grid; gap: 7px; padding: 12px 10px 14px; border-radius: 30px; background: var(--bg);
+  border: 6px solid color-mix(in srgb, var(--fg) 82%, transparent); box-shadow: var(--shadow); font-size: 11px; line-height: 1.25; text-align: start; position: relative; overflow: hidden; }
+.mini3 > * { position: relative; }
+.mini3::before { content: ""; position: absolute; inset: -40px -40px auto auto; width: 160px; height: 160px; border-radius: 50%; background: var(--blob1); }
+.mini3 .m-top { display: flex; align-items: center; gap: 6px; background: var(--surface); border-radius: 12px; padding: 6px 8px; box-shadow: var(--card-shadow); }
+.mini3 .m-logo { width: 20px; height: 20px; border-radius: 7px; background: var(--brand); display: grid; place-items: center; font-size: 11px; flex: none; }
+.mini3 .m-title { font-weight: 800; font-size: 12px; background: var(--brand); -webkit-background-clip: text; background-clip: text; color: transparent; white-space: nowrap; }
+.mini3 .m-tabs { display: flex; gap: 3px; background: var(--surface); border-radius: 999px; padding: 3px; box-shadow: var(--card-shadow); }
+.mini3 .m-tabs span { flex: 1; text-align: center; padding: 4px 2px; border-radius: 999px; color: var(--muted); font-weight: 700; white-space: nowrap; }
+.mini3 .m-tabs .on { background: var(--brand); color: #fff; }
+.mini3 .m-today { display: flex; justify-content: space-between; align-items: center; color: #fff; background: var(--good-grad); border-radius: 16px; padding: 10px 12px; box-shadow: 0 8px 18px rgba(26, 140, 160, .25); }
+.mini3 .m-today small { display: block; opacity: .9; font-weight: 600; }
+.mini3 .m-today b { font-size: 26px; font-weight: 800; line-height: 1.1; }
+.mini3 .m-face { width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; font-size: 22px; box-shadow: inset 0 0 0 3px #fff; }
+.mini3 .m-tile { background: var(--surface); border-radius: 12px; padding: 7px 9px; border-inline-start: 4px solid var(--pc3); box-shadow: var(--card-shadow); display: grid; gap: 4px; font-weight: 700; color: var(--fg); }
+.mini3 .m-tile i { display: block; height: 6px; border-radius: 4px; background: var(--line); overflow: hidden; }
+.mini3 .m-tile em { display: block; height: 100%; border-radius: 4px; }
+.mini3 .m-row { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.mini3 .m-tile.s { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+.mini3 .m-btn { justify-self: center; background: var(--brand); color: #fff; font-weight: 800; border-radius: 999px; padding: 6px 16px; box-shadow: 0 6px 14px rgba(219, 53, 119, .35); }
+/* Colors screen: the picture stays in view while trying colors, with save / cancel */
+.lookprev { display: grid; gap: 10px; }
+.lookprev.pend { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 6px); z-index: 6; background: color-mix(in srgb, var(--bg) 92%, transparent); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); padding: 8px 0 10px; border-radius: 20px; }
+.lookprev.pend .mini3 { max-width: 180px; padding: 7px 7px 9px; gap: 4px; font-size: 10px; }
+.lookprev.pend .lookbar { font-size: 14px; gap: 6px; } .lookprev.pend .lookbar .btn { padding: 6px 12px; }
+.lookprev .lookbar { display: flex; gap: 8px; justify-content: center; align-items: center; flex-wrap: wrap; font-weight: 700; }
+.lookprev .lookbar[hidden] { display: none; }
+/* Login page */
+.auth { gap: 22px; }
+.auth .hero3 { display: grid; gap: 14px; justify-items: center; text-align: center; padding: 22px 16px 26px; border-radius: 30px; position: relative; overflow: hidden;
+  background: linear-gradient(160deg, color-mix(in srgb, var(--brand1) 18%, var(--surface)), color-mix(in srgb, var(--brand3) 14%, var(--surface))); box-shadow: var(--card-shadow); }
+.auth .hero3 h1 { margin: 0; font-size: clamp(26px, 7vw, 34px); }
+.auth .hero3 .tag { margin: 0; font-weight: 700; font-size: 17px; color: var(--fg); text-wrap: balance; }
+.auth .hero3 .mini3 { max-width: 230px; transform: rotate(-3deg); margin-top: 4px; }
+.auth .hero3 .hero-logo { width: 72px; height: 72px; border-radius: 24px; font-size: 38px; }
+.auth .panel { border-inline-start: 5px solid var(--brand2); }
+.auth .feats > div { border-inline-start: 4px solid var(--fc, var(--brand2)); }
 /* Holidays and Friday: a small greeting above the home cards */
 .season3 { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 10px 14px; border-radius: 18px; font-weight: 800; font-size: 18px;
   background: linear-gradient(120deg, color-mix(in srgb, #f5b400 22%, var(--surface)), color-mix(in srgb, var(--brand2) 14%, var(--surface))); box-shadow: var(--card-shadow); }
@@ -1187,11 +1225,20 @@ html.hugetext .season3 svg { width: 70px; height: 21px; }
 
 <div class="auth" id="authScreen" hidden>
   <a class="getapp" href="budget.apk" download hidden>📱 הורדת האפליקציה לאנדרואיד</a><div class="themes" role="group" aria-label="מצב תצוגה"><button type="button" data-theme-pick="light" aria-pressed="false">☀️ בהיר</button><button type="button" data-theme-pick="dark" aria-pressed="false">🌙 כהה</button></div>
-  <div class="hero-logo" aria-hidden="true">💰</div>
-  <div>
+  <section class="hero3">
+    <div class="hero-logo" aria-hidden="true">💰</div>
     <h1>התקציב החודשי שלי</h1>
+    <p class="tag">כמה מותר לך להוציא היום, במספר אחד.</p>
+    <div class="mini3" aria-hidden="true">
+      <div class="m-top"><span class="m-logo">💰</span><b class="m-title">התקציב החודשי שלי</b></div>
+      <div class="m-tabs"><span class="on">🏠 ראשי</span><span>⏰ משמרות</span><span>📅 לוח</span></div>
+      <div class="m-today"><div><small>מותר לך להוציא היום</small><b>₪132</b></div><span class="m-face">😎</span></div>
+      <div class="m-tile" style="--pc3:#ec4899">🛍️ לפי קטגוריות<i><em style="width:43%;background:#f97316"></em></i><i><em style="width:28%;background:#ec4899"></em></i></div>
+      <div class="m-row"><div class="m-tile s" style="--pc3:#8b5cf6">🧠 ההרגלים שלי</div><div class="m-tile s" style="--pc3:#10b981">🎯 חיסכון</div></div>
+      <div class="m-btn">💸 הוצאה</div>
+    </div>
     <p class="sub">התחברו כדי לשמור את התקציב שלכם ולראות אותו מכל מכשיר.</p>
-  </div>
+  </section>
   <section class="panel">
     <button class="btn block google" type="button" id="googleBtn" hidden>
       <svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>
@@ -1212,12 +1259,12 @@ html.hugetext .season3 svg { width: 70px; height: 21px; }
     <h2 id="landH">מה יש כאן?</h2>
     <p class="sub">אפליקציה חינמית בעברית למי שהכסף נגמר לו לפני סוף החודש.</p>
     <div class="feats">
-      <div><span aria-hidden="true">😎</span><b>כמה מותר היום</b><small>סכום אחד ברור לכל יום, שמתעדכן עם כל הוצאה.</small></div>
-      <div><span aria-hidden="true">⚡</span><b>רישום בלחיצה</b><small>הקפה של הבוקר נרשם בלחיצה אחת, בלי טפסים.</small></div>
-      <div><span aria-hidden="true">⏰</span><b>משמרות ושכר</b><small>שעות נוספות, לילה, שבת וחג לפי החוק, ותזכורת יומית.</small></div>
-      <div><span aria-hidden="true">🤔</span><b>״אולי אקנה״</b><small>מחכים 48 שעות לפני קנייה, ורוב הפעמים מוותרים.</small></div>
-      <div><span aria-hidden="true">🎯</span><b>יעדי חיסכון</b><small>רואים כמה חסר ומתי מגיעים.</small></div>
-      <div><span aria-hidden="true">📱</span><b>בכל מכשיר</b><small>טלפון, מחשב ואפליקציה לאנדרואיד, הכול מסונכרן.</small></div>
+      <div style="--fc:#f97316"><span aria-hidden="true">😎</span><b>כמה מותר היום</b><small>סכום אחד ברור לכל יום, שמתעדכן עם כל הוצאה.</small></div>
+      <div style="--fc:#f5b400"><span aria-hidden="true">⚡</span><b>רישום בלחיצה</b><small>הקפה של הבוקר נרשם בלחיצה אחת, בלי טפסים.</small></div>
+      <div style="--fc:#8b5cf6"><span aria-hidden="true">⏰</span><b>משמרות ושכר</b><small>שעות נוספות, לילה, שבת וחג לפי החוק, ותזכורת יומית.</small></div>
+      <div style="--fc:#3b82f6"><span aria-hidden="true">🤔</span><b>״אולי אקנה״</b><small>מחכים 48 שעות לפני קנייה, ורוב הפעמים מוותרים.</small></div>
+      <div style="--fc:#10b981"><span aria-hidden="true">🎯</span><b>יעדי חיסכון</b><small>רואים כמה חסר ומתי מגיעים.</small></div>
+      <div style="--fc:#ec4899"><span aria-hidden="true">📱</span><b>בכל מכשיר</b><small>טלפון, מחשב ואפליקציה לאנדרואיד, הכול מסונכרן.</small></div>
     </div>
   </section>
 </div>
@@ -1585,6 +1632,17 @@ html.hugetext .season3 svg { width: 70px; height: 21px; }
       <button class="btn" type="button" id="lookBack">→ חזרה</button>
       <h2 class="settitle">🎨 עיצוב וצבעים</h2>
     </div>
+    <div class="lookprev" id="lookPrev">
+    <div class="mini3" aria-hidden="true">
+      <div class="m-top"><span class="m-logo">💰</span><b class="m-title">התקציב החודשי שלי</b></div>
+      <div class="m-tabs"><span class="on">🏠 ראשי</span><span>⏰ משמרות</span><span>📅 לוח</span></div>
+      <div class="m-today"><div><small>מותר לך להוציא היום</small><b>₪132</b></div><span class="m-face">😎</span></div>
+      <div class="m-tile" style="--pc3:#ec4899">🛍️ לפי קטגוריות<i><em style="width:43%;background:#f97316"></em></i><i><em style="width:28%;background:#ec4899"></em></i></div>
+      <div class="m-row"><div class="m-tile s" style="--pc3:#8b5cf6">🧠 ההרגלים שלי</div><div class="m-tile s" style="--pc3:#10b981">🎯 חיסכון</div></div>
+      <div class="m-btn">💸 הוצאה</div>
+    </div>
+      <div class="lookbar" id="lookBar" hidden><span>לשמור את הצבעים האלה?</span><button class="btn primary" type="button" id="lookOk">✓ שמור</button><button class="btn" type="button" id="lookNo">✕ ביטול</button></div>
+    </div>
     <section class="panel" aria-labelledby="modeH">
       <h2 id="modeH" class="pc-violet" data-e="🌗">מצב תצוגה</h2>
       <div class="modepick" role="group" aria-label="מצב תצוגה">
@@ -1595,7 +1653,7 @@ html.hugetext .season3 svg { width: 70px; height: 21px; }
     </section>
     <section class="panel" aria-labelledby="palH">
       <h2 id="palH" class="pc-orange" data-e="🎨">צבע הרקע</h2>
-      <p class="hint">הצבע משתנה מיד, ונשמר במכשיר הזה. לכל צבע יש גרסה בהירה וגרסה כהה.</p>
+      <p class="hint">לוחצים על צבע ורואים אותו מיד, למעלה ובכל המסך. ״שמור״ משאיר אותו, ״ביטול״ מחזיר את הקודם. לכל צבע יש גרסה בהירה וגרסה כהה.</p>
       <div class="palgrid" id="palGrid"></div>
     </section>
     <section class="panel" aria-labelledby="accH">
@@ -6177,6 +6235,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       const dot = document.createElement("i"); dot.style.background = "linear-gradient(135deg," + a + "," + b + " 55%," + c + ")"; if (id === cur) dot.textContent = "✓";
       btn.append(dot, name);
       btn.addEventListener("click", () => {
+        lookPend();
         try { if (id === "orig") localStorage.removeItem("budget-accent"); else localStorage.setItem("budget-accent", id); } catch (e) {}
         BP.applyAccent(); renderAccents(); renderPalettes();
       });
@@ -6193,6 +6252,28 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   }));
   $("hapticOn").addEventListener("change", () => { try { localStorage.setItem("budget-haptic", $("hapticOn").checked ? "1" : "0"); } catch (e) {} if ($("hapticOn").checked) buzz(); });
   $("confettiOn").addEventListener("change", () => { try { localStorage.setItem("budget-confetti", $("confettiOn").checked ? "1" : "0"); } catch (e) {} if ($("confettiOn").checked) confetti(); });
+  // Trying colors: the first tap remembers the colors before it; ✓ keeps the new ones, ✕ (or leaving the screen) brings the old ones back
+  let lookWas = null;
+  function lookPend() {
+    if (!lookWas) { let p = null, a = null; try { p = localStorage.getItem("budget-palette"); a = localStorage.getItem("budget-accent"); } catch (e) {} lookWas = { p, a }; }
+    $("lookBar").hidden = false; $("lookPrev").classList.add("pend");
+  }
+  function lookDone(keep) {
+    if (!lookWas) return;
+    if (!keep) {
+      try {
+        if (lookWas.p) localStorage.setItem("budget-palette", lookWas.p); else localStorage.removeItem("budget-palette");
+        if (lookWas.a) localStorage.setItem("budget-accent", lookWas.a); else localStorage.removeItem("budget-accent");
+      } catch (e) {}
+      BP.applyAccent(); paintTheme();
+    }
+    lookWas = null; $("lookBar").hidden = true; $("lookPrev").classList.remove("pend");
+    renderPalettes(); renderAccents();
+    if (keep) snack("✓ הצבעים נשמרו");
+  }
+  $("lookOk").addEventListener("click", () => lookDone(true));
+  $("lookNo").addEventListener("click", () => lookDone(false));
+  new MutationObserver(() => { if ($("viewLook").hidden) lookDone(false); }).observe($("viewLook"), { attributes: true, attributeFilter: ["hidden"] });
   function renderPalettes() {
     const box = $("palGrid"), cur = BP.get(), dark = BP.isDark();
     box.innerHTML = "";
@@ -6207,6 +6288,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       if (id === cur) { const ok = document.createElement("em"); ok.textContent = "✅"; sw.append(ok); }
       b.append(sw, name);
       b.addEventListener("click", () => {
+        lookPend();
         try { if (id === "orig") localStorage.removeItem("budget-palette"); else localStorage.setItem("budget-palette", id); } catch (e) {}
         paintTheme(); renderPalettes();
       });
