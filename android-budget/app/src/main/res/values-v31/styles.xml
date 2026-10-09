@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Android 12 and later draw their own opening screen: the ring on the same green-blue -->
     <style name="AppTheme" parent="@android:style/Theme.Material.Light.NoActionBar">
         <item name="android:colorPrimary">#1f6b4f</item>
         <item name="android:colorPrimaryDark">#1f6b4f</item>
@@ -8,8 +9,7 @@
         <item name="android:windowLightStatusBar">@bool/lightBar</item>
         <item name="android:navigationBarColor">#1f6b4f</item>
         <item name="android:windowBackground">@drawable/splash</item>
+        <item name="android:windowSplashScreenBackground">#1aa0b8</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/splash_logo</item>
     </style>
-    <color name="splash">#fff6ee</color>
-    <color name="bar">#fff6ee</color>
-    <bool name="lightBar">true</bool>
 </resources>
