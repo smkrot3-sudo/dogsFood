@@ -6544,6 +6544,12 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     if (document.querySelector("dialog[open]")) { if (tries < 40) setTimeout(() => showDonate(tries + 1), 3000); return; }
     openDlg("donateSheet");
   }
+  // Also on every return to the app from the background (hidden for 30s or more), once a user is signed in
+  let donateArmed = false, donateHiddenAt = 0;
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) { donateHiddenAt = Date.now(); return; }
+    if (donateArmed && donateHiddenAt && Date.now() - donateHiddenAt >= 30000 && !$("donateSheet").open) setTimeout(showDonate, 800);
+  });
   $("donateSkip").addEventListener("click", () => closeDlg("donateSheet"));
   $("donateBit").addEventListener("click", (e) => {
     if (window.BudgetApp) { e.preventDefault(); location.href = e.currentTarget.href; }
@@ -7623,7 +7629,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     else nextIntro();
     $("openAdmin").hidden = !isAdmin(); vipSync();
     aiFabSync();
-    recordSeen(); loadBroadcast(); setTimeout(loadPersonal, 2500); setTimeout(showDonate, 4500);
+    recordSeen(); loadBroadcast(); setTimeout(loadPersonal, 2500); donateArmed = true; setTimeout(showDonate, 4500);
     const ns = new URLSearchParams(location.search).get("newShift");
     if (ns) { history.replaceState(null, "", location.pathname + location.hash); window.openShiftFromApp(ns); }
   }
