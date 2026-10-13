@@ -7245,15 +7245,20 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   function isVip() { return !!(user && VIP_IDS.includes(user.id)); }
   const isEarly = () => isAdmin() || isVip();
   function vipSync() { $("vipCrown").hidden = !isVip(); }
-  // Donation banner (owner, 2026-10-13): at the top of the app for every user until 2026-10-15 23:09 Israel time; "הסתר" hides it for good on this phone
+  // Donation banner (owner, 2026-10-13): at the top of the app for every user until 2026-10-15 23:09 Israel time
   const DONATE_UNTIL = Date.parse("2026-10-15T20:09:00Z");
+  // Pinned until the end time (owner, 2026-10-13 21:26Z): fully open on every app open; "הסתר" only shrinks it to one slim line until the next open
   function showDonate() {
-    let hidden = false; try { hidden = localStorage.getItem("budget-donate-hide") === "1"; } catch (e) {}
-    // Pinned until the end time (owner, 2026-10-13 21:20Z): "הסתר" only shrinks it to one slim line with the Bit button
     $("donBar").hidden = Date.now() >= DONATE_UNTIL;
-    $("donBar").classList.toggle("slim", hidden);
+    $("donBar").classList.remove("slim");
   }
-  $("donateHide").addEventListener("click", () => { $("donBar").classList.add("slim"); try { localStorage.setItem("budget-donate-hide", "1"); } catch (e) {} });
+  $("donateHide").addEventListener("click", () => $("donBar").classList.add("slim"));
+  // Coming back to the app after 30 seconds or more counts as a new open
+  let donateAway = 0;
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) { donateAway = Date.now(); return; }
+    if (donateAway && Date.now() - donateAway >= 30000 && user) showDonate();
+  });
   $("donateBit").addEventListener("click", (e) => { if (window.BudgetApp) { e.preventDefault(); location.href = e.currentTarget.href; } });
   function nextIntro() {
     if (isVip() && !store.vipSeen) { setTimeout(() => openDlg("vipSheet"), 600); return; }
