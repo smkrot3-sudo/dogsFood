@@ -893,6 +893,42 @@ dialog.alarm form { gap: 12px; }
 .donbar .row { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px 14px; }
 .donbar .bitbtn { text-decoration: none; background: #fff; color: #1a9fbf; font-weight: 800; padding: 9px 14px; border-radius: 14px; box-shadow: 0 4px 12px rgba(0,0,0,.15); }
 .donbar .bitbtn .bit { display: inline-block; background: #1dc8e6; color: #fff; border-radius: 8px; padding: 0 7px; margin-inline-end: 6px; font-weight: 900; }
+/* Friends and shared expenses */
+.frbadge { display: inline-grid; place-items: center; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 99px; background: #ff3b5c; color: #fff; font-size: 11.5px; font-weight: 800; margin-inline-start: 4px; vertical-align: 2px; line-height: 1; box-shadow: 0 0 0 2px var(--surface); }
+.tabs a[aria-current="true"] .frbadge { background: #ffd84d; color: #3a2a00; box-shadow: none; }
+.frbtns { display: flex; flex-wrap: wrap; gap: 8px; }
+.frbtns .btn { flex: 1 1 140px; padding: 11px 12px; }
+.frlist { display: grid; gap: 8px; min-width: 0; }
+.frrow { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 16px; background: var(--surface-2); border: 1px solid var(--line); text-align: start; width: 100%; color: var(--fg); font: inherit; min-width: 0; }
+button.frrow { cursor: pointer; }
+.frav { flex: none; width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; font-size: 19px; font-weight: 700; background: var(--surface); border: 1px solid var(--line); overflow: hidden; }
+.frav img { width: 100%; height: 100%; object-fit: cover; }
+.frmid { flex: 1 1 7em; min-width: 0; display: grid; gap: 1px; }
+.frrow, .frdebt { flex-wrap: wrap; row-gap: 8px; }
+.frmid b { overflow-wrap: anywhere; }
+.frmid small { color: var(--muted); font-size: 13px; overflow-wrap: anywhere; }
+.frend { flex: none; margin-inline-start: auto; white-space: nowrap; text-align: end; font-weight: 700; font-size: 14px; font-variant-numeric: tabular-nums; }
+.frend.get { color: var(--accent); } .frend.give { color: var(--danger); }
+.fracts { flex: none; display: flex; gap: 6px; align-items: center; margin-inline-start: auto; }
+.btn.frmini { padding: 6px 10px; font-size: 14px; }
+.frbit { background: #1dc8e6 !important; color: #fff !important; border-color: transparent !important; font-weight: 900; text-decoration: none; }
+.frbig { font-size: 20px; font-weight: 800; margin: 0; }
+.frbig.get { color: var(--accent); } .frbig.give { color: var(--danger); }
+.frsub { font-size: 15px; }
+.frdebt { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 14px; border: 1px dashed var(--line); }
+.frdebt.frpaid { border-style: solid; opacity: .8; font-size: 14px; }
+.frpayin { display: flex; align-items: center; gap: 8px; padding: 0 12px; }
+.frpayin input { width: 110px; }
+.frsep { text-align: center; color: var(--muted); font-weight: 600; }
+.frcontact summary { font-weight: 700; cursor: pointer; padding: 6px 0; }
+.frcontact[open] { display: grid; gap: 10px; }
+.shrow { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 92px) minmax(0, 92px); gap: 8px; align-items: center; }
+.shrow input { width: 100%; min-width: 0; }
+.shhead span { font-size: 13px; color: var(--muted); font-weight: 600; }
+.shname { font-weight: 700; overflow-wrap: anywhere; }
+.shsum { display: flex; flex-wrap: wrap; gap: 6px 14px; margin: 0; font-size: 14px; font-weight: 700; }
+.shsum .ok { color: var(--accent); } .shsum .off { color: var(--danger); }
+#frSheet .foot { flex-wrap: wrap; }
 .donbar .hide { background: transparent; border: 0; color: #fff; font: inherit; font-weight: 600; text-decoration: underline; padding: 8px 10px; min-height: 40px; }
 dialog.alarm.dimsum { background: radial-gradient(circle at 50% 0%, #ffcf5c 0, transparent 38%), linear-gradient(170deg, #c8102e, #8a0b1f 70%, #5e0614); }
 .dimsum .signs { animation: steam 2.2s ease-in-out infinite; }
@@ -1159,6 +1195,12 @@ html.bigtext .tabs a, html.hugetext .tabs a { font-size: 14px; padding-inline: 2
 .tabs a { white-space: nowrap; overflow: hidden; text-overflow: clip; }
 .tabs a .tw2 { display: none; }
 @media (min-width: 371px) { html:not(.bigtext):not(.hugetext) .tabs a .tw2 { display: inline; } }
+/* Four tabs: the emoji sits above the word so every tab fits on narrow phones */
+.tabs { gap: 2px; padding: 4px; border-radius: 22px; }
+.tabs a { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; padding: 6px 2px; font-size: 14px; line-height: 1.2; border-radius: 18px; white-space: nowrap; }
+.tabs a .ti { font-style: normal; font-size: 19px; line-height: 1.15; }
+html.bigtext .tabs a, html.hugetext .tabs a { font-size: 13px; padding-inline: 1px; }
+.tabs a .missdot, .tabs a .frbadge { position: absolute; top: 2px; inset-inline-start: calc(50% + 6px); margin: 0; vertical-align: 0; }
 .panel h2 > .h2t.fit { white-space: nowrap; min-width: 0; }
 .panel h2:has(> .h2t.fit) { flex-wrap: nowrap; }
 .panel h2 > .fsum { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
@@ -1332,9 +1374,10 @@ html.hugetext .season3 svg { width: 70px; height: 21px; }
   </div>
 
   <nav class="tabs" aria-label="עמודים">
-    <a href="#" data-view="main" aria-current="true">🏠 ראשי</a>
-    <a href="#shifts" data-view="shifts">⏰ משמרות<span class="missdot" id="missDot" hidden aria-label="יש ימים שלא הוזנו"></span></a>
-    <a href="#calendar" data-view="calendar">📅 לוח שנה</a>
+    <a href="#" data-view="main" aria-current="true"><i class="ti" aria-hidden="true">🏠</i>ראשי</a>
+    <a href="#shifts" data-view="shifts"><i class="ti" aria-hidden="true">⏰</i>משמרות<span class="missdot" id="missDot" hidden aria-label="יש ימים שלא הוזנו"></span></a>
+    <a href="#calendar" data-view="calendar"><i class="ti" aria-hidden="true">📅</i>לוח<span class="tw2"> שנה</span></a>
+    <a href="#friends" data-view="friends"><i class="ti" aria-hidden="true">👥</i>חברים<span class="frbadge" id="frDot" hidden></span></a>
   </nav>
 
   <div class="bcast" id="bcast" role="status" hidden>
@@ -1639,6 +1682,11 @@ html.hugetext .season3 svg { width: 70px; height: 21px; }
       <p class="hint">כמה פעמים השתמשו בעוזר ב־30 הימים האחרונים. בלי השאלות עצמן.</p>
       <div class="adlist" id="adAi"></div>
     </section>
+    <section class="panel" aria-labelledby="adFrH">
+      <h2 id="adFrH" class="pc-violet" data-e="👥">מי חבר של מי</h2>
+      <p class="hint">בלי סכומים: רק החברויות וכמה הוצאות משותפות יש לכל זוג.</p>
+      <div class="adlist" id="adFr"></div>
+    </section>
     <section class="panel" aria-labelledby="adFbH">
       <h2 id="adFbH" class="pc-mint" data-e="💬">משובים</h2>
       <div class="actions"><button class="btn" type="button" id="adFbSum">✨ סיכום המשובים לנושאים</button></div>
@@ -1780,6 +1828,34 @@ html.hugetext .season3 svg { width: 70px; height: 21px; }
     </section>
   </div>
 
+  <div class="viewcol" id="viewFriends" hidden>
+    <section class="panel" id="frWaitBox" aria-labelledby="frWaitH" hidden>
+      <h2 id="frWaitH" class="pc-pink" data-e="🔔">מחכה לי</h2>
+      <div class="frlist" id="frWaitList"></div>
+    </section>
+    <section class="panel" aria-labelledby="frH">
+      <h2 id="frH" class="pc-violet" data-e="👥">החברים שלי</h2>
+      <div class="frbtns"><button class="btn primary" type="button" id="frNewExp">🍔 הוצאה משותפת</button><button class="btn" type="button" id="frAdd">➕ הוספת חבר</button></div>
+      <div class="frlist" id="frList"></div>
+      <p class="empty" id="frEmpty" hidden>עוד אין חברים. מוסיפים חבר לפי מייל או שם, או שולחים לינק הזמנה בווצאפ.</p>
+    </section>
+    <section class="panel" aria-labelledby="frExpH">
+      <h2 id="frExpH" class="pc-orange" data-e="🧾">הוצאות משותפות</h2>
+      <p class="hint">בתקציב שלי נכנס רק החלק שלי בכל הוצאה.</p>
+      <div class="frlist" id="frExpList"></div>
+      <p class="empty" id="frExpEmpty" hidden>עוד אין הוצאות משותפות.</p>
+    </section>
+    <section class="panel" aria-labelledby="frMeH">
+      <h2 id="frMeH" class="pc-mint" data-e="🙂">איך חברים רואים אותי</h2>
+      <p class="hint">חברים רואים רק את השם, האימוג׳י או התמונה, ואת ההוצאות שחילקנו ביחד. אף פעם לא את התקציב שלי.</p>
+      <label class="field" for="frMyName">השם שלי<input type="text" id="frMyName" maxlength="60"></label>
+      <fieldset class="chips" id="frEmojis"><legend>תמונה או אימוג׳י</legend></fieldset>
+      <label class="field" for="frMyBit">הקישור שלי בביט (לא חובה)<input type="url" id="frMyBit" maxlength="300" placeholder="https://www.bitpay.co.il/app/me/…" dir="ltr"></label>
+      <p class="hint">כך חברים יכולים להחזיר לי כסף בלחיצה אחת. את הקישור האישי מעתיקים מאפליקציית ביט.</p>
+      <label class="check" for="frFindable"><input type="checkbox" id="frFindable"> אפשר למצוא אותי בחיפוש לפי מייל או שם</label>
+      <div class="actions"><button class="btn" type="button" id="frMeSave">שמירה</button> <span class="hint" id="frMeMsg" role="status"></span></div>
+    </section>
+  </div>
   <div class="viewcol" id="viewCal" hidden>
     <section class="panel" aria-labelledby="calH">
       <h2 id="calH" class="pc-blue" data-e="📅"><span id="calTitle">החודש</span></h2>
@@ -1991,11 +2067,59 @@ html.hugetext .season3 svg { width: 70px; height: 21px; }
     </div>
   </form>
 </dialog>
+<dialog class="sheet" id="frAddSheet" aria-labelledby="frAddH">
+  <form method="dialog" id="frAddForm" novalidate>
+    <h2 id="frAddH" data-e="➕">הוספת חבר</h2>
+    <label for="frQ">מייל מלא או שם<input type="search" id="frQ" maxlength="120" autocomplete="off" placeholder="למשל dani@gmail.com"></label>
+    <button class="btn primary" type="submit" id="frQGo">🔎 חיפוש</button>
+    <div class="frlist" id="frResults" aria-live="polite"></div>
+    <div class="frsep">או</div>
+    <button class="btn" type="button" id="frInvite">📲 שליחת לינק הזמנה בווצאפ</button>
+    <details class="frcontact" id="frContactBox"><summary>👤 חבר בלי האפליקציה</summary>
+      <p class="hint">רק אני רואה אותו. אפשר לרשום איתו הוצאות משותפות ולעקוב מי מחזיר למי.</p>
+      <label for="frCName">שם<input type="text" id="frCName" maxlength="60"></label>
+      <button class="btn" type="button" id="frCAdd">הוספה</button>
+    </details>
+    <div class="foot"><button class="btn" type="button" id="frAddClose">סגירה</button></div>
+  </form>
+</dialog>
+<dialog class="sheet" id="frInvSheet" aria-labelledby="frInvH">
+  <form method="dialog">
+    <h2 id="frInvH" data-e="📲">לינק הזמנה</h2>
+    <p class="hint">מי שנכנס מהלינק ונרשם (או מתחבר) הופך לחבר שלי מיד. הלינק בתוקף לשבוע.</p>
+    <label for="frInvText">ההודעה (אפשר לשנות)<textarea id="frInvText" rows="4" maxlength="500"></textarea></label>
+    <p class="hint" dir="ltr" id="frInvLink"></p>
+    <div class="foot"><button class="btn primary" type="button" id="frInvGo">שליחה</button><button class="btn" type="button" id="frInvClose">ביטול</button></div>
+  </form>
+</dialog>
+<dialog class="sheet" id="frSheet" aria-labelledby="frSheetH">
+  <form method="dialog">
+    <h2 id="frSheetH" data-e="👥"></h2>
+    <div class="frlist" id="frBody"></div>
+    <div class="foot" id="frFoot"></div>
+  </form>
+</dialog>
+<dialog class="sheet" id="shSheet" aria-labelledby="shH">
+  <form method="dialog" id="shForm" novalidate>
+    <h2 id="shH" data-e="🍔">הוצאה משותפת</h2>
+    <label for="shTitle">על מה?<input type="text" id="shTitle" maxlength="120" placeholder="למשל: ארוחת צהריים" autocomplete="off"></label>
+    <label for="shTotal">כמה עלה בסך הכול?<input type="number" id="shTotal" class="amount-in" inputmode="decimal" min="0" step="0.01" placeholder="₪0"></label>
+    <label for="shDate">מתי?<input type="date" id="shDate"></label>
+    <fieldset class="chips" id="shWho"><legend>עם מי?</legend></fieldset>
+    <p class="hint">לכל אחד: כמה שילם בפועל, וכמה מזה החלק שלו.</p>
+    <div class="frlist" id="shRows"></div>
+    <p class="shsum" id="shSum" role="status"></p>
+    <fieldset class="chips" id="shCats"><legend>באיזו קטגוריה אצלי?</legend></fieldset>
+    <p class="err" id="shErr" hidden></p>
+    <div class="foot"><button class="btn primary" type="submit" id="shSave">שמירה</button><button class="btn" type="button" id="shCancel">ביטול</button></div>
+  </form>
+</dialog>
 <dialog class="sheet newsheet" id="newsSheet" aria-labelledby="newsH">
   <form method="dialog">
     <h2 id="newsH" data-e="✨">מה חדש</h2>
+    <p class="hint" id="newsLead">מוסיפים חבר בלשונית ״👥 חברים״ ➕ הוספת חבר.</p>
     <ul id="newsList"></ul>
-    <div class="foot"><button class="btn primary" type="button" id="newsOk">יופי, הבנתי</button></div>
+    <div class="foot"><button class="btn primary" type="button" id="newsGo">👥 לחברים שלי</button><button class="btn" type="button" id="newsOk">הבנתי</button></div>
   </form>
 </dialog>
 
@@ -3292,7 +3416,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   }
   $("txAmount").addEventListener("input", showHours);
   function closeSheet() { const dlg = $("sheet"); if (dlg.close) dlg.close(); else dlg.removeAttribute("open"); editing = null; editingInc = null; }
-  $("fab").addEventListener("click", () => (view === "shifts" ? openShift() : openSheet()));
+  $("fab").addEventListener("click", () => (view === "shifts" ? openShift() : view === "friends" ? frOpenForm(null) : openSheet()));
   $("addIncome").addEventListener("click", () => openIncome());
   $("txCancel").addEventListener("click", closeSheet);
 
@@ -6156,11 +6280,6 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   }
   const l3ro = new ResizeObserver((ents) => requestAnimationFrame(() => ents.forEach((e) => l3fit(e.target, e.target.tagName === "H1" ? 12 : 13))));
   function l3titles() { document.querySelectorAll("#app .panel h2 > .h2t, #app > header h1").forEach((el) => { l3ro.observe(el); l3fit(el, el.tagName === "H1" ? 12 : 13); }); }
-  // Calendar tab: just "לוח" when there's no room for "לוח שנה"
-  (function () {
-    const a = document.querySelector('.tabs a[data-view="calendar"]');
-    if (a && /לוח שנה/.test(a.textContent)) { a.textContent = "📅 לוח"; const s = document.createElement("span"); s.className = "tw2"; s.textContent = " שנה"; a.append(s); }
-  })();
   // The add button shrinks to + while scrolling down and comes back on the way up
   (function () {
     let y0 = scrollY;
@@ -6230,10 +6349,594 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   document.addEventListener("click", (e) => { if (e.target.closest(".panel h2, .tabs a")) setTimeout(() => { try { l3cards(); l3titles(); } catch (x) {} }, 0); }, true);
   addEventListener("resize", () => { try { l3cards(); } catch (e) {} });
 
+  // ---- Friends and shared expenses (owner, 2026-10-13) ----
+  // A friend sees only what the two of you shared: name, emoji or photo, and the shared expenses. Never the budget.
+  // Each person's budget gets only their own share, as a normal expense row tagged {shared: id}, after they approve it.
+  const fr = { me: null, links: [], profs: {}, exps: [], parts: [], pays: [], loaded: false };
+  const m2 = (n) => Math.round((+n || 0) * 100) / 100;
+  const fm = (n) => "₪" + m2(n).toLocaleString("he-IL", { maximumFractionDigits: 2 });
+  const frContacts = () => (store.contacts = store.contacts || []);
+  const frKey = (p) => p.user_id || "c:" + p.contact_id;
+  const frEl = (tag, cls, text) => { const n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; };
+  const frFriendIds = () => fr.links.filter((l) => l.status === "accepted").map((l) => (l.a === user.id ? l.b : l.a));
+  const frParts = (e) => fr.parts.filter((p) => p.expense_id === e.id);
+  const frLive = () => fr.exps.filter((e) => !e.deleted);
+  function frName(key, e) {
+    if (user && key === user.id) return "אני";
+    const part = e && fr.parts.find((x) => x.expense_id === e.id && frKey(x) === key);
+    if (key.startsWith("c:")) { const c = frContacts().find((x) => "c:" + x.id === key); return c ? c.name : (part && part.name) || "חבר"; }
+    const p = fr.profs[key]; if (p && p.name) return p.name;
+    return ((part && part.name) || "משתמש") + " (כבר לא באפליקציה)";
+  }
+  function frAvatar(key) {
+    const box = frEl("span", "frav"); box.setAttribute("aria-hidden", "true");
+    const p = !key.startsWith("c:") && (key === user.id ? fr.me : fr.profs[key]);
+    if (p && p.photo && !p.emoji) { const img = document.createElement("img"); img.src = p.photo; img.alt = ""; img.referrerPolicy = "no-referrer"; box.append(img); }
+    else box.textContent = (p && p.emoji) || (key.startsWith("c:") ? "👤" : (((p && p.name) || frName(key))[0] || "🙂"));
+    return box;
+  }
+  function frRow(key, title, sub, end, endCls, onTap) {
+    const row = frEl(onTap ? "button" : "div", "frrow"); if (onTap) { row.type = "button"; row.addEventListener("click", onTap); }
+    const mid = frEl("span", "frmid"); mid.append(frEl("b", "", title)); if (sub) mid.append(frEl("small", "", sub));
+    row.append(key ? frAvatar(key) : frEl("span", "frav", "🧾"), mid);
+    if (end) row.append(frEl("span", "frend " + (endCls || ""), end));
+    return row;
+  }
+
+  // Load everything the friends tab needs; RLS returns only what this user is part of
+  let frLoading = null;
+  function loadFriends() { if (!frLoading) frLoading = frLoad().finally(() => { frLoading = null; }); return frLoading; }
+  async function frLoad() {
+    if (!sb || !user) return;
+    try {
+      const [me, links, profs, exps, parts, pays] = await Promise.all([
+        sb.from("profiles").select("*").eq("user_id", user.id).maybeSingle(),
+        sb.from("friendships").select("*"),
+        sb.from("profiles").select("user_id, name, emoji, photo, bit_link"),
+        sb.from("shared_expenses").select("*").order("spent_on", { ascending: false }).order("created_at", { ascending: false }).limit(500),
+        sb.from("shared_parts").select("*"),
+        sb.from("shared_paybacks").select("*").order("created_at"),
+      ]);
+      const bad = [me, links, profs, exps, parts, pays].find((r) => r.error); if (bad) throw bad.error;
+      fr.me = me.data || (await frMakeProfile());
+      fr.links = links.data || []; fr.profs = Object.fromEntries((profs.data || []).map((p) => [p.user_id, p]));
+      fr.exps = exps.data || []; fr.parts = (parts.data || []).map((p) => ({ ...p, share: +p.share, paid: +p.paid })); fr.pays = pays.data || [];
+      fr.loaded = true;
+    } catch (e) { return; }
+    await frAcceptInvite();
+    await frSyncBudget();
+    renderFriends();
+  }
+  async function frMakeProfile() {
+    const meta = user.user_metadata || {};
+    const row = { user_id: user.id, name: String(meta.full_name || meta.name || (user.email || "").split("@")[0] || "").slice(0, 60), photo: String(meta.avatar_url || "").slice(0, 600) };
+    const { data } = await sb.from("profiles").upsert(row).select().maybeSingle();
+    return data || row;
+  }
+
+  // An invite link (?invite=…) is remembered until the person is signed in, then makes the two of you friends
+  try { const t = new URLSearchParams(location.search).get("invite"); if (t) { localStorage.setItem("budget-invite", t); history.replaceState(null, "", location.pathname + location.hash); } } catch (e) {}
+  async function frAcceptInvite() {
+    let t = ""; try { t = localStorage.getItem("budget-invite") || ""; } catch (e) {}
+    if (!t) return;
+    try { localStorage.removeItem("budget-invite"); } catch (e) {}
+    const { data, error } = await sb.rpc("friend_accept_invite", { t });
+    if (error) return;
+    if (data === "expired") { snack("לינק ההזמנה כבר לא בתוקף. אפשר לבקש מהחבר לינק חדש."); return; }
+    if (data === "self" || data === "signin") return;
+    snack("🎉 " + data + " ואני חברים עכשיו! אפשר לחלק הוצאות בלשונית ״חברים״.");
+    try { confetti(); } catch (e) {}
+    const r = await Promise.all([sb.from("friendships").select("*"), sb.from("profiles").select("user_id, name, emoji, photo, bit_link")]);
+    if (!r[0].error) fr.links = r[0].data || [];
+    if (!r[1].error) fr.profs = Object.fromEntries((r[1].data || []).map((p) => [p.user_id, p]));
+  }
+
+  // My approved shares become rows in my own expenses; edits and deletions by friends follow on the next load
+  const frCat = (id) => { const cats = data().cats; return cats.some((c) => c.id === id) ? id : ((cats.find((c) => /שונות/.test(c.name || "")) || cats[0] || {}).id); };
+  function frNote(e) {
+    const others = frParts(e).filter((p) => p.user_id !== user.id && p.status !== "declined").map((p) => frName(frKey(p), e).replace(/ \(.*\)$/, ""));
+    return ("👥 " + (e.title || "הוצאה משותפת") + (others.length ? " · עם " + others.slice(0, 3).join(", ") + (others.length > 3 ? " ועוד" : "") : "")).slice(0, 200);
+  }
+  async function frSyncBudget() {
+    try {
+      const mine = fr.parts.filter((p) => p.user_id === user.id && p.status === "approved");
+      const ids = mine.map((p) => p.tx_id).filter(Boolean), rows = {};
+      if (ids.length) {
+        const { data: r, error } = await sb.from("expenses").select("id, spent_on, amount, category, note, tags, created_at").in("id", ids);
+        if (error) return;
+        (r || []).forEach((x) => { rows[x.id] = { ...x, amount: +x.amount }; });
+      }
+      outbox().forEach((op) => { if (op.op === "add" && op.row && ids.includes(op.row.id)) rows[op.row.id] = op.row; });
+      let changed = false;
+      for (const p of mine) {
+        const e = fr.exps.find((x) => x.id === p.expense_id); if (!e) continue;
+        const r = p.tx_id && rows[p.tx_id];
+        if (e.deleted || !(p.share > 0)) {
+          if (p.tx_id) { if (r) delTx(p.tx_id); p.tx_id = null; changed = true; await sb.from("shared_parts").update({ tx_id: null }).eq("id", p.id); }
+          continue;
+        }
+        const note = frNote(e);
+        if (!p.tx_id) {
+          const row = { id: uid(), spent_on: e.spent_on, amount: m2(p.share), category: frCat(p.cat), note, tags: { shared: e.id }, created_at: new Date().toISOString() };
+          if (periodOf(row.spent_on) === month) commit();
+          addTx(row); p.tx_id = row.id; changed = true;
+          await sb.from("shared_parts").update({ tx_id: row.id }).eq("id", p.id);
+        } else if (r && (Math.abs(r.amount - p.share) > 0.004 || r.spent_on !== e.spent_on || r.note !== note)) {
+          updateTx(r, { ...r, amount: m2(p.share), spent_on: e.spent_on, note }); changed = true;
+        }
+      }
+      if (changed) { renderTracking(); persist(); }
+    } catch (e) {}
+  }
+
+  // Who owes whom inside one expense: everyone who paid more than their share gets it back from those who paid less
+  function frDebts(e) {
+    const ps = frParts(e).filter((p) => p.status !== "declined");
+    const net = ps.map((p) => ({ k: frKey(p), v: m2(p.paid - p.share) }));
+    const cr = net.filter((x) => x.v > 0.004), db = net.filter((x) => x.v < -0.004).map((x) => ({ k: x.k, v: -x.v }));
+    const out = []; let i = 0, j = 0;
+    while (i < db.length && j < cr.length) {
+      const a = Math.min(db[i].v, cr[j].v);
+      out.push({ from: db[i].k, to: cr[j].k, amount: m2(a) });
+      db[i].v -= a; cr[j].v -= a;
+      if (db[i].v < 0.005) i++;
+      if (cr[j].v < 0.005) j++;
+    }
+    out.forEach((d) => {
+      d.back = m2(fr.pays.filter((b) => b.expense_id === e.id && b.from_key === d.from && b.to_key === d.to).reduce((s, b) => s + +b.amount, 0));
+      d.left = m2(Math.max(0, d.amount - d.back));
+    });
+    return out;
+  }
+  // What a friend and I owe each other over all shared expenses (+ = I get money back)
+  function frBalance(key) {
+    let s = 0;
+    frLive().forEach((e) => frDebts(e).forEach((d) => {
+      if (d.from === key && d.to === user.id) s += d.left;
+      if (d.from === user.id && d.to === key) s -= d.left;
+    }));
+    return m2(s);
+  }
+  const frBalText = (b) => (b > 0.004 ? ["מגיע לי " + fm(b), "get"] : b < -0.004 ? ["להחזיר " + fm(-b), "give"] : ["הכול סגור ✓", ""]);
+  function frWaiting() {
+    if (!fr.loaded || !user) return { reqs: [], exps: [] };
+    const reqs = fr.links.filter((l) => l.b === user.id && l.status === "pending");
+    const exps = fr.parts.filter((p) => p.user_id === user.id && p.status === "pending").map((p) => fr.exps.find((e) => e.id === p.expense_id)).filter((e) => e && !e.deleted);
+    return { reqs, exps };
+  }
+  function frBadge() {
+    const w = frWaiting(), n = w.reqs.length + w.exps.length, b = $("frDot");
+    b.hidden = !n; b.textContent = n > 9 ? "9+" : String(n);
+    b.setAttribute("aria-label", n + " דברים מחכים לך");
+  }
+
+  function renderFriends() {
+    frBadge();
+    if (view !== "friends") return;
+    if (!sb || !user) { $("frList").replaceChildren(frEl("p", "empty", "צריך להיות מחובר כדי להוסיף חברים.")); return; }
+    if (!fr.loaded) { $("frList").replaceChildren(frEl("p", "hint", "טוען…")); return; }
+    // Waiting for me
+    const w = frWaiting(), wl = $("frWaitList"); wl.innerHTML = "";
+    w.reqs.forEach((l) => {
+      const row = frRow(l.a, frName(l.a), "בקשת חברות");
+      const ok = frEl("button", "btn primary frmini", "✓ אישור"); ok.type = "button";
+      const no = frEl("button", "btn frmini", "✕"); no.type = "button"; no.setAttribute("aria-label", "דחייה");
+      ok.addEventListener("click", () => frRespond(l, true)); no.addEventListener("click", () => frRespond(l, false));
+      const act = frEl("span", "fracts"); act.append(ok, no); row.append(act); wl.append(row);
+    });
+    w.exps.forEach((e) => {
+      const p = frParts(e).find((x) => x.user_id === user.id);
+      wl.append(frRow(e.created_by, "🍔 " + (e.title || "הוצאה משותפת"), "מאת " + frName(e.created_by, e) + " · החלק שלי " + fm(p.share), "לאישור ›", "get", () => frOpenApprove(e)));
+    });
+    $("frWaitBox").hidden = !wl.children.length;
+    // Friends, contacts and requests I sent
+    const fl = $("frList"); fl.innerHTML = "";
+    const people = frFriendIds().map((id) => ({ key: id, name: frName(id) })).concat(frContacts().map((c) => ({ key: "c:" + c.id, name: c.name, contact: true })));
+    people.map((p) => ({ ...p, bal: frBalance(p.key) })).sort((a, b) => Math.abs(b.bal) - Math.abs(a.bal) || a.name.localeCompare(b.name, "he"))
+      .forEach((p) => { const [t, cls] = frBalText(p.bal); fl.append(frRow(p.key, p.name, p.contact ? "בלי האפליקציה" : "", t, cls, () => frOpenPerson(p.key))); });
+    fr.links.filter((l) => l.a === user.id && l.status !== "accepted").forEach((l) => {
+      const row = frRow(l.b, frName(l.b), l.status === "declined" ? "הבקשה נדחתה" : "הבקשה מחכה לאישור");
+      const x = frEl("button", "btn frmini", "✕"); x.type = "button"; x.setAttribute("aria-label", l.status === "declined" ? "הסרה מהרשימה" : "ביטול הבקשה");
+      x.addEventListener("click", async () => { await sb.from("friendships").delete().eq("id", l.id); fr.links = fr.links.filter((y) => y.id !== l.id); renderFriends(); });
+      const act = frEl("span", "fracts"); act.append(x); row.append(act); fl.append(row);
+    });
+    $("frEmpty").hidden = !!fl.children.length;
+    // All shared expenses
+    const el = $("frExpList"); el.innerHTML = "";
+    frLive().slice(0, 60).forEach((e) => el.append(frExpRow(e)));
+    $("frExpEmpty").hidden = !!el.children.length;
+    // My profile
+    if (document.activeElement !== $("frMyName")) $("frMyName").value = fr.me ? fr.me.name : "";
+    if (document.activeElement !== $("frMyBit")) $("frMyBit").value = fr.me ? fr.me.bit_link || "" : "";
+    $("frFindable").checked = !fr.me || fr.me.findable !== false;
+    frPaintEmojis();
+  }
+  function frExpRow(e) {
+    const mine = frParts(e).find((p) => p.user_id === user.id);
+    let end = "", cls = "";
+    const ds = frDebts(e).filter((d) => d.left > 0 && (d.from === user.id || d.to === user.id));
+    if (ds.length) { const s = ds.reduce((a, d) => a + (d.to === user.id ? d.left : -d.left), 0); [end, cls] = frBalText(s); }
+    else end = "✓";
+    const others = frParts(e).filter((p) => frKey(p) !== user.id).map((p) => frName(frKey(p), e).replace(/ \(.*\)$/, ""));
+    const sub = shortDate(e.spent_on) + " · " + fm(e.total) + (mine ? " · החלק שלי " + fm(mine.share) : "") + (others.length ? " · עם " + others.slice(0, 2).join(", ") + (others.length > 2 ? " ועוד" : "") : "");
+    const pend = mine && mine.status === "pending";
+    return frRow(null, (e.title || "הוצאה משותפת"), sub, pend ? "לאישור ›" : end, pend ? "get" : cls, () => (pend ? frOpenApprove(e) : frOpenExp(e)));
+  }
+
+  async function frRespond(l, ok) {
+    const { error } = await sb.rpc("friend_respond", { fid: l.id, ok });
+    if (error) { snack("לא הצלחתי כרגע. נסה שוב."); return; }
+    l.status = ok ? "accepted" : "declined";
+    if (ok) { snack("🎉 " + frName(l.a) + " ואני חברים עכשיו"); buzz(); }
+    renderFriends();
+  }
+
+  // ---- My profile ----
+  const FR_EMOJI = ["", "😎", "🙂", "🦊", "🐱", "🐶", "🦁", "🐼", "🌸", "⚡", "🔥", "⭐", "🍕", "⚽", "🎮", "🎧"];
+  function frPaintEmojis() {
+    const box = $("frEmojis"); box.querySelectorAll(".chip").forEach((n) => n.remove());
+    const cur = (fr.me && fr.me.emoji) || "";
+    FR_EMOJI.forEach((em, i) => {
+      const lab = frEl("label", "chip"); const inp = document.createElement("input"); inp.type = "radio"; inp.name = "frEmoji"; inp.value = em; inp.id = "frEmoji-" + i; inp.checked = em === cur;
+      lab.append(inp, frEl("span", "", em || (fr.me && fr.me.photo ? "📷 התמונה שלי" : "🔤 האות הראשונה")));
+      box.append(lab);
+    });
+  }
+  $("frMeSave").addEventListener("click", async () => {
+    if (!sb || !user) return;
+    const name = $("frMyName").value.trim().slice(0, 60), bit = $("frMyBit").value.trim().slice(0, 300);
+    if (!name) { $("frMeMsg").textContent = "צריך שם, כדי שחברים יזהו אותך."; return; }
+    if (bit && !/^https:\/\/(www\.)?bitpay\.co\.il\//i.test(bit)) { $("frMeMsg").textContent = "זה לא נראה כמו קישור של ביט. הוא מתחיל ב־https://www.bitpay.co.il"; return; }
+    const pick = document.querySelector('input[name="frEmoji"]:checked');
+    const row = { user_id: user.id, name, bit_link: bit, findable: $("frFindable").checked, emoji: pick ? pick.value : "" };
+    $("frMeSave").disabled = true;
+    const { data: d, error } = await sb.from("profiles").upsert(row).select().maybeSingle();
+    $("frMeSave").disabled = false;
+    if (error) { $("frMeMsg").textContent = "לא נשמר. נסה שוב."; return; }
+    fr.me = d || { ...fr.me, ...row }; fr.profs[user.id] = fr.me;
+    $("frMeMsg").textContent = "✓ נשמר"; setTimeout(() => { $("frMeMsg").textContent = ""; }, 2500);
+  });
+
+  // ---- Adding friends: search, invite link, or a contact without the app ----
+  $("frAdd").addEventListener("click", () => frOpenAdd());
+  function frOpenAdd() {
+    $("frQ").value = ""; $("frResults").innerHTML = ""; $("frCName").value = ""; $("frContactBox").open = false;
+    openDlg("frAddSheet");
+  }
+  $("frAddClose").addEventListener("click", () => closeDlg("frAddSheet"));
+  $("frAddForm").addEventListener("submit", async (ev) => {
+    ev.preventDefault();
+    const q = $("frQ").value.trim(), box = $("frResults");
+    if (q.length < 2) { box.replaceChildren(frEl("p", "hint", "כותבים מייל מלא או לפחות שתי אותיות מהשם.")); return; }
+    box.replaceChildren(frEl("p", "hint", "מחפש…"));
+    const { data: r, error } = await sb.rpc("friend_search", { q });
+    box.innerHTML = "";
+    if (error) { box.append(frEl("p", "hint", "החיפוש לא עבד כרגע. נסה שוב.")); return; }
+    if (!r || !r.length) { box.append(frEl("p", "hint", q.includes("@") ? "לא מצאתי משתמש עם המייל הזה. אפשר לשלוח לו לינק הזמנה." : "לא מצאתי. אפשר לנסות את המייל המלא, או לשלוח לינק הזמנה.")); return; }
+    r.forEach((p) => {
+      fr.profs[p.user_id] = fr.profs[p.user_id] || p;
+      const link = fr.links.find((l) => l.a === p.user_id || l.b === p.user_id);
+      const row = frRow(p.user_id, p.name || "משתמש");
+      const act = frEl("span", "fracts");
+      if (link && link.status === "accepted") act.append(frEl("span", "frend", "כבר חברים ✓"));
+      else if (link && link.status === "pending" && link.a === user.id) act.append(frEl("span", "frend", "נשלחה ✓"));
+      else {
+        const b = frEl("button", "btn primary frmini", link && link.b === user.id && link.status === "pending" ? "✓ אישור" : "➕ בקשת חברות"); b.type = "button";
+        b.addEventListener("click", async () => {
+          b.disabled = true;
+          const { data: res, error: err } = await sb.rpc("friend_request", { target: p.user_id });
+          if (err) { b.disabled = false; snack("לא הצלחתי לשלוח. נסה שוב."); return; }
+          b.textContent = res === "accepted" || res === "already" ? "חברים ✓" : "נשלחה ✓";
+          snack(res === "accepted" ? "🎉 " + (p.name || "") + " ואני חברים עכשיו" : "הבקשה נשלחה. אחרי האישור זה יופיע ברשימת החברים.");
+          await loadFriends();
+        });
+        act.append(b);
+      }
+      row.append(act); box.append(row);
+    });
+  });
+  $("frCAdd").addEventListener("click", () => {
+    const name = $("frCName").value.trim().slice(0, 60);
+    if (!name) { $("frCName").focus(); return; }
+    frContacts().push({ id: uid().slice(0, 8), name }); persist();
+    closeDlg("frAddSheet"); renderFriends(); snack("״" + name + "״ נוסף. רק אני רואה אותו.");
+  });
+  async function frShareText(text) {
+    const app = window.BudgetApp;
+    try { if (app && app.share) { app.share(text); return; } } catch (e) {}
+    if (navigator.share) { try { await navigator.share({ text }); return; } catch (e) { if (e && e.name === "AbortError") return; } }
+    const wa = "https://wa.me/?text=" + encodeURIComponent(text);
+    if (app && app.openExternal) { app.openExternal(wa); return; }
+    try { await navigator.clipboard.writeText(text); snack("ההודעה הועתקה. אפשר להדביק אותה בוואטסאפ."); } catch (e) { window.open(wa, "_blank"); }
+  }
+  $("frInvite").addEventListener("click", async () => {
+    $("frInvite").disabled = true;
+    const { data: inv, error } = await sb.from("friend_invites").insert({ inviter: user.id }).select("token").single();
+    $("frInvite").disabled = false;
+    if (error) { snack("לא הצלחתי ליצור לינק כרגע. נסה שוב."); return; }
+    const link = SITE_URL + "?invite=" + inv.token;
+    $("frInvText").value = "בוא נהיה חברים ב״התקציב שלי״ 💰 ככה נוכל לחלק הוצאות ביחד ולדעת בדיוק מי שילם כמה. האפליקציה חינמית. נכנסים מהלינק:";
+    $("frInvLink").textContent = link; $("frInvSheet").dataset.link = link;
+    closeDlg("frAddSheet"); openDlg("frInvSheet");
+  });
+  $("frInvGo").addEventListener("click", () => { frShareText($("frInvText").value.trim() + "\n" + $("frInvSheet").dataset.link); closeDlg("frInvSheet"); });
+  $("frInvClose").addEventListener("click", () => closeDlg("frInvSheet"));
+
+  // ---- One friend: balance and everything we shared ----
+  function frOpenPerson(key) {
+    const box = $("frBody"), foot = $("frFoot"); box.innerHTML = ""; foot.innerHTML = "";
+    $("frSheetH").textContent = frName(key); $("frSheetH").dataset.e = key.startsWith("c:") ? "👤" : "👥";
+    const [t, cls] = frBalText(frBalance(key)); const bl = frEl("p", "frbig " + cls, t); box.append(bl);
+    const list = frEl("div", "frlist");
+    frLive().filter((e) => frParts(e).some((p) => frKey(p) === key)).forEach((e) => list.append(frExpRow(e)));
+    if (!list.children.length) list.append(frEl("p", "empty", "עוד אין הוצאות משותפות."));
+    box.append(frEl("b", "frsub", "הוצאות משותפות"), list);
+    const add = frEl("button", "btn primary", "🍔 הוצאה משותפת חדשה"); add.type = "button";
+    add.addEventListener("click", () => { closeDlg("frSheet"); frOpenForm(null, key); });
+    const rm = frEl("button", "btn", key.startsWith("c:") ? "🗑️ הסרה" : "הסרה מהחברים"); rm.type = "button";
+    rm.addEventListener("click", async () => {
+      if (!rm.dataset.sure) { rm.dataset.sure = "1"; rm.textContent = "בטוח? ההוצאות שרשמנו נשארות"; return; }
+      if (key.startsWith("c:")) { store.contacts = frContacts().filter((c) => "c:" + c.id !== key); persist(); }
+      else { const l = fr.links.find((x) => x.a === key || x.b === key); if (l) { await sb.from("friendships").delete().eq("id", l.id); fr.links = fr.links.filter((x) => x !== l); } }
+      closeDlg("frSheet"); renderFriends();
+    });
+    const close = frEl("button", "btn", "סגירה"); close.type = "button"; close.addEventListener("click", () => closeDlg("frSheet"));
+    foot.append(add, close); box.append(rm);
+    openDlg("frSheet");
+  }
+
+  // ---- One shared expense: who paid what, who owes whom, paybacks ----
+  function frOpenExp(e) {
+    const box = $("frBody"), foot = $("frFoot"); box.innerHTML = ""; foot.innerHTML = "";
+    $("frSheetH").textContent = e.title || "הוצאה משותפת"; $("frSheetH").dataset.e = "🧾";
+    box.append(frEl("p", "hint", shortDate(e.spent_on) + " · סך הכול " + fm(e.total) + (e.updated_by && e.updated_by !== e.created_by ? " · עודכן ע״י " + frName(e.updated_by, e) : "")));
+    const people = frEl("div", "frlist");
+    frParts(e).forEach((p) => {
+      const k = frKey(p), st = p.status === "pending" ? " · מחכה לאישור" : p.status === "declined" ? " · לא אושר" : "";
+      people.append(frRow(k, frName(k, e), "שולם " + fm(p.paid) + st, "החלק " + fm(p.share), ""));
+    });
+    box.append(people);
+    const ds = frDebts(e);
+    if (ds.length) box.append(frEl("b", "frsub", "מי מחזיר למי"));
+    ds.forEach((d) => {
+      const row = frEl("div", "frdebt");
+      const txt = d.from === user.id ? "להחזיר ל" + frName(d.to, e) : d.to === user.id ? "לקבל מ" + frName(d.from, e) : frName(d.from, e) + " ← " + frName(d.to, e);
+      row.append(frEl("span", "frmid", txt), frEl("span", "frend " + (d.left ? (d.to === user.id ? "get" : d.from === user.id ? "give" : "") : ""), d.left ? fm(d.left) : "הוחזר ✓"));
+      if (d.left > 0) {
+        const act = frEl("span", "fracts");
+        const mark = frEl("button", "btn frmini", d.to === user.id ? "✓ קיבלתי" : "✓ החזרתי"); mark.type = "button";
+        mark.addEventListener("click", () => frPayForm(row, e, d));
+        act.append(mark);
+        const bit = !d.to.startsWith("c:") && d.from === user.id && fr.profs[d.to] && fr.profs[d.to].bit_link;
+        if (bit) { const a = frEl("a", "btn frmini frbit", "bit"); a.href = bit; a.target = "_blank"; a.rel = "noopener"; a.addEventListener("click", (ev) => { if (window.BudgetApp) { ev.preventDefault(); location.href = bit; } }); act.append(a); }
+        row.append(act);
+      }
+      box.append(row);
+    });
+    const myPays = fr.pays.filter((b) => b.expense_id === e.id);
+    myPays.forEach((b) => {
+      const row = frEl("div", "frdebt frpaid");
+      row.append(frEl("span", "frmid", "💸 החזר מ" + frName(b.from_key, e) + " ל" + frName(b.to_key, e) + " · " + shortDate(b.created_at.slice(0, 10))), frEl("span", "frend", fm(b.amount)));
+      if (b.marked_by === user.id) {
+        const x = frEl("button", "btn frmini", "✕"); x.type = "button"; x.setAttribute("aria-label", "ביטול הסימון");
+        x.addEventListener("click", async () => { await sb.from("shared_paybacks").delete().eq("id", b.id); fr.pays = fr.pays.filter((y) => y.id !== b.id); renderFriends(); frOpenExp(e); });
+        row.append(x);
+      }
+      box.append(row);
+    });
+    const edit = frEl("button", "btn primary", "✏️ עריכה"); edit.type = "button"; edit.addEventListener("click", () => { closeDlg("frSheet"); frOpenForm(e); });
+    const del = frEl("button", "btn", "🗑️ מחיקה"); del.type = "button";
+    del.addEventListener("click", async () => {
+      if (!del.dataset.sure) { del.dataset.sure = "1"; del.textContent = "למחוק לכולם?"; return; }
+      const { error } = await sb.from("shared_expenses").update({ deleted: true }).eq("id", e.id);
+      if (error) { snack("לא הצלחתי למחוק. נסה שוב."); return; }
+      e.deleted = true; closeDlg("frSheet"); await frSyncBudget(); renderFriends(); snack("ההוצאה המשותפת נמחקה");
+    });
+    const close = frEl("button", "btn", "סגירה"); close.type = "button"; close.addEventListener("click", () => closeDlg("frSheet"));
+    foot.append(edit, del, close);
+    openDlg("frSheet");
+  }
+  function frPayForm(row, e, d) {
+    if (row.querySelector(".frpayin")) return;
+    const f = frEl("div", "frpayin");
+    const inp = document.createElement("input"); inp.type = "number"; inp.inputMode = "decimal"; inp.min = "0"; inp.step = "0.01"; inp.value = d.left; inp.id = "frPayAmt"; inp.setAttribute("aria-label", "כמה הוחזר");
+    const ok = frEl("button", "btn primary frmini", "שמירה"); ok.type = "button";
+    ok.addEventListener("click", async () => {
+      const amount = m2(inp.value);
+      if (!(amount > 0)) { inp.focus(); return; }
+      ok.disabled = true;
+      const { data: b, error } = await sb.from("shared_paybacks").insert({ expense_id: e.id, from_key: d.from, to_key: d.to, amount: Math.min(amount, d.left), marked_by: user.id }).select().single();
+      if (error) { ok.disabled = false; snack("לא נשמר. נסה שוב."); return; }
+      fr.pays.push(b); buzz(); renderFriends(); frOpenExp(e);
+    });
+    f.append(frEl("span", "", "כמה?"), inp, ok); row.after(f); inp.focus(); inp.select();
+  }
+
+  // ---- Approving a shared expense someone else wrote ----
+  function frOpenApprove(e) {
+    const p = frParts(e).find((x) => x.user_id === user.id); if (!p) return;
+    const box = $("frBody"), foot = $("frFoot"); box.innerHTML = ""; foot.innerHTML = "";
+    $("frSheetH").textContent = e.title || "הוצאה משותפת"; $("frSheetH").dataset.e = "🍔";
+    box.append(frEl("p", "", "הוצאה משותפת מאת " + frName(e.created_by, e) + ", מ־" + shortDate(e.spent_on) + ", על " + fm(e.total) + "."));
+    box.append(frEl("p", "frbig", "החלק שלי: " + fm(p.share)), frEl("p", "hint", "שילמתי " + fm(p.paid) + ". אחרי האישור, " + fm(p.share) + " ייכנסו לתקציב שלי כהוצאה."));
+    const people = frEl("div", "frlist");
+    frParts(e).filter((x) => x !== p).forEach((x) => people.append(frRow(frKey(x), frName(frKey(x), e), "שולם " + fm(x.paid), "החלק " + fm(x.share))));
+    box.append(people);
+    const cats = frEl("fieldset", "chips"); cats.append(frEl("legend", "", "באיזו קטגוריה אצלי?"));
+    const pick = frCat(/אוכל|מסעד|בילוי/.test(e.title) ? (data().cats.find((c) => /אוכל|מסעד|בילוי/.test(c.name || "")) || {}).id : null);
+    catTree(data().cats).forEach(({ c, i, depth }) => {
+      const lab = frEl("label", "chip"); const inp = document.createElement("input"); inp.type = "radio"; inp.name = "frApCat"; inp.value = c.id; inp.id = "frApCat-" + i; inp.checked = c.id === pick;
+      lab.append(inp, frEl("span", "", (depth ? "↳ " : "") + catIcon(c) + " " + (c.name || "בלי שם"))); cats.append(lab);
+    });
+    box.append(cats);
+    const ok = frEl("button", "btn primary", "✓ אישור"); ok.type = "button";
+    const no = frEl("button", "btn", "✕ זה לא שלי"); no.type = "button";
+    const go = async (approve) => {
+      ok.disabled = no.disabled = true;
+      const sel = document.querySelector('input[name="frApCat"]:checked');
+      const { error } = await sb.from("shared_parts").update({ status: approve ? "approved" : "declined", cat: sel ? sel.value : null }).eq("id", p.id);
+      if (error) { ok.disabled = no.disabled = false; snack("לא נשמר. נסה שוב."); return; }
+      p.status = approve ? "approved" : "declined"; p.cat = sel ? sel.value : null;
+      closeDlg("frSheet");
+      if (approve) { await frSyncBudget(); snack("✓ " + fm(p.share) + " נכנסו לתקציב שלי"); buzz(); }
+      renderFriends();
+    };
+    ok.addEventListener("click", () => go(true)); no.addEventListener("click", () => go(false));
+    foot.append(ok, no);
+    openDlg("frSheet");
+  }
+
+  // ---- New or edited shared expense ----
+  let frEdit = null, frWho = [];
+  function frOpenForm(e, withKey, pre) {
+    if (!sb || !user) { snack("צריך להיות מחובר כדי לחלק הוצאות עם חברים."); return; }
+    if (!frFriendIds().length && !frContacts().length && !e) { snack("קודם מוסיפים חבר 🙂"); setView("friends"); frOpenAdd(); return; }
+    frEdit = e || null;
+    $("shH").textContent = e ? "עריכת הוצאה משותפת" : "הוצאה משותפת";
+    $("shTitle").value = e ? e.title : (pre && pre.title) || "";
+    $("shTotal").value = e ? m2(e.total) : (pre && pre.total) || "";
+    $("shDate").value = e ? e.spent_on : (pre && pre.date) || todayStr();
+    $("shErr").hidden = true;
+    const parts = e ? frParts(e) : [];
+    frWho = e ? parts.map((p) => ({ key: frKey(p), paid: p.paid, share: p.share, id: p.id }))
+      : [{ key: user.id, paid: "", share: "" }].concat(withKey ? [{ key: withKey, paid: "", share: "" }] : []);
+    if (pre && pre.who) frWho = pre.who;
+    frPaintWho(); frPaintRows();
+    $("shCats").hidden = !!e;
+    if (!e) {
+      const box = $("shCats"); box.querySelectorAll(".chip").forEach((n) => n.remove());
+      const want = pre && pre.cat ? frCat(pre.cat) : frCat(null);
+      catTree(data().cats).forEach(({ c, i, depth }) => {
+        const lab = frEl("label", "chip"); const inp = document.createElement("input"); inp.type = "radio"; inp.name = "shCat"; inp.value = c.id; inp.id = "shCat-" + i; inp.checked = c.id === want;
+        lab.append(inp, frEl("span", "", (depth ? "↳ " : "") + catIcon(c) + " " + (c.name || "בלי שם"))); box.append(lab);
+      });
+    }
+    openDlg("shSheet");
+  }
+  function frPaintWho() {
+    const box = $("shWho"); box.querySelectorAll(".chip").forEach((n) => n.remove());
+    const keys = frFriendIds().concat(frContacts().map((c) => "c:" + c.id));
+    frWho.forEach((w) => { if (w.key !== user.id && !keys.includes(w.key)) keys.push(w.key); });
+    keys.forEach((k, i) => {
+      const lab = frEl("label", "chip"); const inp = document.createElement("input"); inp.type = "checkbox"; inp.id = "shWho-" + i; inp.checked = frWho.some((w) => w.key === k);
+      // a friend who isn't a friend of mine any more can stay on an expense but not be added again
+      inp.disabled = !inp.checked && !frFriendIds().includes(k) && !k.startsWith("c:");
+      inp.addEventListener("change", () => {
+        if (inp.checked) frWho.push({ key: k, paid: "", share: "" }); else frWho = frWho.filter((w) => w.key !== k);
+        frPaintRows();
+      });
+      lab.append(inp, frEl("span", "", frName(k, frEdit).replace(/ \(.*\)$/, ""))); box.append(lab);
+    });
+  }
+  function frPaintRows() {
+    const box = $("shRows"); box.innerHTML = "";
+    const head = frEl("div", "shrow shhead"); head.append(frEl("span", "", ""), frEl("span", "", "שולם"), frEl("span", "", "החלק")); box.append(head);
+    frWho.forEach((w, i) => {
+      const row = frEl("div", "shrow");
+      row.append(frEl("span", "shname", frName(w.key, frEdit).replace(/ \(.*\)$/, "")));
+      ["paid", "share"].forEach((f) => {
+        const inp = document.createElement("input"); inp.type = "number"; inp.inputMode = "decimal"; inp.min = "0"; inp.step = "0.01"; inp.placeholder = "₪0";
+        inp.id = "sh-" + f + "-" + i; inp.value = w[f] === "" || w[f] == null ? "" : m2(w[f]);
+        inp.setAttribute("aria-label", (f === "paid" ? "כמה שילם " : "החלק של ") + frName(w.key, frEdit));
+        inp.addEventListener("input", () => { w[f] = inp.value; frPaintSum(); });
+        row.append(inp);
+      });
+      box.append(row);
+    });
+    frPaintSum();
+  }
+  function frPaintSum() {
+    const total = m2($("shTotal").value), paid = m2(frWho.reduce((s, w) => s + (+w.paid || 0), 0)), share = m2(frWho.reduce((s, w) => s + (+w.share || 0), 0));
+    const el = $("shSum"); el.innerHTML = "";
+    const a = frEl("span", Math.abs(paid - total) < 0.01 ? "ok" : "off", "שולם " + fm(paid) + " מתוך " + fm(total));
+    const b = frEl("span", Math.abs(share - total) < 0.01 ? "ok" : "off", "חולק " + fm(share) + " מתוך " + fm(total));
+    el.append(a, b);
+  }
+  $("shTotal").addEventListener("input", frPaintSum);
+  $("shCancel").addEventListener("click", () => closeDlg("shSheet"));
+  $("frNewExp").addEventListener("click", () => frOpenForm(null));
+  $("shForm").addEventListener("submit", async (ev) => {
+    ev.preventDefault();
+    const err = (t) => { $("shErr").textContent = t; $("shErr").hidden = false; };
+    const title = $("shTitle").value.trim().slice(0, 120), total = m2($("shTotal").value), date = $("shDate").value || todayStr();
+    if (!(total > 0)) return err("כמה עלה בסך הכול?");
+    if (frWho.length < 2) return err("צריך לבחור לפחות חבר אחד.");
+    const paid = m2(frWho.reduce((s, w) => s + (+w.paid || 0), 0)), share = m2(frWho.reduce((s, w) => s + (+w.share || 0), 0));
+    if (Math.abs(paid - total) >= 0.01) return err("מה שכולם שילמו (" + fm(paid) + ") צריך להיות שווה לסך הכול (" + fm(total) + ").");
+    if (Math.abs(share - total) >= 0.01) return err("החלקים של כולם (" + fm(share) + ") צריכים להיות שווים לסך הכול (" + fm(total) + ").");
+    $("shSave").disabled = true;
+    try {
+      let e = frEdit;
+      if (!e) {
+        const { data: ne, error } = await sb.from("shared_expenses").insert({ created_by: user.id, title, total, spent_on: date }).select().single();
+        if (error) throw error; e = ne; fr.exps.unshift(e);
+      } else {
+        const { error } = await sb.from("shared_expenses").update({ title, total, spent_on: date }).eq("id", e.id);
+        if (error) throw error; Object.assign(e, { title, total, spent_on: date, updated_by: user.id });
+      }
+      const myCat = (document.querySelector('input[name="shCat"]:checked') || {}).value || null;
+      const old = frParts(e);
+      // removed people
+      for (const p of old) if (!frWho.some((w) => w.key === frKey(p))) { await sb.from("shared_parts").delete().eq("id", p.id); fr.parts = fr.parts.filter((x) => x !== p); }
+      for (const w of frWho) {
+        const vals = { paid: m2(w.paid), share: m2(w.share) };
+        const p = old.find((x) => frKey(x) === w.key);
+        if (p) { if (p.paid !== vals.paid || p.share !== vals.share) { const { error } = await sb.from("shared_parts").update(vals).eq("id", p.id); if (error) throw error; Object.assign(p, vals); } continue; }
+        const row = { expense_id: e.id, ...vals, name: frName(w.key).replace(/ \(.*\)$/, "").slice(0, 60) };
+        if (w.key.startsWith("c:")) row.contact_id = w.key.slice(2); else row.user_id = w.key;
+        if (w.key === user.id) { row.cat = myCat; row.name = (fr.me && fr.me.name) || ""; }
+        const { data: np, error } = await sb.from("shared_parts").insert(row).select().single();
+        if (error) throw error; fr.parts.push({ ...np, share: +np.share, paid: +np.paid });
+      }
+      closeDlg("shSheet");
+      await frSyncBudget(); renderFriends(); buzz();
+      const mine = frParts(e).find((p) => p.user_id === user.id);
+      snack(frEdit ? "ההוצאה המשותפת עודכנה" : "✓ נשמר. " + (mine && mine.share > 0 ? fm(mine.share) + " נכנסו לתקציב שלי" : "") + (frParts(e).some((p) => p.status === "pending") ? ", והחברים יקבלו בקשה לאשר" : ""));
+    } catch (x) { err("לא הצלחתי לשמור. בדוק את החיבור ונסה שוב."); }
+    $("shSave").disabled = false;
+  });
+
+  // For the ✨ assistant: friends' names and the shared expenses (only what the user already sees in the friends tab)
+  function frAiContext() {
+    if (!fr.loaded) return "";
+    const L = ["\n== חברים והוצאות משותפות =="];
+    const people = frFriendIds().map((id) => frName(id)).concat(frContacts().map((c) => c.name + " (בלי האפליקציה)"));
+    L.push("החברים של המשתמש: " + (people.join(", ") || "אין עדיין") + ".");
+    L.push('פעולה נוספת שמותר להציע ב־[[act]]: {"t":"shared_add","title":"על מה","total":סך הכול,"date":"YYYY-MM-DD","cat":"id של קטגוריה","me":{"paid":כמה המשתמש שילם,"share":החלק של המשתמש},"people":[{"name":"שם החבר כמו ברשימה","paid":מספר,"share":מספר}]} כשהמשתמש מספר שקנה משהו יחד עם חבר מהרשימה. סכום ה־paid של כולם וסכום ה־share של כולם שווים ל־total. בלי פירוט אחר החלוקה שווה, ואם לא נאמר מי שילם, המשתמש שילם הכול. שם שלא ברשימה: שאל במקום להציע. אפשר גם לענות מי חייב למי ולנתח הרגלים משותפים (למשל ״כל יום שישי אתם קונים יחד ארוחת צהריים יקרה״), בלי לחשוף על חבר יותר ממה שמופיע כאן.');
+    L.push("הוצאות משותפות (תאריך | יום | על מה | סך הכול | החלק של המשתמש | המשתמש שילם | עם מי | מצב החזרים). בתקציב של המשתמש נכנס רק החלק שלו, והן כבר מופיעות ברשימת ההוצאות עם 👥:");
+    const wd = (d) => ["א", "ב", "ג", "ד", "ה", "ו", "ש"][new Date(d + "T12:00").getDay()];
+    frLive().filter((e) => e.spent_on >= dateAdd(todayStr(), -200)).slice(0, 150).forEach((e) => {
+      const me = frParts(e).find((p) => p.user_id === user.id) || { share: 0, paid: 0 };
+      const others = frParts(e).filter((p) => frKey(p) !== user.id).map((p) => frName(frKey(p), e).replace(/ \(.*\)$/, ""));
+      const open = frDebts(e).filter((d) => d.left > 0 && (d.from === user.id || d.to === user.id)).map((d) => (d.to === user.id ? "לקבל מ" + frName(d.from, e) : "להחזיר ל" + frName(d.to, e)) + " " + d.left);
+      L.push([e.spent_on, wd(e.spent_on), e.title || "", +e.total, me.share, me.paid, others.join(", "), open.join("; ") || "סגור"].join(" | "));
+    });
+    return L.join("\n");
+  }
+  // The assistant's "shared_add" card: people are matched by name to friends or contacts
+  function frAiPlan(a) {
+    const total = m2(a.total), title = String(a.title || "").trim().slice(0, 120);
+    const date = /^\d{4}-\d\d-\d\d$/.test(a.date || "") && a.date <= todayStr() ? a.date : todayStr();
+    const bad = (sub) => ({ txt: "🍔 הוצאה משותפת" + (title ? ": " + title : ""), sub, ok: false });
+    if (!sb || !user) return bad("צריך להיות מחובר");
+    if (!(total > 0)) return bad("חסר הסכום הכולל");
+    const keys = frFriendIds().map((id) => ({ key: id, name: frName(id) })).concat(frContacts().map((c) => ({ key: "c:" + c.id, name: c.name })));
+    const find = (n) => { n = String(n || "").trim(); return keys.find((k) => k.name === n) || keys.find((k) => n && (k.name.includes(n) || n.includes(k.name.split(" ")[0]))); };
+    const who = [{ key: user.id, paid: m2(a.me && a.me.paid), share: m2(a.me && a.me.share) }];
+    for (const p of Array.isArray(a.people) ? a.people : []) {
+      const k = find(p.name); if (!k) return bad("לא מצאתי חבר בשם ״" + String(p.name || "") + "״. אפשר להוסיף אותו בלשונית חברים.");
+      if (!who.some((w) => w.key === k.key)) who.push({ key: k.key, paid: m2(p.paid), share: m2(p.share) });
+    }
+    if (who.length < 2) return bad("עם מי?");
+    const sum = (f) => m2(who.reduce((s, w) => s + w[f], 0));
+    return { ok: true, txt: "🍔 הוצאה משותפת " + fm(total) + (title ? " · " + title : ""), sub: who.map((w) => frName(w.key).replace(/ \(.*\)$/, "") + ": שולם " + fm(w.paid) + ", חלק " + fm(w.share)).join(" · ") + (sum("paid") !== total || sum("share") !== total ? " (לבדוק בטופס)" : ""),
+      run: () => { closeDlg("aiSheet"); setView("friends"); frOpenForm(null, null, { title, total, date, cat: a.cat, who }); return "טופס הוצאה משותפת (לבדוק ולשמור)"; } };
+  }
+
   // ---- Pages ----
   let view = "main";
   function setView(v, fromHash) {
-    view = ["shifts", "calendar", "settings", "look", "admin"].includes(v) ? v : "main";
+    view = ["shifts", "calendar", "friends", "settings", "look", "admin"].includes(v) ? v : "main";
     if (view !== "main" && layEditing) exitLayEdit(false);
     $("viewMain").hidden = view !== "main";
     $("viewSettings").hidden = view !== "settings";
@@ -6247,12 +6950,14 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     if (view === "settings") renderLayList();
     $("viewShifts").hidden = view !== "shifts";
     $("viewCal").hidden = view !== "calendar";
+    $("viewFriends").hidden = view !== "friends";
     document.querySelectorAll(".tabs a").forEach((a) => a.setAttribute("aria-current", String(a.dataset.view === view)));
-    $("fab").textContent = view === "shifts" ? "⏰ משמרת" : "💸 הוצאה";
+    $("fab").textContent = view === "shifts" ? "⏰ משמרת" : view === "friends" ? "🍔 משותפת" : "💸 הוצאה";
     aiFabSync();
     if (!fromHash) { const h = view === "main" ? "" : "#" + view; if (location.hash !== h) history.replaceState(null, "", location.pathname + h); }
     if (view === "calendar") renderCal();
     if (view === "shifts") renderShifts();
+    if (view === "friends") { renderFriends(); loadFriends(); }
     window.scrollTo(0, 0);
   }
 
@@ -6615,6 +7320,17 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       sb.from("broadcasts").select("id, body, push, active, created_at").order("id", { ascending: false }).limit(10)
     ]);
     renderAdminAi(u.data, f.data);
+    sb.rpc("admin_friends").then(({ data: fl, error: fe }) => {
+      const box = $("adFr"); box.innerHTML = "";
+      if (fe) { box.textContent = "לא הצלחתי לטעון: " + fe.message; return; }
+      if (!fl.length) { box.textContent = "עוד אין חברויות."; return; }
+      fl.forEach((r) => {
+        const d = document.createElement("div"); d.className = "aduser";
+        const b1 = document.createElement("b"); b1.textContent = r.a_name + " ↔ " + r.b_name;
+        const l1 = document.createElement("span"); l1.textContent = ({ accepted: "✓ חברים", pending: "⏳ בקשה מחכה", declined: "✕ נדחתה" }[r.status] || r.status) + " · " + new Date(r.since).toLocaleDateString("he-IL") + " · " + r.shared + " הוצאות משותפות";
+        d.append(b1, l1); box.append(d);
+      });
+    });
     const box = $("adUsers"); box.innerHTML = "";
     if (u.error) box.textContent = "לא הצלחתי לטעון: " + u.error.message;
     else {
@@ -6700,9 +7416,10 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     statement: ["🏦 לכל ההוצאות של החודש", () => aiGoBlock("statement")],
     challenge: ["🏅 לאתגר החודש", () => aiGoBlock("challenge")],
     habits: ["🧠 להרגלים שלי", () => aiGoBlock("habits")],
-    plan: ["📝 לתוכנית החודש", () => aiGoBlock("plan")]
+    plan: ["📝 לתוכנית החודש", () => aiGoBlock("plan")],
+    friends: ["👥 לחברים", () => setView("friends")]
   };
-  const AI_GUIDE = "מבנה האפליקציה: למעלה לוגו, גלגל שיניים ⚙ של הגדרות ליד תמונת הפרופיל, ובורר חודש. שלוש לשוניות למעלה: ראשי / משמרות / לוח שנה. בדף הראשי יש אריחים שאפשר לסדר (לחיצה ארוכה על אריח פותחת מצב עריכה: גוררים ⠿, 👁 מסתיר, ✓ שומר; או בהגדרות > פריסת דף הבית). כפתור 💸 הוצאה למטה פותח טופס הוצאה (סכום, קטגוריה, פירוט, תאריך, צריך/רוצה, למה קניתי, ⭐ שמירה ככפתור, חיוב קבוע כל חודש, ״אולי אקנה״ ל־48 שעות). בלשונית משמרות: כפתור ⏰ משמרת, ייבוא משמרות (הדבקה מחילן, כמה ימים ביחד, צילום דוח), הגדרות שכר, יעד הכנסה לחודש. הגדרות > כללי: מתי מתחיל החודש, טון ההודעות, מתי לספור את הכסף מהמשמרות, תזכורת ערב. הגדרות > עיצוב וצבעים: בהיר/כהה, צבע רקע, צבע מבטא, גודל טקסט, רטט וקונפטי. ✨ הוא העוזר עצמו.\n"
+  const AI_GUIDE = "מבנה האפליקציה: למעלה לוגו, גלגל שיניים ⚙ של הגדרות ליד תמונת הפרופיל, ובורר חודש. שלוש לשוניות למעלה: ראשי / משמרות / לוח שנה. בדף הראשי יש אריחים שאפשר לסדר (לחיצה ארוכה על אריח פותחת מצב עריכה: גוררים ⠿, 👁 מסתיר, ✓ שומר; או בהגדרות > פריסת דף הבית). כפתור 💸 הוצאה למטה פותח טופס הוצאה (סכום, קטגוריה, פירוט, תאריך, צריך/רוצה, למה קניתי, ⭐ שמירה ככפתור, חיוב קבוע כל חודש, ״אולי אקנה״ ל־48 שעות). בלשונית משמרות: כפתור ⏰ משמרת, ייבוא משמרות (הדבקה מחילן, כמה ימים ביחד, צילום דוח), הגדרות שכר, יעד הכנסה לחודש. הגדרות > כללי: מתי מתחיל החודש, טון ההודעות, מתי לספור את הכסף מהמשמרות, תזכורת ערב. הגדרות > עיצוב וצבעים: בהיר/כהה, צבע רקע, צבע מבטא, גודל טקסט, רטט וקונפטי. ✨ הוא העוזר עצמו. לשונית 👥 חברים: מוסיפים חבר לפי מייל או שם, או לינק הזמנה בווצאפ, או חבר בלי האפליקציה; כפתור 🍔 הוצאה משותפת: סך הכול, עם מי, כמה כל אחד שילם וכמה החלק של כל אחד; החבר מאשר לפני שזה נכנס לתקציב שלו; בתקציב נכנס רק החלק של המשתמש; ״החזרתי״/״קיבלתי״ מסמנים החזר (גם חלקי); בביט אם החבר שמר קישור. חבר רואה רק שם ואת מה שחילקו ביחד.\n"
     + "הסברים על כל אריח:\n" + Object.values(HELP).map((t) => "- " + t).join("\n")
     + "\nיעדים לכפתור [[go:...]]: " + Object.keys(AI_GO).map((k) => k + "=" + AI_GO[k][0]).join(", ");
   // "Why this number?" under today's allowance: the same parts render() used, in two plain lines
@@ -6833,6 +7550,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       const planInc = pl ? pl.income.reduce((a, x) => a + (+x.amount || 0), 0) : 0, fixed = pl ? pl.expenses.reduce((a, x) => a + (+x.amount || 0), 0) : 0;
       L.push(k + ": הוצאות יומיום " + Math.round(m.exp) + " (" + Object.entries(m.cats).sort((a, b) => b[1] - a[1]).map(([c, v]) => c + " " + Math.round(v)).join(", ") + ") · משמרות " + m.n + " (" + (m.min / 60).toFixed(1) + " שעות, " + Math.round(m.gross) + " ברוטו) · הכנסות חד־פעמיות " + Math.round(m.inc) + " · הכנסה בתוכנית " + planInc + " · חיובים קבועים " + fixed);
     });
+    L.push(frAiContext());
     L.push(aiFacts(e.data || [], s.data || [], byM));
     L.push("\n== מדריך האפליקציה ==\n" + AI_GUIDE);
     return L.join("\n");
@@ -6975,6 +7693,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
         return { ok: true, txt: "🧠 לזכור: " + text, sub: "נשמר בחשבון שלך. אפשר למחוק ב״🧠 מה אני זוכר״",
           run: () => { store.aiNotes = (store.aiNotes || []).concat([{ id: uid(), text, at: todayStr() }]).slice(-30); persist(); return "אזכור את זה"; } };
       }
+      case "shared_add": return frAiPlan(a);
       case "note_del": {
         const want = String(a.text || "").trim(), n = (store.aiNotes || []).find((x) => x.text === want) || (store.aiNotes || []).find((x) => want && (x.text.includes(want) || want.includes(x.text)));
         if (!n) return bad("🧠 לשכוח: " + want, "אין דבר כזה בזיכרון");
@@ -7503,16 +8222,14 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     $("adFbSum").disabled = false;
   });
 
-  const NEWS_ID = "2026-10-08-look3";
+  const NEWS_ID = "2026-10-13-friends";
   const NEWS = [
-    ["🎨", "עיצוב מסודר יותר", "לכל אריח פס צבע משלו, וכפתורי ? ו־▾ קטנים ושקטים יותר."],
-    ["⭕", "טבעת סביב הפרצוף", "בכרטיס ״מותר לך היום״: הטבעת מתרוקנת ככל שמוציאים היום."],
-    ["📉", "גרף קטן של החודש", "מתחת לסכום של היום. הקו המקווקו הוא הקצב שמגיע בדיוק לסוף החודש."],
-    ["🛍️", "קטגוריות צבעוניות", "הפסים עבים יותר ובצבע של הקטגוריה בעוגה. נהיים אדומים רק כשעוברים את היעד."],
-    ["📦", "אריחים סגורים", "אריח סגור מראה שורת סיכום, ושני אריחים סגורים עומדים זה ליד זה."],
-    ["📅", "לוח שנה צבוע", "ככל שהוצאת יותר ביום, הריבוע שלו כהה יותר. והחודש למעלה כתוב בעברית."],
-    ["➕", "כפתור הוצאה", "כשגוללים למטה הוא מתכווץ ל־+ כדי לא להסתיר, וחוזר כשגוללים למעלה."],
-    ["🕯️", "שבת שלום", "ביום שישי מחכות חלות בדף הבית, ובחגים ברכה של החג."]
+    ["👥", "חדש: חברים", "לשונית חדשה ״חברים״ למעלה. מוסיפים חבר לפי המייל או השם שלו, או שולחים לו לינק הזמנה בווצאפ."],
+    ["🍔", "הוצאות משותפות", "קניתם ביחד? רושמים כמה כל אחד שילם וכמה החלק של כל אחד. בתקציב שלך נכנס רק החלק שלך."],
+    ["✅", "כל אחד מאשר", "החבר מקבל בקשה ומאשר לפני שזה נכנס לתקציב שלו, ובוחר לזה קטגוריה משלו."],
+    ["💸", "מי מחזיר למי", "האפליקציה מראה למי להחזיר וממי לקבל. מסמנים ״החזרתי״ או ״קיבלתי״, גם החזר חלקי, ואפשר לשלם בביט."],
+    ["🔒", "פרטיות", "חבר רואה רק את השם שלך ואת ההוצאות שחילקתם ביחד. אף פעם לא את התקציב, היתרה או המשמרות."],
+    ["✨", "גם עם העוזר", "אפשר לכתוב לעוזר ״אכלנו פיצה ב־120 עם דני, הוא שילם 40״ והוא ימלא את ההוצאה המשותפת לאישור."]
   ];
   $("genderAsk").addEventListener("click", (e) => {
     const b = e.target.closest("[data-g]"); if (!b) return;
@@ -7534,6 +8251,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     setTimeout(() => { $("newsSheet").scrollTop = 0; const f = $("newsSheet").querySelector("form"); if (f) f.scrollTop = 0; }, 30);
   }
   $("newsOk").addEventListener("click", () => { try { localStorage.setItem("budget-news", NEWS_ID); } catch (e) {} closeDlg("newsSheet"); });
+  $("newsGo").addEventListener("click", () => { try { localStorage.setItem("budget-news", NEWS_ID); } catch (e) {} closeDlg("newsSheet"); setView("friends"); });
 
   // ---- Share the month as a picture ----
   async function drawMonthCard(withAmounts) {
@@ -7615,7 +8333,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     else nextIntro();
     $("openAdmin").hidden = !isAdmin(); vipSync();
     aiFabSync();
-    recordSeen(); loadBroadcast(); setTimeout(loadPersonal, 2500); showDonate();
+    recordSeen(); loadBroadcast(); setTimeout(loadPersonal, 2500); showDonate(); loadFriends();
     const ns = new URLSearchParams(location.search).get("newShift");
     if (ns) { history.replaceState(null, "", location.pathname + location.hash); window.openShiftFromApp(ns); }
   }
@@ -7827,6 +8545,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     runRecurring();
     await loadHist();
     renderTracking();
+    loadFriends();
   }
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "hidden") { flushSave(); }
