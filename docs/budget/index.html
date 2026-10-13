@@ -886,6 +886,15 @@ dialog.alarm form { gap: 12px; }
 .alarm .btn.ghost { background: transparent; color: #fff; border: 2px solid rgba(255, 255, 255, .7); }
 @keyframes alarmPulse { 50% { transform: scale(1.08); } }
 /* Dim sum style: lantern red and gold, steaming baskets */
+dialog.donate { background: radial-gradient(circle at 50% 0%, rgba(255,214,102,.55) 0, transparent 42%), linear-gradient(165deg, #ff7a59, #e8487a 55%, #8e44ad); color: #fff; text-align: center; }
+dialog.donate h2 { text-align: center; justify-content: center; color: #fff; font-size: 24px; margin: 4px 0 6px; text-wrap: balance; }
+dialog.donate .hearts { font-size: 34px; letter-spacing: 6px; margin-top: 6px; }
+dialog.donate .msg { background: rgba(255,255,255,.16); border: 2px solid rgba(255,255,255,.55); border-radius: 18px; padding: 14px 16px; font-size: 17px; line-height: 1.6; font-weight: 600; margin: 10px 0 14px; }
+dialog.donate .msg b { display: block; margin-top: 6px; }
+dialog.donate .bitbtn:focus { outline: none; }
+dialog.donate .bitbtn { display: block; text-decoration: none; background: #fff; color: #1a9fbf; font-weight: 800; font-size: 19px; padding: 15px 16px; border-radius: 16px; box-shadow: 0 6px 18px rgba(0,0,0,.18); }
+dialog.donate .bitbtn .bit { display: inline-block; background: #1dc8e6; color: #fff; border-radius: 9px; padding: 1px 8px; margin-inline-end: 6px; font-weight: 900; }
+dialog.donate .skip { background: transparent; border: 0; color: rgba(255,255,255,.9); font-size: 16px; margin-top: 10px; padding: 10px 24px; text-decoration: underline; }
 dialog.alarm.dimsum { background: radial-gradient(circle at 50% 0%, #ffcf5c 0, transparent 38%), linear-gradient(170deg, #c8102e, #8a0b1f 70%, #5e0614); }
 .dimsum .signs { animation: steam 2.2s ease-in-out infinite; }
 .dimsum p { border-color: #ffcf5c; border-style: double; border-width: 5px; background: rgba(255, 207, 92, .12); }
@@ -1964,6 +1973,15 @@ html.hugetext .season3 svg { width: 70px; height: 21px; }
       <li><span>🚀</span><div><b>חידושים לפני כולם</b><small>דברים חדשים יגיעו קודם אלייך.</small></div></li>
     </ul>
     <div class="foot"><button class="btn primary" type="button" id="vipGold">🎨 לנסות את הזהב</button><button class="btn" type="button" id="vipOk">תודה! 💛</button></div>
+  </form>
+</dialog>
+<dialog class="sheet donate" id="donateSheet" aria-labelledby="donateH">
+  <form method="dialog">
+  <div class="hearts">💛🙏💛</div>
+  <h2 id="donateH">רגע אחד לפני שממשיכים</h2>
+  <div class="msg">אפליקציה זו נוצרה באופן עצמאי על ידי שמואל רוט, והושקעו בה זמן, מחשבה וכסף.<b>אם היא משמשת אתכם, נשמח לתרומות להמשך תחזוקה ועדכונים.</b></div>
+  <a class="bitbtn" id="donateBit" href="https://www.bitpay.co.il/app/me/FA4F8726-85D1-3F0D-E1FE-9D227477881C0742" target="_blank" rel="noopener"><span class="bit">bit</span>לתרומה בביט לחצו כאן</a>
+  <button class="skip" type="button" id="donateSkip">דלג</button>
   </form>
 </dialog>
 <dialog class="sheet" id="genderSheet" aria-labelledby="genderH">
@@ -6518,6 +6536,18 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   function isVip() { return !!(user && VIP_IDS.includes(user.id)); }
   const isEarly = () => isAdmin() || isVip();
   function vipSync() { $("vipCrown").hidden = !isVip(); }
+  // Donation popup (owner, 2026-10-13): every app open, for every user, until 2026-10-15 23:09 Israel time
+  const DONATE_UNTIL = Date.parse("2026-10-15T20:09:00Z");
+  function showDonate(tries = 0) {
+    if (Date.now() >= DONATE_UNTIL) return;
+    if (document.querySelector("dialog[open]")) { if (tries < 40) setTimeout(() => showDonate(tries + 1), 3000); return; }
+    openDlg("donateSheet");
+  }
+  $("donateSkip").addEventListener("click", () => closeDlg("donateSheet"));
+  $("donateBit").addEventListener("click", (e) => {
+    if (window.BudgetApp) { e.preventDefault(); location.href = e.currentTarget.href; }
+    setTimeout(() => closeDlg("donateSheet"), 300);
+  });
   function nextIntro() {
     if (isVip() && !store.vipSeen) { setTimeout(() => openDlg("vipSheet"), 600); return; }
     setTimeout(() => showNews(false), 1200);
@@ -7592,7 +7622,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     else nextIntro();
     $("openAdmin").hidden = !isAdmin(); vipSync();
     aiFabSync();
-    recordSeen(); loadBroadcast(); setTimeout(loadPersonal, 2500);
+    recordSeen(); loadBroadcast(); setTimeout(loadPersonal, 2500); setTimeout(showDonate, 4500);
     const ns = new URLSearchParams(location.search).get("newShift");
     if (ns) { history.replaceState(null, "", location.pathname + location.hash); window.openShiftFromApp(ns); }
   }
