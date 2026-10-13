@@ -929,6 +929,12 @@ button.frrow { cursor: pointer; }
 .shsum { display: flex; flex-wrap: wrap; gap: 6px 14px; margin: 0; font-size: 14px; font-weight: 700; }
 .shsum .ok { color: var(--accent); } .shsum .off { color: var(--danger); }
 #frSheet .foot { flex-wrap: wrap; }
+.donbar.slim { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 12px; text-align: start; }
+.donbar.slim > p, .donbar.slim .hide { display: none; }
+.donbar .slimtxt { display: none; font-weight: 700; }
+.donbar.slim .slimtxt { display: block; }
+.donbar.slim .row { flex: none; }
+.donbar.slim .bitbtn { padding: 6px 12px; font-size: 14px; }
 .donbar .hide { background: transparent; border: 0; color: #fff; font: inherit; font-weight: 600; text-decoration: underline; padding: 8px 10px; min-height: 40px; }
 dialog.alarm.dimsum { background: radial-gradient(circle at 50% 0%, #ffcf5c 0, transparent 38%), linear-gradient(170deg, #c8102e, #8a0b1f 70%, #5e0614); }
 .dimsum .signs { animation: steam 2.2s ease-in-out infinite; }
@@ -1327,6 +1333,7 @@ html.hugetext .season3 svg { width: 70px; height: 21px; }
 <div class="wrap" id="app" hidden>
   <div class="donbar" id="donBar" role="region" aria-label="תרומה" hidden>
     <p>💛 אפליקציה זו נוצרה באופן עצמאי על ידי שמואל רוט, והושקעו בה זמן, מחשבה וכסף. אם היא משמשת אתכם, נשמח לתרומות להמשך תחזוקה ועדכונים.<i>(בעוד כחמישה שבועות יוצא המשחק GTA 6 והוא מאוד רוצה לשחק בו. עזרו לו לממן את המשחק, ואת התקופה שבה לא יעבוד בגללו 🎮)</i></p>
+    <span class="slimtxt">💛 תרומה לאפליקציה</span>
     <div class="row">
       <a class="bitbtn" id="donateBit" href="https://www.bitpay.co.il/app/me/FA4F8726-85D1-3F0D-E1FE-9D227477881C0742" target="_blank" rel="noopener"><span class="bit">bit</span>לתרומה בביט לחצו כאן</a>
       <button class="hide" type="button" id="donateHide">הסתר</button>
@@ -1376,7 +1383,7 @@ html.hugetext .season3 svg { width: 70px; height: 21px; }
   <nav class="tabs" aria-label="עמודים">
     <a href="#" data-view="main" aria-current="true"><i class="ti" aria-hidden="true">🏠</i>ראשי</a>
     <a href="#shifts" data-view="shifts"><i class="ti" aria-hidden="true">⏰</i>משמרות<span class="missdot" id="missDot" hidden aria-label="יש ימים שלא הוזנו"></span></a>
-    <a href="#calendar" data-view="calendar"><i class="ti" aria-hidden="true">📅</i>לוח<span class="tw2"> שנה</span></a>
+    <a href="#calendar" data-view="calendar"><i class="ti" aria-hidden="true">📅</i><span>לוח<span class="tw2"> שנה</span></span></a>
     <a href="#friends" data-view="friends"><i class="ti" aria-hidden="true">👥</i>חברים<span class="frbadge" id="frDot" hidden></span></a>
   </nav>
 
@@ -7242,9 +7249,11 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   const DONATE_UNTIL = Date.parse("2026-10-15T20:09:00Z");
   function showDonate() {
     let hidden = false; try { hidden = localStorage.getItem("budget-donate-hide") === "1"; } catch (e) {}
-    $("donBar").hidden = hidden || Date.now() >= DONATE_UNTIL;
+    // Pinned until the end time (owner, 2026-10-13 21:20Z): "הסתר" only shrinks it to one slim line with the Bit button
+    $("donBar").hidden = Date.now() >= DONATE_UNTIL;
+    $("donBar").classList.toggle("slim", hidden);
   }
-  $("donateHide").addEventListener("click", () => { $("donBar").hidden = true; try { localStorage.setItem("budget-donate-hide", "1"); } catch (e) {} });
+  $("donateHide").addEventListener("click", () => { $("donBar").classList.add("slim"); try { localStorage.setItem("budget-donate-hide", "1"); } catch (e) {} });
   $("donateBit").addEventListener("click", (e) => { if (window.BudgetApp) { e.preventDefault(); location.href = e.currentTarget.href; } });
   function nextIntro() {
     if (isVip() && !store.vipSeen) { setTimeout(() => openDlg("vipSheet"), 600); return; }
