@@ -1731,6 +1731,11 @@ html.hugetext .season3 svg { width: 70px; height: 21px; }
       <p class="hint">כמה פעמים השתמשו בעוזר ב־30 הימים האחרונים. בלי השאלות עצמן.</p>
       <div class="adlist" id="adAi"></div>
     </section>
+    <section class="panel" aria-labelledby="adErrH">
+      <h2 id="adErrH" class="pc-violet" data-e="🐞">תקלות באפליקציה</h2>
+      <p class="hint">שגיאות שקרו אצל משתמשים ב־30 הימים האחרונים, נשלחות לבד. רק טקסט השגיאה, הגרסה והמסך, בלי סכומים ובלי פרטים אישיים.</p>
+      <div class="adlist" id="adErr"></div>
+    </section>
     <section class="panel" aria-labelledby="adFrH">
       <h2 id="adFrH" class="pc-violet" data-e="👥">מי חבר של מי</h2>
       <p class="hint">בלי סכומים: רק החברויות וכמה הוצאות משותפות יש לכל זוג.</p>
@@ -2212,7 +2217,7 @@ html.hugetext .season3 svg { width: 70px; height: 21px; }
     <h2 id="newsH" data-e="✨">מה חדש</h2>
     <p class="hint" id="newsLead">הכל כדי שרישום הוצאה ייקח שנייה.</p>
     <ul id="newsList"></ul>
-    <div class="foot"><button class="btn primary" type="button" id="newsGo">💳 להפעלה בהגדרות</button><button class="btn" type="button" id="newsOk">הבנתי</button></div>
+    <div class="foot"><button class="btn primary" type="button" id="newsGo">💳 להפעלת זיהוי תשלומים</button><button class="btn" type="button" id="newsOk">הבנתי</button></div>
   </form>
 </dialog>
 
@@ -2413,6 +2418,31 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   const shifts = {};      // month -> [{ id, work_date, start_time, end_time, break_min, wage, note, created_at, pending }]
   let sb = null;
 
+  // ---- Automatic error reports: only the error text, where in the code, the app version and the screen. No amounts, notes or names ----
+  const errQ = []; let errSent = 0;
+  function errReport(msg, src) {
+    msg = String(msg || "").replace(/\d{3,}/g, "#").replace(/\s+/g, " ").trim().slice(0, 300);
+    if (!msg || /ResizeObserver|^Script error\.?$|Load failed|Failed to fetch|NetworkError|AbortError/i.test(msg)) return;
+    if (errQ.length >= 10 || errQ.some((e) => e.msg === msg)) return;
+    let ver = "web", scr = "";
+    try { ver = window.BudgetApp && BudgetApp.version ? "android " + BudgetApp.version() : /iPhone|iPad/.test(navigator.userAgent) ? "iphone" : "web"; } catch (e) {}
+    try { scr = view; } catch (e) {}
+    errQ.push({ msg, src: String(src || "").replace(/^https?:\/\/[^/]+/, "").slice(0, 200), version: ver, view: String(scr || "").slice(0, 20), sent: false });
+    errFlush();
+  }
+  function errFlush() {
+    if (!sb || !user || errSent >= 5) return;
+    const rows = errQ.filter((e) => !e.sent).slice(0, 5 - errSent);
+    if (!rows.length) return;
+    rows.forEach((e) => { e.sent = true; }); errSent += rows.length;
+    sb.from("app_errors").insert(rows.map(({ msg, src, version, view }) => ({ msg, src, version, view }))).then(() => {}, () => {});
+  }
+  window.addEventListener("error", (e) => { if (e && e.message) errReport(e.message, (e.filename || "") + ":" + (e.lineno || 0) + ":" + (e.colno || 0)); });
+  window.addEventListener("unhandledrejection", (e) => {
+    const r = e && e.reason; if (!r) return;
+    errReport("Promise: " + (r.message || String(r)), r.stack ? String(r.stack).split("\n").find((l) => /\d+:\d+/.test(l)) : "");
+  });
+
   function show(which) {
     $("loading").hidden = which !== "loading";
     $("authScreen").hidden = which !== "auth";
@@ -2526,6 +2556,9 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   // Android phones in a regular browser get a link to the app; inside the app it stays hidden
   if (/Android/i.test(navigator.userAgent) && !/BudgetApp/.test(navigator.userAgent))
     document.querySelectorAll(".getapp").forEach((a) => (a.hidden = false));
+  // iPhone in Safari: the same spot explains how to put the app on the home screen
+  const isIphone = /iPhone|iPad|iPod/.test(navigator.userAgent) && !navigator.standalone && !matchMedia("(display-mode: standalone)").matches;
+  if (isIphone) document.querySelectorAll(".getapp").forEach((a) => { a.href = "iphone.html"; a.removeAttribute("download"); a.textContent = "📱 התקנה באייפון"; a.hidden = false; });
   paintTheme();
 
   // ---- Feel: a short vibration when logging, confetti for wins (per device, both on by default) ----
@@ -7467,6 +7500,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       sb.from("broadcasts").select("id, body, push, active, created_at").order("id", { ascending: false }).limit(10)
     ]);
     renderAdminAi(u.data, f.data);
+    renderAdminErr(u.data);
     sb.rpc("admin_friends").then(({ data: fl, error: fe }) => {
       const box = $("adFr"); box.innerHTML = "";
       if (fe) { box.textContent = "לא הצלחתי לטעון: " + fe.message; return; }
@@ -8355,6 +8389,24 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       });
     } catch (e) { box.textContent = aiErrText(e); }
   }
+  async function renderAdminErr(users) {
+    const box = $("adErr"); box.textContent = "טוען…";
+    const { data, error } = await sb.from("app_errors").select("user_id, at, msg, src, version, view").gte("at", new Date(Date.now() - 30 * 864e5).toISOString()).order("at", { ascending: false }).limit(300);
+    box.innerHTML = "";
+    if (error) { box.textContent = "לא הצלחתי לטעון: " + error.message; return; }
+    if (!data.length) { box.textContent = "🟢 לא היו תקלות ב־30 הימים האחרונים."; return; }
+    const em = {}; (users || []).forEach((x) => { em[x.user_id] = x.email; });
+    const g = {};
+    data.forEach((r) => { const k = r.msg; (g[k] = g[k] || { n: 0, who: new Set(), vers: new Set(), r }).n++; g[k].who.add(r.user_id); g[k].vers.add(r.version || "?"); });
+    Object.values(g).sort((a, b) => new Date(b.r.at) - new Date(a.r.at)).slice(0, 15).forEach((x) => {
+      const d = document.createElement("div"); d.className = "aduser";
+      const b = document.createElement("b"); b.textContent = "🐞 " + x.r.msg;
+      const s1 = document.createElement("span"); s1.textContent = x.n + " פעמים · " + [...x.who].map((id) => (em[id] || "משתמש").split("@")[0]).join(", ") + " · אחרונה " + ago(x.r.at);
+      const s2 = document.createElement("span"); s2.textContent = [...x.vers].join(", ") + (x.r.view ? " · מסך " + x.r.view : "") + (x.r.src ? " · " + x.r.src : "");
+      s2.dir = "ltr"; s2.style.textAlign = "right";
+      d.append(b, s1, s2); box.append(d);
+    });
+  }
   const AI_LBL = { chat: "💬 שאלות", expenses: "✍️ רישום הוצאות", shiftsheet: "📷 דוחות נוכחות", receipt: "🧾 קבלות", challenge: "🏅 אתגרים", letter: "💌 מכתבים", patterns: "🔍 הרגלים", admin_fb: "🛠️ סיכום משובים" };
   const AI_TOPIC = { money: "💸 הוצאות וכסף", shifts: "⏰ משמרות ושכר", action: "✍️ בקשות לרשום", app: "📱 איך עושים באפליקציה", rights: "⚖️ זכויות", whatif: "🔮 מה אם", afford: "🤔 אפשר להרשות?", weekplan: "📅 תכנון שבוע", tax: "💸 החזר מס", showwork: "🔎 איך הגעת לזה", item: "🧾 על הוצאה מסוימת", other: "💬 אחר" };
   // Owner: is the assistant healthy (failures, speed, which Google model answered) and a weekly picture of the app
@@ -8676,13 +8728,21 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     try { const { error } = await sb.rpc("push_key_set", { k: BudgetApp.pushKey() }); if (!error) pushKeyDone = true; } catch (e) {}
   }
 
-  const NEWS_ID = "2026-10-15-pay";
+  const NEWS_ID = "2026-10-15-all";
+  // [emoji, title, text, who]: "a" = Android app only, "i" = iPhone in Safari only, "" = everyone
   const NEWS = [
-    ["💳", "הוצאה מוכנה מההתראה", "כשהבנק או האשראי שולחים התראה על חיוב, האפליקציה מכינה את ההוצאה ואתה רק בוחר קטגוריה ושומר. מפעילים פעם אחת בהגדרות ← כללי."],
-    ["📲", "ווידג׳ט במסך הבית", "לחיצה ארוכה על מסך הבית של הטלפון ← ווידג׳טים ← ״התקציב שלי״. רואים כמה מותר היום, ו־+ פותח הוצאה חדשה."],
-    ["🔔", "התראות גם כשהאפליקציה סגורה", "הודעות אישיות, בקשות חברות והוצאות משותפות שמחכות לך יגיעו גם בלי לפתוח את האפליקציה."],
-    ["🔒", "פרטיות", "ההתראות נקראות רק בטלפון שלך ולא נשלחות לשום מקום. אפשר לכבות בכל רגע."],
-    ["📥", "צריך את גרסה 2.2", "הכל עובד באפליקציה לאנדרואיד מגרסה 2.2. אם מופיע באנר ״עדכון״, לוחצים עליו."]
+    ["💳", "הוצאה מוכנה מההתראה", "כשהבנק או האשראי שולחים התראה על חיוב, האפליקציה מכינה את ההוצאה ונשאר רק לבחור קטגוריה ולשמור. מפעילים פעם אחת בהגדרות ← כללי. ההתראות נקראות רק בטלפון שלך.", "a"],
+    ["📲", "ווידג׳ט במסך הבית", "לחיצה ארוכה על מסך הבית של הטלפון ← ווידג׳טים ← ״התקציב שלי״. רואים כמה מותר היום, ו־+ פותח הוצאה חדשה.", "a"],
+    ["🔔", "התראות גם כשהאפליקציה סגורה", "הודעות אישיות, בקשות חברות והוצאות משותפות מגיעות גם בלי לפתוח את האפליקציה (מגרסה 2.2).", "a"],
+    ["📱", "האפליקציה במסך הבית של האייפון", "בתפריט ״החשבון שלי״ יש ״התקנה באייפון״ עם הסבר בתמונות.", "i"],
+    ["🔎", "חיפוש בכל החודשים", "כפתור 🔎 למעלה מוצא הוצאות, משמרות והכנסות לפי מילה, קטגוריה או סכום.", ""],
+    ["📂", "לחיצה על קטגוריה", "מראה את כל ההוצאות שלה החודש ובחודשים הקודמים.", ""],
+    ["📊", "חצי שנה בגרף", "כמה נכנס וכמה יצא בכל אחד מ־6 החודשים האחרונים.", ""],
+    ["↩️", "ביטול מחיקה", "מחקת משהו בטעות? ״ביטול״ בהודעה שמופיעה למטה מחזיר אותו.", ""],
+    ["🎯", "לפני קנייה גדולה", "הוצאה מסוג ״רצון״ מעל סכום שבוחרים בהגדרות מראה כמה היא מרחיקה מהיעד.", ""],
+    ["🧭", "חזרה למסלול וניצחון שבועי", "כשהחודש בורח יש תוכנית רגועה לחזור. ושבוע טוב מקבל הודעת כל הכבוד.", ""],
+    ["📅", "סיכום שנה במשמרות", "כמה שעות, משמרות וכסף בכל חודש של השנה.", ""],
+    ["✨", "עוד בעוזר", "״אפשר להרשות לעצמי?״ מתוך הוספת הוצאה, תכנון שבוע, בדיקת החזר מס, ו־👍👎 על כל תשובה.", ""]
   ];
   $("genderAsk").addEventListener("click", (e) => {
     const b = e.target.closest("[data-g]"); if (!b) return;
@@ -8693,10 +8753,11 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   function showNews(force) {
     let seen = ""; try { seen = localStorage.getItem("budget-news") || ""; } catch (e) {}
     if (!force && seen === NEWS_ID) return;
-    // This round is about the Android app; other phones skip it quietly
-    if (!force && !/Android/i.test(navigator.userAgent)) { try { localStorage.setItem("budget-news", NEWS_ID); } catch (e) {} return; }
+    const inApp = !!(window.BudgetApp && BudgetApp.payEnabled);
+    $("newsGo").hidden = !inApp;
+    $("newsLead").textContent = "הרבה דברים חדשים, הכל כדי שיהיה קל יותר לעקוב.";
     const ul = $("newsList"); ul.innerHTML = "";
-    NEWS.forEach(([e, t, d]) => {
+    NEWS.filter((n) => !n[3] || (n[3] === "a" ? inApp : isIphone)).forEach(([e, t, d]) => {
       const li = document.createElement("li");
       const a = document.createElement("span"); a.textContent = e; a.setAttribute("aria-hidden", "true");
       const w = document.createElement("div"); const b = document.createElement("b"); b.textContent = t; const sm = document.createElement("small"); sm.textContent = d;
@@ -8772,6 +8833,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   });
 
   async function afterLoad() {
+    errFlush();
     gWasFem = gWasFem || isFem(); applyGender();
     runRecurring();
     syncPlanOpen();

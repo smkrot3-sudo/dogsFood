@@ -1,0 +1,30 @@
+name: Budget page robot check
+
+# Opens the budget page at phone sizes in local mode (no real accounts) after every change to it,
+# clicks through the main screens and fails on any error or sideways scrolling.
+on:
+  push:
+    branches: [main]
+    paths: ['docs/budget/**', 'tests/budget-smoke.js', '.github/workflows/budget-check.yml']
+  pull_request:
+    paths: ['docs/budget/**', 'tests/budget-smoke.js']
+  workflow_dispatch:
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install the robot browser
+        run: |
+          npm install --no-save --no-package-lock playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Check the page
+        run: |
+          python3 -m http.server 8765 --directory docs >/dev/null 2>&1 &
+          sleep 2
+          node tests/budget-smoke.js
