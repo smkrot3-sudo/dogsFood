@@ -7407,10 +7407,15 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   const isAdmin = () => !!(user && user.id === OWNER_ID);
   // VIP users (owner's pick, 2026-10-07: Shani Dahan only): crown, welcome sheet, gold palette, AI without a daily limit
   // (also in the ai function), first in the admin list. isEarly() gates new features that open to the owner and VIPs first.
-  const VIP_IDS = ["51ee3304-84e8-4ee2-ac0c-c9ac75ed5b6d"];
+  const VIP_IDS = []; // Shani removed from VIP by the owner, 2026-10-15
   function isVip() { return !!(user && VIP_IDS.includes(user.id)); }
   const isEarly = () => isAdmin() || isVip();
-  function vipSync() { $("vipCrown").hidden = !isVip(); }
+  function vipSync() {
+    $("vipCrown").hidden = !isVip();
+    // gold is VIP-only: someone who lost VIP moves to the closest regular palette
+    if (user && !isVip()) { let p = null; try { p = localStorage.getItem("budget-palette"); } catch (e) {}
+      if (p === "gold") { try { localStorage.setItem("budget-palette", "cream"); } catch (e) {} paintTheme(); } }
+  }
   // Donation banner (owner, 2026-10-13): at the top of the app for every user until 2026-10-15 23:09 Israel time
   const DONATE_UNTIL = Date.parse("2026-10-15T20:09:00Z");
   // Pinned until the end time (owner, 2026-10-13 21:26Z): fully open on every app open; "הסתר" only shrinks it to one slim line until the next open

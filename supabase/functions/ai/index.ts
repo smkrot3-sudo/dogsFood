@@ -6,7 +6,7 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 const OWNER = "75753136-73de-4975-bc7a-5897db6ae434";
 const DAILY_LIMIT = 20;
 // VIP users (owner's pick) ask without a daily limit, like the owner
-const VIP = ["51ee3304-84e8-4ee2-ac0c-c9ac75ed5b6d"];
+const VIP: string[] = []; // Shani removed from VIP by the owner, 2026-10-15
 // Tried in order; quota, overload, timeout or an unknown model moves on to the next one
 const MODELS = (Deno.env.get("GEMINI_MODEL") || "gemini-3.5-flash,gemini-3.5-flash-lite,gemini-3.1-flash-lite,gemini-3.8-flash").split(",").map((s) => s.trim()).filter(Boolean);
 const cors = {
