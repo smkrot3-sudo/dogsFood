@@ -1716,7 +1716,7 @@ html.hugetext .season3 svg { width: 70px; height: 21px; }
     </section>
     <section class="panel" aria-labelledby="adUsersH">
       <h2 id="adUsersH" class="pc-blue" data-e="👥">משתמשים <span class="sum" id="adCount"></span></h2>
-      <p class="hint">בלי סכומים: רק מי קיים, איך נכנס, מתי היה פעיל, איזו גרסה מותקנת אצלו וכמה רשומות יש לו.</p>
+      <p class="hint">כל המשתמשים הרשומים, מי שהיה באפליקציה הכי לאחרונה למעלה (שעון ישראל). בלי סכומים: רק מי קיים, איך נכנס, מתי היה פעיל, איזו גרסה מותקנת אצלו וכמה רשומות יש לו.</p>
       <div class="adlist" id="adUsers"></div>
     </section>
     <section class="panel" aria-labelledby="adWeekH">
@@ -7521,14 +7521,20 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     if (u.error) box.textContent = "לא הצלחתי לטעון: " + u.error.message;
     else {
       $("adCount").textContent = u.data.length;
-      u.data.sort((a, c) => VIP_IDS.includes(c.user_id) - VIP_IDS.includes(a.user_id));
+      // Last time each user was in the app: opening it (app_seen) or a sign-in (sessions stay signed in for weeks). Newest first.
+      const lastAct = (r) => Math.max(...[r.last_seen, r.last_sign_in].map((t) => (t ? Date.parse(t) : 0)));
+      const ilTime = (t) => new Date(t).toLocaleString("he-IL", { timeZone: "Asia/Jerusalem", weekday: "short", day: "numeric", month: "numeric", hour: "2-digit", minute: "2-digit" });
+      u.data.sort((a, c) => VIP_IDS.includes(c.user_id) - VIP_IDS.includes(a.user_id) || lastAct(c) - lastAct(a));
       u.data.forEach((r) => {
         const d = document.createElement("div"); d.className = "aduser";
         const b1 = document.createElement("b"); b1.textContent = (VIP_IDS.includes(r.user_id) ? "👑 VIP · " : "") + (r.email || "בלי מייל");
         const l1 = document.createElement("span"); l1.textContent = (r.provider === "google" ? "🔵 גוגל" : "✉️ מייל וסיסמה") + " · נרשם " + new Date(r.joined).toLocaleDateString("he-IL");
-        const l2 = document.createElement("span"); l2.textContent = "פעיל: " + ago(r.last_seen || r.last_sign_in) + " · " + (r.platform === "android-app" ? "📱 אפליקציה " + (r.version || "?") : r.platform === "android-web" ? "🌐 דפדפן בטלפון" : r.platform === "web" ? "💻 דפדפן" : "גרסה לא ידועה (עוד לא נכנס מאז שהתחלנו לרשום)");
+        const l2 = document.createElement("span"); l2.textContent = (r.platform === "android-app" ? "📱 אפליקציה " + (r.version || "?") : r.platform === "android-web" ? "🌐 דפדפן בטלפון" : r.platform === "web" ? "💻 דפדפן" : "גרסה לא ידועה (עוד לא נכנס מאז שהתחלנו לרשום)");
+        const la = lastAct(r), lw = document.createElement("span"); lw.style.color = "var(--fg)"; lw.style.fontWeight = "700";
+        lw.textContent = la ? "🕒 היה באפליקציה לאחרונה: " + ilTime(la) + " (" + ago(new Date(la).toISOString()) + ")" : "🕒 עוד לא היה באפליקציה";
+        const ls = document.createElement("span"); ls.textContent = "🔑 התחברות אחרונה עם סיסמה או גוגל: " + (r.last_sign_in ? ilTime(r.last_sign_in) : "אין");
         const l3 = document.createElement("span"); l3.textContent = r.expenses + " הוצאות · " + r.shifts + " משמרות" + (r.last_entry ? " · רישום אחרון " + shortDate(r.last_entry) : "");
-        d.append(b1, l1, l2, l3); box.append(d);
+        d.append(b1, lw, ls, l1, l2, l3); box.append(d);
       });
     }
     const fb = $("adFb"); fb.innerHTML = "";
