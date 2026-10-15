@@ -985,6 +985,19 @@ dialog.alarm.dimsum { background: radial-gradient(circle at 50% 0%, #ffcf5c 0, t
 .paylist li { border: 1px solid var(--line); border-radius: 16px; padding: 10px 12px; display: grid; gap: 6px; }
 .paylist .amt { font-size: 20px; font-weight: 800; } .paylist .src { color: var(--muted); font-size: 13px; white-space: pre-wrap; overflow-wrap: anywhere; }
 .paylist .row2 { display: flex; flex-wrap: wrap; gap: 8px; }
+.srchin { width: 100%; font: inherit; font-size: 17px; padding: 12px 14px; border-radius: 14px; border: 1.5px solid var(--line); background: var(--surface); color: var(--fg); }
+.srlist { list-style: none; padding: 0; margin: 0; display: grid; gap: 6px; }
+.srlist h3 { margin: 10px 0 2px; font-size: 15px; color: var(--muted); }
+.srlist button { width: 100%; display: flex; align-items: center; gap: 10px; text-align: start; font: inherit; color: var(--fg); background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 9px 12px; cursor: pointer; }
+.srlist .w { flex: 1; min-width: 0; display: grid; } .srlist .w small { color: var(--muted); font-size: 13px; } .srlist .w span { overflow-wrap: anywhere; }
+.srlist .a { font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.drillsum { font-size: 15px; margin: 0; } .drillm { border: 1px solid var(--line); border-radius: 14px; padding: 8px 12px; }
+.drillm summary { display: flex; justify-content: space-between; gap: 10px; cursor: pointer; font-weight: 600; }
+.drillm .srlist { margin-top: 8px; }
+.histsvg .inc { fill: var(--accent); } .histsvg .out { fill: var(--spend); } .histsvg .out.over { fill: var(--danger); }
+.histsvg .net { font-size: 13px; font-weight: 700; } .histsvg .net.pos { fill: var(--accent); } .histsvg .net.neg { fill: var(--danger); }
+.histlegend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 13px; color: var(--muted); margin: -4px 0 4px; }
+.histlegend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-inline-end: 5px; vertical-align: -1px; }
 .bcast .bci { font-size: 22px; } .bcast p { flex: 1; margin: 0; white-space: pre-wrap; } .bcast .linkbtn { flex: none; }
 .adlist { display: grid; gap: 8px; }
 .aduser { background: var(--surface-2); border-radius: 14px; padding: 10px 12px; display: grid; gap: 2px; font-size: 13.5px; }
@@ -1353,6 +1366,7 @@ html.hugetext .season3 svg { width: 70px; height: 21px; }
       </div>
     </div>
     <div class="tools">
+      <button class="gearbtn" type="button" id="searchBtn"><span aria-hidden="true">🔎</span><small>חיפוש</small></button>
       <button class="gearbtn" type="button" id="gearBtn" aria-pressed="false"><span aria-hidden="true">⚙️</span><small>הגדרות</small></button>
       <details class="usermenu" id="userbar" hidden>
         <summary aria-label="החשבון שלי"><img id="userPhoto" alt="" referrerpolicy="no-referrer" hidden><span class="initial" id="userInitial" aria-hidden="true"></span></summary>
@@ -1522,7 +1536,8 @@ html.hugetext .season3 svg { width: 70px; height: 21px; }
 
       <section data-block="hist" class="panel" aria-labelledby="histH">
         <h2 id="histH" class="pc-blue" data-e="📊">לאורך החודשים</h2>
-        <p class="hint">העמודה היא כמה הוצאת מהכסף החופשי, והקו הוא מה שתכננת.</p>
+        <p class="hint">כמה נכנס וכמה יצא בכל חודש. מתחת לכל חודש: כמה נשאר או חסר.</p>
+        <div class="histlegend"><span><i style="background:var(--accent)"></i>נכנס (משכורת, משמרות והכנסות)</span><span><i style="background:var(--spend)"></i>יצא (חיובים קבועים והוצאות)</span></div>
         <div class="hist" id="histChart"></div>
         <p class="histnote" id="histNote"></p>
         <p class="histnote" id="histTop"></p>
@@ -2133,6 +2148,27 @@ html.hugetext .season3 svg { width: 70px; height: 21px; }
     <div class="foot"><button class="btn primary" type="submit" id="shSave">שמירה</button><button class="btn" type="button" id="shCancel">ביטול</button></div>
   </form>
 </dialog>
+<dialog class="sheet" id="searchSheet" aria-labelledby="searchH">
+  <form method="dialog">
+    <h2 id="searchH" data-e="🔎">חיפוש בכל האפליקציה</h2>
+    <input type="search" id="searchIn" class="srchin" placeholder="למשל: פיצה, 120, שופרסל" autocomplete="off" aria-label="מה לחפש">
+    <p class="hint" id="searchState" aria-live="polite">מחפש בהוצאות מכל החודשים, בקטגוריות, במשמרות ובהכנסות.</p>
+    <div id="searchOut"></div>
+    <div class="foot"><button class="btn" type="button" id="searchClose">סגירה</button></div>
+  </form>
+</dialog>
+
+<dialog class="sheet" id="drillSheet" aria-labelledby="drillH">
+  <form method="dialog">
+    <h2 id="drillH" data-e="🛍️">קטגוריה</h2>
+    <p class="drillsum" id="drillSum"></p>
+    <ul class="srlist" id="drillNow"></ul>
+    <h3 id="drillPrevH" style="margin:12px 0 4px">חודשים קודמים</h3>
+    <div id="drillPrev" style="display:grid;gap:8px"></div>
+    <div class="foot"><button class="btn primary" type="button" id="drillAdd">＋ הוצאה בקטגוריה</button><button class="btn" type="button" id="drillClose">סגירה</button></div>
+  </form>
+</dialog>
+
 <dialog class="sheet" id="paySheet" aria-labelledby="payH">
   <form method="dialog">
     <h2 id="payH" data-e="💳">תשלומים שזוהו</h2>
@@ -2962,10 +2998,12 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       if (isCat) {
         const n = monthTx().filter((r) => r.category === item.id).length;
         if (n) { snack("יש " + n + " הוצאות בקטגוריה הזו החודש. מחקו או העבירו אותן קודם."); return; }
-        // Its subcategories stay, as main categories
-        list.forEach((c) => { if (c.parent === item.id) delete c.parent; });
       }
+      const kids = isCat ? list.filter((c) => c.parent === item.id) : [];
+      // Its subcategories stay, as main categories
+      kids.forEach((c) => { delete c.parent; });
       list.splice(i, 1); touch(); render();
+      snack((isCat ? "הקטגוריה" : kind === "inc" ? "ההכנסה" : "השורה") + (item.name ? " ״" + item.name + "״" : "") + " נמחקה", () => { list.splice(i, 0, item); kids.forEach((c) => { c.parent = item.id; }); touch(); render(); });
     });
     if (isCat) {
       row.classList.add("catrow");
@@ -3172,7 +3210,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       const b = document.createElement("button");
       b.type = "button"; b.className = "cat" + (c.sub ? " sub" : "");
       if (c.id) b.dataset.cat = c.id;
-      if (c.id) b.addEventListener("click", () => openSheet(c.id)); else b.disabled = true;
+      if (c.id) b.addEventListener("click", () => openDrill(c.id)); else b.disabled = true;
       const top = document.createElement("div"); top.className = "top";
       const nm = document.createElement("span"); nm.className = "name"; nm.textContent = (c.id ? c.icon : "🗑️") + " " + c.name;
       const nums = document.createElement("span"); nums.className = "nums"; nums.textContent = c.sub && !c.budget ? fmt(c.spent) : fmt(c.spent) + " מתוך " + fmt(c.budget);
@@ -3182,7 +3220,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
         nums.textContent = fmt(c.spent);
         const s = document.createElement("span"); s.className = "state plain"; s.textContent = c.sub ? "נספר בתוך " + c.parentName : "בלי יעד";
         b.append(top, s);
-        b.setAttribute("aria-label", c.name + ": " + nums.textContent + ". " + s.textContent + ". לחצו לרישום הוצאה");
+        b.setAttribute("aria-label", c.name + ": " + nums.textContent + ". " + s.textContent + ". לחצו לראות את ההוצאות");
         cl.append(b);
         return;
       }
@@ -3201,7 +3239,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
         : st === "warn" ? "מהר מדי. נשארו " + fmt(c.budget - c.spent)
         : "נשארו " + fmt(c.budget - c.spent);
       b.append(top, pace, s);
-      b.setAttribute("aria-label", c.name + ": " + nums.textContent + ". " + s.textContent + (c.id ? ". לחצו לרישום הוצאה" : ""));
+      b.setAttribute("aria-label", c.name + ": " + nums.textContent + ". " + s.textContent + (c.id ? ". לחצו לראות את ההוצאות" : ""));
       cl.append(b);
     });
     if (!rows.length) { const e = document.createElement("p"); e.className = "empty"; e.textContent = "אין קטגוריות. הוסיפו אותן בתוכנית של החודש."; cl.append(e); }
@@ -3742,6 +3780,11 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   async function loadHist() {
     const months = [];
     for (let i = 5; i >= 0; i--) months.push(shiftMonth(month, -i));
+    // Shifts (one month earlier too, for "count next month") and one-off incomes, for the money-in bars
+    try {
+      await Promise.all([shiftMonth(months[0], -1)].concat(months).map((m) => (shifts[m] ? 0 : loadShifts(m).catch(() => { shifts[m] = shifts[m] || []; })))
+        .concat(months.map((m) => (incomes[m] ? 0 : INC.load(m).catch(() => { incomes[m] = incomes[m] || []; })))));
+    } catch (e) {}
     const need = months.filter((m) => !tx[m]);
     if (!need.length) return months;
     let rows = [];
@@ -3772,27 +3815,35 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       spent: tx[m] ? tx[m].reduce((s, r) => s + r.amount, 0) : hist[m] || 0,
       budget: m === month ? plan().spend : spendOf(store.months[m])
     }));
-    const W = 600, H = 230, top = 28, base = 190, slot = W / rows.length, bw = Math.min(56, slot * 0.5);
-    const max = Math.max(1, ...rows.map((r) => Math.max(r.spent, r.budget || 0)));
+    const sum = (l, k) => (l || []).reduce((a, x) => a + (+x[k] || 0), 0);
+    rows.forEach((r) => {
+      const d0 = r.m === month ? data() : store.months[r.m];
+      r.fixed = d0 ? sum(d0.expenses, "amount") : 0;
+      r.inc = r.m === month ? plan().inc + incTotal() : (d0 ? sum(d0.income, "amount") : 0) + shiftIncome(r.m) + sum(incomes[r.m], "amount");
+      r.out = r.fixed + r.spent;
+    });
+    const W = 600, H = 250, top = 28, base = 190, slot = W / rows.length, bw = Math.min(30, slot * 0.3);
+    const max = Math.max(1, ...rows.map((r) => Math.max(r.inc, r.out)));
     const y = (v) => base - (v / max) * (base - top);
     const ns = "http://www.w3.org/2000/svg";
     const el = (tag, attrs, text) => { const n = document.createElementNS(ns, tag); Object.entries(attrs).forEach(([k, v]) => n.setAttribute(k, v)); if (text != null) n.textContent = text; return n; };
     const svg = el("svg", { viewBox: "0 0 " + W + " " + H, role: "img", class: "histsvg" });
-    svg.setAttribute("aria-label", rows.map((r) => monthName(r.m) + ": " + fmt(r.spent) + (r.budget != null ? " מתוך " + fmt(r.budget) : "")).join(". "));
+    svg.setAttribute("aria-label", rows.map((r) => monthName(r.m) + ": נכנס " + fmt(r.inc) + ", יצא " + fmt(r.out)).join(". "));
     [0.5, 1].forEach((f) => svg.append(el("line", { x1: 0, x2: W, y1: y(max * f), y2: y(max * f), class: "grid" })));
     svg.append(el("line", { x1: 0, x2: W, y1: base, y2: base, class: "axis" }));
-    // RTL: the oldest month on the right, the current one on the left
+    const bar = (x, v, cls) => { const h = Math.max(base - y(v), v > 0 ? 2 : 0); return h > 0 ? el("path", { d: "M" + x + "," + base + "V" + (base - h + 4) + "q0,-4 4,-4H" + (x + bw - 4) + "q4,0 4,4V" + base + "Z", class: cls }) : null; };
+    // RTL: the oldest month on the right, the current one on the left; in each month "in" on the right, "out" on the left
     rows.forEach((r, i) => {
       const cx = W - slot * (i + 0.5);
       const g = el("g", { class: "hbar" + (r.m === month ? " cur" : "") });
-      const over = r.budget != null && r.spent > r.budget;
-      const h = Math.max(base - y(r.spent), r.spent > 0 ? 2 : 0);
-      if (h > 0) g.append(el("path", { d: "M" + (cx - bw / 2) + "," + base + "V" + (base - h + 4) + "q0,-4 4,-4H" + (cx + bw / 2 - 4) + "q4,0 4,4V" + base + "Z", class: over ? "over" : "spent" }));
-      if (r.budget != null) g.append(el("line", { x1: cx - bw / 2 - 8, x2: cx + bw / 2 + 8, y1: y(r.budget), y2: y(r.budget), class: "budget" }));
-      g.append(el("text", { x: cx, y: Math.max(y(r.spent) - 8, 16), class: "val" + (over ? " bad" : "") }, r.spent ? (over ? "⚠️ " : "") + fmt(r.spent) : ""));
+      const over = r.inc > 0 && r.out > r.inc;
+      const bi = bar(cx + 2, r.inc, "inc"), bo = bar(cx - bw - 2, r.out, "out" + (over ? " over" : ""));
+      if (bi) g.append(bi); if (bo) g.append(bo);
       g.append(el("text", { x: cx, y: base + 22, class: "lbl" }, monthName(r.m)));
+      const net = r.inc - r.out;
+      if (r.inc || r.out) g.append(el("text", { x: cx, y: base + 44, class: "net " + (net >= 0 ? "pos" : "neg") }, "\u200e" + (net >= 0 ? "+" : "−") + fmt(Math.abs(net))));
       g.append(el("rect", { x: cx - slot / 2, y: 0, width: slot, height: H, class: "hit" }));
-      g.append(el("title", {}, monthName(r.m) + ": הוצאת " + fmt(r.spent) + (r.budget != null ? " מתוך " + fmt(r.budget) + (over ? ", חריגה של " + fmt(r.spent - r.budget) : "") : "")));
+      g.append(el("title", {}, monthName(r.m) + ": נכנס " + fmt(r.inc) + ", יצא " + fmt(r.out) + " (" + fmt(r.fixed) + " חיובים קבועים ו־" + fmt(r.spent) + " הוצאות)"));
       svg.append(g);
     });
     const box = $("histChart"); box.innerHTML = ""; box.append(svg);
@@ -5077,9 +5128,12 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       const b = qButton(it, names);
       b.addEventListener("click", () => {
         if (quickEditing) {
+          const favsBefore = (store.favs || []).slice(), hideBefore = (store.favHide || []).slice();
           if (it.fav) store.favs = (store.favs || []).filter((f) => f.note !== it.note || f.amount !== it.amount);
           else store.favHide = (store.favHide || []).concat([it.note]).slice(-100);
-          persist(); renderQuick(); return;
+          persist(); renderQuick();
+          snack("הכפתור ״" + (it.note || names[it.category] || "הוצאה") + "״ הוסר", () => { store.favs = favsBefore; store.favHide = hideBefore; persist(); renderQuick(); });
+          return;
         }
         quickLog(it);
       });
@@ -7130,6 +7184,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     layEditing = layout();
     document.body.classList.add("layedit");
     $("editBar").hidden = false; $("layHint").hidden = true;
+    try { localStorage.setItem("budget-layhint", "99"); } catch (e) {}
     planWasOpen = $("planBox").open; $("planBox").open = false;
     homeBlocks().forEach(addLayTools);
     syncArrows();
@@ -7147,7 +7202,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     const snap = layEditing; layEditing = null;
     if (layWatch) { layWatch.disconnect(); layWatch = null; }
     document.body.classList.remove("layedit");
-    $("editBar").hidden = true; $("layHint").hidden = false;
+    $("editBar").hidden = true; $("layHint").hidden = !layHintOn();
     document.querySelectorAll(".laytools, .layname").forEach((x) => x.remove());
     homeBlocks().forEach((b) => { b.classList.remove("dragging", "shift"); b.style.transform = ""; });
     $("planBox").open = planWasOpen;
@@ -8259,6 +8314,134 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     $("adFbSum").disabled = false;
   });
 
+  // ---- The long-press hint shows only on the first few opens ----
+  function layHintOn() { let n = 0; try { n = +localStorage.getItem("budget-layhint") || 0; } catch (e) {} return n < 5; }
+  let layHintCounted = false;
+  function layHintCount() {
+    if (!layHintCounted) { layHintCounted = true; let n = 0; try { n = +localStorage.getItem("budget-layhint") || 0; localStorage.setItem("budget-layhint", String(n + 1)); } catch (e) {} }
+    if (!layEditing) $("layHint").hidden = !layHintOn();
+  }
+
+  // ---- Cards not touched for two weeks fold up by themselves (▾ opens them again) ----
+  const FOLD_AFTER = 14 * 864e5, FOLD_KEEP = new Set(["today", "statement"]);
+  function useMap() { try { return JSON.parse(localStorage.getItem("budget-cardused") || "{}"); } catch (e) { return {}; } }
+  document.addEventListener("pointerdown", (e) => {
+    const h = e.target.closest && e.target.closest("#app .panel") && e.target.closest("#app .panel").querySelector(":scope > h2.foldable");
+    if (!h || !h.id) return;
+    const u = useMap(); u[h.id] = Date.now(); try { localStorage.setItem("budget-cardused", JSON.stringify(u)); } catch (e2) {}
+  }, true);
+  let autoFolded = false;
+  function autoFold() {
+    if (autoFolded || !store) return; autoFolded = true;
+    const u = useMap(), now = Date.now(); let changed = 0, fresh = false;
+    document.querySelectorAll("#app .panel > h2.foldable").forEach((h) => {
+      if (!h.id || NO_FOLD.has(h.id)) return;
+      const blk = h.closest("[data-block]"); if (blk && FOLD_KEEP.has(blk.dataset.block)) return;
+      if (!u[h.id]) { u[h.id] = now; fresh = true; return; }
+      if (!folded.has(h.id) && now - u[h.id] > FOLD_AFTER) { folded.add(h.id); u[h.id] = now; changed++; }
+    });
+    try { localStorage.setItem("budget-cardused", JSON.stringify(u)); } catch (e) {}
+    if (!changed) return;
+    saveFolded(); applyFolded();
+    snack(changed === 1 ? "קיפלתי כרטיס אחד שלא נגעת בו שבועיים. לחיצה על ▾ פותחת אותו." : "קיפלתי " + changed + " כרטיסים שלא נגעת בהם שבועיים. לחיצה על ▾ פותחת.");
+  }
+
+  // ---- Search across every month: expenses, categories, shifts and incomes ----
+  let searchT = null, searchSeq = 0;
+  $("searchBtn").addEventListener("click", () => { openDlg("searchSheet"); setTimeout(() => $("searchIn").focus(), 50); });
+  $("searchClose").addEventListener("click", () => closeDlg("searchSheet"));
+  $("searchIn").addEventListener("input", () => { clearTimeout(searchT); searchT = setTimeout(runSearch, 300); });
+  function srItem(icon, title, sub, amt, go) {
+    const li = document.createElement("li"), b = document.createElement("button"); b.type = "button";
+    const e = document.createElement("span"); e.textContent = icon; e.setAttribute("aria-hidden", "true");
+    const w = document.createElement("span"); w.className = "w";
+    const t = document.createElement("span"); t.textContent = title; const s2 = document.createElement("small"); s2.textContent = sub; w.append(t, s2);
+    const a = document.createElement("span"); a.className = "a"; a.textContent = amt || "";
+    b.append(e, w, a); b.addEventListener("click", go); li.append(b); return li;
+  }
+  function openTxFrom(r) {
+    closeDlg("searchSheet"); closeDlg("drillSheet");
+    setView("main");
+    const m = periodOf(r.spent_on);
+    const go = () => openSheet(null, { ...r, amount: +r.amount });
+    if (m !== month) { goMonth(m); ensureTx(m).then(() => setTimeout(go, 50)); } else go();
+  }
+  async function runSearch() {
+    const q = $("searchIn").value.trim(), out = $("searchOut"), seq = ++searchSeq;
+    out.innerHTML = "";
+    if (q.length < 2) { $("searchState").textContent = "כותבים לפחות 2 אותיות או מספר."; return; }
+    $("searchState").textContent = "מחפש…";
+    const names = catNames(), ql = q.toLowerCase();
+    const catIds = Object.keys(names).filter((id) => (names[id] || "").toLowerCase().includes(ql));
+    const num = /^\d+(\.\d+)?$/.test(q) ? +q : null;
+    let ex = [], sh = [], inc = [];
+    const like = "%" + q.replace(/[%_,()]/g, "") + "%";
+    if (sb && user) {
+      const ors = ["note.ilike." + like]; if (catIds.length) ors.push("category.in.(" + catIds.join(",") + ")"); if (num != null) ors.push("amount.eq." + num);
+      const [a, b, c] = await Promise.all([
+        sb.from("expenses").select("id, spent_on, amount, category, note, tags, created_at").or(ors.join(",")).order("spent_on", { ascending: false }).limit(60),
+        sb.from("shifts").select("id, work_date, start_time, end_time, note").ilike("note", like).order("work_date", { ascending: false }).limit(20),
+        sb.from("incomes").select("id, received_on, amount, note, kind").or(["note.ilike." + like].concat(num != null ? ["amount.eq." + num] : []).join(",")).order("received_on", { ascending: false }).limit(20)
+      ]);
+      if (seq !== searchSeq) return;
+      if (a.error) { $("searchState").textContent = "החיפוש נכשל. בדוק את החיבור לאינטרנט ונסה שוב."; return; }
+      ex = a.data || []; sh = b.data || []; inc = c.data || [];
+    } else {
+      ex = (store.tx || []).filter((r) => (r.note || "").toLowerCase().includes(ql) || catIds.includes(r.category) || (num != null && +r.amount === num)).sort((x, y) => y.spent_on.localeCompare(x.spent_on)).slice(0, 60);
+    }
+    const n = ex.length + sh.length + inc.length;
+    $("searchState").textContent = n ? "נמצאו " + n + (n >= 60 ? " ומעלה" : "") + ". לחיצה פותחת." : "לא מצאתי כלום על ״" + q + "״.";
+    const sec = (h, items) => { if (!items.length) return; const ul = document.createElement("ul"); ul.className = "srlist"; const t = document.createElement("h3"); t.textContent = h; out.append(t); items.forEach((x) => ul.append(x)); out.append(ul); };
+    if (ex.length) {
+      const total = ex.reduce((a2, r) => a2 + +r.amount, 0);
+      sec("הוצאות · " + fmt(total) + " בסך הכל", ex.map((r) => srItem(emojiOf(r.category, names[r.category]), r.note || names[r.category] || "הוצאה",
+        dayLabel(r.spent_on) + " · " + monthName(periodOf(r.spent_on)) + " · " + (names[r.category] || "קטגוריה שנמחקה"), fmt(+r.amount), () => openTxFrom(r))));
+    }
+    sec("משמרות", sh.map((r) => srItem("⏰", r.note || "משמרת", dayLabel(r.work_date) + " · " + r.start_time + "–" + r.end_time, "", () => { closeDlg("searchSheet"); const m = periodOf(r.work_date); if (m !== month) goMonth(m); setView("shifts"); })));
+    sec("הכנסות", inc.map((r) => srItem("💵", r.note || "הכנסה", dayLabel(r.received_on), fmt(+r.amount), () => { closeDlg("searchSheet"); const m = periodOf(r.received_on); if (m !== month) goMonth(m); setView("main"); })));
+  }
+
+  // ---- A category's expenses: this month and the five before ----
+  let drillCat = null;
+  $("drillClose").addEventListener("click", () => closeDlg("drillSheet"));
+  $("drillAdd").addEventListener("click", () => { closeDlg("drillSheet"); openSheet(drillCat); });
+  async function openDrill(id) {
+    drillCat = id;
+    const names = catNames(), d = data();
+    const ids = [id].concat(d.cats.filter((c) => c.parent === id).map((c) => c.id));
+    $("drillH").textContent = (names[id] || "קטגוריה");
+    $("drillH").dataset.e = emojiOf(id, names[id]);
+    const now = monthTx().filter((r) => ids.includes(r.category));
+    const tot = now.reduce((a, r) => a + r.amount, 0);
+    $("drillSum").textContent = "ב" + monthName(month) + ": " + fmt(tot) + (now.length ? " ב־" + now.length + (now.length === 1 ? " הוצאה" : " הוצאות") : ", עוד אין הוצאות");
+    const row = (r) => srItem(emojiOf(r.category, names[r.category]), r.note || names[r.category] || "הוצאה", dayLabel(r.spent_on) + (ids.length > 1 && r.category !== id ? " · " + names[r.category] : ""), fmt(+r.amount), () => openTxFrom(r));
+    const ul = $("drillNow"); ul.innerHTML = ""; now.forEach((r) => ul.append(row(r)));
+    const prevBox = $("drillPrev"); prevBox.textContent = "טוען…";
+    openDlg("drillSheet");
+    const months = []; for (let k = 1; k <= 5; k++) months.push(shiftMonth(month, -k));
+    let rows = [];
+    try {
+      if (sb && user) {
+        const { data: r } = await sb.from("expenses").select("id, spent_on, amount, category, note, tags, created_at").in("category", ids)
+          .gte("spent_on", periodStart(months[4])).lte("spent_on", periodEnd(months[0])).order("spent_on", { ascending: false });
+        rows = r || [];
+      } else rows = (store.tx || []).filter((r) => ids.includes(r.category) && periodOf(r.spent_on) < month && periodOf(r.spent_on) >= months[4]);
+    } catch (e) {}
+    if (drillCat !== id) return;
+    prevBox.innerHTML = "";
+    months.forEach((m) => {
+      const list = rows.filter((r) => periodOf(r.spent_on) === m).sort((a, b) => b.spent_on.localeCompare(a.spent_on));
+      const det = document.createElement("details"); det.className = "drillm";
+      const sm = document.createElement("summary");
+      const a = document.createElement("span"); a.textContent = monthName(m) + (m.slice(0, 4) !== month.slice(0, 4) ? " " + m.slice(0, 4) : "");
+      const b = document.createElement("span"); b.textContent = list.length ? fmt(list.reduce((x, r) => x + +r.amount, 0)) : "—";
+      sm.append(a, b); det.append(sm);
+      const l2 = document.createElement("ul"); l2.className = "srlist"; list.forEach((r) => l2.append(row(r)));
+      if (!list.length) { const e = document.createElement("li"); e.className = "hint"; e.style.margin = "0"; e.textContent = "לא היו הוצאות"; l2.append(e); }
+      det.append(l2); prevBox.append(det);
+    });
+  }
+
   // ---- Payments seen in the phone's card and bank notifications (app 2.2+): a ready expense to approve ----
   let payFrom = null;
   const payApp = () => window.BudgetApp && BudgetApp.payPending ? BudgetApp : null;
@@ -8441,7 +8624,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     $("openAdmin").hidden = !isAdmin(); vipSync();
     aiFabSync();
     recordSeen(); loadBroadcast(); setTimeout(loadPersonal, 2500); showDonate(); loadFriends();
-    payCheck(); pushKeySync();
+    payCheck(); pushKeySync(); layHintCount(); autoFold();
     const fromApp = new URLSearchParams(location.search).get("app");
     if (fromApp) { history.replaceState(null, "", location.pathname + location.hash); setTimeout(() => window.openFromApp(fromApp), 400); }
     const ns = new URLSearchParams(location.search).get("newShift");
