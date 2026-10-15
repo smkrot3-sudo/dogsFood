@@ -22,7 +22,8 @@ import java.util.Calendar;
 public class UpdateCheck extends BroadcastReceiver {
     static final String ACTION = "io.github.smkrot3sudo.budget.UPDATE_CHECK";
     private static final String URL_JSON = "https://smkrot3-sudo.github.io/dogsFood/budget/app-version.json";
-    private static final long EVERY = 3 * AlarmManager.INTERVAL_HOUR;
+    // Every hour for personal messages and friend requests; the version check itself runs every 3 hours
+    private static final long EVERY = AlarmManager.INTERVAL_HOUR;
 
     static void schedule(Context c) {
         AlarmManager am = (AlarmManager) c.getSystemService(Context.ALARM_SERVICE);
@@ -38,8 +39,13 @@ public class UpdateCheck extends BroadcastReceiver {
         final PendingResult done = goAsync();
         final Context app = c.getApplicationContext();
         new Thread(() -> {
-            try { check(app); } catch (Exception e) { /* offline: try again next time */ }
-            try { checkMessages(app); } catch (Exception e) { /* offline: try again next time */ }
+            SharedPreferences p = app.getSharedPreferences("update-check", Context.MODE_PRIVATE);
+            if (System.currentTimeMillis() - p.getLong("lastFull", 0) > 3 * AlarmManager.INTERVAL_HOUR - 10 * 60 * 1000) {
+                p.edit().putLong("lastFull", System.currentTimeMillis()).apply();
+                try { check(app); } catch (Exception e) { /* offline: try again next time */ }
+                try { checkMessages(app); } catch (Exception e) { /* offline: try again next time */ }
+            }
+            try { checkInbox(app); } catch (Exception e) { /* offline: try again next time */ }
             finally { done.finish(); }
         }).start();
     }
@@ -87,6 +93,51 @@ public class UpdateCheck extends BroadcastReceiver {
         } catch (Exception e) { at = System.currentTimeMillis(); }
         if (System.currentTimeMillis() - at > 3L * 24 * 3600 * 1000) return;
         Notes.show(c, "📣 הודעה מ״התקציב שלי״", m.optString("body"), 400);
+    }
+
+    /** A random key made once per phone. The page links it to the signed-in account, so the check below needs no password. */
+    static String deviceKey(Context c) {
+        SharedPreferences p = c.getSharedPreferences("update-check", Context.MODE_PRIVATE);
+        String k = p.getString("deviceKey", null);
+        if (k == null) {
+            byte[] b = new byte[24];
+            new java.security.SecureRandom().nextBytes(b);
+            k = android.util.Base64.encodeToString(b, android.util.Base64.URL_SAFE | android.util.Base64.NO_WRAP | android.util.Base64.NO_PADDING);
+            p.edit().putString("deviceKey", k).apply();
+        }
+        return k;
+    }
+
+    // Personal messages, friend requests and shared expenses waiting for this user, also while the app is closed
+    private static final String INBOX_URL = "https://iteswfqwzbtpsjfwcptr.supabase.co/rest/v1/rpc/push_inbox";
+
+    private static void checkInbox(Context c) throws Exception {
+        if (quietNow()) return;
+        SharedPreferences p = c.getSharedPreferences("update-check", Context.MODE_PRIVATE);
+        if (p.getString("deviceKey", null) == null) return;
+        HttpURLConnection con = (HttpURLConnection) new URL(INBOX_URL).openConnection();
+        con.setConnectTimeout(15000);
+        con.setReadTimeout(15000);
+        con.setUseCaches(false);
+        con.setRequestMethod("POST");
+        con.setDoOutput(true);
+        con.setRequestProperty("apikey", ANON);
+        con.setRequestProperty("Authorization", "Bearer " + ANON);
+        con.setRequestProperty("Content-Type", "application/json");
+        try (java.io.OutputStream o = con.getOutputStream()) { o.write(new JSONObject().put("k", deviceKey(c)).toString().getBytes("UTF-8")); }
+        ByteArrayOutputStream buf = new ByteArrayOutputStream();
+        try (InputStream in = con.getInputStream()) {
+            byte[] b = new byte[4096];
+            for (int n; (n = in.read(b)) > 0; ) buf.write(b, 0, n);
+        } finally { con.disconnect(); }
+        org.json.JSONArray a = new org.json.JSONArray(buf.toString("UTF-8"));
+        for (int i = 0; i < a.length(); i++) {
+            JSONObject m = a.getJSONObject(i);
+            String key = m.optString("key");
+            if (key.isEmpty() || Notes.wasShown(c, key)) continue;
+            Notes.markShown(c, key);
+            Notes.show(c, m.optString("title"), m.optString("body"), 500 + Math.abs(key.hashCode() % 1000));
+        }
     }
 
     private static void check(Context c) throws Exception {

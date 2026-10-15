@@ -64,6 +64,7 @@ public class Notes extends BroadcastReceiver {
                 long at = n.optLong("at");
                 if (at <= now + 60000) {
                     // Show it only if it isn't stale (the phone was off for days)
+                    if (n.optString("id").startsWith("pm")) markShown(c, n.optString("id"));
                     if (now - at < DAY) show(c, n.optString("title"), n.optString("text"), 200 + Math.abs(n.optString("id").hashCode() % 1000));
                     int every = n.optInt("every", 0);
                     if (every > 0) {
@@ -77,6 +78,15 @@ public class Notes extends BroadcastReceiver {
         }
         // Also after a restart or an app update, when alarms are cleared
         schedule(c);
+    }
+
+    /** Keys of notes already shown (personal messages can arrive both as a scheduled note and from the background check). */
+    static boolean wasShown(Context c, String key) { return prefs(c).getString("shown", "").contains("|" + key + "|"); }
+
+    static void markShown(Context c, String key) {
+        String s = prefs(c).getString("shown", "|") + key + "|";
+        if (s.length() > 2000) s = "|" + s.substring(s.length() - 1500).replaceFirst("^[^|]*\\|", "");
+        prefs(c).edit().putString("shown", s).apply();
     }
 
     static void show(Context c, String title, String text, int id) {

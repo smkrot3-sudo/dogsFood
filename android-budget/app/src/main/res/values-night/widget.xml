@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="wBg">#221b2e</color>
+    <color name="wText">#f4eefb</color>
+    <color name="wMuted">#aba0bd</color>
+</resources>

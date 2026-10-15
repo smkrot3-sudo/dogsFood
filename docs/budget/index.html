@@ -980,6 +980,11 @@ dialog.alarm.dimsum { background: radial-gradient(circle at 50% 0%, #ffcf5c 0, t
 .catchips button { flex: none; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--fg); font: inherit; font-size: 13.5px; cursor: pointer; white-space: nowrap; }
 .catchips button[aria-pressed="true"] { background: var(--brand); color: #fff; border-color: transparent; font-weight: 700; }
 .bcast { display: flex; align-items: start; gap: 10px; max-width: 760px; margin: 0 auto 4px; background: var(--surface); border: 2px solid var(--brand2); border-radius: 18px; padding: 12px 14px; box-shadow: var(--card-shadow); }
+.paybar { display: flex; align-items: center; gap: 10px; max-width: 760px; margin: 0 auto 10px; background: var(--surface); border: 2px solid var(--accent); border-radius: 18px; padding: 10px 14px; box-shadow: var(--card-shadow); font-weight: 600; }
+.paybar span { flex: 1; } .paylist { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+.paylist li { border: 1px solid var(--line); border-radius: 16px; padding: 10px 12px; display: grid; gap: 6px; }
+.paylist .amt { font-size: 20px; font-weight: 800; } .paylist .src { color: var(--muted); font-size: 13px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.paylist .row2 { display: flex; flex-wrap: wrap; gap: 8px; }
 .bcast .bci { font-size: 22px; } .bcast p { flex: 1; margin: 0; white-space: pre-wrap; } .bcast .linkbtn { flex: none; }
 .adlist { display: grid; gap: 8px; }
 .aduser { background: var(--surface-2); border-radius: 14px; padding: 10px 12px; display: grid; gap: 2px; font-size: 13.5px; }
@@ -1392,6 +1397,7 @@ html.hugetext .season3 svg { width: 70px; height: 21px; }
     <button class="linkbtn" type="button" id="bcastOk">הבנתי</button>
   </div>
   <div id="viewMain">
+  <div class="paybar" id="payBar" role="status" hidden><span id="payBarText"></span><button class="btn primary" type="button" id="payBarGo">לרישום</button></div>
   <div class="editbar" id="editBar" hidden>
     <span id="editBarText">✏️ גרור ⠿ כדי להזיז, 👁️ כדי להסתיר</span>
     <button class="okx ok" type="button" id="layOk" aria-label="שמירת השינויים">✓</button>
@@ -1639,6 +1645,12 @@ html.hugetext .season3 svg { width: 70px; height: 21px; }
         </div>
       </div>
       <p class="hint" id="shiftIncHint"></p>
+      <div class="remind" id="payRow" hidden>
+        <p><b>💳 זיהוי תשלומים מההתראות</b> <span id="payState"></span></p>
+        <p class="hint" style="margin:0">כשהבנק או חברת האשראי שולחים התראה על חיוב, האפליקציה מכינה הוצאה מוכנה ואתה רק מאשר. הכל נשאר בטלפון.</p>
+        <button class="btn" type="button" id="payOn">להפעלה בהגדרות הטלפון</button>
+        <p class="hint" id="payHelp" style="margin:0" hidden>בהגדרות שנפתחות, מפעילים את ״התקציב שלי״. אם כתוב שההגדרה מוגבלת: נכנסים בטלפון להגדרות ← אפליקציות ← התקציב שלי ← ⋮ למעלה ← ״לאפשר הגדרות מוגבלות״, ואז מנסים שוב.</p>
+      </div>
       <div class="remind" id="dayCheckRow" hidden>
         <label class="check" for="dayCheckOn"><input type="checkbox" id="dayCheckOn"> 🧾 תזכורת בערב לרשום את ההוצאות של היום</label>
         <label class="field" for="dayCheckAt">בשעה<select id="dayCheckAt"><option>20:00</option><option>20:30</option><option>21:00</option><option>21:30</option><option>22:00</option><option>22:30</option><option>23:00</option></select></label>
@@ -2121,12 +2133,21 @@ html.hugetext .season3 svg { width: 70px; height: 21px; }
     <div class="foot"><button class="btn primary" type="submit" id="shSave">שמירה</button><button class="btn" type="button" id="shCancel">ביטול</button></div>
   </form>
 </dialog>
+<dialog class="sheet" id="paySheet" aria-labelledby="payH">
+  <form method="dialog">
+    <h2 id="payH" data-e="💳">תשלומים שזוהו</h2>
+    <p class="hint">זיהיתי אותם מההתראות של הבנק או האשראי בטלפון. לוחצים ״לרשום״, בוחרים קטגוריה ושומרים.</p>
+    <ul class="paylist" id="payList"></ul>
+    <div class="foot"><button class="btn" type="button" id="payClose">סגירה</button></div>
+  </form>
+</dialog>
+
 <dialog class="sheet newsheet" id="newsSheet" aria-labelledby="newsH">
   <form method="dialog">
     <h2 id="newsH" data-e="✨">מה חדש</h2>
-    <p class="hint" id="newsLead">מוסיפים חבר בלשונית ״👥 חברים״ ➕ הוספת חבר.</p>
+    <p class="hint" id="newsLead">הכל כדי שרישום הוצאה ייקח שנייה.</p>
     <ul id="newsList"></ul>
-    <div class="foot"><button class="btn primary" type="button" id="newsGo">👥 לחברים שלי</button><button class="btn" type="button" id="newsOk">הבנתי</button></div>
+    <div class="foot"><button class="btn primary" type="button" id="newsGo">💳 להפעלה בהגדרות</button><button class="btn" type="button" id="newsOk">הבנתי</button></div>
   </form>
 </dialog>
 
@@ -2493,7 +2514,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     ["עדיין צריך את זה", "עדיין צריכה את זה"], ["לא צריך? לחץ", "לא צריכה? לחצי"], ["עובד לפי שעות", "עובדת לפי שעות"],
     ["שומר שבת", "שומרת שבת"], ["מודע לעצמי", "מודעת לעצמי"], ["להיות מחובר", "להיות מחוברת"], ["חודשים תגיע", "חודשים תגיעי"],
     ["כתוב את", "כתבי את"], ["כתוב:", "כתבי:"], ["כתוב או אמור", "כתבי או אמרי"], ["כתוב על מה", "כתבי על מה"], ["רשום אותו", "רשמי אותו"],
-    ["איך לפנות אליך", "איך לפנות אלייך"],
+    ["איך לפנות אליך", "איך לפנות אלייך"], ["ואתה רק מאשר", "ואת רק מאשרת"], ["ואתה רק בוחר קטגוריה ושומר", "ואת רק בוחרת קטגוריה ושומרת"],
   ];
   const G_WORDS = { "אתה": "את", "שאתה": "שאת", "הוסף": "הוסיפי", "שאל": "שאלי", "לחץ": "לחצי", "ולחץ": "ולחצי", "בחר": "בחרי", "שמור": "שמרי",
     "נסה": "נסי", "פתח": "פתחי", "ופתח": "ופתחי", "בדוק": "בדקי", "ורשום": "ורשמי", "היכנס": "היכנסי", "וראה": "וראי", "התחבר": "התחברי",
@@ -3091,6 +3112,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       todayWhy = { spend, oneOff: incTotal(), spentBefore, spentFuture, spentToday, pool, daysLeft, allowance, left };
       $("todayLbl").textContent = left >= 0 ? "מותר לך להוציא היום" : "חרגת היום ב־";
       $("todayVal").textContent = fmt(Math.abs(left));
+      try { if (window.BudgetApp && BudgetApp.setWidget) BudgetApp.setWidget(gx(left >= 0 ? "מותר לך להוציא היום" : "חרגת היום ב־"), fmt(Math.abs(left))); } catch (e) {}
       $("todayVal").classList.toggle("neg", left < 0);
       $("todayLine").textContent = "נשארו " + fmt(Math.max(spend - spent, 0)) + " כסף חופשי ל־" + daysLeft + " ימים (כולל היום)";
       const rate = spent / dayNum;
@@ -3422,7 +3444,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     $("txHours").textContent = h ? "זה " + h + "." : "";
   }
   $("txAmount").addEventListener("input", showHours);
-  function closeSheet() { const dlg = $("sheet"); if (dlg.close) dlg.close(); else dlg.removeAttribute("open"); editing = null; editingInc = null; }
+  function closeSheet() { const dlg = $("sheet"); if (dlg.close) dlg.close(); else dlg.removeAttribute("open"); editing = null; editingInc = null; payFrom = null; }
   $("fab").addEventListener("click", () => (view === "shifts" ? openShift() : view === "friends" ? frOpenForm(null) : openSheet()));
   $("addIncome").addEventListener("click", () => openIncome());
   $("txCancel").addEventListener("click", closeSheet);
@@ -3499,6 +3521,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     remember(row);
     persist();
     addTx(row);
+    if (payFrom) { try { BudgetApp.payDone(payFrom); } catch (e) {} payFrom = null; setTimeout(payCheck, 300); }
     buzz();
     closeSheet();
     showPeriodOf(row.spent_on);
@@ -4263,7 +4286,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     const days = csv.split(",").filter((d) => /^\d{4}-\d{2}-\d{2}$/.test(d));
     if (days.length) markNoWork(days);
   }
-  window.appResumed = () => { takeAppOffDays(); renderMissing(); };
+  window.appResumed = () => { takeAppOffDays(); renderMissing(); payCheck(); };
   // The notification's "enter shift" button opens the new-shift form for that day
   window.openShiftFromApp = (d) => { if (!store) return false; setView("shifts"); openShift(null, /^\d{4}-\d{2}-\d{2}$/.test(d) ? d : todayStr()); return true; };
   function renderRemind() {
@@ -8236,14 +8259,82 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     $("adFbSum").disabled = false;
   });
 
-  const NEWS_ID = "2026-10-13-friends";
+  // ---- Payments seen in the phone's card and bank notifications (app 2.2+): a ready expense to approve ----
+  let payFrom = null;
+  const payApp = () => window.BudgetApp && BudgetApp.payPending ? BudgetApp : null;
+  function payItems() { const a = payApp(); if (!a) return []; try { return JSON.parse(a.payPending()) || []; } catch (e) { return []; } }
+  function payCheck() {
+    const a = payApp();
+    $("payRow").hidden = !a;
+    if (!a) return;
+    let on = false; try { on = a.payEnabled(); } catch (e) {}
+    $("payState").textContent = on ? "· פועל ✓" : "· כבוי";
+    $("payOn").textContent = on ? "לכבות בהגדרות הטלפון" : "להפעלה בהגדרות הטלפון";
+    const n = payItems().length;
+    $("payBar").hidden = !n;
+    $("payBarText").textContent = n === 1 ? "💳 זיהיתי תשלום אחד שעוד לא נרשם" : "💳 זיהיתי " + n + " תשלומים שעוד לא נרשמו";
+    if ($("paySheet").open) payRender();
+  }
+  function payRender() {
+    const ul = $("payList"); ul.innerHTML = "";
+    const items = payItems();
+    if (!items.length) { closeDlg("paySheet"); return; }
+    items.forEach((p) => {
+      const li = document.createElement("li");
+      const top = document.createElement("div"); top.className = "amt";
+      top.textContent = "₪" + (+p.amount).toLocaleString("he-IL", { maximumFractionDigits: 2 }) + (p.merchant ? " · " + p.merchant : "");
+      const when = new Date(p.at);
+      const src = document.createElement("div"); src.className = "src";
+      src.textContent = when.toLocaleDateString("he-IL", { weekday: "short", day: "numeric", month: "numeric" }) + " " + when.toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" }) + " · " + (p.app || "") + "\n" + (p.text || "");
+      const row = document.createElement("div"); row.className = "row2";
+      const go = document.createElement("button"); go.type = "button"; go.className = "btn primary"; go.textContent = "✍️ לרשום";
+      go.addEventListener("click", () => payLog(p));
+      const no = document.createElement("button"); no.type = "button"; no.className = "btn"; no.textContent = "זו לא הוצאה";
+      no.addEventListener("click", () => { try { BudgetApp.payDone(p.id); } catch (e) {} payCheck(); payRender(); snack("הוסר מהרשימה"); });
+      row.append(go, no); li.append(top, src, row); ul.append(li);
+    });
+  }
+  function payLog(p) {
+    closeDlg("paySheet");
+    if (month !== thisMonth()) goMonth(thisMonth());
+    openSheet();
+    payFrom = p.id;
+    $("txAmount").value = Math.round(+p.amount * 100) / 100;
+    $("txNote").value = p.merchant || "";
+    const d = new Date(p.at); $("txDate").value = d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
+    showHours();
+  }
+  function payShow(id) {
+    const items = payItems();
+    if (!items.length) { snack("אין תשלומים שמחכים לרישום 👍"); return; }
+    const one = id && items.find((p) => p.id === id);
+    if (one) { payLog(one); return; }
+    setView("main"); payRender(); openDlg("paySheet");
+  }
+  $("payBarGo").addEventListener("click", () => payShow());
+  $("payClose").addEventListener("click", () => closeDlg("paySheet"));
+  $("payOn").addEventListener("click", () => { $("payHelp").hidden = false; try { BudgetApp.payOpenSettings(); } catch (e) {} });
+  // The widget's + and the payment notification open the app here
+  window.openFromApp = (what) => {
+    if (!store) return 0;
+    if (what === "add") { setView("main"); openSheet(); return 1; }
+    if (what === "pay" || /^pay:/.test(what)) { payShow(what.slice(4)); return 1; }
+    return 0;
+  };
+  // Links this phone to the account, so personal messages and friend requests arrive even when the app is closed
+  let pushKeyDone = false;
+  async function pushKeySync() {
+    if (pushKeyDone || !sb || !user || !(window.BudgetApp && BudgetApp.pushKey)) return;
+    try { const { error } = await sb.rpc("push_key_set", { k: BudgetApp.pushKey() }); if (!error) pushKeyDone = true; } catch (e) {}
+  }
+
+  const NEWS_ID = "2026-10-15-pay";
   const NEWS = [
-    ["👥", "חדש: חברים", "לשונית חדשה ״חברים״ למעלה. מוסיפים חבר לפי המייל או השם שלו, או שולחים לו לינק הזמנה בווצאפ."],
-    ["🍔", "הוצאות משותפות", "קניתם ביחד? רושמים כמה כל אחד שילם וכמה החלק של כל אחד. בתקציב שלך נכנס רק החלק שלך."],
-    ["✅", "כל אחד מאשר", "החבר מקבל בקשה ומאשר לפני שזה נכנס לתקציב שלו, ובוחר לזה קטגוריה משלו."],
-    ["💸", "מי מחזיר למי", "האפליקציה מראה למי להחזיר וממי לקבל. מסמנים ״החזרתי״ או ״קיבלתי״, גם החזר חלקי, ואפשר לשלם בביט."],
-    ["🔒", "פרטיות", "חבר רואה רק את השם שלך ואת ההוצאות שחילקתם ביחד. אף פעם לא את התקציב, היתרה או המשמרות."],
-    ["✨", "גם עם העוזר", "אפשר לכתוב לעוזר ״אכלנו פיצה ב־120 עם דני, הוא שילם 40״ והוא ימלא את ההוצאה המשותפת לאישור."]
+    ["💳", "הוצאה מוכנה מההתראה", "כשהבנק או האשראי שולחים התראה על חיוב, האפליקציה מכינה את ההוצאה ואתה רק בוחר קטגוריה ושומר. מפעילים פעם אחת בהגדרות ← כללי."],
+    ["📲", "ווידג׳ט במסך הבית", "לחיצה ארוכה על מסך הבית של הטלפון ← ווידג׳טים ← ״התקציב שלי״. רואים כמה מותר היום, ו־+ פותח הוצאה חדשה."],
+    ["🔔", "התראות גם כשהאפליקציה סגורה", "הודעות אישיות, בקשות חברות והוצאות משותפות שמחכות לך יגיעו גם בלי לפתוח את האפליקציה."],
+    ["🔒", "פרטיות", "ההתראות נקראות רק בטלפון שלך ולא נשלחות לשום מקום. אפשר לכבות בכל רגע."],
+    ["📥", "צריך את גרסה 2.2", "הכל עובד באפליקציה לאנדרואיד מגרסה 2.2. אם מופיע באנר ״עדכון״, לוחצים עליו."]
   ];
   $("genderAsk").addEventListener("click", (e) => {
     const b = e.target.closest("[data-g]"); if (!b) return;
@@ -8254,6 +8345,8 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   function showNews(force) {
     let seen = ""; try { seen = localStorage.getItem("budget-news") || ""; } catch (e) {}
     if (!force && seen === NEWS_ID) return;
+    // This round is about the Android app; other phones skip it quietly
+    if (!force && !/Android/i.test(navigator.userAgent)) { try { localStorage.setItem("budget-news", NEWS_ID); } catch (e) {} return; }
     const ul = $("newsList"); ul.innerHTML = "";
     NEWS.forEach(([e, t, d]) => {
       const li = document.createElement("li");
@@ -8265,7 +8358,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     setTimeout(() => { $("newsSheet").scrollTop = 0; const f = $("newsSheet").querySelector("form"); if (f) f.scrollTop = 0; }, 30);
   }
   $("newsOk").addEventListener("click", () => { try { localStorage.setItem("budget-news", NEWS_ID); } catch (e) {} closeDlg("newsSheet"); });
-  $("newsGo").addEventListener("click", () => { try { localStorage.setItem("budget-news", NEWS_ID); } catch (e) {} closeDlg("newsSheet"); setView("friends"); });
+  $("newsGo").addEventListener("click", () => { try { localStorage.setItem("budget-news", NEWS_ID); } catch (e) {} closeDlg("newsSheet"); setView("settings"); setTimeout(() => { const r = $("payRow"); if (r && !r.hidden) r.scrollIntoView({ behavior: "smooth", block: "center" }); }, 80); });
 
   // ---- Share the month as a picture ----
   async function drawMonthCard(withAmounts) {
@@ -8348,6 +8441,9 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     $("openAdmin").hidden = !isAdmin(); vipSync();
     aiFabSync();
     recordSeen(); loadBroadcast(); setTimeout(loadPersonal, 2500); showDonate(); loadFriends();
+    payCheck(); pushKeySync();
+    const fromApp = new URLSearchParams(location.search).get("app");
+    if (fromApp) { history.replaceState(null, "", location.pathname + location.hash); setTimeout(() => window.openFromApp(fromApp), 400); }
     const ns = new URLSearchParams(location.search).get("newShift");
     if (ns) { history.replaceState(null, "", location.pathname + location.hash); window.openShiftFromApp(ns); }
   }

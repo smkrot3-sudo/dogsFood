@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="wBg">#fff6ee</color>
+    <color name="wText">#2b2238</color>
+    <color name="wMuted">#6e6481</color>
+    <color name="wBrand">#db3577</color>
+    <string name="widget_desc">כמה מותר להוציא היום, וכפתור להוספת הוצאה</string>
+</resources>

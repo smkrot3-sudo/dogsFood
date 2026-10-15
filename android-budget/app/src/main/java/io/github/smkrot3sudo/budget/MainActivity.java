@@ -41,6 +41,8 @@ public class MainActivity extends Activity {
     private static final String HOME = "https://smkrot3-sudo.github.io/dogsFood/budget/";
     private static final int PICK_FILE = 1, HILAN = 2, VOICE = 4;
     static final String EXTRA_SHIFT_DATE = "shiftDate";
+    /** From the widget or a payment notification: "add" opens a new expense, "pay" or "pay:<id>" the payments waiting */
+    static final String EXTRA_OPEN = "open";
 
     private WebView web;
     private ValueCallback<Uri[]> pendingPick;
@@ -105,6 +107,10 @@ public class MainActivity extends Activity {
             Reminder.cancel(this);
             getIntent().removeExtra(EXTRA_SHIFT_DATE);
             web.loadUrl(HOME + "?newShift=" + Uri.encode(shiftDate) + "#shifts");
+        } else if (getIntent().getStringExtra(EXTRA_OPEN) != null) {
+            String what = getIntent().getStringExtra(EXTRA_OPEN);
+            getIntent().removeExtra(EXTRA_OPEN);
+            web.loadUrl(HOME + "?app=" + Uri.encode(what));
         } else if (!openSignIn(getIntent())) {
             if (state != null) web.restoreState(state);
             else web.loadUrl(HOME);
@@ -120,6 +126,14 @@ public class MainActivity extends Activity {
             Reminder.cancel(this);
             web.evaluateJavascript("window.openShiftFromApp?(window.openShiftFromApp(" + JSONObject.quote(shiftDate) + "),1):0", r -> {
                 if (!"1".equals(r)) web.loadUrl(HOME + "?newShift=" + Uri.encode(shiftDate) + "#shifts");
+            });
+            return;
+        }
+        String what = intent.getStringExtra(EXTRA_OPEN);
+        if (what != null) {
+            intent.removeExtra(EXTRA_OPEN);
+            web.evaluateJavascript("window.openFromApp?(window.openFromApp(" + JSONObject.quote(what) + "),1):0", r -> {
+                if (!"1".equals(r)) web.loadUrl(HOME + "?app=" + Uri.encode(what));
             });
             return;
         }
@@ -333,6 +347,30 @@ public class MainActivity extends Activity {
         @JavascriptInterface
         public void setNotes(String json) { Notes.set(MainActivity.this, json); }
 
+        /** Whether reading payment notifications is allowed in Android settings. */
+        @JavascriptInterface
+        public boolean payEnabled() { return PayListener.enabled(MainActivity.this); }
+
+        /** Opens the Android screen where the user allows the app to read notifications. */
+        @JavascriptInterface
+        public void payOpenSettings() { runOnUiThread(() -> PayListener.openSettings(MainActivity.this)); }
+
+        /** Payments seen in notifications and not yet logged or dismissed (JSON list, newest first). */
+        @JavascriptInterface
+        public String payPending() { return PayListener.pending(MainActivity.this).toString(); }
+
+        /** The page logged or dismissed this payment. */
+        @JavascriptInterface
+        public void payDone(String id) { if (id != null) PayListener.done(MainActivity.this, id); }
+
+        /** Today's number for the home-screen widget. */
+        @JavascriptInterface
+        public void setWidget(String label, String value) { BudgetWidget.set(MainActivity.this, label, value); }
+
+        /** This phone's private key for background notifications; the page registers it with the account. */
+        @JavascriptInterface
+        public String pushKey() { return UpdateCheck.deviceKey(MainActivity.this); }
+
         /** Speech to text in Hebrew; the words arrive at window.onVoice. */
         @JavascriptInterface
         public void listen() {
@@ -425,6 +463,7 @@ public class MainActivity extends Activity {
         super.onResume();
         // Coming back to the app counts as opening it: the page decides whether a Hilan sync is due
         if (web != null) web.evaluateJavascript("window.hilanOnResume&&window.hilanOnResume();window.appResumed&&window.appResumed()", null);
+        BudgetWidget.refresh(this);
     }
 
     private long updateId = -1;

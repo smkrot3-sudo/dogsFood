@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Home-screen widget: today's number on the right (Hebrew), a round + on the left -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:background="@drawable/widget_bg" android:orientation="horizontal"
+    android:gravity="center_vertical" android:layoutDirection="rtl" android:padding="10dp">
+    <LinearLayout android:id="@+id/wBody" android:layout_width="0dp" android:layout_height="wrap_content"
+        android:layout_weight="1" android:orientation="vertical" android:paddingStart="6dp" android:paddingEnd="6dp">
+        <TextView android:id="@+id/wLabel" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:textColor="@color/wMuted" android:textSize="13sp" android:maxLines="1" android:ellipsize="end"
+            android:textDirection="rtl" android:text="מותר לך להוציא היום" />
+        <TextView android:id="@+id/wValue" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:textColor="@color/wText" android:textSize="26sp" android:textStyle="bold" android:maxLines="1"
+            android:textDirection="rtl" android:text="—" />
+        <TextView android:id="@+id/wPay" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:textColor="@color/wBrand" android:textSize="12sp" android:maxLines="1" android:ellipsize="end"
+            android:textDirection="rtl" android:visibility="gone" />
+    </LinearLayout>
+    <TextView android:id="@+id/wAdd" android:layout_width="48dp" android:layout_height="48dp"
+        android:background="@drawable/widget_add" android:gravity="center" android:text="+"
+        android:textColor="#FFFFFFFF" android:textSize="28sp" android:textStyle="bold"
+        android:contentDescription="הוצאה חדשה" />
+</LinearLayout>
