@@ -1996,6 +1996,7 @@ html.hugetext .season3 svg { width: 70px; height: 21px; }
       <button class="btn txdel" type="button" id="txDel" hidden>🗑️ מחיקה</button>
     </div>
     <button class="btn wishbtn" type="button" id="txWish">🤔 אולי אקנה. אחליט בעוד 48 שעות</button>
+    <button class="btn wishbtn" type="button" id="txAfford" hidden>✨ אפשר להרשות לעצמי?</button>
   </form>
 </dialog>
 
@@ -3470,6 +3471,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     $("sheetH").textContent = edit ? "עריכת הוצאה" : "הוצאה חדשה";
     $("txSave").textContent = edit ? "שמירה" : "רישום";
     $("txWish").hidden = !!edit;
+    $("txAfford").hidden = !!edit || !(aiReady() && aiOk === true);
     $("repeatRow").hidden = !!edit;
     $("txRepeat").checked = false;
     $("favRow").hidden = !!edit;
@@ -3606,6 +3608,16 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     closeSheet();
     showPeriodOf(row.spent_on);
     afterSpend(row);
+  });
+
+  // ---- "Can I afford it?": the assistant answers from this month's numbers ----
+  $("txAfford").addEventListener("click", () => {
+    const amount = parseFloat($("txAmount").value) || 0;
+    if (!(amount > 0)) { $("txAmount").focus(); $("txErr").textContent = "כמה זה עולה? רשמו סכום קודם."; $("txErr").hidden = false; return; }
+    const picked = document.querySelector('input[name="txCat"]:checked'), cat = picked ? catNames()[picked.value] : "";
+    const note = $("txNote").value.trim();
+    closeSheet(); aiOpen();
+    aiAsk("אני שוקל לקנות עכשיו " + (note ? "״" + note + "״" : cat || "משהו") + " ב־" + fmt(amount) + (cat && note ? " (" + cat + ")" : "") + ". אפשר להרשות לעצמי? תענה כן, לא או כדאי לחכות, עם סיבה אחת קצרה לפי המספרים שלי החודש. אל תרשום כלום.", "afford");
   });
 
   // ---- "Maybe I'll buy it": wait 48 hours before buying ----
@@ -7527,12 +7539,12 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   };
   // Ready questions, by the tab the assistant was opened from (the owner's pick: people don't know what to ask)
   function aiStarters() {
-    if (aiFrom === "shifts") return ["כמה הרווחתי החודש מהמשמרות?", "כמה משמרות עשיתי החודש?", "כמה משמרות חסרות לי ליעד החודש?", "מה אם אעבוד עוד 2 משמרות החודש?", "איזו משמרת הכי משתלמת לי?", "כמה שעות נוספות עשיתי החודש?", "מגיע לי תשלום על עבודה בחג?"];
+    if (aiFrom === "shifts") return ["כמה הרווחתי החודש מהמשמרות?", "כמה משמרות עשיתי החודש?", "כמה משמרות חסרות לי ליעד החודש?", "מה אם אעבוד עוד 2 משמרות החודש?", "איזו משמרת הכי משתלמת לי?", "כמה שעות נוספות עשיתי החודש?", "מגיע לי תשלום על עבודה בחג?", "💸 אולי מגיע לי החזר מס?"];
     if (aiFrom === "calendar") return ["באיזה יום בשבוע אני מוציא הכי הרבה?", "איזה יום החודש היה הכי יקר?", "כמה ימים בלי הוצאות היו לי החודש?", "כמה הוצאתי בשבוע האחרון?"];
     const list = tx[thisMonth()] || [], by = {};
     list.forEach((r) => { by[r.category] = (by[r.category] || 0) + r.amount; });
     const top = Object.entries(by).sort((a, b) => b[1] - a[1])[0], topName = top && catNames()[top[0]];
-    return ["כמה מותר לי להוציא היום?", "כמה הוצאתי החודש?", topName ? "כמה הוצאתי על " + topName + " החודש?" : "", "על מה הכי הוצאתי החודש?", "מה ההוצאה הכי גדולה שלי החודש?", "מה אם אוציא היום 200 ₪?", "באיזה חודש הכי בזבזתי?", "איך מוסיפים מנוי?"].filter(Boolean);
+    return ["📅 תכנן לי את השבוע", "כמה מותר לי להוציא היום?", "כמה הוצאתי החודש?", topName ? "כמה הוצאתי על " + topName + " החודש?" : "", "על מה הכי הוצאתי החודש?", "מה ההוצאה הכי גדולה שלי החודש?", "מה אם אוציא היום 200 ₪?", "באיזה חודש הכי בזבזתי?", "איך מוסיפים מנוי?", "💸 אולי מגיע לי החזר מס?"].filter(Boolean);
   }
   const AI_GO = {
     settings: ["⚙️ להגדרות", () => setView("settings")],
@@ -7554,7 +7566,8 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     plan: ["📝 לתוכנית החודש", () => aiGoBlock("plan")],
     friends: ["👥 לחברים", () => setView("friends")]
   };
-  const AI_GUIDE = "מבנה האפליקציה: למעלה לוגו, גלגל שיניים ⚙ של הגדרות ליד תמונת הפרופיל, ובורר חודש. שלוש לשוניות למעלה: ראשי / משמרות / לוח שנה. בדף הראשי יש אריחים שאפשר לסדר (לחיצה ארוכה על אריח פותחת מצב עריכה: גוררים ⠿, 👁 מסתיר, ✓ שומר; או בהגדרות > פריסת דף הבית). כפתור 💸 הוצאה למטה פותח טופס הוצאה (סכום, קטגוריה, פירוט, תאריך, צריך/רוצה, למה קניתי, ⭐ שמירה ככפתור, חיוב קבוע כל חודש, ״אולי אקנה״ ל־48 שעות). בלשונית משמרות: כפתור ⏰ משמרת, ייבוא משמרות (הדבקה מחילן, כמה ימים ביחד, צילום דוח), הגדרות שכר, יעד הכנסה לחודש. הגדרות > כללי: מתי מתחיל החודש, טון ההודעות, מתי לספור את הכסף מהמשמרות, תזכורת ערב. הגדרות > עיצוב וצבעים: בהיר/כהה, צבע רקע, צבע מבטא, גודל טקסט, רטט וקונפטי. ✨ הוא העוזר עצמו. לשונית 👥 חברים: מוסיפים חבר לפי מייל או שם, או לינק הזמנה בווצאפ, או חבר בלי האפליקציה; כפתור 🍔 הוצאה משותפת: סך הכול, עם מי, כמה כל אחד שילם וכמה החלק של כל אחד; החבר מאשר לפני שזה נכנס לתקציב שלו; בתקציב נכנס רק החלק של המשתמש; ״החזרתי״/״קיבלתי״ מסמנים החזר (גם חלקי); בביט אם החבר שמר קישור. חבר רואה רק שם ואת מה שחילקו ביחד.\n"
+  const AI_GUIDE = "מבנה האפליקציה: למעלה לוגו, גלגל שיניים ⚙ של הגדרות ליד תמונת הפרופיל, ובורר חודש. שלוש לשוניות למעלה: ראשי / משמרות / לוח שנה. בדף הראשי יש אריחים שאפשר לסדר (לחיצה ארוכה על אריח פותחת מצב עריכה: גוררים ⠿, 👁 מסתיר, ✓ שומר; או בהגדרות > פריסת דף הבית). כפתור 💸 הוצאה למטה פותח טופס הוצאה (סכום, קטגוריה, פירוט, תאריך, צריך/רוצה, למה קניתי, ⭐ שמירה ככפתור, חיוב קבוע כל חודש, ״אולי אקנה״ ל־48 שעות). בלשונית משמרות: כפתור ⏰ משמרת, ייבוא משמרות (הדבקה מחילן, כמה ימים ביחד, צילום דוח), הגדרות שכר, יעד הכנסה לחודש. הגדרות > כללי: מתי מתחיל החודש, טון ההודעות, מתי לספור את הכסף מהמשמרות, תזכורת ערב. הגדרות > עיצוב וצבעים: בהיר/כהה, צבע רקע, צבע מבטא, גודל טקסט, רטט וקונפטי. ✨ הוא העוזר עצמו. לשונית 👥 חברים: מוסיפים חבר לפי מייל או שם, או לינק הזמנה בווצאפ, או חבר בלי האפליקציה; כפתור 🍔 הוצאה משותפת: סך הכול, עם מי, כמה כל אחד שילם וכמה החלק של כל אחד; החבר מאשר לפני שזה נכנס לתקציב שלו; בתקציב נכנס רק החלק של המשתמש; ״החזרתי״/״קיבלתי״ מסמנים החזר (גם חלקי); בביט אם החבר שמר קישור. חבר רואה רק שם ואת מה שחילקו ביחד.\n" +
+    "החזר מס (כשהמשתמש שואל): שכיר בישראל יכול לבקש החזר מס על 6 השנים האחרונות, בטופס 135 באזור האישי באתר רשות המסים (gov.il) או דרך מייצג. סיבות נפוצות אצל צעירים: עבד רק חלק מהשנה, החליף מקום עבודה באמצע שנה או עבד בשני מקומות, נקודות זיכוי שלא נוצלו (חייל משוחרר או בת שירות לאומי, סיום תואר או לימודי מקצוע, תושב ישוב מזכה), תרומות עם קבלה. צריך טופסי 106 מכל מעסיק. שואלים 2 או 3 שאלות, נותנים צעדים, לא מבטיחים סכום ולא ממציאים מספרים.\n"
     + "הסברים על כל אריח:\n" + Object.values(HELP).map((t) => "- " + t).join("\n")
     + "\nיעדים לכפתור [[go:...]]: " + Object.keys(AI_GO).map((k) => k + "=" + AI_GO[k][0]).join(", ");
   // "Why this number?" under today's allowance: the same parts render() used, in two plain lines
@@ -7928,6 +7941,10 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
         if (m.rows && m.rows.length) btn(m.showRows ? "🔎 הסתר" : "🔎 מאיפה זה?", () => { m.showRows = !m.showRows; aiSaveChat(); aiPaint(); });
         else if (!m.local && !m.act && !m.mem && m === lastAi && /\d/.test(m.text) && !aiBusy) btn("🔎 איך הגעת לזה?", () => aiAsk("איך הגעת לזה?", "showwork"));
         if (window.speechSynthesis && window.SpeechSynthesisUtterance) btn(aiSpeaking === m ? "⏹️ עצור" : "🔊 הקרא", () => aiSpeak(m));
+        if (!m.local && !m.act && !m.mem) {
+          if (m.vote) { const k = document.createElement("span"); k.className = "ailocal"; k.textContent = m.vote === "up" ? "👍 תודה!" : "👎 תודה, זה עוזר לשפר"; bar.append(k); }
+          else { btn("👍", () => aiVote(m, true)); btn("👎", () => aiVote(m, false)); }
+        }
         if (bar.childNodes.length) d.append(bar);
       }
       if (m.role === "err" && aiLast && !aiBusy) { const b = document.createElement("button"); b.type = "button"; b.className = "btn aigo"; b.textContent = "🔄 נסה שוב (לא נספר במכסה)"; b.addEventListener("click", aiRetry); d.append(b); }
@@ -7939,12 +7956,18 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     sb0.hidden = (!!aiChat.length && !aiIdeas) || !!aiMode || aiBusy;
     $("aiIdeas").hidden = !aiChat.length || !!aiMode;
     $("aiIdeas").textContent = aiIdeas ? "✕ סגור" : "💡 רעיונות";
-    aiStarters().forEach((q) => { const b = document.createElement("button"); b.type = "button"; b.textContent = q; b.addEventListener("click", () => aiAsk(q)); sb0.append(b); });
+    aiStarters().forEach((q) => { const b = document.createElement("button"); b.type = "button"; b.textContent = q; b.addEventListener("click", () => (AI_SPECIAL[q] ? aiAsk(AI_SPECIAL[q][0], AI_SPECIAL[q][1]) : aiAsk(q))); sb0.append(b); });
     $("aiMode").hidden = !aiMode;
     $("aiModeTxt").textContent = aiMode === "exp" ? "✍️ רישום הוצאות: כתוב או אמור כמה הוצאות ביחד" : "";
     $("aiIn").placeholder = aiMode === "exp" ? "קפה 18, פיצה 60, דלק 200" : "שאל על הכסף שלך…";
     $("aiSend").disabled = aiBusy;
     setTimeout(() => { log.scrollTop = log.scrollHeight; }, 0);
+  }
+  // A thumbs up or down on an answer: only the vote and the question's topic are kept, never the chat itself
+  async function aiVote(m, good) {
+    m.vote = good ? "up" : "down"; aiSaveChat(); aiPaint();
+    const i = aiChat.indexOf(m), q = aiChat.slice(0, i).reverse().find((x) => x.role === "me");
+    try { if (sb && user) await sb.from("ai_feedback").insert({ good, topic: q ? aiTopic(q.text) : "other" }); } catch (e) {}
   }
   function aiPush(role, text, local) {
     const m = local ? { role, text, local: 1 } : { role, text };
@@ -8021,9 +8044,15 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     return null;
   }
   // A one-word topic for the owner's weekly summary (the question itself never leaves the phone for that)
+  // Starters that send a fuller question than their short label
+  const AI_SPECIAL = {
+    "📅 תכנן לי את השבוע": ["תכנן לי את השבוע הקרוב, עד מוצאי שבת: כמה מותר לי להוציא בכל יום, לפי הכסף החופשי שנשאר החודש, המשמרות שרשמתי והחיובים הקבועים שעוד יורדים. תן טבלה קצרה של ימים וסכומים ועצה אחת. אל תשנה כלום.", "weekplan"],
+    "💸 אולי מגיע לי החזר מס?": ["אולי מגיע לי החזר מס? תשאל אותי 2 או 3 שאלות קצרות כדי לבדוק, ואחרי שאענה תן לי רשימת צעדים פשוטה מה לעשות. אל תבטיח סכום.", "tax"]
+  };
   function aiTopic(q) {
     if (/מה אם|ואם א/.test(q)) return "whatif";
     if (/איך (עושים|מוסיפים|משנים|מוחקים|רואים|מסתירים|מחזירים|מבטלים)|איפה (יש|אני|רואים|זה)|באפליקציה/.test(q)) return "app";
+    if (/החזר מס|מס הכנסה|נקודות זיכוי|טופס 135/.test(q)) return "tax";
     if (/זכאי|זכאית|מגיע לי|זכויות|חוק|פיצויים|דמי (מחלה|הבראה)|חופשה שנתית/.test(q)) return "rights";
     if (/(^|\s)(תוסיף|תוסיפי|תרשום|תרשמי|תמחק|תמחקי|תזכיר|תזכירי|תזכור|תזכרי|קניתי|עבדתי|קיבלתי|שילמתי)(?=\s|$)/.test(q)) return "action";
     if (/משמרת|משמרות|שעות|שכר|הרווחתי|משכורת/.test(q)) return "shifts";
@@ -8306,6 +8335,17 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       const l1 = document.createElement("span"); l1.textContent = Object.entries(byTool).sort((a, b) => b[1] - a[1]).map(([t, n]) => (LBL[t] || t) + " " + n).join(" · ");
       const l2 = document.createElement("span"); l2.textContent = "עלות: ₪0 (מסלול חינמי של Gemini)";
       d.append(b1, l1, l2); box.append(d);
+      try {
+        const { data: v } = await sb.from("ai_feedback").select("good, topic, at").gte("at", new Date(Date.now() - 30 * 864e5).toISOString());
+        if (v && v.length) {
+          const up = v.filter((x) => x.good).length, down = v.length - up, bad = {};
+          v.filter((x) => !x.good).forEach((x) => { bad[x.topic] = (bad[x.topic] || 0) + 1; });
+          const dv = document.createElement("div"); dv.className = "aduser";
+          const bv = document.createElement("b"); bv.textContent = "👍 " + up + " · 👎 " + down + " ב־30 יום";
+          const sv = document.createElement("span"); sv.textContent = down ? "איפה ענה לא טוב: " + Object.entries(bad).sort((a, b) => b[1] - a[1]).map(([t, n]) => (AI_TOPIC[t] || t) + " " + n).join(" · ") : "אף אחד לא סימן 👎";
+          dv.append(bv, sv); box.append(dv);
+        }
+      } catch (e) {}
       const em = {}; (users || []).forEach((u) => { em[u.user_id] = u.email; });
       Object.entries(byUser).sort((a, b) => b[1] - a[1]).forEach(([id, n]) => {
         const u = document.createElement("div"); u.className = "aduser";
@@ -8316,7 +8356,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     } catch (e) { box.textContent = aiErrText(e); }
   }
   const AI_LBL = { chat: "💬 שאלות", expenses: "✍️ רישום הוצאות", shiftsheet: "📷 דוחות נוכחות", receipt: "🧾 קבלות", challenge: "🏅 אתגרים", letter: "💌 מכתבים", patterns: "🔍 הרגלים", admin_fb: "🛠️ סיכום משובים" };
-  const AI_TOPIC = { money: "💸 הוצאות וכסף", shifts: "⏰ משמרות ושכר", action: "✍️ בקשות לרשום", app: "📱 איך עושים באפליקציה", rights: "⚖️ זכויות", whatif: "🔮 מה אם", showwork: "🔎 איך הגעת לזה", item: "🧾 על הוצאה מסוימת", other: "💬 אחר" };
+  const AI_TOPIC = { money: "💸 הוצאות וכסף", shifts: "⏰ משמרות ושכר", action: "✍️ בקשות לרשום", app: "📱 איך עושים באפליקציה", rights: "⚖️ זכויות", whatif: "🔮 מה אם", afford: "🤔 אפשר להרשות?", weekplan: "📅 תכנון שבוע", tax: "💸 החזר מס", showwork: "🔎 איך הגעת לזה", item: "🧾 על הוצאה מסוימת", other: "💬 אחר" };
   // Owner: is the assistant healthy (failures, speed, which Google model answered) and a weekly picture of the app
   function renderAdminHealth(rows, users, fbs) {
     const wk = Date.now() - 7 * 864e5, w = rows.filter((r) => new Date(r.at) >= wk), prev = rows.filter((r) => new Date(r.at) < wk);
