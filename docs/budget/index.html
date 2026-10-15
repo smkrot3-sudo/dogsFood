@@ -998,6 +998,13 @@ dialog.alarm.dimsum { background: radial-gradient(circle at 50% 0%, #ffcf5c 0, t
 .histsvg .net { font-size: 13px; font-weight: 700; } .histsvg .net.pos { fill: var(--accent); } .histsvg .net.neg { fill: var(--danger); }
 .histlegend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 13px; color: var(--muted); margin: -4px 0 4px; }
 .histlegend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-inline-end: 5px; vertical-align: -1px; }
+.backcard { margin-top: 10px; border-radius: 14px; padding: 12px 14px; background: var(--spend-soft); display: grid; gap: 6px; }
+.backcard b { font-size: 16px; } .backcard ol { margin: 0; padding-inline-start: 20px; display: grid; gap: 3px; } .backcard .linkbtn { justify-self: start; }
+.txfuture { margin: -4px 0 0; font-size: 14px; font-weight: 600; color: var(--spend); }
+.holhint { margin: 8px 0 0; border-radius: 12px; padding: 10px 12px; background: var(--accent-soft); font-size: 14px; }
+.yeargrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.yeargrid div { border: 1px solid var(--line); border-radius: 14px; padding: 10px 12px; display: grid; } .yeargrid b { font-size: 20px; font-variant-numeric: tabular-nums; } .yeargrid small { color: var(--muted); }
+.yeartable { width: 100%; border-collapse: collapse; font-size: 14px; font-variant-numeric: tabular-nums; } .yeartable td, .yeartable th { padding: 6px 4px; border-bottom: 1px solid var(--line); text-align: start; }
 .bcast .bci { font-size: 22px; } .bcast p { flex: 1; margin: 0; white-space: pre-wrap; } .bcast .linkbtn { flex: none; }
 .adlist { display: grid; gap: 8px; }
 .aduser { background: var(--surface-2); border-radius: 14px; padding: 10px 12px; display: grid; gap: 2px; font-size: 13.5px; }
@@ -1435,6 +1442,12 @@ html.hugetext .season3 svg { width: 70px; height: 21px; }
         <div class="verdict" id="verdict" role="status"></div>
         <div class="streak" id="streak" hidden></div>
         </div>
+        <div class="backcard" id="backCard" hidden>
+          <b>🧭 איך חוזרים למסלול</b>
+          <span id="backLead"></span>
+          <ol id="backSteps"></ol>
+          <button class="linkbtn" type="button" id="backHide">הבנתי, להסתיר עד סוף החודש</button>
+        </div>
       </section>
 
       <section data-block="statement" class="panel" aria-labelledby="stmH">
@@ -1666,6 +1679,8 @@ html.hugetext .season3 svg { width: 70px; height: 21px; }
         <button class="btn" type="button" id="payOn">להפעלה בהגדרות הטלפון</button>
         <p class="hint" id="payHelp" style="margin:0" hidden>בהגדרות שנפתחות, מפעילים את ״התקציב שלי״. אם כתוב שההגדרה מוגבלת: נכנסים בטלפון להגדרות ← אפליקציות ← התקציב שלי ← ⋮ למעלה ← ״לאפשר הגדרות מוגבלות״, ואז מנסים שוב.</p>
       </div>
+      <label class="field" for="futureMin">🎯 לפני קנייה ״רוצה״ מעל הסכום הזה, להראות מה היא עושה ליעד שלי
+        <select id="futureMin"><option value="0">אף פעם</option><option value="100">₪100</option><option value="150">₪150</option><option value="200">₪200</option><option value="300">₪300</option><option value="500">₪500</option><option value="1000">₪1,000</option></select></label>
       <div class="remind" id="dayCheckRow" hidden>
         <label class="check" for="dayCheckOn"><input type="checkbox" id="dayCheckOn"> 🧾 תזכורת בערב לרשום את ההוצאות של היום</label>
         <label class="field" for="dayCheckAt">בשעה<select id="dayCheckAt"><option>20:00</option><option>20:30</option><option>21:00</option><option>21:30</option><option>22:00</option><option>22:30</option><option>23:00</option></select></label>
@@ -1812,6 +1827,8 @@ html.hugetext .season3 svg { width: 70px; height: 21px; }
       <div class="actions"><button class="btn" type="button" id="importShifts">📥 ייבוא מהיר: מחילן או כמה ימים ביחד</button></div>
       <div class="shifts" id="shiftList"></div>
       <p class="hint">לחיצה על משמרת פותחת אותה לעריכה. משמרת מסוג מיוחד מסומנת בצבע של הסוג שלה.</p>
+      <p class="holhint" id="holHint" hidden></p>
+      <div class="actions"><button class="btn" type="button" id="yearBtn">📅 סיכום שנתי של העבודה</button></div>
     </section>
 
     <section class="panel hilan" id="hilanBox" aria-labelledby="hilanH" hidden>
@@ -1959,6 +1976,7 @@ html.hugetext .season3 svg { width: 70px; height: 21px; }
     <p class="hint" id="voiceHint" hidden></p>
     <label for="txAmount">כמה?<input type="number" id="txAmount" class="amount-in" inputmode="decimal" min="0" step="0.01" placeholder="₪0"></label>
     <p class="hours" id="txHours" aria-live="polite"></p>
+    <p class="txfuture" id="txFuture" aria-live="polite" hidden></p>
     <fieldset class="chips" id="txCats"><legend>על מה?</legend></fieldset>
     <fieldset class="chips" id="incKinds" hidden><legend>מה זה?</legend></fieldset>
     <label for="txNote" id="txNoteLbl">פירוט (לא חובה)<input type="text" id="txNote" maxlength="200" placeholder="למשל: שווארמה עם חברים" autocomplete="off"></label>
@@ -2148,6 +2166,16 @@ html.hugetext .season3 svg { width: 70px; height: 21px; }
     <div class="foot"><button class="btn primary" type="submit" id="shSave">שמירה</button><button class="btn" type="button" id="shCancel">ביטול</button></div>
   </form>
 </dialog>
+<dialog class="sheet" id="yearSheet" aria-labelledby="yearH">
+  <form method="dialog">
+    <h2 id="yearH" data-e="📅">סיכום שנתי</h2>
+    <p class="hint" id="yearLead">כל המשמרות שרשמת השנה. שימושי לבדיקת החזר מס ומול המעסיק.</p>
+    <div class="yeargrid" id="yearGrid"></div>
+    <div style="overflow-x:auto"><table class="yeartable" id="yearTable"></table></div>
+    <div class="foot"><button class="btn" type="button" id="yearPrev">‹ שנה קודמת</button><button class="btn" type="button" id="yearClose">סגירה</button></div>
+  </form>
+</dialog>
+
 <dialog class="sheet" id="searchSheet" aria-labelledby="searchH">
   <form method="dialog">
     <h2 id="searchH" data-e="🔎">חיפוש בכל האפליקציה</h2>
@@ -3168,7 +3196,9 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       else if (false && overCat) setV("warn", say(overCat.name + " בחריגה של " + X(overCat.over) + ". הכסף הזה יוצא מקטגוריה אחרת, אז מעכשיו " + overCat.name + " סגורה עד סוף החודש.", overCat.name + " עברה את התקציב שלה ב־" + X(overCat.over) + ". כדאי לא להוציא עליה יותר החודש.", overCat.name + " עברה קצת את התקציב (" + X(overCat.over) + "). ננסה לוותר עליה עד סוף החודש."));
       else if (!list.length) setV("warn", say("עוד לא רשמת אף הוצאה החודש. כל שקל שיוצא נרשם כאן, גם הקפה.", "עוד לא רשמת הוצאות החודש. כדאי לרשום כל הוצאה, גם קטנה.", "עוד לא רשמת הוצאות החודש. כל הוצאה שתרשום תעזור לראות את התמונה 🙂"));
       else setV("good", say("אתה בתוך התקציב. זו לא סיבה להתפנק.", "אתה בתוך התקציב. ככה ממשיכים.", "כל הכבוד, אתה בתוך התקציב! 🎉"));
+      backCard(spend, spent, daysLeft, allowance, runOut < days && dayNum >= 3 ? shortDate(dateAdd(periodStart(month), runOut - 1)) : "");
     } else if (isPast) {
+      $("backCard").hidden = true;
       $("todayFc").hidden = true;
       const left = spend - spent;
       $("todayLbl").textContent = left >= 0 ? "נשאר בסוף " + monthName(month) : "חריגה ב" + monthName(month);
@@ -3480,6 +3510,18 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   function showHours() {
     const h = hoursText(parseFloat($("txAmount").value) || 0);
     $("txHours").textContent = h ? "זה " + h + "." : "";
+    showFuture();
+  }
+  // A big "want": what it does to the nearest savings goal, or how many days of the daily budget it is (display only)
+  function showFuture() {
+    const p = $("txFuture"), min = +(settings().futureMin == null ? 150 : settings().futureMin), amt = parseFloat($("txAmount").value) || 0;
+    const show = !editing && min > 0 && sheetTags.nw === "want" && amt >= min;
+    p.hidden = !show; if (!show) return;
+    const g = (store.goals || []).filter((x) => +x.target > +x.saved).sort((a, b) => (a.target - a.saved) - (b.target - b.saved))[0];
+    const daily = todayWhy && todayWhy.allowance > 0 ? todayWhy.allowance : 0;
+    if (g) { const pct = Math.round(amt / (g.target - g.saved) * 100); p.textContent = "🎯 " + fmt(amt) + " זה " + (pct >= 100 ? "יותר מכל מה שחסר" : pct + "% ממה שחסר") + " ליעד ״" + g.name + "״."; }
+    else if (daily) { const d = Math.round(amt / daily * 10) / 10; p.textContent = "🎯 זה כמו " + (d <= 1 ? "יום שלם" : d + " ימים") + " של התקציב היומי שלך."; }
+    else p.hidden = true;
   }
   $("txAmount").addEventListener("input", showHours);
   function closeSheet() { const dlg = $("sheet"); if (dlg.close) dlg.close(); else dlg.removeAttribute("open"); editing = null; editingInc = null; payFrom = null; }
@@ -3502,8 +3544,8 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       box.append(b);
     });
   }
-  $("txNeed").addEventListener("click", () => { sheetTags.nw = sheetTags.nw === "need" ? undefined : "need"; paintTags(); });
-  $("txWant").addEventListener("click", () => { sheetTags.nw = sheetTags.nw === "want" ? undefined : "want"; paintTags(); });
+  $("txNeed").addEventListener("click", () => { sheetTags.nw = sheetTags.nw === "need" ? undefined : "need"; paintTags(); showFuture(); });
+  $("txWant").addEventListener("click", () => { sheetTags.nw = sheetTags.nw === "want" ? undefined : "want"; paintTags(); showFuture(); });
   $("txRegret").addEventListener("click", () => { sheetTags.regret = !sheetTags.regret || undefined; paintTags(); });
   function cleanTags(t) {
     const o = {}; if (t && (t.nw === "need" || t.nw === "want")) o.nw = t.nw; if (t && t.mood) o.mood = t.mood; if (t && t.regret) o.regret = true;
@@ -4148,6 +4190,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   // The shifts page: summary, the list with type colors, types and pay settings
   function renderShifts() {
     if (!store) return;
+    try { holHint(); } catch (e) {}
     const pp = periodPay(month);
     const list = shifts[month] || [];
     $("shTitle").textContent = "משמרות " + monthName(month);
@@ -8314,6 +8357,88 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     $("adFbSum").disabled = false;
   });
 
+  // ---- A calm plan when the month went off track (shown until hidden for the month) ----
+  function backCard(spend, spent, daysLeft, allowance, runOutDay) {
+    const box = $("backCard");
+    let hid = ""; try { hid = localStorage.getItem("budget-backhide") || ""; } catch (e) {}
+    const over = spend > 0 && spent > spend;
+    if (hid === month || !(over || runOutDay)) { box.hidden = true; return; }
+    $("backLead").textContent = over
+      ? gx("החודש כבר עברת את הכסף החופשי. זה קורה, ולא סוף העולם. המטרה עכשיו היא רק לעצור את המינוס.")
+      : gx("בקצב הזה הכסף ייגמר ב־" + runOutDay + ". אם תוציא עד " + fmt(allowance) + " ביום, תגיע לסוף החודש בשקט.");
+    const steps = over
+      ? ["עד סוף החודש רק מה שחייבים: אוכל בבית, נסיעות, חשבונות.", "כל ״רוצה״ נכנס לרשימת ״אולי אקנה״ ומחכה לחודש הבא.", "בוחרים 2 ימים בשבוע בלי שום הוצאה."]
+      : ["השבוע: רק " + fmt(allowance) + " ביום, ולא יותר.", "כל ״רוצה״ נכנס קודם לרשימת ״אולי אקנה״ ל־48 שעות.", "בוחרים יום אחד השבוע בלי שום הוצאה."];
+    const ol = $("backSteps"); ol.innerHTML = ""; steps.forEach((t) => { const li = document.createElement("li"); li.textContent = gx(t); ol.append(li); });
+    box.hidden = false;
+  }
+  $("backHide").addEventListener("click", () => { try { localStorage.setItem("budget-backhide", month); } catch (e) {} $("backCard").hidden = true; });
+  $("futureMin").addEventListener("change", () => setSetting("futureMin", +$("futureMin").value));
+
+  // ---- A weekly pat on the back: last week cost less than the plan ----
+  async function weeklyWin() {
+    if (!store || month !== thisMonth()) return;
+    const now = new Date(), sun = new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay());
+    const prevSun = new Date(sun); prevSun.setDate(sun.getDate() - 7);
+    const ds = (d) => d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
+    const from = ds(prevSun), to = ds(new Date(sun.getTime() - 864e5)), key = "budget-win-" + from;
+    try { if (localStorage.getItem(key)) return; } catch (e) { return; }
+    const ms = [...new Set([periodOf(from), periodOf(to)])];
+    for (const m of ms) { try { await ensureTx(m); } catch (e) {} }
+    const rows = ms.flatMap((m) => tx[m] || []).filter((r) => r.spent_on >= from && r.spent_on <= to);
+    const spend = plan().spend + incTotal(), perWeek = spend / periodDays(month) * 7;
+    const spent = rows.reduce((a, r) => a + r.amount, 0);
+    try { localStorage.setItem(key, "1"); } catch (e) {}
+    if (!(perWeek > 0) || rows.length < 3 || spent >= perWeek) return;
+    setTimeout(() => { snack(gx("🎉 בשבוע שעבר הוצאת " + fmt(perWeek - spent) + " פחות מהתוכנית. כל הכבוד!")); try { confetti(); } catch (e) {} }, 2500);
+  }
+
+  // ---- Holidays you didn't work: a nudge to check the payslip ----
+  function holHint() {
+    const p = $("holHint"), list = shifts[month] || [];
+    if (!list.length) { p.hidden = true; return; }
+    const worked = new Set(list.map((r) => r.work_date)), seen = new Set(), names = [];
+    for (let d = periodStart(month); d <= periodEnd(month); d = dateAdd(d, 1)) {
+      const n = restName(d);
+      if (!n || n === "שבת" || worked.has(d) || new Date(d + "T12:00").getDay() === 6 || seen.has(n)) continue;
+      seen.add(n); names.push(n);
+    }
+    p.hidden = !names.length;
+    if (names.length) p.textContent = gx("🕎 החודש היה חג (" + names.join(", ") + ") ולא עבדת בו. מי שעובד 3 חודשים ומעלה מקבל ברוב המקרים תשלום על יום חג, גם בלי לעבוד. כדאי לבדוק שזה מופיע בתלוש.");
+  }
+
+  // ---- The year's work at a glance ----
+  let yearShown = null;
+  $("yearBtn").addEventListener("click", () => openYear(+thisMonth().slice(0, 4)));
+  $("yearPrev").addEventListener("click", () => openYear(yearShown - 1));
+  $("yearClose").addEventListener("click", () => closeDlg("yearSheet"));
+  async function openYear(y) {
+    yearShown = y;
+    $("yearH").textContent = "סיכום שנתי " + y;
+    $("yearGrid").textContent = "טוען…"; $("yearTable").innerHTML = "";
+    if (!$("yearSheet").open) openDlg("yearSheet");
+    const months = []; for (let k = 1; k <= 12; k++) months.push(y + "-" + pad(k));
+    const cur = thisMonth(), use = months.filter((m) => m <= cur);
+    await Promise.all(use.map((m) => (shifts[m] ? 0 : loadShifts(m).catch(() => { shifts[m] = shifts[m] || []; }))));
+    if (yearShown !== y) return;
+    const st = settings(), tot = { n: 0, min: 0, gross: 0, night: 0, shabbat: 0, hol: 0 }, rowsOut = [];
+    use.forEach((m) => {
+      const l = shifts[m] || []; let n = 0, min = 0, gross = 0;
+      l.forEach((r) => { const p = shiftPay(r, st); n++; min += p.paidMin; gross += p.gross; if (p.night) tot.night++; if (p.rest === "שבת") tot.shabbat++; else if (p.rest) tot.hol++; });
+      tot.n += n; tot.min += min; tot.gross += gross;
+      if (n) rowsOut.push([monthName(m), n, Math.round(min / 6) / 10, gross]);
+    });
+    const hrs = (m) => Math.floor(m / 60) + ":" + pad(Math.round(m % 60));
+    const g = $("yearGrid"); g.innerHTML = "";
+    [[tot.n, "משמרות"], [hrs(tot.min), "שעות עבודה"], [fmt(tot.gross), "ברוטו (הערכה)"], [tot.shabbat, "משמרות בשבת"], [tot.hol, "משמרות בחג"], [tot.night, "משמרות לילה"]]
+      .forEach(([v, l]) => { const d = document.createElement("div"); const b = document.createElement("b"); b.textContent = v; const s2 = document.createElement("small"); s2.textContent = l; d.append(b, s2); g.append(d); });
+    const t = $("yearTable");
+    if (!rowsOut.length) { t.innerHTML = ""; $("yearLead").textContent = "אין משמרות רשומות ב־" + y + "."; return; }
+    $("yearLead").textContent = gx("כל המשמרות שרשמת ב־" + y + ". שימושי לבדיקת החזר מס ומול המעסיק.");
+    const hr = document.createElement("tr"); ["חודש", "משמרות", "שעות", "ברוטו"].forEach((h) => { const th = document.createElement("th"); th.textContent = h; hr.append(th); }); t.append(hr);
+    rowsOut.forEach((r) => { const tr = document.createElement("tr"); [r[0], r[1], r[2], fmt(r[3])].forEach((v) => { const td = document.createElement("td"); td.textContent = v; tr.append(td); }); t.append(tr); });
+  }
+
   // ---- The long-press hint shows only on the first few opens ----
   function layHintOn() { let n = 0; try { n = +localStorage.getItem("budget-layhint") || 0; } catch (e) {} return n < 5; }
   let layHintCounted = false;
@@ -8624,7 +8749,8 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     $("openAdmin").hidden = !isAdmin(); vipSync();
     aiFabSync();
     recordSeen(); loadBroadcast(); setTimeout(loadPersonal, 2500); showDonate(); loadFriends();
-    payCheck(); pushKeySync(); layHintCount(); autoFold();
+    payCheck(); pushKeySync(); layHintCount(); autoFold(); weeklyWin();
+    $("futureMin").value = String(settings().futureMin == null ? 150 : settings().futureMin);
     const fromApp = new URLSearchParams(location.search).get("app");
     if (fromApp) { history.replaceState(null, "", location.pathname + location.hash); setTimeout(() => window.openFromApp(fromApp), 400); }
     const ns = new URLSearchParams(location.search).get("newShift");
