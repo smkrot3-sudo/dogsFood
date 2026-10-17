@@ -8431,7 +8431,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     } catch (e) {}
   }
   // Each style: the decorations above and below the text
-  const PM_STYLES = { alarm: ["🛑⛔⚠️🚫", "🚧🚨🚧"], dimsum: ["🏮🥟🥢🥟🏮", "🧧 🥡 🍵 🥡 🧧"], star: ["✨🎨💅✨", "💖 🌟 💖"] };
+  const PM_STYLES = { alarm: ["🛑⛔⚠️🚫", "🚧🚨🚧"], dimsum: ["🏮🥟🥢🥟🏮", "🧧 🥡 🍵 🥡 🧧"], star: ["✨🎨💅✨", "🖌️ 🌟 🖌️"] };
   function showPersonal(m) {
     const st = PM_STYLES[m.style] ? m.style : "alarm", deco = $("pmSheet").querySelectorAll(".signs");
     $("pmSheet").classList.toggle("dimsum", st === "dimsum");
