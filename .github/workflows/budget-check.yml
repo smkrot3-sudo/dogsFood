@@ -1,19 +1,20 @@
 name: Budget page robot check
 
 # Opens the budget page at phone sizes in local mode (no real accounts) after every change to it,
-# clicks through the main screens and fails on any error or sideways scrolling.
+# clicks through the main screens and fails on any error or sideways scrolling. Then 50 simulated users with
+# months of made-up data check that the numbers match an independent calculation (tests/budget-sim).
 on:
   push:
     branches: [main]
-    paths: ['docs/budget/**', 'tests/budget-smoke.js', '.github/workflows/budget-check.yml']
+    paths: ['docs/budget/**', 'tests/budget-smoke.js', 'tests/budget-sim/**', '.github/workflows/budget-check.yml']
   pull_request:
-    paths: ['docs/budget/**', 'tests/budget-smoke.js']
+    paths: ['docs/budget/**', 'tests/budget-smoke.js', 'tests/budget-sim/**']
   workflow_dispatch:
 
 jobs:
   smoke:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -28,3 +29,5 @@ jobs:
           python3 -m http.server 8765 --directory docs >/dev/null 2>&1 &
           sleep 2
           node tests/budget-smoke.js
+      - name: 50 simulated users
+        run: node tests/budget-sim/run.js

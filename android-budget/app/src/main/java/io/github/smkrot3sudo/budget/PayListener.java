@@ -45,6 +45,19 @@ public class PayListener extends NotificationListenerService {
         "חיוב|חויב|עסק[הת]|רכישה|רכשת|שולם|שילמת|תשלום|אושר|בוצע|העברת|charged|payment|purchase|paid|spent|transaction", Pattern.CASE_INSENSITIVE);
     private static final Pattern INCOMING = Pattern.compile(
         "זיכוי|זוכה|החזר|קיבלת|הועבר[וה]? אליך|העביר לך|העבירה לך|refund|received|credited", Pattern.CASE_INSENSITIVE);
+    // Dollar charges (online shops, subscriptions): kept in dollars, the page turns them into shekels for the user to check
+    private static final Pattern USD = Pattern.compile(
+        "(?:\\$|USD)\\s?([0-9][0-9,]*(?:\\.[0-9]{1,2})?)|([0-9][0-9,]*(?:\\.[0-9]{1,2})?)\\s?(?:\\$|USD|דולר)");
+    // Not a charge: an upcoming statement total, a one-time code, a cancelled or declined charge, a balance update
+    private static final Pattern NOT_PAY = Pattern.compile(
+        "חיוב צפוי|צפוי לחיוב|סך החיובים|סה\"כ חיובים|סה״כ חיובים|חיוב החודשי|דף החשבון|פירוט החיובים|"
+        + "קוד אימות|קוד חד|קוד הזדהות|סיסמה חד|סיסמא חד|קוד כניסה|OTP|verification code|one.time|"
+        + "בוטל|ביטול|מבוטל|נדחה|נדחתה|סורב|סירוב|לא אושר|לא אושרה|cancel|declined|reversed", Pattern.CASE_INSENSITIVE);
+    // "יתרה: ₪3,000" next to a charge is the account balance, not the charge; it's cut out before looking for the amount
+    private static final Pattern BALANCE = Pattern.compile(
+        "(?:יתרת?|היתרה|balance)[^0-9₪$\\n]{0,25}(?:₪|ש\"ח|ש״ח)?\\s?-?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s?(?:₪|ש\"ח|ש״ח|ILS)?", Pattern.CASE_INSENSITIVE);
+    // A "merchant" that is only card digits ("כרטיס המסתיים ב-1234") is no merchant at all
+    private static final Pattern CARD_BITS = Pattern.compile("^[0-9*xX•\\s-]+$|כרטיס|המסתיים|ספרות|אשראי");
     private static final Pattern MERCHANT = Pattern.compile(
         "(?:בבית העסק|בבית עסק|אצל|ב־|ב-|at )\\s*([^,.\\n:;]{2,40}?)(?=\\s*(?:בסך|בסכום|בתאריך|ביום|על סך|,|\\.|$|\\n|₪|[0-9]))");
 
@@ -101,26 +114,31 @@ public class PayListener extends NotificationListenerService {
         if (body.isEmpty()) body = str(x.getCharSequence(Notification.EXTRA_TEXT));
         String all = (title + "\n" + body).trim();
         if (all.length() > 600) all = all.substring(0, 600);
-        if (!PAID.matcher(all).find() || INCOMING.matcher(all).find()) return;
+        all = BALANCE.matcher(all).replaceAll(" ").trim();
+        if (!PAID.matcher(all).find() || INCOMING.matcher(all).find() || NOT_PAY.matcher(all).find()) return;
         Matcher m = AMOUNT.matcher(all);
-        if (!m.find()) return;
+        String cur = "ILS";
+        if (!m.find()) { m = USD.matcher(all); if (!m.find()) return; cur = "USD"; }
         double amount = Double.parseDouble((m.group(1) != null ? m.group(1) : m.group(2)).replace(",", ""));
         if (!(amount > 0) || amount > 100000) return;
 
         String merchant = "";
         Matcher mm = MERCHANT.matcher(body.isEmpty() ? all : body);
-        if (mm.find()) merchant = mm.group(1).trim();
+        while (mm.find()) {
+            String cand = mm.group(1).trim();
+            if (!CARD_BITS.matcher(cand).find()) { merchant = cand; break; }
+        }
 
         long now = System.currentTimeMillis();
         // The same charge often comes twice (bank + card app, or an updated notification): one entry per amount per 15 minutes
-        String key = String.format(java.util.Locale.US, "%.2f/%d", amount, now / (15 * 60 * 1000));
+        String key = String.format(java.util.Locale.US, "%s%.2f/%d", cur, amount, now / (15 * 60 * 1000));
         SharedPreferences p = prefs(this);
         if (key.equals(p.getString("lastKey", ""))) return;
 
         String app = pkg;
         try { app = getPackageManager().getApplicationLabel(getPackageManager().getApplicationInfo(pkg, 0)).toString(); } catch (Exception e) { /* keep the package name */ }
         String id = "p" + now;
-        JSONObject item = new JSONObject().put("id", id).put("at", now).put("amount", amount).put("merchant", merchant)
+        JSONObject item = new JSONObject().put("id", id).put("at", now).put("amount", amount).put("cur", cur).put("merchant", merchant)
             .put("app", app).put("text", all.length() > 200 ? all.substring(0, 200) : all);
         synchronized (PayListener.class) {
             JSONArray l = pending(this), out = new JSONArray();
@@ -129,16 +147,16 @@ public class PayListener extends NotificationListenerService {
             p.edit().putString("list", out.toString()).putString("lastKey", key).apply();
         }
         BudgetWidget.refresh(this);
-        notifyFound(this, id, amount, merchant);
+        notifyFound(this, id, amount, cur, merchant);
     }
 
     private static String str(CharSequence s) { return s == null ? "" : s.toString().trim(); }
 
-    private static void notifyFound(Context c, String id, double amount, String merchant) {
+    private static void notifyFound(Context c, String id, double amount, String cur, String merchant) {
         NotificationManager nm = (NotificationManager) c.getSystemService(Context.NOTIFICATION_SERVICE);
         if (Build.VERSION.SDK_INT >= 26 && nm.getNotificationChannel(CHANNEL) == null)
             nm.createNotificationChannel(new NotificationChannel(CHANNEL, "תשלומים שזוהו", NotificationManager.IMPORTANCE_LOW));
-        String amt = "₪" + (amount == Math.floor(amount) ? String.valueOf((long) amount) : String.format(java.util.Locale.US, "%.2f", amount));
+        String amt = ("USD".equals(cur) ? "$" : "₪") + (amount == Math.floor(amount) ? String.valueOf((long) amount) : String.format(java.util.Locale.US, "%.2f", amount));
         Intent open = new Intent(c, MainActivity.class).putExtra(MainActivity.EXTRA_OPEN, "pay:" + id)
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         PendingIntent openPi = PendingIntent.getActivity(c, id.hashCode(), open, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);

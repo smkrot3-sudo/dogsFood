@@ -786,6 +786,13 @@ html.hugetext dialog.aisheet { height: min(calc(92vh / 1.25), 860px); }
 .helptext::before { content: "💡 "; }
 .today .helpbtn { position: absolute; top: 22px; inset-inline-end: 74px; background: rgba(255, 255, 255, .22); border-color: transparent; color: #fff; z-index: 1; }
 .today .lbl { padding-inline-end: 0; }
+/* Biggest text: the ❓ sits under the title instead of over it, and the top of the screen takes less room */
+html.hugetext .today > * { order: 2; }
+html.hugetext .today > .lbl { order: 0; padding-inline-end: 56px; line-height: 1.25; }
+html.hugetext .panel.today::after { font-size: 32px; inset-inline-end: 12px; top: 12px; }
+html.hugetext .today > .helpbtn { order: 1; position: static; justify-self: start; margin-top: -6px; }
+html.hugetext .topbar, html.hugetext .monthbar, html.hugetext .tabs { zoom: .8; }
+html.hugetext #tagline { display: none; }
 .today .helptext { background: rgba(255, 255, 255, .2); color: #fff; }
 /* Choice buttons (tone and the like) */
 .seg { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -1136,6 +1143,8 @@ dialog.alarm.star { background: radial-gradient(circle at 20% 0%, rgba(255, 255,
 .hrow:last-child { border-bottom: 0; }
 .hsub { font-weight: 700; font-size: 14.5px; margin: 4px 0 0; }
 .fcline { font-size: 13.5px; font-weight: 600; opacity: .92; margin-top: -4px; }
+.today .big.stale { opacity: .5; filter: grayscale(1); }
+.dblbtns { display: grid; gap: 10px; margin-top: 8px; }
 .chal { display: grid; gap: 10px; }
 .chalpick { display: grid; gap: 8px; }
 .chalpick button { text-align: start; display: grid; gap: 2px; padding: 10px 12px; border-radius: 14px; border: 1.5px solid var(--line); background: var(--surface-2); color: var(--fg); font: inherit; cursor: pointer; }
@@ -1602,6 +1611,8 @@ html.hugetext .season3 svg { width: 70px; height: 21px; }
       <section data-block="today" class="panel today" aria-labelledby="todayLbl">
         <span class="lbl" id="todayLbl">מותר לך להוציא היום</span>
         <span class="big" id="todayVal">₪0</span>
+        <span class="fcline" id="todayStale" hidden></span>
+        <span class="fcline" id="todayAside" hidden></span>
         <span class="fcline" id="todayFc" hidden></span>
         <button type="button" class="todaymore" id="todayMoreBtn" aria-expanded="false" aria-controls="todayMore">פרטים ▾</button>
         <div class="todaybox" id="todayMore" hidden>
@@ -2185,7 +2196,7 @@ html.hugetext .season3 svg { width: 70px; height: 21px; }
       <h2 id="calH" class="pc-blue" data-e="📅"><span id="calTitle">החודש</span></h2>
       <div class="caltiles">
         <div class="ctile"><span class="t">הכנסת</span><span class="n pos" id="calIn">+₪0</span></div>
-        <div class="ctile"><span class="t">הוצאת</span><span class="n neg" id="calOut">−₪0</span></div>
+        <div class="ctile"><span class="t">הוצאת</span><span class="n neg" id="calOut">₪0</span></div>
         <div class="ctile"><span class="t">מאזן</span><span class="n" id="calNet">₪0</span></div>
       </div>
       <p class="hint" id="calNote"></p>
@@ -2394,6 +2405,21 @@ html.hugetext .season3 svg { width: 70px; height: 21px; }
     </div>
   </form>
 </dialog>
+<dialog class="sheet" id="dblSheet" aria-labelledby="dblH">
+  <form method="dialog">
+    <h2 id="dblH" data-e="🤔">שאלה קטנה על ההכנסה</h2>
+    <p class="sub" id="dblQ"></p>
+    <div class="dblbtns" id="dblStep1">
+      <button class="btn primary" type="button" id="dblNo">➕ לא, המשמרות בנוסף</button>
+      <button class="btn" type="button" id="dblYes">🔁 כן, היא כוללת אותן</button>
+    </div>
+    <div class="dblbtns" id="dblStep2" hidden>
+      <p class="sub">אז הכסף נספר פעמיים. מה להשאיר בחשבון?</p>
+      <button class="btn primary" type="button" id="dblKeepShifts">⏰ רק את המשמרות</button>
+      <button class="btn" type="button" id="dblKeepSal">💼 רק את המשכורת שרשמתי</button>
+    </div>
+  </form>
+</dialog>
 <dialog class="sheet" id="frAddSheet" aria-labelledby="frAddH">
   <form method="dialog" id="frAddForm" novalidate>
     <h2 id="frAddH" data-e="➕">הוספת חבר</h2>
@@ -2566,10 +2592,10 @@ html.hugetext .season3 svg { width: 70px; height: 21px; }
           <button type="button" data-k="both" aria-pressed="false">🔀 גם וגם</button>
         </div>
       </div>
-      <label for="wzInc">כמה כסף נכנס לך בחודש, אחרי מס?<input type="number" id="wzInc" class="amount-in" inputmode="decimal" min="0" placeholder="₪0"></label>
-      <p class="hint">הכנסה משתנה? כתוב את הסכום הנמוך שבטוח ייכנס.</p>
+      <label for="wzInc" id="wzIncRow"><span id="wzIncLbl">כמה כסף נכנס לך בחודש, אחרי מס?</span><input type="number" id="wzInc" class="amount-in" inputmode="decimal" min="0" placeholder="₪0"></label>
+      <p class="hint" id="wzIncHint">הכנסה משתנה? כתוב את הסכום הנמוך שבטוח ייכנס.</p>
       <label for="wzPayday" id="wzPaydayRow" hidden>באיזה יום המשכורת נכנסת?<select id="wzPayday"></select></label>
-      <label for="wzWage" id="wzWageRow">עובד לפי שעות? שכר לשעה (לא חובה)<input type="number" id="wzWage" inputmode="decimal" min="0" step="0.01" placeholder="₪"></label>
+      <label for="wzWage" id="wzWageRow"><span id="wzWageLbl">עובד לפי שעות? שכר לשעה (לא חובה)</span><input type="number" id="wzWage" inputmode="decimal" min="0" step="0.01" placeholder="₪"></label>
     </div>
     <div class="wzstep" data-step="2" hidden>
       <p class="sub">מה החשבונות הקבועים שלך? לחץ על מה שיש לך ורשום סכום.</p>
@@ -2889,6 +2915,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   // The texts are written in the masculine; for "f" every text the page shows (and the phone notes) goes through
   // gx(). Phrases first, then single words that in this app always talk to the user.
   const G_PHRASES = [
+    ["שאתה עדיין צריך", "שאת עדיין צריכה"], ["אם תוציא עד", "אם תוציאי עד"], ["תגיע לסוף החודש", "תגיעי לסוף החודש"],
     ["אתה חי", "את חיה"], ["אתה מרוויח", "את מרוויחה"], ["אתה עדיין צריך", "את עדיין צריכה"], ["שאתה עדיין משתמש", "שאת עדיין משתמשת"],
     ["עדיין צריך את זה", "עדיין צריכה את זה"], ["לא צריך? לחץ", "לא צריכה? לחצי"], ["עובד לפי שעות", "עובדת לפי שעות"],
     ["שומר שבת", "שומרת שבת"], ["מודע לעצמי", "מודעת לעצמי"], ["להיות מחובר", "להיות מחוברת"], ["חודשים תגיע", "חודשים תגיעי"],
@@ -3051,6 +3078,10 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     const s = toMin(r.start_time);
     let len = toMin(r.end_time) - s;
     if (len <= 0) len += 1440;                     // ends after midnight
+    // The night the clocks move: a shift through it is really an hour longer (autumn) or shorter (spring)
+    const [wy, wm, wd] = String(r.work_date).split("-").map(Number);
+    const dst = new Date(wy, wm - 1, wd, 0, s + len).getTimezoneOffset() - new Date(wy, wm - 1, wd, 0, s).getTimezoneOffset();
+    if (Math.abs(dst) === 60 && len + dst > 0) len += dst;
     const brk = Math.min(+r.break_min || 0, len);
     const breakFrom = Math.floor((len - brk) / 2); // unpaid break taken from the middle
     const mins = { 100: 0 };
@@ -3086,7 +3117,11 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   }
   const prevMonth = (m) => shiftMonth(m, -1);
   function daysIn(m) { const [y, mo] = m.split("-").map(Number); return new Date(y, mo, 0).getDate(); }
-  function monthName(m) { const [y, mo] = m.split("-").map(Number); return new Date(y, mo - 1, 1).toLocaleDateString("he-IL", { month: "long" }); }
+  function calName(m) { const [y, mo] = m.split("-").map(Number); return new Date(y, mo - 1, 1).toLocaleDateString("he-IL", { month: "long" }); }
+  // A budget month is called by the calendar month most of its days fall in: with a start day after the 15th
+  // (a late payday), 28.9 to 27.10 is "October"
+  function namedMonth(m) { return startDay() > 15 ? shiftMonth(m, 1) : m; }
+  function monthName(m) { return calName(namedMonth(m)); }
   function dayLabel(s) {
     const [y, mo, d] = s.split("-").map(Number);
     const dt = new Date(y, mo - 1, d);
@@ -3104,7 +3139,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     let d = store.months[month];
     if (!d) {
       if (draftFor !== month) {
-        const prev = store.months[prevMonth(month)];
+        const prev = lastPlanBefore(month);
         draft = prev
           ? { pct: prev.pct, income: clone(prev.income), expenses: clone(prev.expenses), cats: cloneCats(prev.cats || blankCats()) }
           : { pct: 50, income: [{ name: "משכורת", amount: 0 }], expenses: [], cats: blankCats() };
@@ -3113,10 +3148,16 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       d = draft;
     }
     if (!d.cats) {
-      const prev = store.months[prevMonth(month)];
+      const prev = lastPlanBefore(month);
       d.cats = prev && prev.cats ? cloneCats(prev.cats) : blankCats();
     }
     return d;
+  }
+  // The newest saved plan before month m: a month nobody touched is never saved, so after a break the plan
+  // comes from the last month that has one, not an empty one
+  function lastPlanBefore(m) {
+    const keys = Object.keys(store.months).filter((k) => k < m && store.months[k] && !store.months[k].example).sort();
+    return keys.length ? store.months[keys[keys.length - 1]] : null;
   }
   function commit() {
     if (draftFor === month && !store.months[month]) store.months[month] = draft;
@@ -3130,12 +3171,28 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     const from = shiftIncomeFrom();
     if (from === "off" || !store || isSalaried()) return 0;
     const pm = from === "prev" ? prevMonth(m) : m;
-    if (!shifts[pm]) {
-      if (from === "prev" && !loadingPrevPay.has(pm)) { loadingPrevPay.add(pm); loadShifts(pm).catch(() => { shifts[pm] = shifts[pm] || []; }).then(() => { loadingPrevPay.delete(pm); render(); renderTracking(); }); }
-      return 0;
+    // "Same month" in the current month: until enough shifts are in, the rest of the month is guessed from last month
+    const guess = from === "same" && m === thisMonth();
+    const want = guess ? [pm, prevMonth(m)] : [pm];
+    const missing = want.filter((k) => !shifts[k]);
+    missing.forEach((k) => {
+      if (k !== m && !loadingPrevPay.has(k)) { loadingPrevPay.add(k); loadShifts(k).catch(() => { shifts[k] = shifts[k] || []; }).then(() => { loadingPrevPay.delete(k); render(); renderTracking(); }); }
+    });
+    if (!shifts[pm]) return 0;
+    const pay = (list) => list.reduce((s, r) => s + shiftPay(r, settings()).gross, 0);
+    let total = pay(shifts[pm]), est = 0;
+    if (guess && shifts[prevMonth(m)]) {
+      const last = pay(shifts[prevMonth(m)]);
+      if (last > 0) {
+        const today = todayStr(), days = periodDays(m), dayNum = daysBetween(periodStart(m), today) + 1;
+        const g = pay(shifts[m].filter((r) => r.work_date <= today)) + last * Math.max(days - dayNum, 0) / days;
+        if (g > total) { est = g - total; total = g; }
+      }
     }
-    return Math.round(shifts[pm].reduce((s, r) => s + shiftPay(r, settings()).gross, 0));
+    if (m === month) shiftEst = Math.round(est);
+    return Math.round(total);
   }
+  let shiftEst = 0;
   let lastShiftInc = null;
   const loadingPrevPay = new Set();
   // Savings % is switched off for now: nothing is set aside, and its controls are hidden
@@ -3145,14 +3202,18 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   function plan() {
     const d = data();
     const shiftInc = shiftIncome(month);
-    const inc = d.income.reduce((s, x) => s + (+x.amount || 0), 0) + shiftInc;
+    const typed = d.income.reduce((s, x) => s + (+x.amount || 0), 0);
+    const inc = typed + shiftInc;
     const exp = d.expenses.reduce((s, x) => s + (+x.amount || 0), 0);
     const remain = inc - exp;
-    const pos = Math.max(remain, 0);
+    // A new user's first month counts only the days left after signing up (shift pay is earned in those days anyway)
+    const fm = store.firstMonth, part = fm && fm.m === month && fm.frac > 0 && fm.frac < 1 ? fm.frac : 1;
+    const free = part < 1 ? Math.round((typed - exp) * part) + shiftInc : remain;
+    const pos = Math.max(free, 0);
     const save = Math.round(pos * savePct(d) / 100);
     const spend = pos - save;
     const catTotal = d.cats.reduce((s, c) => s + (isSub(c, d.cats) ? 0 : +c.budget || 0), 0); // subcategories are part of their main one
-    return { d, inc, exp, remain, save, spend, catTotal, shiftInc };
+    return { d, inc, exp, remain, free, part, save, spend, catTotal, shiftInc, typed };
   }
 
   // ---- Saving the plan ----
@@ -3407,13 +3468,13 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   }
 
   function computePlan() {
-    const { d, inc, exp, remain, save, spend, catTotal } = plan();
+    const { d, inc, exp, remain, save, spend, catTotal, part } = plan();
     const days = periodDays(month);
     $("incSum").textContent = fmt(inc);
     const from = shiftIncomeFrom(), si = plan().shiftInc;
     lastShiftInc = si;
     $("shiftIncRow").hidden = from === "off" || isSalaried() || !(+settings().wage > 0 || si > 0);
-    $("shiftIncLbl").textContent = "⏰ מהמשמרות של " + monthName(from === "prev" ? prevMonth(month) : month) + " (ברוטו)";
+    $("shiftIncLbl").textContent = "⏰ מהמשמרות של " + monthName(from === "prev" ? prevMonth(month) : month) + " (ברוטו" + (shiftEst > 0 ? ", כולל הערכה לפי החודש שעבר" : "") + ")";
     $("shiftIncVal").textContent = fmt(si);
     $("expSum").textContent = fmt(exp);
     $("remain").textContent = signed(remain);
@@ -3422,7 +3483,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     $("save").textContent = fmt(save);
     $("spend").textContent = fmt(spend);
     $("spendD").textContent = spend > 0
-      ? "בערך " + fmt(spend / days) + " ליום, " + fmt(spend / (days / 7)) + " לשבוע"
+      ? (part < 1 ? "החודש הראשון: נספר רק החלק של הימים שנשארו מההרשמה. " : "") + "בערך " + fmt(spend / Math.max(1, Math.round(days * part))) + " ליום, " + fmt(spend / (Math.max(1, Math.round(days * part)) / 7)) + " לשבוע"
       : "אין כסף חופשי החודש";
     $("saveD").textContent = save > 0 ? "בקצב הזה: " + fmt(save * 12) + " בשנה" : "אין יתרה לחיסכון החודש";
     $("fInc").textContent = fmt(inc);
@@ -3459,8 +3520,8 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   }
 
   function renderTracking() {
-    const { d, spend: planned } = plan();
-    const spend = planned + incTotal();   // one-off incomes join the month's spending money
+    const { d } = plan();
+    const spend = monthMoney();   // one-off incomes join the month's spending money
     const list = monthTx();
     const cur = thisMonth();
     const isCur = month === cur, isPast = month < cur;
@@ -3488,9 +3549,21 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     if (isCur) {
       const daysLeft = days - dayNum + 1;
       const pool = spend - spentBefore - spentFuture;
-      const allowance = Math.max(pool, 0) / daysLeft;
+      let allowance = Math.max(pool, 0) / daysLeft, aside = 0;
+      // The last 3 days show a normal day's money, not everything that's left; the rest is money to put aside
+      const normal = spend / days;
+      if (daysLeft <= 3 && spend > 0 && allowance > normal) { aside = Math.round((allowance - normal) * daysLeft); allowance = normal; }
       const left = allowance - spentToday;
-      todayWhy = { spend, oneOff: incTotal(), spentBefore, spentFuture, spentToday, pool, daysLeft, allowance, left };
+      todayWhy = { spend, oneOff: incTotal(), spentBefore, spentFuture, spentToday, pool, daysLeft, allowance, left, aside };
+      $("todayAside").hidden = !(aside > 0);
+      $("todayAside").textContent = aside > 0 ? "🐷 עוד " + fmt(aside) + " נשארו בצד עד סוף החודש. תעביר אותם לחיסכון." : "";
+      // No expense logged for 3+ days: the big number is probably too high, so it turns gray and says so
+      let lastAct = "";
+      allTx().forEach((r) => { const a = String(r.created_at || r.spent_on || "").slice(0, 10); if (a > lastAct && a <= today) lastAct = a; });
+      const quiet = lastAct ? daysBetween(lastAct, today) : 0;
+      $("todayVal").classList.toggle("stale", quiet >= 3);
+      $("todayStale").hidden = !(quiet >= 3);
+      $("todayStale").textContent = quiet >= 3 ? "😶 לא רשמת הוצאות " + quiet + " ימים, המספר כנראה גבוה מדי." : "";
       $("todayLbl").textContent = left >= 0 ? "מותר לך להוציא היום" : "חרגת היום ב־";
       $("todayVal").textContent = fmt(Math.abs(left));
       try { if (window.BudgetApp && BudgetApp.setWidget) BudgetApp.setWidget(gx(left >= 0 ? "מותר לך להוציא היום" : "חרגת היום ב־"), fmt(Math.abs(left))); } catch (e) {}
@@ -3502,9 +3575,11 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       $("todayFc").hidden = !(dayNum >= 3 && spent > 0 && spend > 0);
       $("todayFc").textContent = fc >= 0 ? "📈 בקצב הזה תסיים את החודש עם בערך " + fmt(Math.round(fc / 10) * 10) + " בצד"
         : "📉 בקצב הזה תסיים את החודש במינוס של בערך " + fmt(Math.round(-fc / 10) * 10);
-      const runOut = rate > 0 ? Math.ceil(spend / rate) : Infinity;
+      const runOut = rate > 0 && spend > 0 ? Math.ceil(spend / rate) : Infinity;
       const X = (n) => fmt(n);
-      if (spend <= 0) setV("bad", say("אין לך כסף חופשי החודש. כל שקל שתוציא יבוא מהחיסכון.", "אין כסף חופשי החודש. כל הוצאה תבוא מהחיסכון.", "החודש אין כסף חופשי. כדאי לעבור על התוכנית ולמצוא קצת מרווח 💛"));
+      const p0 = plan();
+      if (spend <= 0 && !isSalaried() && shiftIncomeFrom() !== "off" && !p0.shiftInc && !p0.typed) setV("warn", "עוד אין כסף מהמשמרות שנספר לחודש הזה. כל משמרת שתרשום תוסיף לכסף החופשי.");
+      else if (spend <= 0) setV("bad", say("אין לך כסף חופשי החודש. כל שקל שתוציא יבוא מהחיסכון.", "אין כסף חופשי החודש. כל הוצאה תבוא מהחיסכון.", "החודש אין כסף חופשי. כדאי לעבור על התוכנית ולמצוא קצת מרווח 💛"));
       else if (spent > spend) setV("bad", say("חרגת מהכסף החופשי ב־" + X(spent - spend) + ". עד סוף החודש: אפס בזבוזים.", "עברת את הכסף החופשי ב־" + X(spent - spend) + ". עדיף לעצור הוצאות עד סוף החודש.", "עברת את הכסף החופשי ב־" + X(spent - spend) + ". זה קורה. מעכשיו ננסה להוציא רק מה שחייבים 🙏"));
       else if (left < 0) setV("bad", say("חרגת היום ב־" + X(-left) + ". זה יורד מהתקציב של מחר.", "היום הוצאת " + X(-left) + " מעבר. זה יקטין קצת את התקציב של הימים הבאים.", "היום יצא קצת יותר (" + X(-left) + "). לא נורא, מחר מתחילים מחדש 🙂"));
       else if (runOut < days) { const dd = shortDate(dateAdd(periodStart(month), runOut - 1)); setV("warn", say("בקצב הזה הכסף נגמר ב־" + dd + ". תאט עכשיו, לא מחר.", "בקצב הזה הכסף ייגמר ב־" + dd + ". כדאי להאט.", "בקצב הזה הכסף ייגמר ב־" + dd + ". אם נאט קצת, נגיע לסוף החודש בשקט.")); }
@@ -3514,6 +3589,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       backCard(spend, spent, daysLeft, allowance, runOut < days && dayNum >= 3 ? shortDate(dateAdd(periodStart(month), runOut - 1)) : "");
     } else if (isPast) {
       $("backCard").hidden = true;
+      $("todayAside").hidden = true; $("todayStale").hidden = true; $("todayVal").classList.remove("stale");
       $("todayFc").hidden = true;
       const left = spend - spent;
       $("todayLbl").textContent = left >= 0 ? "נשאר בסוף " + monthName(month) : "חריגה ב" + monthName(month);
@@ -4461,6 +4537,8 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     return { gross, net, min, count, plannedNet };
   }
   const monthInc = () => incomes[month] || [];
+  // The month's spending money: free money plus one-off incomes. A one-off first covers fixed bills that are higher than the income
+  function monthMoney() { const p = plan(); return Math.max(p.spend + incTotal() + Math.min(p.free, 0), 0); }
   const incTotal = () => monthInc().reduce((s, r) => s + r.amount, 0);
 
   function payLine(pp) {
@@ -4483,35 +4561,39 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     $("payLine").textContent = payLine(pp);
 
     // Will this month's work cover this month's spending?
-    const { exp, catTotal, spend } = plan();
+    const { exp, catTotal, spend, typed } = plan();
     const spent = monthTx().reduce((s, r) => s + r.amount, 0);
     const need = exp + Math.max(catTotal || spend, spent);
     const netHour = w * (1 - deductRate());
     const v = $("payVerdict");
     const setV = (cls, text) => { v.className = "verdict " + cls; v.textContent = text; v.hidden = false; };
     v.hidden = true;
-    const extra = incTotal();
+    // The fixed salary typed in the plan counts too, not only the shifts
+    const extra = incTotal() + (typed || 0);
+    const nSh = (n) => (n === 1 ? "משמרת אחת" : n + " משמרות");
     if (isCur && netHour > 0 && need > 0) {
       const days = periodDays(month);
       const dayNum = daysBetween(periodStart(month), todayStr()) + 1;
       const projected = Math.max(pp.net / dayNum * days, pp.net + pp.plannedNet) + extra;
       const gap = need - projected;
-      const avgShift = pp.count ? pp.min / pp.count / 60 : 8;
+      const avgShift = pp.count && pp.min > 0 ? pp.min / pp.count / 60 : 8;
       const needTxt = "החשבונות הקבועים והכסף החופשי שלך הם " + fmt(need) + ". ";
-      if (!pp.count && !pp.plannedNet) {
+      if (!pp.count && !pp.plannedNet && extra >= need) {
+        setV("good", "המשכורת הקבועה כבר מכסה את ההוצאות שתכננת. כל משמרת היא תוספת שאפשר לחסוך.");
+      } else if (!pp.count && !pp.plannedNet) {
         const h = Math.ceil(Math.max(need - extra, 0) / netHour);
-        setV("warn", "עוד לא רשמת אף משמרת החודש. " + needTxt + "כדי לכסות אותם צריך בערך " + h + " שעות עבודה, כלומר " + Math.ceil(h / avgShift) + " משמרות.");
+        setV("warn", "עוד לא רשמת אף משמרת החודש. " + needTxt + (typed > 0 ? "אחרי המשכורת הקבועה, " : "") + "כדי לכסות אותם צריך בערך " + h + " שעות עבודה, כלומר " + nSh(Math.ceil(h / avgShift)) + ".");
       } else if (gap > 0) {
         const h = Math.ceil(gap / netHour);
-        setV("bad", "בקצב הזה תרוויח בערך " + fmt(projected) + " החודש. " + needTxt + "חסרים " + fmt(gap) + ": צריך עוד בערך " + h + " שעות, כלומר " + Math.ceil(h / avgShift) + " משמרות, עד " + shortDate(periodEnd(month)) + ".");
+        setV("bad", "בקצב הזה תרוויח בערך " + fmt(projected) + " החודש. " + needTxt + "חסרים " + fmt(gap) + ": צריך עוד בערך " + h + " שעות, כלומר " + nSh(Math.ceil(h / avgShift)) + ", עד " + shortDate(periodEnd(month)) + ".");
       } else {
         setV("good", "בקצב הזה תרוויח בערך " + fmt(projected) + " החודש, " + fmt(-gap) + " יותר מההוצאות שתכננת. " + say("אל תוריד משמרות, את העודף תעביר לחיסכון.", "את העודף כדאי להעביר לחיסכון.", "יופי! את העודף אפשר לשים בחיסכון 💛"));
       }
     } else if (isPast && pp.count) {
-      const left = pp.net + extra - need;
+      const left = pp.net + extra - need, wh = typed > 0 ? "המשכורת והמשמרות של " : "המשמרות של ";
       setV(left >= 0 ? "good" : "bad", left >= 0
-        ? "המשמרות של " + monthName(month) + " כיסו את ההוצאות ונשאר עודף של " + fmt(left) + "."
-        : "המשמרות של " + monthName(month) + " לא כיסו את ההוצאות. חסרו " + fmt(-left) + ".");
+        ? wh + monthName(month) + " כיסו את ההוצאות ונשאר עודף של " + fmt(left) + "."
+        : wh + monthName(month) + " לא כיסו את ההוצאות. חסרו " + fmt(-left) + ".");
     }
     renderShifts();
     renderPayExtras();
@@ -5087,8 +5169,8 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
         const list = calMonthShifts(workCM);
         const gross = list.reduce((a, r) => a + (r._p || shiftPay(r, st)).gross, 0);
         const still = workCM === thisCM;
-        if (list.length) parts.push({ text: "💰 ב־" + shortDate(payDate) + " (" + (daysBetween(t, payDate) === 0 ? "היום" : "עוד " + daysBetween(t, payDate) + " ימים") + ") ייכנסו בערך " + fmt(gross) + " ברוטו, על " + (list.length === 1 ? "המשמרת" : list.length + " המשמרות") + " של " + monthName(workCM) + (still ? " עד עכשיו" : "") + "." });
-        else parts.push({ text: "💰 המשכורת הבאה ב־" + shortDate(payDate) + ". אין משמרות רשומות ב" + monthName(workCM) + "." });
+        if (list.length) parts.push({ text: "💰 ב־" + shortDate(payDate) + " (" + (daysBetween(t, payDate) === 0 ? "היום" : "עוד " + daysBetween(t, payDate) + " ימים") + ") ייכנסו בערך " + fmt(gross) + " ברוטו, על " + (list.length === 1 ? "המשמרת" : list.length + " המשמרות") + " של " + calName(workCM) + (still ? " עד עכשיו" : "") + "." });
+        else parts.push({ text: "💰 המשכורת הבאה ב־" + shortDate(payDate) + ". אין משמרות רשומות ב" + calName(workCM) + "." });
       }
     }
     renderIncGoal();
@@ -5495,7 +5577,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     (incomes[m] || []).forEach((r) => { const o = get(r.received_on); o.earned += r.amount; o.inc.push(r); });
     return by;
   }
-  const plus = (n) => "+" + fmt(n), minus = (n) => "−" + fmt(n);
+  const plus = (n) => "+" + fmt(n), minus = (n) => (Math.round(n) ? "−" + fmt(n) : fmt(0));
   const compact = (n) => Math.round(n).toLocaleString("he-IL");
   function renderCal() {
     if (!store || view !== "calendar") return;
@@ -5791,7 +5873,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   const isRecurringRow = (r) => (store.recurring || []).some((x) => (x.note || "") === (r.note || "") && +x.amount === +r.amount && x.category === r.category);
   function streakInfo() {
     const cur = thisMonth(), days = periodDays(cur);
-    const sp = (cur === month ? plan().spend : spendOf(store.months[cur]) || 0) + (cur === month ? incTotal() : 0);
+    const sp = cur === month ? monthMoney() : spendOf(store.months[cur]) || 0;
     const avg = sp / days;
     if (!(avg > 0)) return null;
     // Only days whose month is loaded can be judged
@@ -5915,7 +5997,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     const d = store.months[m];
     const list = tx[m], names = catNames();
     const spent = list.reduce((s2, r) => s2 + r.amount, 0);
-    const free = (m === month ? plan().spend : spendOf(d) || 0) + (m === month ? incTotal() : 0);
+    const free = m === month ? monthMoney() : spendOf(d) || 0;
     const saved = d ? Math.round(Math.max(d.income.reduce((s2, x) => s2 + (+x.amount || 0), 0) - d.expenses.reduce((s2, x) => s2 + (+x.amount || 0), 0), 0) * savePct(d) / 100) : 0;
     const left = free - spent;
     $("sumTitle").textContent = "סיכום " + monthName(m);
@@ -6051,7 +6133,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       const first = Object.keys(have).length === 0 && fresh.length > 2; // first run with old data: record quietly
       fresh.forEach((id) => { have[id] = todayStr(); });
       persist();
-      if (!first) { const b = BADGES.find((x) => x[0] === fresh[0]); if (b) setTimeout(() => { snack("🏆 הישג חדש: " + b[1] + " " + b[2] + (fresh.length > 1 ? " (ועוד " + (fresh.length - 1) + ")" : "")); confetti(); }, 4200); }
+      if (!first) { const b = BADGES.find((x) => x[0] === fresh[0]); if (b && onePop()) setTimeout(() => { snack("🏆 הישג חדש: " + b[1] + " " + b[2] + (fresh.length > 1 ? " (ועוד " + (fresh.length - 1) + ")" : "")); confetti(); }, 4200); }
     }
     const box = $("badgeList"); box.innerHTML = "";
     BADGES.forEach(([id, e, name, how]) => {
@@ -6436,6 +6518,12 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   function wzBills() { return [...document.querySelectorAll(".wzbill")].filter((r) => r.querySelector("button").getAttribute("aria-pressed") === "true").map((r) => ({ name: r.dataset.name, amount: Math.max(parseFloat(r.querySelector("input").value) || 0, 0) })); }
   const wzPick = (id) => (document.querySelector("#" + id + ' [aria-pressed="true"]') || {}).dataset || {};
   function wzSummary() {
+    if (wzPick("wzPay").k === "hourly") {
+      const exp = wzBills().reduce((a, x) => a + x.amount, 0);
+      $("wzSum").className = "verdict good";
+      $("wzSum").textContent = "הכסף החופשי יגדל עם כל משמרת שתרשום" + (exp ? ", אחרי " + fmt(exp) + " של חשבונות קבועים." : ".");
+      return;
+    }
     const inc = parseFloat($("wzInc").value) || 0, exp = wzBills().reduce((a, x) => a + x.amount, 0);
     const pct = SAVINGS_OFF ? 0 : +(wzPick("wzPct").p || 20), rem = Math.max(inc - exp, 0), save = Math.round(rem * pct / 100), free = rem - save;
     $("wzSum").className = "verdict " + (inc > exp ? "good" : "bad");
@@ -6468,15 +6556,28 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     document.querySelectorAll("#wzPay button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
     $("wzPaydayRow").hidden = b.dataset.k === "hourly";
     $("wzWageRow").hidden = b.dataset.k === "salary";
+    // Hourly: only the wage. A typed monthly income on top of counted shifts would be counted twice.
+    const k = b.dataset.k;
+    $("wzIncRow").hidden = $("wzIncHint").hidden = k === "hourly";
+    $("wzIncLbl").textContent = k === "both" ? "כמה המשכורת הקבועה בחודש, בלי המשמרות?" : "כמה כסף נכנס לך בחודש, אחרי מס?";
+    $("wzIncHint").textContent = k === "both" ? "רק החלק הקבוע. את המשמרות האפליקציה תוסיף לבד." : "הכנסה משתנה? כתוב את הסכום הנמוך שבטוח ייכנס.";
+    $("wzWageLbl").textContent = k === "hourly" ? "כמה מקבלים לשעה? (ברוטו)" : "ושכר לשעה במשמרות (לא חובה)";
     $("wzErr").hidden = true;
   });
   $("wzBack").addEventListener("click", () => { wzStep = Math.max(1, wzStep - 1); wzShow(); });
-  $("wzSkip").addEventListener("click", () => { store.onboarded = true; persist(); closeDlg("wizard"); $("planBox").open = true; });
+  // A new user who starts mid-month gets only the share of the month that's left
+  function markFirstMonth() {
+    if (store.firstMonth) return;
+    const days = periodDays(month), left = days - (daysBetween(periodStart(month), todayStr()) + 1) + 1, frac = Math.round(left / days * 100) / 100;
+    if (frac < 0.95 && frac > 0) store.firstMonth = { m: month, frac };
+  }
+  $("wzSkip").addEventListener("click", () => { store.onboarded = true; markFirstMonth(); persist(); closeDlg("wizard"); $("planBox").open = true; });
   $("wzForm").addEventListener("submit", (e) => {
     e.preventDefault();
     if (wzStep === 1 && !settings().gender) { $("wzErr").textContent = "איך לפנות אליך? בחר אחת מהאפשרויות."; $("wzErr").hidden = false; return; }
     if (wzStep === 1 && !wzPick("wzPay").k) { $("wzErr").textContent = "איך משלמים לך? בחר אחת מהאפשרויות."; $("wzErr").hidden = false; return; }
-    if (wzStep === 1 && !(parseFloat($("wzInc").value) > 0)) { $("wzErr").textContent = "כמה נכנס לך בחודש? אפשר גם הערכה."; $("wzErr").hidden = false; $("wzInc").focus(); return; }
+    if (wzStep === 1 && wzPick("wzPay").k === "hourly" && !(parseFloat($("wzWage").value) > 0)) { $("wzErr").textContent = "כמה מקבלים לשעה? בלי זה אי אפשר לחשב את המשמרות."; $("wzErr").hidden = false; $("wzWage").focus(); return; }
+    if (wzStep === 1 && wzPick("wzPay").k !== "hourly" && !(parseFloat($("wzInc").value) > 0)) { $("wzErr").textContent = "כמה נכנס לך בחודש? אפשר גם הערכה."; $("wzErr").hidden = false; $("wzInc").focus(); return; }
     if (wzStep < 3) { wzStep++; wzShow(); return; }
     // Pay type first: a salary payday moves the start of the month, and with it which month the plan is for
     const pk = wzPick("wzPay").k || "hourly", wpd = pk === "hourly" ? 0 : +$("wzPayday").value || 0;
@@ -6487,7 +6588,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     // Build the plan
     commit();
     const d = data();
-    const inc = Math.round(parseFloat($("wzInc").value) || 0);
+    const inc = pk === "hourly" ? 0 : Math.round(parseFloat($("wzInc").value) || 0);
     d.income = [{ name: "משכורת", amount: inc }];
     d.expenses = wzBills().filter((x) => x.amount > 0);
     d.pct = +(wzPick("wzPct").p || 20);
@@ -6498,7 +6599,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     const w = parseFloat($("wzWage").value) || 0;
     store.settings = { ...settings(), tone: wzPick("wzTone").tone || "mid", ...(w > 0 ? { wage: w } : {}) };
     if (pk !== "hourly") store.salIn = { ...(store.salIn || {}), [month]: todayStr() };
-    store.onboarded = true;
+    store.onboarded = true; markFirstMonth();
     persist(); closeDlg("wizard"); render(); renderPay(); sendAppPlans();
     snack("התוכנית מוכנה! אפשר לשנות הכול ב״התוכנית של החודש״.");
   });
@@ -6872,7 +6973,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       lb = document.createElement("span"); lb.className = "mlabel"; lb.setAttribute("aria-hidden", "true"); inp.after(lb); inp.classList.add("heb");
       inp.addEventListener("click", () => { try { inp.showPicker(); } catch (e) {} });
     }
-    lb.textContent = monthName(month) + " " + month.slice(0, 4);
+    lb.textContent = monthName(month) + " " + namedMonth(month).slice(0, 4);
   }
   // Titles shrink a little before they would break onto a second line
   function l3fit(el, min) {
@@ -7603,7 +7704,10 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     { id: "today", e: "🏠", t: "המספר הגדול: מותר לך להוציא היום", d: "", body: [
       "הסכום שאפשר להוציא היום בלי לפגוע בשאר החודש. הוצאת פחות היום? מחר יהיה יותר.",
       "״פרטים ▾״ מראה כמה כבר יצא, כמה מהחודש עבר, רצף ימים בתוך התקציב ו־״❓ למה המספר הזה?״.",
-      "כשהחודש בורח מופיע כרטיס ״🧭 איך חוזרים למסלול״ עם תוכנית רגועה. ״הבנתי״ מסתיר אותו עד סוף החודש."
+      "כשהחודש בורח מופיע כרטיס ״🧭 איך חוזרים למסלול״ עם תוכנית רגועה. ״הבנתי״ מסתיר אותו עד סוף החודש.",
+      { t: "בשלושת הימים האחרונים של החודש מותר סכום של יום רגיל. מה שנשאר מעבר לזה מופיע בשורה ״🐷 נשארו בצד״, וכדאי להעביר אותו לחיסכון.", d: "2026-10-18" },
+      { t: "לא רשמת הוצאות 3 ימים? המספר הגדול נהיה אפור, כי כנראה הוא גבוה מדי. רושמים את מה שיצא והוא חוזר לצבע שלו.", d: "2026-10-18" },
+      { t: "בחודש הראשון אחרי ההרשמה נספר רק החלק של החודש שנשאר, כדי שהסכום ליום לא יצא גבוה מדי.", d: "2026-10-18" }
     ] },
     { id: "add", e: "💸", t: "רישום הוצאה", d: "", body: [
       "כפתור *💸 הוצאה* למטה פותח טופס: כמה, על מה (קטגוריה), פירוט ותאריך. רק הסכום חובה.",
@@ -7628,7 +7732,9 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       "*הכנסה צפויה נטו*: משכורת, קצבה, עזרה. הכנסה משתנה? רושמים את הסכום הנמוך שבטוח ייכנס.",
       "*חשבונות קבועים*: שכר דירה, חשמל, מנויים. ״העתקה מהחודש הקודם״ חוסכת הקלדה.",
       "*תקציב לכל קטגוריה*: יעד לכל קטגוריה. זה רק יעד: אין התראה, הפס פשוט נצבע באדום כשעוברים. ₪0 מוצג כ״בלי יעד״.",
-      "אפשר להוסיף קטגוריות כמה שרוצים, לבחור לכל אחת אימוג׳י ולפתוח תת־קטגוריה. הוצאה בתת־קטגוריה נספרת גם בקטגוריה שמעליה."
+      "אפשר להוסיף קטגוריות כמה שרוצים, לבחור לכל אחת אימוג׳י ולפתוח תת־קטגוריה. הוצאה בתת־קטגוריה נספרת גם בקטגוריה שמעליה.",
+      { t: "דילגת על חודש? החודש החדש לוקח את התוכנית מהחודש האחרון שיש בו תוכנית.", d: "2026-10-18" },
+      { t: "כשהחודש מתחיל באמצע חודש, הוא נקרא לפי החודש שרוב הימים שלו נופלים בו.", d: "2026-10-18" }
     ] },
     { id: "cards", e: "🧩", t: "הכרטיסים בדף הבית", d: "", body: [
       "*⚡ רישום בלחיצה*: הוצאות שחוזרות אצלך, ככפתורים.",
@@ -7670,7 +7776,10 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       "*📅 סיכום שנתי*: שעות, משמרות וכסף בכל חודש בשנה.",
       "בחודש שהיה בו חג ולא עבדת בו מופיעה תזכורת לבדוק שהוא מופיע בתלוש.",
       { t: "באפליקציה לאנדרואיד: תזכורת בערב ״עבדת היום?״ ותזכורת ביום חמישי לקבוע משמרות.", w: "a" },
-      "בהגדרות ← כללי בוחרים מתי הכסף מהמשמרות נספר: באותו חודש, בחודש שאחרי, או לא בכלל."
+      "בהגדרות ← כללי בוחרים מתי הכסף מהמשמרות נספר: באותו חודש, בחודש שאחרי, או לא בכלל.",
+      { t: "נספר באותו חודש? עד שנרשמות מספיק משמרות, שאר החודש מוערך לפי החודש שעבר, כדי שבתחילת החודש לא יהיה 0.", d: "2026-10-18" },
+      { t: "בכרטיס המשכורת, החישוב של כמה משמרות עוד צריך סופר גם משכורת קבועה, אם רשמת כזו.", d: "2026-10-18" },
+      { t: "רשמת גם משכורת וגם משמרות? האפליקציה תשאל פעם אחת אם המשכורת כוללת את המשמרות, כדי לא לספור אותו כסף פעמיים.", d: "2026-10-18" }
     ], go: ["shifts", "⏰ למשמרות"] },
     { id: "cal", e: "📅", t: "לוח שנה", d: "", body: [
       "כל החודש בלוח אחד: כמה נכנס, כמה יצא והמאזן.",
@@ -7712,6 +7821,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       "מצב בהיר, כהה, או לפי הטלפון.",
       "צבע רקע וצבע מבטא (הכפתורים והכותרות). לוחצים, רואים מיד, ושומרים או מבטלים.",
       "גודל טקסט: רגיל, גדול או גדול מאוד.",
+      { t: "בגודל ״גדול מאוד״ החלק העליון של המסך קטן יותר, ובכל פתיחה מופיעה רק הודעה אחת.", d: "2026-10-18" },
       "רטט קצר כשרושמים וקונפטי בהצלחות. אפשר לכבות."
     ], go: ["look", "🎨 לעיצוב"] },
     { id: "phone", e: "📱", t: "האפליקציה בטלפון", d: "", body: [
@@ -7720,6 +7830,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       { t: "גרסה חדשה של האפליקציה מגיעה בהתראה, ומתעדכנים בלחיצה. רוב השינויים מגיעים בלי לעדכן בכלל.", w: "apk" },
       { t: "*📲 ווידג׳ט*: לחיצה ארוכה על מסך הבית של הטלפון ← ווידג׳טים ← ״התקציב שלי״. רואים כמה מותר היום, ו־+ פותח הוצאה.", w: "a" },
       { t: "*💳 זיהוי תשלומים*: כשמגיעה התראת חיוב מהבנק או מהאשראי, האפליקציה מכינה הוצאה ונשאר רק לאשר. מפעילים בהגדרות ← כללי. ההתראות נקראות רק בטלפון שלך.", w: "apk" },
+      { t: "מגרסה 2.3 הזיהוי מדלג על קודי אימות, חיוב צפוי, ביטולים ועדכוני יתרה, וחיוב בדולרים מוצג גם בשקלים (בערך, אפשר לתקן).", w: "apk", d: "2026-10-18" },
       { t: "התראות מגיעות גם כשהאפליקציה סגורה: הודעות אישיות, בקשות חברות, הוצאות משותפות, סיכום שבועי במוצאי שבת.", w: "a" },
       { t: "בשבת ובחג הטלפון לא מצלצל: ההתראות מחכות למוצאי שבת.", w: "a" },
       "בתחתית כל עמוד כתובה הגרסה של האפליקציה."
@@ -8387,10 +8498,35 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     if (donateAway && Date.now() - donateAway >= 30000 && user) showDonate();
   });
   $("donateBit").addEventListener("click", (e) => { if (window.BudgetApp) { e.preventDefault(); location.href = e.currentTarget.href; } });
+  // At the biggest text size only one popup shows per open; the rest wait for a later open
+  var popUsed = false;
+  function onePop() {
+    if (!document.documentElement.classList.contains("hugetext")) return true;
+    if (popUsed) return false;
+    popUsed = true; return true;
+  }
   function nextIntro() {
     if (isVip() && !store.vipSeen) { setTimeout(() => openDlg("vipSheet"), 600); return; }
-    setTimeout(() => showNews(false), 1200);
+    setTimeout(() => { if (!dblAsk()) showNews(false); }, 1200);
   }
+  // ---- One time: a typed salary plus counted shift pay may be the same money twice ----
+  function dblLine() {
+    const d = data(), l = salLine(d);
+    return l && +l.amount > 0 ? l : d.income.filter((x) => +x.amount > 0).sort((a, b) => b.amount - a.amount)[0] || null;
+  }
+  function dblAsk() {
+    if (!store || store.dblAsked || month !== thisMonth() || payType() === "salary" || shiftIncomeFrom() === "off") return false;
+    const p = plan(), l = dblLine();
+    if (!l || !(p.typed > 0) || !(p.shiftInc > 0) || !onePop()) return false;
+    $("dblQ").textContent = gx("רשמת הכנסה של " + fmt(+l.amount) + " בחודש, והאפליקציה גם סופרת " + fmt(p.shiftInc) + " מהמשמרות. ה־" + fmt(+l.amount) + " כוללים את הכסף מהמשמרות?");
+    $("dblStep1").hidden = false; $("dblStep2").hidden = true;
+    openDlg("dblSheet"); return true;
+  }
+  function dblDone(msg) { store.dblAsked = true; persist(); closeDlg("dblSheet"); render(); renderPay(); sendAppPlans(); if (msg) snack(msg); }
+  $("dblNo").addEventListener("click", () => dblDone(""));
+  $("dblYes").addEventListener("click", () => { $("dblStep1").hidden = true; $("dblStep2").hidden = false; });
+  $("dblKeepShifts").addEventListener("click", () => { commit(); const l = dblLine(); if (l) l.amount = 0; dblDone("מעכשיו נספרות רק המשמרות. אפשר לשנות ב״התוכנית של החודש״."); });
+  $("dblKeepSal").addEventListener("click", () => { store.settings = { ...settings(), shiftIncome: "off" }; dblDone("מעכשיו נספרת רק המשכורת שרשמת. אפשר לשנות בהגדרות."); });
   function vipDone() { store.vipSeen = true; persist(); closeDlg("vipSheet"); confetti(); }
   $("vipOk").addEventListener("click", vipDone);
   $("vipGold").addEventListener("click", () => {
@@ -8450,7 +8586,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     $("pmOk").onclick = () => done();
     $("pmAct").onclick = () => done(toDesign ? () => setView("design") : () => window.openShiftFromApp(shift[1]));
     document.querySelectorAll("dialog[open]").forEach((d) => { if (d.id !== "pmSheet") closeDlg(d.id); });
-    openDlg("pmSheet"); buzz();
+    popUsed = true; openDlg("pmSheet"); buzz();
   }
   window.previewPersonal = showPersonal;
   const ago = (iso) => { if (!iso) return "אף פעם"; const d = (Date.now() - new Date(iso)) / 864e5; return d < 1 / 24 ? "עכשיו" : d < 1 ? "היום" : d < 2 ? "אתמול" : "לפני " + Math.floor(d) + " ימים"; };
@@ -8579,6 +8715,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     const w = todayWhy, el = $("todayWhy"); if (!w) return;
     const l1 = "יש לך החודש " + fmt(Math.round(w.spend)) + " כסף חופשי: ההכנסה פחות החיובים הקבועים" + (w.oneOff ? ", כולל הכנסות חד־פעמיות" : "") + ". לפני היום הוצאת " + fmt(Math.round(w.spentBefore)) + (w.spentFuture ? " (ועוד " + fmt(Math.round(w.spentFuture)) + " רשומים לימים הבאים)" : "") + ".";
     const l2 = w.pool <= 0 ? "לא נשאר כסף חופשי לשאר החודש, ולכן היום מותר 0."
+      : w.aside > 0 ? "בימים האחרונים של החודש מותר סכום של יום רגיל, " + fmt(Math.round(w.allowance)) + ". השאר, " + fmt(w.aside) + ", נשאר בצד לחיסכון."
       : "את מה שנשאר, " + fmt(Math.round(w.pool)) + ", מחלקים ל־" + w.daysLeft + " ימים כולל היום: " + fmt(Math.round(w.allowance)) + " ליום." + (w.spentToday ? " היום כבר הוצאת " + fmt(Math.round(w.spentToday)) + ", אז " + (w.left >= 0 ? "נשארו " + fmt(Math.round(w.left)) + "." : "עברת ב־" + fmt(Math.round(-w.left)) + ".") : "");
     el.textContent = l1 + "\n" + l2;
   }
@@ -9463,10 +9600,10 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     const ms = [...new Set([periodOf(from), periodOf(to)])];
     for (const m of ms) { try { await ensureTx(m); } catch (e) {} }
     const rows = ms.flatMap((m) => tx[m] || []).filter((r) => r.spent_on >= from && r.spent_on <= to);
-    const spend = plan().spend + incTotal(), perWeek = spend / periodDays(month) * 7;
+    const spend = monthMoney(), perWeek = spend / periodDays(month) * 7;
     const spent = rows.reduce((a, r) => a + r.amount, 0);
     try { localStorage.setItem(key, "1"); } catch (e) {}
-    if (!(perWeek > 0) || rows.length < 3 || spent >= perWeek) return;
+    if (!(perWeek > 0) || rows.length < 3 || spent >= perWeek || !onePop()) return;
     setTimeout(() => { snack(gx("🎉 בשבוע שעבר הוצאת " + fmt(perWeek - spent) + " פחות מהתוכנית. כל הכבוד!")); try { confetti(); } catch (e) {} }, 2500);
   }
 
@@ -9667,7 +9804,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     items.forEach((p) => {
       const li = document.createElement("li");
       const top = document.createElement("div"); top.className = "amt";
-      top.textContent = "₪" + (+p.amount).toLocaleString("he-IL", { maximumFractionDigits: 2 }) + (p.merchant ? " · " + p.merchant : "");
+      top.textContent = (p.cur === "USD" ? "$" + (+p.amount).toLocaleString("he-IL", { maximumFractionDigits: 2 }) + " (בערך " + fmt(payIls(p)) + ")" : "₪" + (+p.amount).toLocaleString("he-IL", { maximumFractionDigits: 2 })) + (p.merchant ? " · " + p.merchant : "");
       const when = new Date(p.at);
       const src = document.createElement("div"); src.className = "src";
       src.textContent = when.toLocaleDateString("he-IL", { weekday: "short", day: "numeric", month: "numeric" }) + " " + when.toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" }) + " · " + (p.app || "") + "\n" + (p.text || "");
@@ -9679,13 +9816,16 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       row.append(go, no); li.append(top, src, row); ul.append(li);
     });
   }
+  // A dollar charge becomes shekels at a round rate; the user sees it in the add sheet and can fix it
+  const USD_ILS = 3.7;
+  const payIls = (p) => (p.cur === "USD" ? Math.round(+p.amount * USD_ILS) : +p.amount);
   function payLog(p) {
     closeDlg("paySheet");
     if (month !== thisMonth()) goMonth(thisMonth());
     openSheet();
     payFrom = p.id;
-    $("txAmount").value = Math.round(+p.amount * 100) / 100;
-    $("txNote").value = p.merchant || "";
+    $("txAmount").value = Math.round(payIls(p) * 100) / 100;
+    $("txNote").value = (p.merchant || "") + (p.cur === "USD" ? (p.merchant ? " " : "") + "($" + p.amount + ")" : "");
     const d = new Date(p.at); $("txDate").value = d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
     showHours();
   }
@@ -9739,7 +9879,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   });
   function showNews(force) {
     let seen = ""; try { seen = localStorage.getItem("budget-news") || ""; } catch (e) {}
-    if (!force && seen === NEWS_ID) return;
+    if (!force && (seen === NEWS_ID || !onePop())) return;
     const inApp = !!(window.BudgetApp && BudgetApp.payEnabled) && !isStore();
     $("newsGo").hidden = !inApp;
     $("newsLead").textContent = "הרבה דברים חדשים, הכל כדי שיהיה קל יותר לעקוב.";
@@ -9758,7 +9898,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 
   // ---- Share the month as a picture ----
   async function drawMonthCard(withAmounts) {
-    const { spend: planned } = plan(); const spend = planned + incTotal();
+    const spend = monthMoney();
     const list = monthTx(), spent = list.reduce((a, r) => a + r.amount, 0);
     const names = catNames(), d0 = data(), topOf = (id) => { const cc = d0.cats.find((x) => x.id === id); return cc && isSub(cc, d0.cats) ? cc.parent : id; };
     const byTop = {}; list.forEach((r) => { const k = topOf(r.category); byTop[k] = (byTop[k] || 0) + r.amount; });
@@ -9865,7 +10005,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   $("addCat").addEventListener("click", () => { data().cats.push({ id: catId(), name: "", budget: 0 }); touch(); render(); focusLast("catRows"); });
   function focusLast(id) { const r = [...$(id).querySelectorAll(".row")].pop(); const i = r && r.querySelector("input[type=text]"); if (i) { i.focus(); i.scrollIntoView({ block: "center" }); } }
   $("copyPrev").addEventListener("click", () => {
-    const prev = store.months[prevMonth(month)];
+    const prev = lastPlanBefore(month);
     if (!prev || !prev.expenses.length) { snack("אין חשבונות קבועים שמורים בחודש הקודם."); return; }
     data().expenses = clone(prev.expenses); touch(); render(); snack("הועתקו " + prev.expenses.length + " חשבונות קבועים מהחודש הקודם.");
   });
