@@ -4570,7 +4570,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     v.hidden = true;
     // The fixed salary typed in the plan counts too, not only the shifts
     const extra = incTotal() + (typed || 0);
-    const nSh = (n) => (n === 1 ? "משמרת אחת" : n + " משמרות");
+    const nSh = (n) => (n === 1 ? "משמרת אחת" : n + " משמרות"), nH = (n) => (n === 1 ? "שעה אחת" : n + " שעות");
     if (isCur && netHour > 0 && need > 0) {
       const days = periodDays(month);
       const dayNum = daysBetween(periodStart(month), todayStr()) + 1;
@@ -4582,10 +4582,12 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
         setV("good", "המשכורת הקבועה כבר מכסה את ההוצאות שתכננת. כל משמרת היא תוספת שאפשר לחסוך.");
       } else if (!pp.count && !pp.plannedNet) {
         const h = Math.ceil(Math.max(need - extra, 0) / netHour);
-        setV("warn", "עוד לא רשמת אף משמרת החודש. " + needTxt + (typed > 0 ? "אחרי המשכורת הקבועה, " : "") + "כדי לכסות אותם צריך בערך " + h + " שעות עבודה, כלומר " + nSh(Math.ceil(h / avgShift)) + ".");
-      } else if (gap > 0) {
+        setV("warn", "עוד לא רשמת אף משמרת החודש. " + needTxt + (typed > 0 ? "אחרי המשכורת הקבועה, " : "") + "כדי לכסות אותם צריך בערך " + nH(h) + " עבודה, כלומר " + nSh(Math.ceil(h / avgShift)) + ".");
+      } else if (gap >= netHour) {
         const h = Math.ceil(gap / netHour);
-        setV("bad", "בקצב הזה תרוויח בערך " + fmt(projected) + " החודש. " + needTxt + "חסרים " + fmt(gap) + ": צריך עוד בערך " + h + " שעות, כלומר " + nSh(Math.ceil(h / avgShift)) + ", עד " + shortDate(periodEnd(month)) + ".");
+        setV("bad", "בקצב הזה תרוויח בערך " + fmt(projected) + " החודש. " + needTxt + "חסרים " + fmt(gap) + ": צריך עוד בערך " + nH(h) + ", כלומר " + nSh(Math.ceil(h / avgShift)) + ", עד " + shortDate(periodEnd(month)) + ".");
+      } else if (gap > -netHour) {
+        setV("good", "בקצב הזה תרוויח בערך " + fmt(projected) + " החודש, בערך כמו ההוצאות שתכננת. " + say("אל תוריד משמרות.", "כדאי לשמור על הקצב.", "יופי, ככה ממשיכים 💛"));
       } else {
         setV("good", "בקצב הזה תרוויח בערך " + fmt(projected) + " החודש, " + fmt(-gap) + " יותר מההוצאות שתכננת. " + say("אל תוריד משמרות, את העודף תעביר לחיסכון.", "את העודף כדאי להעביר לחיסכון.", "יופי! את העודף אפשר לשים בחיסכון 💛"));
       }
