@@ -42,6 +42,8 @@ const TEXT = ['1', '3'];
     await esc();
     await step('settings', async () => { await p.click('#gearBtn'); await p.waitForTimeout(400); });
     await wide('settings');
+    await step('guide', async () => { await p.click('#openGuide'); await p.waitForTimeout(300); if (!(await p.locator('.guidesec').count())) throw new Error('the guide is empty'); });
+    await wide('guide');
     await ctx.close();
     console.log((errs.length ? '✗ ' : '✓ ') + tag + (errs.length ? '\n    ' + errs.join('\n    ') : ''));
     if (errs.length) fails.push(tag);

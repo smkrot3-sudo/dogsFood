@@ -866,6 +866,25 @@ body.salaried .tabs a[data-view="shifts"], body.salaried #shiftIncField, body.sa
 .setlink > span:nth-child(2) { flex: 1; display: grid; }
 .setlink b { font-size: 17px; }
 .setlink small { color: var(--muted); font-size: 13.5px; }
+.gnew { display: inline-block; vertical-align: middle; background: linear-gradient(135deg, var(--brand1), var(--brand2)); color: #fff; font-size: 12px; font-weight: 700; line-height: 1; padding: 4px 8px; border-radius: 999px; margin-inline-start: 6px; white-space: nowrap; }
+.guidelead { margin: 0; }
+.guidefind { font: inherit; color: var(--fg); background: var(--surface); border: 1.5px solid var(--line); border-radius: 14px; padding: 11px 14px; width: 100%; min-width: 0; box-sizing: border-box; }
+.guidenewbox { background: var(--surface); border-radius: var(--radius); box-shadow: var(--card-shadow); padding: 14px 16px; display: grid; gap: 10px; border-inline-start: 4px solid var(--brand2); }
+.guidechips { display: flex; flex-wrap: wrap; gap: 8px; }
+.guidechips button { font: inherit; font-size: 14.5px; border: 1px solid var(--line); background: var(--surface-2); color: var(--fg); border-radius: 999px; padding: 7px 12px; cursor: pointer; }
+.guidelist { display: grid; gap: 10px; min-width: 0; }
+.guidesec { background: var(--surface); border-radius: var(--radius); box-shadow: var(--card-shadow); min-width: 0; }
+.guidesec.isnew { box-shadow: var(--card-shadow), inset 0 0 0 2px var(--brand2); }
+.guidesec > summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: 10px; padding: 14px 16px; font-weight: 700; font-size: 17px; }
+.guidesec > summary::-webkit-details-marker { display: none; }
+.guidesec > summary::after { content: "▾"; margin-inline-start: auto; color: var(--muted); transition: transform .2s; flex: none; }
+.guidesec:not([open]) > summary::after { transform: rotate(90deg); }
+.guidesec .ge { font-size: 22px; flex: none; }
+.guidesec .gt { min-width: 0; overflow-wrap: anywhere; }
+.guidesec > summary .gnew { flex: none; }
+.guidesec ul { margin: 0; padding: 0 16px 14px; padding-inline-start: 34px; display: grid; gap: 8px; line-height: 1.55; overflow-wrap: anywhere; }
+.guidesec li.isnew { background: var(--surface-2); border-radius: 10px; padding: 4px 8px; }
+.guidesec .actions { padding: 0 16px 14px; }
 .setlink > span:last-child { font-size: 24px; color: var(--muted); }
 .modepick { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
 .modepick button { display: grid; justify-items: center; gap: 4px; padding: 12px 6px; border-radius: 16px; border: 2px solid var(--line); background: var(--surface-2); color: var(--fg); font: inherit; font-weight: 700; cursor: pointer; }
@@ -1389,6 +1408,7 @@ html.hugetext .season3 svg { width: 70px; height: 21px; }
         <div class="menu">
           <span class="who" id="userName"></span>
           <a class="getapp" href="budget.apk" download hidden>📱 הורדת האפליקציה לאנדרואיד</a>
+          <button class="btn" type="button" id="guideMenu">📖 מדריך לאפליקציה</button>
           <button class="btn" type="button" id="feedbackBtn">💬 שלח משוב</button>
           <button class="btn" type="button" id="inviteBtn">📣 המלץ לחבר</button>
           <button class="btn" type="button" id="accountBtn">💾 גיבוי, שחזור ומחיקה</button>
@@ -1668,6 +1688,7 @@ html.hugetext .season3 svg { width: 70px; height: 21px; }
       <h2 class="settitle">⚙️ הגדרות</h2>
     </div>
     <button class="setlink" type="button" id="openAdmin" hidden><span aria-hidden="true">🛠️</span><span><b>לוח מנהל</b><small>משתמשים, גרסאות, משובים והודעה לכולם</small></span><span aria-hidden="true">‹</span></button>
+    <button class="setlink" type="button" id="openGuide"><span aria-hidden="true">📖</span><span><b>מדריך לאפליקציה <span class="gnew" id="guideNewPill" hidden>חדש</span></b><small>איך משתמשים בכל דבר ומה אפשר לשנות</small></span><span aria-hidden="true">‹</span></button>
     <button class="setlink" type="button" id="openNews"><span aria-hidden="true">✨</span><span><b>מה חדש</b><small>מה נוסף לאפליקציה לאחרונה</small></span><span aria-hidden="true">‹</span></button>
     <button class="setlink" type="button" id="openLook"><span aria-hidden="true">🎨</span><span><b>עיצוב וצבעים</b><small>מצב בהיר או כהה, וצבע הרקע</small></span><span aria-hidden="true">‹</span></button>
     <section class="panel" aria-labelledby="setH">
@@ -1828,6 +1849,18 @@ html.hugetext .season3 svg { width: 70px; height: 21px; }
       <label class="check" for="confettiOn"><input type="checkbox" id="confettiOn"> 🎉 קונפטי כשמשהו טוב קורה (הישג, יעד, אתגר)</label>
       <p class="hint">נשמר במכשיר הזה.</p>
     </section>
+  </div>
+
+  <div class="viewcol" id="viewGuide" hidden>
+    <div class="sethead">
+      <button class="btn" type="button" id="guideBack">→ חזרה</button>
+      <h2 class="settitle">📖 מדריך</h2>
+    </div>
+    <p class="hint guidelead">כל מה שיש באפליקציה, בקצרה. לוחצים על נושא כדי לפתוח אותו. מה שהשתנה בעדכון האחרון מסומן ״חדש״ לכמה ימים.</p>
+    <input type="search" id="guideFind" class="guidefind" placeholder="🔎 מה מחפשים? למשל: קטגוריה, משמרת, צבע" aria-label="חיפוש במדריך" autocomplete="off">
+    <div class="guidenewbox" id="guideNewBox" hidden></div>
+    <div class="guidelist" id="guideList"></div>
+    <p class="empty" id="guideNone" hidden>לא מצאתי את זה במדריך. אפשר לשאול את העוזר ✨ או לשלוח משוב.</p>
   </div>
 
   <div class="viewcol" id="viewShifts" hidden>
@@ -7298,19 +7331,21 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   // ---- Pages ----
   let view = "main";
   function setView(v, fromHash) {
-    view = ["shifts", "calendar", "friends", "settings", "look", "admin"].includes(v) ? v : "main";
+    view = ["shifts", "calendar", "friends", "settings", "look", "admin", "guide"].includes(v) ? v : "main";
     if (view === "shifts" && isSalaried()) view = "main";
     if (view !== "main" && layEditing) exitLayEdit(false);
     $("viewMain").hidden = view !== "main";
     $("viewSettings").hidden = view !== "settings";
     $("viewLook").hidden = view !== "look";
     $("viewAdmin").hidden = view !== "admin";
+    $("viewGuide").hidden = view !== "guide";
     if (view === "admin") renderAdmin();
+    if (view === "guide") renderGuide();
     $("bcast").hidden = view !== "main" || !bcastShown;
     if (view === "look") { renderPalettes(); renderAccents(); }
-    $("gearBtn").setAttribute("aria-pressed", String(["settings", "look", "admin"].includes(view)));
-    document.body.classList.toggle("onsettings", ["settings", "look", "admin"].includes(view));
-    if (view === "settings") renderLayList();
+    $("gearBtn").setAttribute("aria-pressed", String(["settings", "look", "admin", "guide"].includes(view)));
+    document.body.classList.toggle("onsettings", ["settings", "look", "admin", "guide"].includes(view));
+    if (view === "settings") { renderLayList(); guideSync(); }
     $("viewShifts").hidden = view !== "shifts";
     $("viewCal").hidden = view !== "calendar";
     $("viewFriends").hidden = view !== "friends";
@@ -7327,7 +7362,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   // ---- Settings screen (the gear at the top) ----
   let viewBeforeSettings = "main";
   $("gearBtn").addEventListener("click", () => {
-    if (["settings", "look", "admin"].includes(view)) { setView(viewBeforeSettings); return; }
+    if (["settings", "look", "admin", "guide"].includes(view)) { setView(viewBeforeSettings); return; }
     viewBeforeSettings = view; setView("settings");
   });
   $("setBack").addEventListener("click", () => setView(viewBeforeSettings));
@@ -7336,6 +7371,249 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   $("openAdmin").addEventListener("click", () => setView("admin"));
   $("adminBack").addEventListener("click", () => setView("settings"));
   $("openNews").addEventListener("click", () => showNews(true));
+
+  // ---- The guide (⚙️ הגדרות ← 📖 מדריך): everything in the app, in plain words ----
+  // EVERY UPDATE THAT ADDS OR CHANGES SOMETHING A USER SEES MUST UPDATE THIS LIST: fix the section's text and set
+  // "d" (on the section, or on the one line that changed) to the day the update goes live. The guide marks it
+  // "חדש" for GUIDE_NEW_DAYS days. Lines are a string, or { t, d, w } for a dated line or one only some users see.
+  // Who sees it ("w", on a section or a line): "" everyone, "a" inside the Android app, "ab" Android browser
+  // without the app, "i" iPhone, "hr" works by hours (hourly, both, or not chosen), "sal" monthly salary
+  // (salary or both), "both", "adm" the owner. *star* text is bold. Write in the masculine; gx() turns it for women.
+  const GUIDE_NEW_DAYS = 4;
+  const GUIDE = [
+    { id: "start", e: "👋", t: "איך זה עובד", d: "", body: [
+      "רושמים כמה נכנס כל חודש ומה החיובים הקבועים. מה שנשאר הוא *הכסף החופשי* להוצאות של היומיום.",
+      "כל הוצאה שנרשמת יורדת מהכסף החופשי, והאפליקציה מחלקת את מה שנשאר בימים שנשארו בחודש.",
+      "החודש לא חייב להתחיל ב־1. בוחרים יום התחלה, למשל היום שהמשכורת נכנסת.",
+      "הכל נשמר בחשבון שלך ומופיע בכל טלפון ומחשב שנכנסים ממנו."
+    ] },
+    { id: "today", e: "🏠", t: "המספר הגדול: מותר לך להוציא היום", d: "", body: [
+      "הסכום שאפשר להוציא היום בלי לפגוע בשאר החודש. הוצאת פחות היום? מחר יהיה יותר.",
+      "״פרטים ▾״ מראה כמה כבר יצא, כמה מהחודש עבר, רצף ימים בתוך התקציב ו־״❓ למה המספר הזה?״.",
+      "כשהחודש בורח מופיע כרטיס ״🧭 איך חוזרים למסלול״ עם תוכנית רגועה. ״הבנתי״ מסתיר אותו עד סוף החודש."
+    ] },
+    { id: "add", e: "💸", t: "רישום הוצאה", d: "", body: [
+      "כפתור *💸 הוצאה* למטה פותח טופס: כמה, על מה (קטגוריה), פירוט ותאריך. רק הסכום חובה.",
+      "🧰 צריך או 🎁 רוצה, ולמה קניתי: לא חובה, אבל מזה נבנה כרטיס ״ההרגלים שלי״.",
+      "⭐ ״שמור ככפתור רישום בלחיצה״ הופך הוצאה שחוזרת לכפתור. לחיצה אחת עליו רושמת אותה להיום.",
+      "״חיוב קבוע כל חודש״ מעביר אותה לחיובים הקבועים, שיורדים מההכנסה כבר בתחילת החודש.",
+      "🎤 אפשר להגיד את ההוצאה במקום להקליד.",
+      "🤔 ״אולי אקנה״ שומר קנייה לא מתוכננת ל־48 שעות. ברוב המקרים החשק עובר.",
+      "✨ ״אפשר להרשות לעצמי?״ שואל את העוזר אם הקנייה מסתדרת עם החודש.",
+      "🎯 קנייה מסוג ״רוצה״ מעל סכום שבוחרים בהגדרות מראה כמה היא מרחיקה מהיעד.",
+      "בראש הטופס ״הכנסה״ רושם הכנסה חד־פעמית, למשל מתנה או החזר.",
+      "מחקת בטעות? ״ביטול״ בהודעה שמופיעה למטה מחזיר את מה שנמחק."
+    ] },
+    { id: "list", e: "🏦", t: "כל ההוצאות של החודש", d: "", body: [
+      "כל ההוצאות וההכנסות החד־פעמיות של החודש, לפי ימים, כמו בדף חשבון.",
+      "לחיצה על הוצאה פותחת תיקון מהיר: סכום, תאריך, קטגוריה ופירוט.",
+      "העיגולים של הקטגוריות מסננים את הרשימה. שורת החיפוש מוצאת הוצאות גם בחודשים קודמים.",
+      "💳 ״ייבוא מכרטיס אשראי״: מורידים מהאתר של חברת האשראי (מקס, ישראכרט, כאל, אמריקן אקספרס) את פירוט החיובים לאקסל, מעלים, בודקים ומוסיפים."
+    ] },
+    { id: "plan", e: "📋", t: "התוכנית של החודש", d: "", body: [
+      "בתחתית דף הבית. כאן קובעים את הבסיס של כל החישוב.",
+      "*הכנסה צפויה נטו*: משכורת, קצבה, עזרה. הכנסה משתנה? רושמים את הסכום הנמוך שבטוח ייכנס.",
+      "*חשבונות קבועים*: שכר דירה, חשמל, מנויים. ״העתקה מהחודש הקודם״ חוסכת הקלדה.",
+      "*תקציב לכל קטגוריה*: יעד לכל קטגוריה. זה רק יעד: אין התראה, הפס פשוט נצבע באדום כשעוברים. ₪0 מוצג כ״בלי יעד״.",
+      "אפשר להוסיף קטגוריות כמה שרוצים, לבחור לכל אחת אימוג׳י ולפתוח תת־קטגוריה. הוצאה בתת־קטגוריה נספרת גם בקטגוריה שמעליה."
+    ] },
+    { id: "cards", e: "🧩", t: "הכרטיסים בדף הבית", d: "", body: [
+      "*⚡ רישום בלחיצה*: הוצאות שחוזרות אצלך, ככפתורים.",
+      "*🛍️ לפי קטגוריות*: כמה יצא בכל קטגוריה מתוך היעד. לחיצה על קטגוריה מראה את כל ההוצאות שלה.",
+      "*🧠 ההרגלים שלי*: כמה היה ״צריך״ וכמה ״רוצה״, ועל מה התחרטת.",
+      "*🏅 אתגר החודש*: אתגר אחד לחודש, כמו ימים בלי הוצאה. מצליחים? מקבלים הישג.",
+      "*🎯 יעדי חיסכון*: יעד עם סכום. בכל העברה לחיסכון לוחצים ״הפקדתי״.",
+      "*🔁 חיובים קבועים*: מנויים ותשלומים שחוזרים. כל 3 חודשים נשאל אם עדיין צריך כל אחד.",
+      "*🤔 אולי אקנה*: הקניות שמחכות 48 שעות.",
+      "*📈 לעומת קודם*: החודש מול אותם ימים בחודש שעבר, והשבוע מול שבוע שעבר.",
+      "*📊 לאורך החודשים*: כמה נכנס וכמה יצא בכל אחד מ־6 החודשים האחרונים. 📸 משתף את החודש כתמונה.",
+      "*🏆 הישגים*: נפתחים כשמתמידים.",
+      "*📋 סיכום החודש*: מופיע ב־5 הימים הראשונים של חודש חדש."
+    ] },
+    { id: "layout", e: "✏️", t: "לסדר את דף הבית", d: "", body: [
+      "לכל כרטיס יש *?* עם הסבר קצר, ו־*▾* שמקפל אותו.",
+      "כרטיס שלא נגעת בו שבועיים מתקפל לבד. ▾ פותח אותו שוב.",
+      "*לחיצה ארוכה* על כרטיס פותחת עריכה: ⠿ גוררים כדי להזיז, 👁️ מסתיר. ✓ שומר, ✕ מבטל.",
+      "אותו דבר יש גם בהגדרות ← ״פריסת דף הבית״, עם ״חזרה לסידור המקורי״.",
+      "הסידור נשמר בחשבון ומופיע בכל המכשירים."
+    ] },
+    { id: "salary", e: "💼", t: "משכורת חודשית", d: "2026-10-17", w: "sal", body: [
+      "בכל חודש, ביום המשכורת, בכרטיס ״המשכורת שלי״ מופיעה השאלה ״נכנסה המשכורת?״. רושמים כמה נכנס ולוחצים שמירה.",
+      "עד שרושמים, החודש מחושב לפי המשכורת של החודש הקודם.",
+      "*➕ תוספת למשכורת*: בונוס או החזר שנכנסו בנפרד.",
+      { t: "החודש מתחיל ביום המשכורת, ובאפליקציה לאנדרואיד מגיעה התראה ב־10:00 באותו יום (אחרי שבת או חג אם הוא נופל בהם).", d: "2026-10-17" },
+      { t: "בטופס ההוצאה המחיר מוצג גם בימי עבודה.", w: "sal" },
+      { t: "גם משכורת וגם משמרות? רושמים כאן רק את המשכורת הקבועה. המשמרות מתווספות עליה לבד, בלי לספור פעמיים.", w: "both" },
+      "משנים את סוג השכר ויום המשכורת בהגדרות ← כללי ← ״איך משלמים לך?״."
+    ], go: ["settings", "⚙️ להגדרות"] },
+    { id: "shifts", e: "⏰", t: "משמרות ושכר לפי שעות", d: "", w: "hr", body: [
+      "בלשונית *⏰ משמרות* רושמים כל משמרת: תאריך, כניסה, יציאה והפסקה שלא משולמת. אפשר להקליד שעה כמו 918 והיא תהפוך ל־09:18.",
+      "השכר מחושב לפי החוק: שעות נוספות, לילה, שבת וחגים. זו הערכה של הברוטו, לפני מס.",
+      "*🎨 סוגי משמרות*: אחוז קבוע לכל שעה, למשל מוצ״ש ב־150%. אם החוק נותן יותר, מקבלים את הגבוה.",
+      "*📥 ייבוא מהיר*: מדביקים את דוח הנוכחות מחילן, מעלים קובץ, מצלמים את הדוח (העוזר קורא אותו), או מסמנים כמה ימים באותן שעות.",
+      "*📝 ימים שלא הוזנו*: ימים שעברו בלי משמרת. ״לא עבדתי״ מוריד אותם מהרשימה.",
+      "*🎯 יעד הכנסה לחודש*: כמה רוצים להרוויח, כמה חסר וכמה שעות זה עוד.",
+      "*🧮 הגדרות שכר*: שכר לשעה, מתי מתחילות שעות נוספות, יום המשכורת, ״שומר שבת וחג״.",
+      "*📅 סיכום שנתי*: שעות, משמרות וכסף בכל חודש בשנה.",
+      "בחודש שהיה בו חג ולא עבדת בו מופיעה תזכורת לבדוק שהוא מופיע בתלוש.",
+      { t: "באפליקציה לאנדרואיד: תזכורת בערב ״עבדת היום?״ ותזכורת ביום חמישי לקבוע משמרות.", w: "a" },
+      "בהגדרות ← כללי בוחרים מתי הכסף מהמשמרות נספר: באותו חודש, בחודש שאחרי, או לא בכלל."
+    ], go: ["shifts", "⏰ למשמרות"] },
+    { id: "cal", e: "📅", t: "לוח שנה", d: "", body: [
+      "כל החודש בלוח אחד: כמה נכנס, כמה יצא והמאזן.",
+      "לחיצה על יום מראה מה היה בו."
+    ], go: ["calendar", "📅 ללוח השנה"] },
+    { id: "friends", e: "👥", t: "חברים והוצאות משותפות", d: "", body: [
+      "בלשונית *👥 חברים* מוסיפים חבר לפי מייל או שם, או שולחים לו לינק הזמנה בווצאפ.",
+      "*🍔 הוצאה משותפת*: רושמים מי שילם כמה ומה החלק של כל אחד. בתקציב שלך נכנס רק החלק שלך.",
+      "החבר מאשר את ההוצאה ובוחר לה קטגוריה אצלו.",
+      "רואים מי חייב למי, ומסמנים כשהחזירו. אם שמרת קישור ביט, חברים יכולים להחזיר בלחיצה.",
+      "חברים רואים רק את השם, התמונה וההוצאות המשותפות. אף פעם לא את התקציב שלך."
+    ], go: ["friends", "👥 לחברים"] },
+    { id: "ai", e: "✨", t: "העוזר", d: "", body: [
+      "הכפתור ✨ למטה פותח עוזר שמכיר את הנתונים שלך. שואלים בשפה רגילה, למשל ״על מה הוצאתי הכי הרבה?״.",
+      "כלים מוכנים: כמה הוצאות במשפט אחד, צילום קבלה, דוח נוכחות למשמרות, מכתב החודש, ההרגלים שלי, מנויים ששכחת, תכנון שבוע ובדיקת החזר מס.",
+      "העוזר לא משנה כלום בלי שתאשר, והשיחה לא נשמרת בשרת.",
+      "עד 20 שאלות ביום. 👍👎 על כל תשובה עוזרים לשפר.",
+      "Enter יורד שורה. שולחים בכפתור ״שלח״."
+    ] },
+    { id: "search", e: "🔎", t: "חיפוש", d: "", body: [
+      "הכפתור 🔎 למעלה מחפש בכל החודשים: הוצאות, משמרות והכנסות, לפי מילה, קטגוריה או סכום."
+    ] },
+    { id: "settings", e: "⚙️", t: "מה אפשר לשנות בהגדרות", d: "", body: [
+      "*החודש שלי מתחיל ב־*: היום שהחודש מתחיל בו.",
+      { t: "*איך משלמים לך?*: משכורת חודשית, לפי שעות, או גם וגם.", d: "2026-10-17" },
+      "*איך ההודעות נשמעות*: קשוח, מאוזן או עדין.",
+      "*איך לפנות אליך*: בלשון זכר או נקבה.",
+      { t: "*מתי לספור את הכסף מהמשמרות*: באותו חודש, בחודש שאחרי, או לא לספור.", w: "hr" },
+      { t: "*💳 זיהוי תשלומים מההתראות*: הוצאה מוכנה מכל התראת חיוב של הבנק או האשראי.", w: "a" },
+      "*🎯 לפני קנייה ״רוצה״*: מאיזה סכום להראות מה הקנייה עושה ליעד.",
+      { t: "*🧾 תזכורת בערב* לרשום את ההוצאות של היום, ובאיזו שעה.", w: "a" },
+      "*📤 ייצוא לאקסל*: ההוצאות או התוכנית.",
+      "*🧩 פריסת דף הבית*: מה מופיע ובאיזה סדר.",
+      "*✨ מה חדש*: מה נוסף לאחרונה."
+    ], go: ["settings", "⚙️ להגדרות"] },
+    { id: "look", e: "🎨", t: "עיצוב וצבעים", d: "", body: [
+      "בהגדרות ← *🎨 עיצוב וצבעים*.",
+      "מצב בהיר, כהה, או לפי הטלפון.",
+      "צבע רקע וצבע מבטא (הכפתורים והכותרות). לוחצים, רואים מיד, ושומרים או מבטלים.",
+      "גודל טקסט: רגיל, גדול או גדול מאוד.",
+      "רטט קצר כשרושמים וקונפטי בהצלחות. אפשר לכבות."
+    ], go: ["look", "🎨 לעיצוב"] },
+    { id: "phone", e: "📱", t: "האפליקציה בטלפון", d: "", body: [
+      { t: "באנדרואיד מורידים את האפליקציה מתפריט החשבון (העיגול עם התמונה שלך למעלה) ← ״📱 הורדת האפליקציה לאנדרואיד״.", w: "ab" },
+      { t: "באייפון: בתפריט החשבון ← ״📱 התקנה באייפון״, עם הסבר איך לשים את האפליקציה במסך הבית.", w: "i" },
+      { t: "גרסה חדשה של האפליקציה מגיעה בהתראה, ומתעדכנים בלחיצה. רוב השינויים מגיעים בלי לעדכן בכלל.", w: "a" },
+      { t: "*📲 ווידג׳ט*: לחיצה ארוכה על מסך הבית של הטלפון ← ווידג׳טים ← ״התקציב שלי״. רואים כמה מותר היום, ו־+ פותח הוצאה.", w: "a" },
+      { t: "*💳 זיהוי תשלומים*: כשמגיעה התראת חיוב מהבנק או מהאשראי, האפליקציה מכינה הוצאה ונשאר רק לאשר. מפעילים בהגדרות ← כללי. ההתראות נקראות רק בטלפון שלך.", w: "a" },
+      { t: "התראות מגיעות גם כשהאפליקציה סגורה: הודעות אישיות, בקשות חברות, הוצאות משותפות, סיכום שבועי במוצאי שבת.", w: "a" },
+      { t: "בשבת ובחג הטלפון לא מצלצל: ההתראות מחכות למוצאי שבת.", w: "a" },
+      "בתחתית כל עמוד כתובה הגרסה של האפליקציה."
+    ] },
+    { id: "account", e: "👤", t: "החשבון שלי", d: "", body: [
+      "לחיצה על העיגול עם התמונה שלך למעלה פותחת את תפריט החשבון.",
+      "*💬 שלח משוב*: רעיון, בקשה או תקלה, ישר אלינו.",
+      "*📣 המלץ לחבר*: לינק לשליחה.",
+      "*💾 גיבוי, שחזור ומחיקה*: שמירת כל הנתונים לקובץ, החזרה מקובץ, או מחיקת החשבון.",
+      "*🚪 התנתקות*: הנתונים נשארים בחשבון ומחכים לכניסה הבאה."
+    ] },
+    { id: "admin", e: "🛠️", t: "לוח מנהל", d: "", w: "adm", body: [
+      "בהגדרות ← *🛠️ לוח מנהל*. רק לך.",
+      "הודעה לכל המשתמשים, גם כהתראה בטלפון.",
+      "משתמשים: מתי כל אחד היה פעיל ונכנס, איזו גרסה מותקנת, בלי סכומים.",
+      "השבוע באפליקציה, שימוש בעוזר, תקלות שקרו אצל משתמשים, מי חבר של מי, ומשובים עם סיכום לנושאים."
+    ], go: ["admin", "🛠️ ללוח המנהל"] }
+  ];
+  function guideWho(w) {
+    const app = !!window.BudgetApp, pt = payType();
+    if (!w) return true;
+    if (w === "a") return app;
+    if (w === "ab") return !app && /Android/i.test(navigator.userAgent);
+    if (w === "i") return isIphone;
+    if (w === "hr") return pt !== "salary";
+    if (w === "sal") return pt === "salary" || pt === "both";
+    if (w === "both") return pt === "both";
+    if (w === "adm") return isAdmin();
+    return true;
+  }
+  const guideNew = (d) => { const t = todayStr(); return !!d && t >= d && t < dateAdd(d, GUIDE_NEW_DAYS); };
+  // The sections this user sees, each with its visible lines and whether anything in it is new
+  function guideFor() {
+    return GUIDE.filter((s) => guideWho(s.w)).map((s) => {
+      const lines = s.body.map((l) => (typeof l === "string" ? { t: l } : l)).filter((l) => guideWho(l.w));
+      return { ...s, lines, isNew: guideNew(s.d) || lines.some((l) => guideNew(l.d)) };
+    }).filter((s) => s.lines.length);
+  }
+  function guideText(el, txt) {
+    String(gx(txt)).split(/\*([^*]+)\*/).forEach((part, i) => {
+      if (!part) return;
+      if (i % 2) { const b = document.createElement("b"); b.textContent = part; el.append(b); } else el.append(document.createTextNode(part));
+    });
+  }
+  function guideGo(where) {
+    if (where === "admin" && !isAdmin()) return;
+    if (where === "settings" || where === "look" || where === "admin") { setView(where); return; }
+    viewBeforeSettings = where; setView(where);
+  }
+  function guideSync() {
+    const n = store ? guideFor().filter((s) => s.isNew).length : 0, b = $("guideNewPill");
+    b.hidden = !n; b.textContent = "חדש";
+  }
+  function renderGuide() {
+    const secs = guideFor(), q = $("guideFind").value.trim(), box = $("guideList"), top = $("guideNewBox");
+    box.innerHTML = ""; top.innerHTML = "";
+    const fresh = secs.filter((s) => s.isNew);
+    top.hidden = !fresh.length || !!q;
+    if (fresh.length) {
+      const h = document.createElement("b"); h.textContent = "🆕 עודכן לאחרונה"; top.append(h);
+      const row = document.createElement("div"); row.className = "guidechips";
+      fresh.forEach((s) => {
+        const c = document.createElement("button"); c.type = "button"; c.textContent = s.e + " " + gx(s.t);
+        c.addEventListener("click", () => { const d = $("g-" + s.id); if (d) { d.open = true; d.scrollIntoView({ behavior: "smooth", block: "start" }); } });
+        row.append(c);
+      });
+      top.append(row);
+    }
+    let shown = 0;
+    secs.forEach((s) => {
+      const hit = (t) => !q || gx(t).replace(/\*/g, "").includes(q);
+      const lines = hit(s.t) ? s.lines : s.lines.filter((l) => hit(l.t));
+      if (!lines.length) return;
+      shown++;
+      const d = document.createElement("details"); d.className = "guidesec" + (s.isNew ? " isnew" : ""); d.id = "g-" + s.id;
+      if (q) d.open = true;
+      const sm = document.createElement("summary");
+      const e = document.createElement("span"); e.className = "ge"; e.setAttribute("aria-hidden", "true"); e.textContent = s.e;
+      const t = document.createElement("span"); t.className = "gt"; t.textContent = gx(s.t);
+      sm.append(e, t);
+      if (s.isNew) { const n = document.createElement("span"); n.className = "gnew"; n.textContent = "חדש"; sm.append(n); }
+      const ul = document.createElement("ul");
+      lines.forEach((l) => {
+        const li = document.createElement("li"); guideText(li, l.t);
+        if (guideNew(l.d) && !guideNew(s.d)) { li.className = "isnew"; const n = document.createElement("span"); n.className = "gnew"; n.textContent = "חדש"; li.append(" ", n); }
+        ul.append(li);
+      });
+      d.append(sm, ul);
+      if (s.go && !(s.go[0] === "shifts" && isSalaried())) {
+        const a = document.createElement("div"); a.className = "actions";
+        const btn = document.createElement("button"); btn.type = "button"; btn.className = "btn"; btn.textContent = s.go[1];
+        btn.addEventListener("click", () => guideGo(s.go[0])); a.append(btn); d.append(a);
+      }
+      box.append(d);
+    });
+    $("guideNone").hidden = !!shown;
+  }
+  // Back from the guide goes where it was opened from: the settings screen, or the page the account menu was on
+  let guideFrom = "settings";
+  $("openGuide").addEventListener("click", () => { guideFrom = "settings"; setView("guide"); });
+  $("guideBack").addEventListener("click", () => setView(guideFrom));
+  $("guideFind").addEventListener("input", renderGuide);
+  $("guideMenu").addEventListener("click", () => {
+    $("userbar").open = false;
+    if (view === "guide") return;
+    guideFrom = ["settings", "look", "admin"].includes(view) ? view : (viewBeforeSettings = view);
+    setView("guide");
+  });
   function renderAccents() {
     const box = $("accGrid"), cur = BP.accent(); box.innerHTML = "";
     BP.accents.forEach(([id, name, a, b, c]) => {
@@ -8933,6 +9211,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   const NEWS_ID = "2026-10-15-all";
   // [emoji, title, text, who]: "a" = Android app only, "i" = iPhone in Safari only, "" = everyone
   const NEWS = [
+    ["📖", "מדריך לאפליקציה", "בהגדרות ובתפריט החשבון: הסבר קצר על כל דבר באפליקציה ומה אפשר לשנות. מה שהשתנה בעדכון מסומן ״חדש״.", ""],
     ["💼", "משכורת חודשית", "לא עובדים לפי שעות? בהגדרות ← כללי בוחרים ״משכורת חודשית״: בלי לשונית משמרות, החודש מתחיל ביום המשכורת, ובכל חודש רושמים כמה נכנס.", ""],
     ["💳", "הוצאה מוכנה מההתראה", "כשהבנק או האשראי שולחים התראה על חיוב, האפליקציה מכינה את ההוצאה ונשאר רק לבחור קטגוריה ולשמור. מפעילים פעם אחת בהגדרות ← כללי. ההתראות נקראות רק בטלפון שלך.", "a"],
     ["📲", "ווידג׳ט במסך הבית", "לחיצה ארוכה על מסך הבית של הטלפון ← ווידג׳טים ← ״התקציב שלי״. רואים כמה מותר היום, ו־+ פותח הוצאה חדשה.", "a"],
