@@ -2,13 +2,30 @@ plugins { id "com.android.application" }
 
 android {
     namespace "io.github.smkrot3sudo.budget"
-    compileSdk 34
+    compileSdk 36
     defaultConfig {
         applicationId "io.github.smkrot3sudo.budget"
         minSdk 24
-        targetSdk 34
-        versionCode 13
-        versionName "2.2"
+    }
+    buildFeatures { buildConfig true }
+    // site: the APK on the website (self-update, payment detection). play: the Google Play build.
+    flavorDimensions = ["where"]
+    productFlavors {
+        site {
+            dimension "where"
+            targetSdk 34
+            versionCode 13
+            versionName "2.2"
+            buildConfigField "boolean", "STORE", "false"
+        }
+        play {
+            dimension "where"
+            // Google Play takes new apps only when they target Android 16 (API 36)
+            targetSdk 36
+            versionCode 100
+            versionName "2.2"
+            buildConfigField "boolean", "STORE", "true"
+        }
     }
     buildTypes {
         release {

@@ -45,6 +45,7 @@ public class MainActivity extends Activity {
     static final String EXTRA_OPEN = "open";
 
     private WebView web;
+    private FrameLayout root;
     private ValueCallback<Uri[]> pendingPick;
     private HilanSync hilanSync;
     private boolean destroyed;
@@ -54,9 +55,11 @@ public class MainActivity extends Activity {
         super.onCreate(state);
         web = new WebView(this);
         web.setBackgroundColor(Color.TRANSPARENT);
-        FrameLayout root = new FrameLayout(this);
+        root = new FrameLayout(this);
         root.addView(web);
         setContentView(root);
+        edgeToEdge();
+        backCallback();
         hilanSync = new HilanSync(this, root);
         hideNavigation();
 
@@ -69,7 +72,7 @@ public class MainActivity extends Activity {
         s.setUserAgentString(s.getUserAgentString() + " BudgetApp/" + BuildConfigVersion.NAME);
 
         web.addJavascriptInterface(new Bridge(), "BudgetApp");
-        // Phone notification when a new app version comes out, also while the app is closed
+        // Hourly check for personal messages and friend requests (and, outside the Play build, new app versions)
         UpdateCheck.schedule(this);
         askNotifications();
         web.setWebViewClient(new WebViewClient() {
@@ -164,12 +167,35 @@ public class MainActivity extends Activity {
         }
     }
 
+    /**
+     * Apps that target Android 15 and later always draw behind the status bar and keyboard (the Google Play
+     * build), so the page is padded by their height and the status bar shows the root's color.
+     */
+    private boolean edgeToEdgeOn() { return Build.VERSION.SDK_INT >= 35 && getApplicationInfo().targetSdkVersion >= 35; }
+
+    private void edgeToEdge() {
+        if (!edgeToEdgeOn()) return;
+        root.setBackgroundColor(0xFFFFF6EE);
+        root.setOnApplyWindowInsetsListener((v, insets) -> {
+            android.graphics.Insets b = insets.getInsets(WindowInsets.Type.systemBars() | WindowInsets.Type.displayCutout() | WindowInsets.Type.ime());
+            v.setPadding(b.left, b.top, b.right, b.bottom);
+            return WindowInsets.CONSUMED;
+        });
+    }
+
+    /** Apps that target Android 16 get the back gesture through this callback instead of onBackPressed. */
+    private void backCallback() {
+        if (Build.VERSION.SDK_INT >= 33 && getApplicationInfo().targetSdkVersion >= 36)
+            getOnBackInvokedDispatcher().registerOnBackInvokedCallback(android.window.OnBackInvokedDispatcher.PRIORITY_DEFAULT, this::goBack);
+    }
+
     @SuppressWarnings("deprecation")
     private void paintBars(boolean dark) { paintBars(dark ? 0xFF17121F : 0xFFFFF6EE, dark); }
 
     @SuppressWarnings("deprecation")
     private void paintBars(int color, boolean dark) {
         getWindow().setStatusBarColor(color);
+        if (edgeToEdgeOn()) root.setBackgroundColor(color);
         if (Build.VERSION.SDK_INT >= 30) {
             WindowInsetsController c = getWindow().getInsetsController();
             if (c != null) c.setSystemBarsAppearance(dark ? 0 : WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS,
@@ -218,7 +244,9 @@ public class MainActivity extends Activity {
 
     @Override
     @SuppressWarnings("deprecation")
-    public void onBackPressed() {
+    public void onBackPressed() { goBack(); }
+
+    private void goBack() {
         // Close an open sheet in the page first, then go back in history, then leave
         web.evaluateJavascript("(function(){var d=document.querySelector('dialog[open]');if(d){d.close();return 1}return 0})()", r -> {
             if ("1".equals(r)) return;
@@ -259,13 +287,17 @@ public class MainActivity extends Activity {
         @JavascriptInterface
         public int versionCode() { return BuildConfigVersion.CODE; }
 
+        /** True in the Google Play build: Play installs updates, and there is no payment detection. */
+        @JavascriptInterface
+        public boolean store() { return BuildConfigVersion.STORE; }
+
         @JavascriptInterface
         public boolean updateNotes() { return true; }
 
         /** Downloads a newer APK and opens the Android installer for it when the download finishes. */
         @JavascriptInterface
         public void installUpdate(String url) {
-            if (url == null || !url.startsWith("https://smkrot3-sudo.github.io/")) return;
+            if (BuildConfigVersion.STORE || url == null || !url.startsWith("https://smkrot3-sudo.github.io/")) return;
             runOnUiThread(() -> startUpdate(url));
         }
 

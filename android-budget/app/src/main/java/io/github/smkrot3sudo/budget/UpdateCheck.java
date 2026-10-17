@@ -141,7 +141,7 @@ public class UpdateCheck extends BroadcastReceiver {
     }
 
     private static void check(Context c) throws Exception {
-        if (quietNow()) return;
+        if (quietNow() || BuildConfigVersion.STORE) return; // Google Play tells about its own updates
         HttpURLConnection con = (HttpURLConnection) new URL(URL_JSON + "?t=" + System.currentTimeMillis()).openConnection();
         con.setConnectTimeout(15000);
         con.setReadTimeout(15000);

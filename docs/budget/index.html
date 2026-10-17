@@ -2525,6 +2525,8 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 
   // ---- Browser storage (never trusted to exist) ----
 
+  // The Google Play build of the app (BudgetApp.store() is true): Play updates it, and it has no payment detection
+  const isStore = () => { try { return !!(window.BudgetApp && BudgetApp.store && BudgetApp.store()); } catch (e) { return false; } };
   // ---- Android app updates: the page tells an outdated app that a newer APK exists and installs it ----
   function startAppUpdate(v) {
     const app = window.BudgetApp; if (!app) return;
@@ -2543,7 +2545,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   }
   (function checkAppUpdate() {
     const app = window.BudgetApp;
-    if (!app) return;
+    if (!app || isStore()) return;
     const LEGACY = { "1.0": 1, "1.1": 2, "1.2": 3 };
     let mine = 0;
     try { mine = app.versionCode ? +app.versionCode() : LEGACY[app.version ? app.version() : "1.0"] || 1; } catch (e) { mine = 1; }
@@ -2575,6 +2577,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       } catch (e) {}
       const span = (t) => { const x = document.createElement("span"); x.textContent = t; box.append(x); };
       if (app) span("הגרסה שלך: " + (mineName || "ישנה"));
+      if (isStore()) { span("✓ מתעדכנת דרך Google Play"); return; }
       span("הגרסה העדכנית: " + v.versionName + (when ? ", שוחררה ב־" + when + " (שעון ישראל)" : ""));
       if (app && v.versionCode > mineCode) {
         const b = document.createElement("button"); b.type = "button"; b.className = "linkbtn"; b.textContent = "⬆️ עדכון";
@@ -4756,7 +4759,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   // ---- Hilan: the Android app reads the user's attendance report with their own Hilan session; Hilan's hours win ----
   const HILAN_EVERY_MS = 30 * 60 * 1000;
   const HILAN_OFF = true; // 2026-10-06: the user shelved the Hilan sync; the card and background sync stay off until they ask again
-  const hilanApp = () => (window.BudgetApp && BudgetApp.hilanConnect ? window.BudgetApp : null);
+  const hilanApp = () => (window.BudgetApp && BudgetApp.hilanConnect && !isStore() ? window.BudgetApp : null);
   function hilanInfo() { try { return JSON.parse(hilanApp().hilanStatus()) || {}; } catch (e) { return {}; } }
   let hilanBusy = false;
   function renderHilan(msg, cls) {
@@ -7488,7 +7491,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       "*איך ההודעות נשמעות*: קשוח, מאוזן או עדין.",
       "*איך לפנות אליך*: בלשון זכר או נקבה.",
       { t: "*מתי לספור את הכסף מהמשמרות*: באותו חודש, בחודש שאחרי, או לא לספור.", w: "hr" },
-      { t: "*💳 זיהוי תשלומים מההתראות*: הוצאה מוכנה מכל התראת חיוב של הבנק או האשראי.", w: "a" },
+      { t: "*💳 זיהוי תשלומים מההתראות*: הוצאה מוכנה מכל התראת חיוב של הבנק או האשראי.", w: "apk" },
       "*🎯 לפני קנייה ״רוצה״*: מאיזה סכום להראות מה הקנייה עושה ליעד.",
       { t: "*🧾 תזכורת בערב* לרשום את ההוצאות של היום, ובאיזו שעה.", w: "a" },
       "*📤 ייצוא לאקסל*: ההוצאות או התוכנית.",
@@ -7505,9 +7508,9 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     { id: "phone", e: "📱", t: "האפליקציה בטלפון", d: "", body: [
       { t: "באנדרואיד מורידים את האפליקציה מתפריט החשבון (העיגול עם התמונה שלך למעלה) ← ״📱 הורדת האפליקציה לאנדרואיד״.", w: "ab" },
       { t: "באייפון: בתפריט החשבון ← ״📱 התקנה באייפון״, עם הסבר איך לשים את האפליקציה במסך הבית.", w: "i" },
-      { t: "גרסה חדשה של האפליקציה מגיעה בהתראה, ומתעדכנים בלחיצה. רוב השינויים מגיעים בלי לעדכן בכלל.", w: "a" },
+      { t: "גרסה חדשה של האפליקציה מגיעה בהתראה, ומתעדכנים בלחיצה. רוב השינויים מגיעים בלי לעדכן בכלל.", w: "apk" },
       { t: "*📲 ווידג׳ט*: לחיצה ארוכה על מסך הבית של הטלפון ← ווידג׳טים ← ״התקציב שלי״. רואים כמה מותר היום, ו־+ פותח הוצאה.", w: "a" },
-      { t: "*💳 זיהוי תשלומים*: כשמגיעה התראת חיוב מהבנק או מהאשראי, האפליקציה מכינה הוצאה ונשאר רק לאשר. מפעילים בהגדרות ← כללי. ההתראות נקראות רק בטלפון שלך.", w: "a" },
+      { t: "*💳 זיהוי תשלומים*: כשמגיעה התראת חיוב מהבנק או מהאשראי, האפליקציה מכינה הוצאה ונשאר רק לאשר. מפעילים בהגדרות ← כללי. ההתראות נקראות רק בטלפון שלך.", w: "apk" },
       { t: "התראות מגיעות גם כשהאפליקציה סגורה: הודעות אישיות, בקשות חברות, הוצאות משותפות, סיכום שבועי במוצאי שבת.", w: "a" },
       { t: "בשבת ובחג הטלפון לא מצלצל: ההתראות מחכות למוצאי שבת.", w: "a" },
       "בתחתית כל עמוד כתובה הגרסה של האפליקציה."
@@ -7531,6 +7534,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     const app = !!window.BudgetApp, pt = payType();
     if (!w) return true;
     if (w === "a") return app;
+    if (w === "apk") return app && !isStore(); // the app from the site, not the Google Play build
     if (w === "ab") return !app && /Android/i.test(navigator.userAgent);
     if (w === "i") return isIphone;
     if (w === "hr") return pt !== "salary";
@@ -7892,7 +7896,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   const DONATE_UNTIL = Date.parse("2026-10-15T20:09:00Z");
   // Pinned until the end time (owner, 2026-10-13 21:26Z): fully open on every app open; "הסתר" only shrinks it to one slim line until the next open
   function showDonate() {
-    $("donBar").hidden = Date.now() >= DONATE_UNTIL;
+    $("donBar").hidden = Date.now() >= DONATE_UNTIL || isStore();
     $("donBar").classList.remove("slim");
   }
   $("donateHide").addEventListener("click", () => $("donBar").classList.add("slim"));
@@ -9160,7 +9164,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 
   // ---- Payments seen in the phone's card and bank notifications (app 2.2+): a ready expense to approve ----
   let payFrom = null;
-  const payApp = () => window.BudgetApp && BudgetApp.payPending ? BudgetApp : null;
+  const payApp = () => window.BudgetApp && BudgetApp.payPending && !isStore() ? BudgetApp : null;
   function payItems() { const a = payApp(); if (!a) return []; try { return JSON.parse(a.payPending()) || []; } catch (e) { return []; } }
   function payCheck() {
     const a = payApp();
@@ -9254,7 +9258,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   function showNews(force) {
     let seen = ""; try { seen = localStorage.getItem("budget-news") || ""; } catch (e) {}
     if (!force && seen === NEWS_ID) return;
-    const inApp = !!(window.BudgetApp && BudgetApp.payEnabled);
+    const inApp = !!(window.BudgetApp && BudgetApp.payEnabled) && !isStore();
     $("newsGo").hidden = !inApp;
     $("newsLead").textContent = "הרבה דברים חדשים, הכל כדי שיהיה קל יותר לעקוב.";
     const ul = $("newsList"); ul.innerHTML = "";

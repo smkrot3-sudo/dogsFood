@@ -1,0 +1,39 @@
+name: Build budget app for Google Play
+
+# The Play build (no self-update, no payment detection) as an unsigned AAB on the android-play-aab branch.
+# It is signed afterwards with the upload key kept outside the repo.
+on:
+  push:
+    branches: [main, play-store]
+    paths: ["android-budget/**", ".github/workflows/android-budget-play.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.11.1"
+      - name: Build unsigned Play bundle and APK
+        run: gradle -p android-budget --no-daemon bundlePlayRelease assemblePlayRelease
+      - name: Publish to the android-play-aab branch
+        run: |
+          mkdir /tmp/out
+          cp android-budget/app/build/outputs/bundle/playRelease/app-play-release.aab /tmp/out/budget-play-unsigned.aab
+          cp android-budget/app/build/outputs/apk/play/release/app-play-release-unsigned.apk /tmp/out/budget-play-unsigned.apk
+          echo "$GITHUB_SHA" > /tmp/out/SOURCE_COMMIT
+          cd /tmp/out
+          git init -q -b android-play-aab
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add . && git commit -qm "Unsigned Play build from $GITHUB_SHA"
+          git push -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" android-play-aab

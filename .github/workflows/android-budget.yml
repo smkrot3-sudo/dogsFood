@@ -20,13 +20,13 @@ jobs:
           java-version: "17"
       - uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: "8.7"
+          gradle-version: "8.11.1"
       - name: Build unsigned release APK
-        run: gradle -p android-budget --no-daemon assembleRelease
+        run: gradle -p android-budget --no-daemon assembleSiteRelease
       # The APK is signed afterwards with a key kept outside the repo, so only the unsigned build is published here
       - name: Publish unsigned APK to the android-apk branch
         run: |
-          APK=android-budget/app/build/outputs/apk/release/app-release-unsigned.apk
+          APK=android-budget/app/build/outputs/apk/site/release/app-site-release-unsigned.apk
           mkdir /tmp/out && cp "$APK" /tmp/out/budget-unsigned.apk
           echo "$GITHUB_SHA" > /tmp/out/SOURCE_COMMIT
           cd /tmp/out
@@ -38,4 +38,4 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: budget-unsigned-apk
-          path: android-budget/app/build/outputs/apk/release/app-release-unsigned.apk
+          path: android-budget/app/build/outputs/apk/site/release/app-site-release-unsigned.apk

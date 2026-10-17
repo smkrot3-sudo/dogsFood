@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Google Play build: Play installs updates, and the first store version has no payment detection or Hilan screen -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" tools:node="remove" />
+    <application>
+        <activity android:name=".HilanActivity" tools:node="remove" />
+        <service android:name=".PayListener" tools:node="remove" />
+        <receiver android:name=".PayListener$Skip" tools:node="remove" />
+    </application>
+</manifest>
