@@ -7476,6 +7476,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       "כלים מוכנים: כמה הוצאות במשפט אחד, צילום קבלה, דוח נוכחות למשמרות, מכתב החודש, ההרגלים שלי, מנויים ששכחת, תכנון שבוע ובדיקת החזר מס.",
       "העוזר לא משנה כלום בלי שתאשר, והשיחה לא נשמרת בשרת.",
       "עד 20 שאלות ביום. 👍👎 על כל תשובה עוזרים לשפר.",
+      { t: "*🚩 דיווח*: מתחת לכל תשובה. אם תשובה פוגענית, שגויה או לא מתאימה, בוחרים סיבה והיא נשלחת לבדיקה.", d: "2026-10-18" },
       "Enter יורד שורה. שולחים בכפתור ״שלח״."
     ] },
     { id: "search", e: "🔎", t: "חיפוש", d: "", body: [
@@ -8460,6 +8461,9 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
         if (!m.local && !m.act && !m.mem) {
           if (m.vote) { const k = document.createElement("span"); k.className = "ailocal"; k.textContent = m.vote === "up" ? "👍 תודה!" : "👎 תודה, זה עוזר לשפר"; bar.append(k); }
           else { btn("👍", () => aiVote(m, true)); btn("👎", () => aiVote(m, false)); }
+          if (m.reported) { const k = document.createElement("span"); k.className = "ailocal"; k.textContent = "🚩 הדיווח נשלח, תודה"; bar.append(k); }
+          else if (m.reporting) Object.entries(AI_REPORT).forEach(([k, t]) => btn(t, () => aiReport(m, k)));
+          else btn("🚩 דיווח", () => { m.reporting = true; aiPaint(); });
         }
         if (bar.childNodes.length) d.append(bar);
       }
@@ -8484,6 +8488,13 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     m.vote = good ? "up" : "down"; aiSaveChat(); aiPaint();
     const i = aiChat.indexOf(m), q = aiChat.slice(0, i).reverse().find((x) => x.role === "me");
     try { if (sb && user) await sb.from("ai_feedback").insert({ good, topic: q ? aiTopic(q.text) : "other" }); } catch (e) {}
+  }
+  // Reporting an answer (offensive, wrong, other): the reason and that one answer are sent to the owner's admin panel
+  const AI_REPORT = { bad: "🙅 פוגעני או לא מתאים", wrong: "❌ מידע שגוי", other: "💬 אחר" };
+  async function aiReport(m, reason) {
+    m.reporting = false; m.reported = true; aiSaveChat(); aiPaint();
+    const i = aiChat.indexOf(m), q = aiChat.slice(0, i).reverse().find((x) => x.role === "me");
+    try { if (sb && user) await sb.from("ai_feedback").insert({ good: false, topic: q ? aiTopic(q.text) : "other", reason, answer: String(m.text || "").slice(0, 2000) }); } catch (e) {}
   }
   function aiPush(role, text, local) {
     const m = local ? { role, text, local: 1 } : { role, text };
@@ -8852,7 +8863,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       const l2 = document.createElement("span"); l2.textContent = "עלות: ₪0 (מסלול חינמי של Gemini)";
       d.append(b1, l1, l2); box.append(d);
       try {
-        const { data: v } = await sb.from("ai_feedback").select("good, topic, at").gte("at", new Date(Date.now() - 30 * 864e5).toISOString());
+        const { data: v } = await sb.from("ai_feedback").select("good, topic, at, reason, answer").gte("at", new Date(Date.now() - 30 * 864e5).toISOString());
         if (v && v.length) {
           const up = v.filter((x) => x.good).length, down = v.length - up, bad = {};
           v.filter((x) => !x.good).forEach((x) => { bad[x.topic] = (bad[x.topic] || 0) + 1; });
@@ -8860,6 +8871,12 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
           const bv = document.createElement("b"); bv.textContent = "👍 " + up + " · 👎 " + down + " ב־30 יום";
           const sv = document.createElement("span"); sv.textContent = down ? "איפה ענה לא טוב: " + Object.entries(bad).sort((a, b) => b[1] - a[1]).map(([t, n]) => (AI_TOPIC[t] || t) + " " + n).join(" · ") : "אף אחד לא סימן 👎";
           dv.append(bv, sv); box.append(dv);
+          v.filter((x) => x.reason).sort((a, b) => (b.at > a.at ? 1 : -1)).slice(0, 10).forEach((x) => {
+            const r = document.createElement("div"); r.className = "aduser";
+            const rb = document.createElement("b"); rb.textContent = "🚩 " + (AI_REPORT[x.reason] || x.reason) + " · " + shortDate(x.at.slice(0, 10));
+            const rs = document.createElement("span"); rs.textContent = x.answer || "";
+            r.append(rb, rs); box.append(r);
+          });
         }
       } catch (e) {}
       const em = {}; (users || []).forEach((u) => { em[u.user_id] = u.email; });
