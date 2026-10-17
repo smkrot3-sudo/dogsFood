@@ -694,6 +694,14 @@ html.hugetext dialog.aisheet { height: min(calc(92vh / 1.25), 860px); }
 .today .helptext { background: rgba(255, 255, 255, .2); color: #fff; }
 /* Choice buttons (tone and the like) */
 .seg { display: flex; flex-wrap: wrap; gap: 6px; }
+/* Monthly salary: no shifts tab, and the pay tile asks for the month's salary */
+body.salaried .tabs a[data-view="shifts"], body.salaried #shiftIncField, body.salaried #shiftIncHint { display: none; }
+.salbox { display: flex; flex-direction: column; gap: 8px; }
+.salask { display: flex; flex-direction: column; gap: 6px; padding: 10px 12px; border-radius: 14px; background: color-mix(in srgb, var(--brand2) 10%, var(--surface)); border: 1.5px solid color-mix(in srgb, var(--brand2) 35%, var(--line)); }
+.salrow { display: flex; gap: 8px; align-items: stretch; }
+.salrow input { flex: 1; min-width: 0; }
+.saldone { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; }
+.saldone .lbl { flex-basis: 100%; }
 .seg button { border: 1.5px solid var(--line); background: var(--surface); color: var(--fg); padding: 7px 14px; font-weight: 600; font-size: 14.5px; }
 .seg button[aria-pressed="true"] { border-color: var(--brand2); color: var(--brand2); background: color-mix(in srgb, var(--brand2) 12%, var(--surface)); }
 /* Not by color alone: shapes and stripes next to every good / warning / over state */
@@ -1485,6 +1493,20 @@ html.hugetext .season3 svg { width: 70px; height: 21px; }
 
       <section data-block="pay" class="panel pay" aria-labelledby="payH">
         <h2 id="payH" class="pc-violet" data-e="💼">המשכורת שלי <button class="btn primary" type="button" id="addShift">⏰ משמרת</button></h2>
+        <div class="salbox" id="salBox" hidden>
+          <div class="salask" id="salAsk" hidden>
+            <b id="salAskT">💰 נכנסה המשכורת?</b>
+            <div class="salrow"><input type="number" id="salIn" class="amount-in" inputmode="decimal" min="0" placeholder="₪" aria-label="כמה נכנס"><button class="btn primary" type="button" id="salSave">שמירה</button></div>
+            <p class="hint" id="salAskHint"></p>
+          </div>
+          <div class="saldone" id="salDone" hidden>
+            <span class="lbl" id="salLbl">המשכורת של החודש</span>
+            <span class="big2" id="salVal">₪0</span>
+            <button class="linkbtn" type="button" id="salEdit">שינוי</button>
+          </div>
+          <span class="line" id="salNext"></span>
+          <div class="actions"><button class="btn" type="button" id="salExtra">➕ תוספת למשכורת</button></div>
+        </div>
         <div class="paybody" id="payBody">
           <span class="lbl" id="payLbl">המשכורת עד עכשיו (ברוטו)</span>
           <span class="big2" id="payNet">₪0</span>
@@ -1652,6 +1674,15 @@ html.hugetext .season3 svg { width: 70px; height: 21px; }
       <h2 id="setH" class="pc-gray" data-e="🛠️">כללי</h2>
       <label class="field" for="startDay">החודש שלי מתחיל ב־<select id="startDay"></select></label>
       <p class="hint">למשל ביום שהמשכורת נכנסת או שהאשראי יורד. ״כמה מותר היום״ והגרף יחושבו לפי זה.</p>
+      <div class="field"><span>איך משלמים לך?</span>
+        <div class="seg" id="payTypeSeg" role="group" aria-label="איך משלמים לך">
+          <button type="button" data-k="salary" aria-pressed="false">💼 משכורת חודשית</button>
+          <button type="button" data-k="hourly" aria-pressed="false">⏰ לפי שעות</button>
+          <button type="button" data-k="both" aria-pressed="false">🔀 גם וגם</button>
+        </div>
+      </div>
+      <label class="field" for="salPayday" id="salPaydayRow" hidden>💰 המשכורת נכנסת ב־<select id="salPayday"></select></label>
+      <p class="hint" id="payTypeHint" hidden></p>
       <div class="field"><span>איך ההודעות שלי נשמעות</span>
         <div class="seg" id="toneSeg" role="group" aria-label="טון ההודעות">
           <button type="button" data-tone="tough" aria-pressed="false">💪 קשוח</button>
@@ -1665,7 +1696,7 @@ html.hugetext .season3 svg { width: 70px; height: 21px; }
           <button type="button" data-g="f" aria-pressed="false">🙋‍♀️ בלשון נקבה</button>
         </div>
       </div>
-      <div class="field"><span>מתי לספור את הכסף מהמשמרות?</span>
+      <div class="field" id="shiftIncField"><span>מתי לספור את הכסף מהמשמרות?</span>
         <div class="seg" id="shiftIncSeg" role="group" aria-label="מאיזה חודש לקחת את הכסף מהמשמרות">
           <button type="button" data-k="same" aria-pressed="false">באותו חודש</button>
           <button type="button" data-k="prev" aria-pressed="false">בחודש שאחרי</button>
@@ -2289,9 +2320,17 @@ html.hugetext .season3 svg { width: 70px; height: 21px; }
           <button type="button" data-g="f" aria-pressed="false">🙋‍♀️ בלשון נקבה</button>
         </div>
       </div>
+      <div class="field"><span>איך משלמים לך?</span>
+        <div class="seg" id="wzPay" role="group" aria-label="איך משלמים לך">
+          <button type="button" data-k="salary" aria-pressed="false">💼 משכורת חודשית</button>
+          <button type="button" data-k="hourly" aria-pressed="false">⏰ לפי שעות</button>
+          <button type="button" data-k="both" aria-pressed="false">🔀 גם וגם</button>
+        </div>
+      </div>
       <label for="wzInc">כמה כסף נכנס לך בחודש, אחרי מס?<input type="number" id="wzInc" class="amount-in" inputmode="decimal" min="0" placeholder="₪0"></label>
       <p class="hint">הכנסה משתנה? כתוב את הסכום הנמוך שבטוח ייכנס.</p>
-      <label for="wzWage">עובד לפי שעות? שכר לשעה (לא חובה)<input type="number" id="wzWage" inputmode="decimal" min="0" step="0.01" placeholder="₪"></label>
+      <label for="wzPayday" id="wzPaydayRow" hidden>באיזה יום המשכורת נכנסת?<select id="wzPayday"></select></label>
+      <label for="wzWage" id="wzWageRow">עובד לפי שעות? שכר לשעה (לא חובה)<input type="number" id="wzWage" inputmode="decimal" min="0" step="0.01" placeholder="₪"></label>
     </div>
     <div class="wzstep" data-step="2" hidden>
       <p class="sub">מה החשבונות הקבועים שלך? לחץ על מה שיש לך ורשום סכום.</p>
@@ -2847,7 +2886,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   const shiftIncomeFrom = () => (store && ["same", "prev", "off"].includes(settings().shiftIncome) ? settings().shiftIncome : "same");
   function shiftIncome(m) {
     const from = shiftIncomeFrom();
-    if (from === "off" || !store) return 0;
+    if (from === "off" || !store || isSalaried()) return 0;
     const pm = from === "prev" ? prevMonth(m) : m;
     if (!shifts[pm]) {
       if (from === "prev" && !loadingPrevPay.has(pm)) { loadingPrevPay.add(pm); loadShifts(pm).catch(() => { shifts[pm] = shifts[pm] || []; }).then(() => { loadingPrevPay.delete(pm); render(); renderTracking(); }); }
@@ -3131,7 +3170,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     $("incSum").textContent = fmt(inc);
     const from = shiftIncomeFrom(), si = plan().shiftInc;
     lastShiftInc = si;
-    $("shiftIncRow").hidden = from === "off" || !(+settings().wage > 0 || si > 0);
+    $("shiftIncRow").hidden = from === "off" || isSalaried() || !(+settings().wage > 0 || si > 0);
     $("shiftIncLbl").textContent = "⏰ מהמשמרות של " + monthName(from === "prev" ? prevMonth(month) : month) + " (ברוטו)";
     $("shiftIncVal").textContent = fmt(si);
     $("expSum").textContent = fmt(exp);
@@ -3334,6 +3373,15 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     return inc > 0 ? inc / 186 : 0;
   }
   function hoursText(amount) {
+    if (isSalaried() && amount > 0) {
+      const l = salLine(data()), sal = (l && +l.amount) || lastSalary() || plan().inc;
+      if (sal > 0) {
+        const days = amount / (sal / 22);
+        if (days < 1) { const h = days * 8.6; return h < 1 ? Math.max(1, Math.round(h * 60)) + " דקות עבודה" : (Math.round(h * 2) / 2).toLocaleString("he-IL") + " שעות עבודה"; }
+        const r = Math.round(days * 2) / 2;
+        return r === 1 ? "יום עבודה" : r.toLocaleString("he-IL") + " ימי עבודה";
+      }
+    }
     const w = wage();
     if (!(w > 0) || !(amount > 0)) return "";
     const h = amount / w;
@@ -4007,17 +4055,12 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       prev: "המשמרות של חודש אחד נספרות כהכנסה של החודש שאחריו, כי אז המשכורת עליהן נכנסת לבנק.",
       off: "הכסף מהמשמרות לא נספר בהכנסה. רק מה שרשמת בתוכנית."
     })[shiftIncomeFrom()] || "";
+    renderPayType();
     $("tagline").textContent = say("כל שקל שיוצא נרשם כאן. בלי תירוצים.", "כל שקל שיוצא נרשם כאן.", "יחד נגיע לסוף החודש בשקט 💛");
     renderPaySettings();
   }
   $("startDay").addEventListener("change", () => {
-    store.settings = { ...(store.settings || {}), startDay: +$("startDay").value };
-    persist();
-    Object.keys(tx).forEach((k) => delete tx[k]);
-    Object.keys(shifts).forEach((k) => delete shifts[k]);
-    Object.keys(incomes).forEach((k) => delete incomes[k]);
-    Object.keys(hist).forEach((k) => delete hist[k]);
-    goMonth(thisMonth());
+    applyStartDay(+$("startDay").value);
     snack("מעכשיו החודש שלך מתחיל ב־" + startDay() + " לחודש.");
   });
 
@@ -4230,6 +4273,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     }
     renderShifts();
     renderPayExtras();
+    renderSalary();
   }
 
   // The shifts page: summary, the list with type colors, types and pay settings
@@ -4375,7 +4419,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   }
   function remindTime() { try { return JSON.parse(remindApp().reminderStatus()).time || "22:30"; } catch (e) { return "22:30"; } }
   function missingDays() {
-    if (!store || !(+settings().wage > 0)) return [];
+    if (!store || !(+settings().wage > 0) || isSalaried()) return [];
     const today = todayStr();
     if (!store.shiftCheckFrom) { store.shiftCheckFrom = today; persist(); }
     const now = new Date(), [h, m] = remindTime().split(":").map(Number);
@@ -4870,6 +4914,136 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   }
   $("payday").addEventListener("change", () => setSetting("payday", +$("payday").value || 0));
 
+  // ---- Monthly salary (owner's picks, 2026-10-17) ----
+  // settings.payType: "salary" | "hourly" | "both". Users from before this have none and keep working exactly as before.
+  // Salary only: no shifts tab and shift pay never counts. The month starts on payday, the salary is typed each month
+  // in the pay tile, and the phone reminds on payday. "Both": the typed salary is the fixed part only, shifts count on top.
+  const payType = () => (store && ["salary", "hourly", "both"].includes(settings().payType) ? settings().payType : "");
+  const isSalaried = () => payType() === "salary";
+  const hasSalary = () => payType() === "salary" || payType() === "both";
+  function salLine(d) { return d.income.find((x) => x.name === "משכורת") || null; }
+  function lastSalary() {
+    for (let m = prevMonth(month), i = 0; i < 12; m = prevMonth(m), i++) { const d = store.months[m], l = d && salLine(d); if (l && +l.amount > 0) return +l.amount; }
+    return 0;
+  }
+  function nextPayday() {
+    const pd = +settings().payday || 0; if (!(pd >= 1 && pd <= 31)) return "";
+    const t = todayStr(), cm = t.slice(0, 7), here = cm + "-" + pad(Math.min(pd, daysIn(cm)));
+    if (here >= t) return here;
+    const nm = shiftMonth(cm, 1); return nm + "-" + pad(Math.min(pd, daysIn(nm)));
+  }
+  function applyStartDay(v) {
+    store.settings = { ...(store.settings || {}), startDay: v };
+    persist();
+    Object.keys(tx).forEach((k) => delete tx[k]);
+    Object.keys(shifts).forEach((k) => delete shifts[k]);
+    Object.keys(incomes).forEach((k) => delete incomes[k]);
+    Object.keys(hist).forEach((k) => delete hist[k]);
+    goMonth(thisMonth());
+  }
+  function setPayday(pd) {
+    store.settings = { ...settings(), payday: pd };
+    if (pd > 0 && hasSalary() && Math.min(pd, 28) !== startDay()) { applyStartDay(Math.min(pd, 28)); snack("מעכשיו החודש שלך מתחיל ביום המשכורת, ה־" + startDay() + " לחודש."); }
+    else { persist(); renderPay(); }
+    renderSettings(); sendAppPlans();
+  }
+  function setPayType(k) {
+    const was = payType();
+    store.settings = { ...settings(), payType: k };
+    persist();
+    applyPayType();
+    if (k === "salary") { const app = remindApp(); try { if (app && JSON.parse(app.reminderStatus()).on) app.setReminder(false, remindTime()); } catch (e) {} }
+    if (k === "salary" && view === "shifts") setView("main");
+    computePlan(); render(); renderPay(); renderTracking(); renderMissing(); sendAppPlans();
+    if (was !== k) snack(k === "salary" ? "מעכשיו: משכורת חודשית. לשונית המשמרות הוסתרה." : k === "both" ? "מעכשיו: משכורת קבועה ועוד משמרות." : "מעכשיו: עבודה לפי שעות.");
+  }
+  function applyPayType() { document.body.classList.toggle("salaried", isSalaried()); }
+  function renderPayType() {
+    const k = payType();
+    document.querySelectorAll("#payTypeSeg button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.k === k)));
+    $("salPaydayRow").hidden = !hasSalary();
+    if (document.activeElement !== $("salPayday")) $("salPayday").value = +settings().payday > 0 ? String(settings().payday) : "";
+    $("payTypeHint").hidden = !hasSalary();
+    $("payTypeHint").textContent = k === "both"
+      ? "את המשכורת הקבועה רושמים כל חודש בכרטיס ״המשכורת שלי״, בלי המשמרות. הכסף מהמשמרות נספר לבד, בנוסף."
+      : "את המשכורת רושמים כל חודש בכרטיס ״המשכורת שלי״ בדף הבית. ביום המשכורת תגיע תזכורת.";
+    applyPayType();
+    try { if (isSalaried() && view === "shifts") setView("main"); } catch (e) {}
+  }
+  // The pay tile for salary users: this month's salary (typed each month), next payday, and "extra on top of salary"
+  function renderSalary() {
+    const on = hasSalary();
+    $("salBox").hidden = !on;
+    const sal = isSalaried();
+    $("addShift").hidden = sal; $("toShifts").hidden = sal;
+    if (sal) { $("payBody").hidden = true; $("payEmpty").hidden = true; }
+    if (!on) return;
+    const d = data(), l = salLine(d), done = !!(store.salIn || {})[month];
+    const word = payType() === "both" ? "המשכורת הקבועה" : "המשכורת";
+    const ask = !done && month === thisMonth();
+    $("salAsk").hidden = !ask;
+    $("salDone").hidden = ask;
+    if (ask) {
+      $("salAskT").textContent = "💰 נכנסה " + word + " של " + monthName(month) + "?";
+      const last = lastSalary();
+      $("salIn").placeholder = last ? fmt(last) : "₪";
+      $("salAskHint").textContent = (payType() === "both" ? "רק המשכורת הקבועה, בלי המשמרות. " : "") + (last ? "בחודש שעבר נכנסו " + fmt(last) + ". עד שתרשום, החישוב לפי הסכום הזה." : "כמה נכנס לבנק, אחרי מס.");
+    } else {
+      $("salLbl").textContent = word + " של " + monthName(month);
+      $("salVal").textContent = fmt(l ? +l.amount || 0 : 0);
+    }
+    const np = nextPayday();
+    $("salNext").textContent = np ? "📅 " + word + " הבאה ב־" + shortDate(np) + " (" + (daysBetween(todayStr(), np) === 0 ? "היום" : "עוד " + daysBetween(todayStr(), np) + " ימים") + ")." : "📅 באיזה יום " + word + " נכנסת? בוחרים בהגדרות ← כללי.";
+  }
+  function saveSalary() {
+    const v = Math.round(parseFloat($("salIn").value) || 0);
+    if (!(v > 0)) { $("salIn").focus(); snack("כמה נכנס? רשמו סכום גדול מאפס."); return; }
+    commit();
+    const d = data();
+    let l = salLine(d);
+    if (!l) { l = { name: "משכורת", amount: 0 }; d.income.unshift(l); }
+    l.amount = v;
+    store.salIn = { ...(store.salIn || {}), [month]: todayStr() };
+    const keep = Object.keys(store.salIn).sort().slice(-24); store.salIn = Object.fromEntries(keep.map((k) => [k, store.salIn[k]]));
+    $("salIn").value = "";
+    touch(); render(); renderPay();
+    snack("נרשם: " + fmt(v) + " משכורת ל" + monthName(month) + ".");
+  }
+  $("salSave").addEventListener("click", saveSalary);
+  $("salIn").addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); saveSalary(); } });
+  $("salEdit").addEventListener("click", () => {
+    const sv = { ...(store.salIn || {}) }; delete sv[month]; store.salIn = sv;
+    renderSalary();
+    const l = salLine(data()); if (l && +l.amount > 0) $("salIn").value = l.amount;
+    $("salIn").focus();
+  });
+  $("salExtra").addEventListener("click", () => { openIncome(); $("txNote").value = "תוספת למשכורת"; });
+  $("payTypeSeg").addEventListener("click", (e) => { const b = e.target.closest("[data-k]"); if (b) setPayType(b.dataset.k); });
+  (function () {
+    [$("salPayday"), $("wzPayday")].forEach((sel) => {
+      const o0 = document.createElement("option"); o0.value = ""; o0.textContent = "לא הוגדר"; sel.append(o0);
+      for (let i = 1; i <= 31; i++) { const o = document.createElement("option"); o.value = i; o.textContent = i + " בחודש"; sel.append(o); }
+    });
+  })();
+  $("salPayday").addEventListener("change", () => setPayday(+$("salPayday").value || 0));
+  // Payday phone note for salary users: 10:00 on payday; on Shabbat or a holiday, right after it ends
+  function paydayNote() {
+    if (!hasSalary()) return null;
+    let day = nextPayday(); if (!day) return null;
+    const at = (s, min) => { const [y, m, d] = s.split("-").map(Number); return new Date(y, m - 1, d).getTime() + min * 60000; };
+    let t = at(day, 600);
+    if (t < Date.now() + 60000) {
+      const pd = +settings().payday, nm = shiftMonth(day.slice(0, 7), 1);
+      day = nm + "-" + pad(Math.min(pd, daysIn(nm))); t = at(day, 600);
+    }
+    for (let i = 0; i < 3 && restName(day); i++) {
+      if (!restName(dateAdd(day, 1))) { t = at(day, sunset(day) + 40 + 20); break; }
+      day = dateAdd(day, 1); t = at(day, 600);
+    }
+    const word = payType() === "both" ? "המשכורת הקבועה" : "המשכורת";
+    return { id: "payday", at: t, title: "💰 היום נכנסת " + word, text: "היכנס ורשום כמה נכנס החודש, כדי שהתקציב יהיה מדויק." };
+  }
+
   // ---- Shabbat and holidays: no shift reminder on them, and on the eve it comes an hour before candle lighting ----
   function keepsShabbat() { return !!store && settings().shabbat !== false; }
   function remindPlan() {
@@ -4951,6 +5125,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
           notes.push({ id: "update", at: t.getTime(), title: "📲 יש עדכון לאפליקציה (" + upd.versionName + ")", text: "פתח את האפליקציה ולחץ \"עדכון\" בבאנר למעלה." });
         }
         if (st.dayCheck !== false) dayCheckNotes(st).forEach((n) => notes.push(n));
+        const pn = paydayNote(); if (pn) notes.push(pn);
         (store.reminders || []).filter((r) => r.at > Date.now()).forEach((r) => notes.push({ id: "rem-" + r.id, at: r.at, title: "🔔 תזכורת", text: r.text }));
         if (user && user.id === "75753136-73de-4975-bc7a-5897db6ae434") notes.push({ id: "admin-weekly", at: weeklyAt() + 30 * 60e3, every: 7, title: "📅 סיכום השבוע של האפליקציה", text: "כמה היו פעילים, על מה שאלו את העוזר ומה ביקשו במשובים. בלוח המנהל." });
         app.setNotes(gx(JSON.stringify(notes)));
@@ -6046,13 +6221,27 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     document.querySelectorAll("#" + id + " button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
     wzSummary();
   }));
+  $("wzPay").addEventListener("click", (e) => {
+    const b = e.target.closest("[data-k]"); if (!b) return;
+    document.querySelectorAll("#wzPay button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+    $("wzPaydayRow").hidden = b.dataset.k === "hourly";
+    $("wzWageRow").hidden = b.dataset.k === "salary";
+    $("wzErr").hidden = true;
+  });
   $("wzBack").addEventListener("click", () => { wzStep = Math.max(1, wzStep - 1); wzShow(); });
   $("wzSkip").addEventListener("click", () => { store.onboarded = true; persist(); closeDlg("wizard"); $("planBox").open = true; });
   $("wzForm").addEventListener("submit", (e) => {
     e.preventDefault();
     if (wzStep === 1 && !settings().gender) { $("wzErr").textContent = "איך לפנות אליך? בחר אחת מהאפשרויות."; $("wzErr").hidden = false; return; }
+    if (wzStep === 1 && !wzPick("wzPay").k) { $("wzErr").textContent = "איך משלמים לך? בחר אחת מהאפשרויות."; $("wzErr").hidden = false; return; }
     if (wzStep === 1 && !(parseFloat($("wzInc").value) > 0)) { $("wzErr").textContent = "כמה נכנס לך בחודש? אפשר גם הערכה."; $("wzErr").hidden = false; $("wzInc").focus(); return; }
     if (wzStep < 3) { wzStep++; wzShow(); return; }
+    // Pay type first: a salary payday moves the start of the month, and with it which month the plan is for
+    const pk = wzPick("wzPay").k || "hourly", wpd = pk === "hourly" ? 0 : +$("wzPayday").value || 0;
+    store.settings = { ...settings(), payType: pk, ...(wpd ? { payday: wpd } : {}) };
+    applyPayType();
+    if (wpd && Math.min(wpd, 28) !== startDay()) applyStartDay(Math.min(wpd, 28));
+    if (pk === "salary") { const app = remindApp(); try { if (app) app.setReminder(false, remindTime()); } catch (e) {} }
     // Build the plan
     commit();
     const d = data();
@@ -6066,8 +6255,9 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     d.example = false;
     const w = parseFloat($("wzWage").value) || 0;
     store.settings = { ...settings(), tone: wzPick("wzTone").tone || "mid", ...(w > 0 ? { wage: w } : {}) };
+    if (pk !== "hourly") store.salIn = { ...(store.salIn || {}), [month]: todayStr() };
     store.onboarded = true;
-    persist(); closeDlg("wizard"); render();
+    persist(); closeDlg("wizard"); render(); renderPay(); sendAppPlans();
     snack("התוכנית מוכנה! אפשר לשנות הכול ב״התוכנית של החודש״.");
   });
 
@@ -7109,6 +7299,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   let view = "main";
   function setView(v, fromHash) {
     view = ["shifts", "calendar", "friends", "settings", "look", "admin"].includes(v) ? v : "main";
+    if (view === "shifts" && isSalaried()) view = "main";
     if (view !== "main" && layEditing) exitLayEdit(false);
     $("viewMain").hidden = view !== "main";
     $("viewSettings").hidden = view !== "settings";
@@ -7707,7 +7898,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     const L = [];
     L.push("העוזר נפתח מהלשונית: " + (AI_TABS[aiFrom] || "ראשי") + ".");
     L.push("היום: " + todayStr() + " (יום " + wd(todayStr()) + "). החודש המוצג באפליקציה: " + month + ". חודש תקציבי מתחיל ב־" + startDay() + " לחודש.");
-    L.push("הגדרות: " + JSON.stringify({ טון: st.tone, שכר_לשעה: st.wage, יום_משכורת: st.payday, יעד_הכנסה_חודשי_ברוטו: st.payGoal, שעות_נוספות_אחרי: st.otAfter, הכסף_מהמשמרות_נספר: { same: "באותו חודש", prev: "בחודש שאחרי", off: "לא נספר" }[shiftIncomeFrom()] }));
+    L.push("הגדרות: " + JSON.stringify({ סוג_שכר: { salary: "משכורת חודשית (בלי משמרות)", hourly: "לפי שעות", both: "משכורת קבועה ועוד משמרות" }[payType()] || "לפי שעות", טון: st.tone, שכר_לשעה: st.wage, יום_משכורת: st.payday, יעד_הכנסה_חודשי_ברוטו: st.payGoal, שעות_נוספות_אחרי: st.otAfter, הכסף_מהמשמרות_נספר: { same: "באותו חודש", prev: "בחודש שאחרי", off: "לא נספר" }[shiftIncomeFrom()] }));
     const p = plan();
     L.push("\n== החודש המוצג (" + month + ") ==");
     L.push("הכנסות בתוכנית: " + (p.d.income.map((x) => x.name + " " + x.amount).join(", ") || "אין") + " · מהמשמרות: " + p.shiftInc + " · סה״כ הכנסה: " + p.inc);
@@ -8742,6 +8933,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   const NEWS_ID = "2026-10-15-all";
   // [emoji, title, text, who]: "a" = Android app only, "i" = iPhone in Safari only, "" = everyone
   const NEWS = [
+    ["💼", "משכורת חודשית", "לא עובדים לפי שעות? בהגדרות ← כללי בוחרים ״משכורת חודשית״: בלי לשונית משמרות, החודש מתחיל ביום המשכורת, ובכל חודש רושמים כמה נכנס.", ""],
     ["💳", "הוצאה מוכנה מההתראה", "כשהבנק או האשראי שולחים התראה על חיוב, האפליקציה מכינה את ההוצאה ונשאר רק לבחור קטגוריה ולשמור. מפעילים פעם אחת בהגדרות ← כללי. ההתראות נקראות רק בטלפון שלך.", "a"],
     ["📲", "ווידג׳ט במסך הבית", "לחיצה ארוכה על מסך הבית של הטלפון ← ווידג׳טים ← ״התקציב שלי״. רואים כמה מותר היום, ו־+ פותח הוצאה חדשה.", "a"],
     ["🔔", "התראות גם כשהאפליקציה סגורה", "הודעות אישיות, בקשות חברות והוצאות משותפות מגיעות גם בלי לפתוח את האפליקציה (מגרסה 2.2).", "a"],
