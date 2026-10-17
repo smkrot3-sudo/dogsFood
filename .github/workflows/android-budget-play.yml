@@ -23,8 +23,8 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: "8.11.1"
-      - name: Build unsigned Play bundle and APK
-        run: gradle -p android-budget --no-daemon bundlePlayRelease assemblePlayRelease
+      - name: Build unsigned Play bundle and APK (and check the site build still compiles)
+        run: gradle -p android-budget --no-daemon bundlePlayRelease assemblePlayRelease assembleSiteRelease
       - name: Publish to the android-play-aab branch
         run: |
           mkdir /tmp/out
