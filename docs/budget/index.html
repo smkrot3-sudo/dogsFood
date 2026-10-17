@@ -36,10 +36,11 @@ window.BP = (function () {
       "--blob1": bl(0, s ? .2 : 0), "--blob2": bl(40, s ? .14 : 0), "--blob3": bl(-40, s ? .12 : 0) };
   }
   function get() { try { return localStorage.getItem("budget-palette") || "orig"; } catch (e) { return "orig"; } }
+  function editing() { try { return !!localStorage.getItem("budget-design-draft"); } catch (e) { return false; } }
   function isDark() { var t = document.documentElement.getAttribute("data-theme"); return t ? t === "dark" : matchMedia("(prefers-color-scheme: dark)").matches; }
   var KEYS = ["--bg", "--surface", "--surface-2", "--line", "--blob1", "--blob2", "--blob3"];
   function apply() {
-    var r = document.documentElement.style, v = vars(get(), isDark());
+    var r = document.documentElement.style, v = editing() ? null : vars(get(), isDark());
     KEYS.forEach(function (k) { if (v) r.setProperty(k, v[k]); else r.removeProperty(k); });
     return v ? v["--bg"] : (isDark() ? "#17121f" : "#fff6ee");
   }
@@ -53,7 +54,7 @@ window.BP = (function () {
   ];
   function accent() { try { return localStorage.getItem("budget-accent") || "orig"; } catch (e) { return "orig"; } }
   function applyAccent() {
-    var r = document.documentElement.style, a = null, id = accent();
+    var r = document.documentElement.style, a = null, id = editing() ? "orig" : accent();
     for (var i = 0; i < A.length; i++) if (A[i][0] === id) a = A[i];
     if (!a || id === "orig") { r.removeProperty("--brand1"); r.removeProperty("--brand2"); r.removeProperty("--brand3"); return; }
     r.setProperty("--brand1", a[2]); r.setProperty("--brand2", a[3]); r.setProperty("--brand3", a[4]);
@@ -66,6 +67,100 @@ window.BP = (function () {
   return { list: L, vars: vars, get: get, apply: apply, isDark: isDark, accents: A, accent: accent, applyAccent: applyAccent, textSize: textSize };
 })();
 try { var t = localStorage.getItem("budget-theme"); if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t); BP.textSize(); BP.applyAccent(); BP.apply(); } catch (e) {}</script>
+<script>
+// ---- The shared app design (table app_designs): the owner and Shani edit it in ⚙️ ← 🎨 עורך העיצוב.
+// Only whitelisted keys with checked values ever reach the page, so a design can't break the app.
+// A user's own background palette and accent (🎨 עיצוב וצבעים) still win over it.
+var DS = (function () {
+  var C = ["bg", "surface", "surface2", "fg", "muted", "line", "accent", "spend", "must", "danger"];
+  var CV = { surface2: "--surface-2" };
+  var DEF = {
+    L: { bg: "#fff6ee", surface: "#ffffff", surface2: "#fdf3ea", fg: "#2b2238", muted: "#6e6481", line: "#f0e3d8", accent: "#0e8a66", spend: "#c25a10", must: "#7c6fd6", danger: "#d02c4c" },
+    D: { bg: "#17121f", surface: "#221b2e", surface2: "#2a2238", fg: "#f4eefb", muted: "#aba0bd", line: "#372d47", accent: "#4fd8a8", spend: "#ffa45e", must: "#a99cf5", danger: "#ff7d95" },
+    brand1: "#ef5a33", brand2: "#db3577", brand3: "#7a46de", good1: "#10a37a", good2: "#1aa0b8", good3: "#5a62e0",
+    font: "Rubik", fontD: "Rubik", title: 20, radius: 22, btnr: 31, pad: 20, gapIn: 14, shadow: 100
+  };
+  // [min, max] of each number; btnr 31 = fully round
+  var NUM = { title: [16, 28], radius: [4, 34], btnr: [4, 31], pad: [10, 30], gapIn: [6, 24], shadow: [0, 200] };
+  var FONTS = {
+    "Rubik": "Rubik:wght@400;500;600;700;800", "Heebo": "Heebo:wght@400;500;700;800", "Assistant": "Assistant:wght@400;600;700;800",
+    "Varela Round": "Varela+Round", "Open Sans": "Open+Sans:wght@400;600;700;800", "Noto Sans Hebrew": "Noto+Sans+Hebrew:wght@400;500;700;800",
+    "IBM Plex Sans Hebrew": "IBM+Plex+Sans+Hebrew:wght@400;500;700", "Alef": "Alef:wght@400;700", "Fredoka": "Fredoka:wght@400;500;600;700",
+    "Playpen Sans Hebrew": "Playpen+Sans+Hebrew:wght@400;600;700;800", "Frank Ruhl Libre": "Frank+Ruhl+Libre:wght@400;500;700;800",
+    "Secular One": "Secular+One", "Suez One": "Suez+One", "Bellefair": "Bellefair", "Amatic SC": "Amatic+SC:wght@400;700", "Karantina": "Karantina:wght@400;700"
+  };
+  var TITLE_ONLY = ["Secular One", "Suez One", "Bellefair", "Amatic SC", "Karantina"];
+  var HEX = /^#[0-9a-f]{6}$/i;
+  function hx(v) { return typeof v === "string" && HEX.test(v) ? v.toLowerCase() : null; }
+  // Keeps only known keys with good values that differ from the original
+  function clean(v) {
+    var o = {}; if (!v || typeof v !== "object") return o;
+    ["L", "D"].forEach(function (m) {
+      var src = v[m]; if (!src || typeof src !== "object") return; var t = {};
+      C.forEach(function (k) { var c = hx(src[k]); if (c && c !== DEF[m][k]) t[k] = c; });
+      for (var x in t) { o[m] = t; break; }
+    });
+    ["brand1", "brand2", "brand3", "good1", "good2", "good3"].forEach(function (k) { var c = hx(v[k]); if (c && c !== DEF[k]) o[k] = c; });
+    if (FONTS[v.font] && TITLE_ONLY.indexOf(v.font) < 0 && v.font !== DEF.font) o.font = v.font;
+    if (FONTS[v.fontD] && v.fontD !== DEF.fontD) o.fontD = v.fontD;
+    for (var k in NUM) { var n = Math.round(Number(v[k])); if (isFinite(n) && v[k] !== "" && v[k] != null) { n = Math.max(NUM[k][0], Math.min(NUM[k][1], n)); if (n !== DEF[k]) o[k] = n; } }
+    return o;
+  }
+  function get(v, k, m) { return m ? (v[m] && v[m][k]) || DEF[m][k] : v[k] != null ? v[k] : DEF[k]; }
+  function fam(f) { return '"' + f + '", "Rubik", "Assistant", "Segoe UI", Arial, sans-serif'; }
+  function colors(v, m) {
+    var s = "", t = v[m] || {};
+    C.forEach(function (k) { if (t[k]) s += (CV[k] || "--" + k) + ":" + t[k] + ";"; });
+    var sm = m === "L" ? 16 : 24;
+    if (t.accent) s += "--accent-soft:color-mix(in srgb," + t.accent + " " + sm + "%,var(--surface));";
+    if (t.spend) s += "--spend-soft:color-mix(in srgb," + t.spend + " " + sm + "%,var(--surface));";
+    if (t.danger) s += "--danger-soft:color-mix(in srgb," + t.danger + " " + sm + "%,var(--surface));";
+    if (v.shadow != null) {
+      var k = v.shadow / 100, r = function (a) { return Math.round(a * k * 1000) / 1000; };
+      s += m === "L" ? "--card-shadow:0 2px 4px rgba(120,70,40," + r(.05) + "),0 8px 24px rgba(120,70,40," + r(.07) + ");--shadow:0 10px 30px rgba(120,60,40," + r(.16) + ");"
+        : "--card-shadow:0 8px 24px rgba(0,0,0," + r(.35) + ");--shadow:0 10px 30px rgba(0,0,0," + r(.55) + ");";
+    }
+    return s;
+  }
+  function css(raw) {
+    var v = clean(raw), out = "", sh = "";
+    // html:root and "html ..." outrank the app's own rules, wherever this sheet sits
+    ["brand1", "brand2", "brand3"].forEach(function (k) { if (v[k]) sh += "--" + k + ":" + v[k] + ";"; });
+    if (v.good1 || v.good2 || v.good3) sh += "--good-grad:linear-gradient(135deg," + get(v, "good1") + "," + get(v, "good2") + " 60%," + get(v, "good3") + ");";
+    if (v.font) sh += "--font-body:" + fam(v.font) + ";";
+    if (v.fontD) sh += "--font-display:" + fam(v.fontD) + ";";
+    if (v.radius) sh += "--radius:" + v.radius + "px;";
+    if (sh) out += "html:root{" + sh + "}";
+    var l = colors(v, "L"), d = colors(v, "D");
+    if (l) out += "@media (prefers-color-scheme: light){html:root:not([data-theme=\"dark\"]){" + l + "}}html:root[data-theme=\"light\"]{" + l + "}";
+    if (d) out += "@media (prefers-color-scheme: dark){html:root:not([data-theme=\"light\"]){" + d + "}}html:root[data-theme=\"dark\"]{" + d + "}";
+    if (v.title) out += "html .panel h2{font-size:" + v.title + "px}";
+    if (v.btnr) out += "html .btn{border-radius:" + (v.btnr >= 31 ? 999 : v.btnr) + "px}";
+    if (v.pad) out += "html .panel,html .panel.today{padding:" + v.pad + "px " + Math.max(8, v.pad - 2) + "px}";
+    if (v.gapIn) out += "html .panel{gap:" + v.gapIn + "px}";
+    return out;
+  }
+  function fontsUrl(list) {
+    var f = list.filter(function (x) { return FONTS[x] && x !== "Rubik"; });
+    return f.length ? "https://fonts.googleapis.com/css2?" + f.map(function (x) { return "family=" + FONTS[x]; }).join("&") + "&display=swap" : "";
+  }
+  function apply(raw) {
+    var v = clean(raw), el = document.getElementById("designLayer");
+    if (!el) { el = document.createElement("style"); el.id = "designLayer"; document.head.appendChild(el); }
+    el.textContent = css(v);
+    var url = fontsUrl([v.font, v.fontD]), ln = document.getElementById("designFonts");
+    if (url) { if (!ln) { ln = document.createElement("link"); ln.id = "designFonts"; ln.rel = "stylesheet"; document.head.appendChild(ln); } if (ln.href !== url) ln.href = url; }
+    else if (ln) ln.remove();
+    return v;
+  }
+  function read(k) { try { var s = localStorage.getItem(k); return s ? JSON.parse(s) : null; } catch (e) { return null; } }
+  // a draft in the editor shows instead of the live design, only on this phone
+  function draft() { var d = read("budget-design-draft"); return d && d.v ? d : null; }
+  function current() { var d = draft(); return d ? d.v : read("budget-design") || {}; }
+  return { DEF: DEF, C: C, NUM: NUM, FONTS: FONTS, TITLE_ONLY: TITLE_ONLY, clean: clean, css: css, apply: apply, get: get, fontsUrl: fontsUrl, draft: draft, current: current, read: read };
+})();
+try { DS.apply(DS.current()); } catch (e) {}
+</script>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="התקציב שלי">
 <link rel="apple-touch-icon" href="icon-180.png">
@@ -967,6 +1062,56 @@ dialog.alarm.dimsum { background: radial-gradient(circle at 50% 0%, #ffcf5c 0, t
 .dimsum .signs { animation: steam 2.2s ease-in-out infinite; }
 .dimsum p { border-color: #ffcf5c; border-style: double; border-width: 5px; background: rgba(255, 207, 92, .12); }
 .dimsum .btn { color: #8a0b1f; }
+/* Design editor (owner + Shani) */
+.dzprev { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 6px); z-index: 6; display: grid; gap: 8px; padding: 10px; background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow); }
+.dzlead { display: grid; gap: 2px; } .dzlead small { color: var(--muted); font-size: 13.5px; }
+.dzmode { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.dzmode button { padding: 8px; border-radius: 14px; border: 2px solid var(--line); background: var(--surface-2); color: var(--fg); font: inherit; font-weight: 700; }
+.dzmode button[aria-pressed="true"] { border-color: var(--brand2); color: var(--brand2); }
+.dzsample { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); gap: 8px; padding: 8px; background: var(--bg); border-radius: calc(var(--radius) * .7); }
+.dzs-today { display: grid; align-content: center; padding: 8px 10px; border-radius: calc(var(--radius) * .6); background: var(--good-grad); color: #fff; }
+.dzs-today small { font-size: 11.5px; } .dzs-today b { font-family: var(--font-display); font-size: 26px; line-height: 1.1; }
+.dzs-card { display: grid; gap: 4px; padding: 8px 10px; border-radius: calc(var(--radius) * .6); background: var(--surface); box-shadow: var(--card-shadow); border: 1px solid var(--line); min-width: 0; }
+.dzs-card > b { font-family: var(--font-display); font-size: 15px; }
+.dzs-muted { color: var(--muted); font-size: 12.5px; }
+.dzs-chips { display: flex; flex-wrap: wrap; gap: 4px; } .dzs-chips i { font-style: normal; color: #fff; font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 999px; }
+.dzs-btns { display: flex; flex-wrap: wrap; gap: 4px; } .dzs-btns .btn { padding: 3px 9px; font-size: 12px; pointer-events: none; }
+.dzwarn { margin: 0; padding: 8px 10px; border-radius: 12px; background: var(--danger-soft); color: var(--danger); font-weight: 700; font-size: 14px; }
+.dzcolors { display: grid; gap: 6px; }
+.dzc { display: flex; align-items: center; gap: 10px; min-height: 44px; }
+.dzc span { flex: 1; min-width: 0; display: grid; } .dzc small { color: var(--muted); font-size: 12.5px; }
+.dzc .dzre, .dzr .dzre { flex: none; border: 0; background: var(--surface-2); color: var(--muted); width: 40px; height: 40px; border-radius: 50%; font-size: 18px; }
+.dzc .dzre[hidden], .dzr .dzre[hidden] { display: block; visibility: hidden; }
+.dzc .dzsw1 { flex: none; width: 44px; height: 44px; border-radius: 50%; border: 2px solid var(--line); box-shadow: inset 0 0 0 2px var(--surface); padding: 0; }
+.dzc > span b { cursor: pointer; }
+.dzpick { display: grid; gap: 10px; padding: 10px; border-radius: 16px; background: var(--surface-2); margin-bottom: 4px; }
+.dzswatches { display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 6px; }
+.dzswatches button { aspect-ratio: 1; min-height: 26px; border-radius: 50%; border: 1px solid var(--line); padding: 0; }
+.dzhsl { display: grid; gap: 2px; font-size: 13.5px; font-weight: 700; }
+.dzhsl input { width: 100%; accent-color: var(--brand2); }
+.dzpickfoot { display: flex; gap: 8px; align-items: center; justify-content: space-between; }
+.dzhex { width: 7.5em; font-family: monospace; text-align: center; }
+.dzsub { font-size: 15px; }
+.dzfonts { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 8px; }
+.dzfonts button { padding: 8px 6px; border-radius: 14px; border: 2px solid var(--line); background: var(--surface-2); color: var(--fg); font-size: 17px; line-height: 1.2; display: grid; gap: 2px; }
+.dzfonts button small { font-family: var(--font-body); font-size: 11.5px; color: var(--muted); }
+.dzfonts button[aria-pressed="true"] { border-color: var(--brand2); box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand2) 25%, transparent); }
+.dzranges { display: grid; gap: 12px; }
+.dzr { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 2px 8px; }
+.dzr label { font-weight: 700; display: flex; justify-content: space-between; gap: 8px; } .dzr label output { color: var(--muted); font-weight: 600; }
+.dzr input[type="range"] { grid-column: 1; width: 100%; accent-color: var(--brand2); }
+.dzr .dzre { grid-row: 1 / span 2; grid-column: 2; }
+.dzlist { display: grid; gap: 8px; }
+.dzitem { display: grid; gap: 6px; padding: 10px 12px; border-radius: 16px; background: var(--surface-2); }
+.dzitem .dzsw { display: flex; gap: 3px; } .dzitem .dzsw i { width: 18px; height: 18px; border-radius: 50%; border: 1px solid var(--line); }
+.dzitem small { color: var(--muted); }
+.dzitem .actions { display: flex; flex-wrap: wrap; gap: 6px; } .dzitem .btn { padding: 6px 12px; font-size: 14px; }
+.dzact { display: flex; flex-wrap: wrap; gap: 8px; }
+.dzpill { position: fixed; z-index: 30; inset-inline-start: 12px; bottom: calc(112px + env(safe-area-inset-bottom)); border: 0; border-radius: 999px; padding: 9px 14px; background: var(--brand); color: #fff; font: inherit; font-weight: 700; box-shadow: var(--shadow); }
+dialog.alarm.star { background: radial-gradient(circle at 20% 0%, rgba(255, 255, 255, .35) 0, transparent 40%), linear-gradient(160deg, #ff7aa8, #c84bd6 55%, #6c4cf0); }
+.star .signs { animation: steam 2.4s ease-in-out infinite; }
+.star p { border: 3px solid rgba(255, 255, 255, .75); background: rgba(255, 255, 255, .14); font-weight: 700; }
+.star .btn { color: #8c2fb8; }
 @keyframes steam { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
 .newsheet li { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: start; background: var(--surface-2); border-radius: 14px; padding: 10px 12px; }
 .newsheet li > span { font-size: 22px; line-height: 1.2; }
@@ -1690,6 +1835,7 @@ html.hugetext .season3 svg { width: 70px; height: 21px; }
     <button class="setlink" type="button" id="openAdmin" hidden><span aria-hidden="true">🛠️</span><span><b>לוח מנהל</b><small>משתמשים, גרסאות, משובים והודעה לכולם</small></span><span aria-hidden="true">‹</span></button>
     <button class="setlink" type="button" id="openGuide"><span aria-hidden="true">📖</span><span><b>מדריך לאפליקציה <span class="gnew" id="guideNewPill" hidden>חדש</span></b><small>איך משתמשים בכל דבר ומה אפשר לשנות</small></span><span aria-hidden="true">‹</span></button>
     <button class="setlink" type="button" id="openNews"><span aria-hidden="true">✨</span><span><b>מה חדש</b><small>מה נוסף לאפליקציה לאחרונה</small></span><span aria-hidden="true">‹</span></button>
+    <button class="setlink" type="button" id="openDesign" hidden><span aria-hidden="true">🖌️</span><span><b>עורך העיצוב</b><small>צבעים, גופנים, גדלים ופינות של האפליקציה לכולם</small></span><span aria-hidden="true">‹</span></button>
     <button class="setlink" type="button" id="openLook"><span aria-hidden="true">🎨</span><span><b>עיצוב וצבעים</b><small>מצב בהיר או כהה, וצבע הרקע</small></span><span aria-hidden="true">‹</span></button>
     <section class="panel" aria-labelledby="setH">
       <h2 id="setH" class="pc-gray" data-e="🛠️">כללי</h2>
@@ -1848,6 +1994,64 @@ html.hugetext .season3 svg { width: 70px; height: 21px; }
       <label class="check" for="hapticOn"><input type="checkbox" id="hapticOn"> 📳 רטט קצר כשרושמים הוצאה או משמרת</label>
       <label class="check" for="confettiOn"><input type="checkbox" id="confettiOn"> 🎉 קונפטי כשמשהו טוב קורה (הישג, יעד, אתגר)</label>
       <p class="hint">נשמר במכשיר הזה.</p>
+    </section>
+  </div>
+
+  <div class="viewcol" id="viewDesign" hidden>
+    <div class="sethead">
+      <button class="btn" type="button" id="dzBack">→ חזרה</button>
+      <h2 class="settitle">🖌️ עורך העיצוב</h2>
+    </div>
+    <div class="dzlead"><b id="dzLead">כל שינוי מופיע מיד, רק אצלך.</b><small id="dzSub"></small></div>
+    <div class="dzmode" role="group" aria-label="איזה מצב עורכים">
+      <button type="button" data-dzmode="L" aria-pressed="true">☀️ עורכים את הבהיר</button>
+      <button type="button" data-dzmode="D" aria-pressed="false">🌙 עורכים את הכהה</button>
+    </div>
+    <div class="dzprev" id="dzPrev">
+      <div class="dzsample" aria-hidden="true">
+        <div class="dzs-today"><small>מותר לך להוציא היום</small><b>₪132</b></div>
+        <div class="dzs-card"><b>🛍️ כרטיס לדוגמה</b><span class="dzs-muted">טקסט משני</span>
+          <span class="dzs-chips"><i style="background:var(--accent)">חיסכון</i><i style="background:var(--spend)">הוצאה</i><i style="background:var(--must)">חובה</i><i style="background:var(--danger)">אזהרה</i></span>
+          <span class="dzs-btns"><span class="btn primary">💸 כפתור ראשי</span><span class="btn">כפתור</span></span></div>
+      </div>
+      <p class="dzwarn" id="dzWarn" hidden></p>
+    </div>
+    <section class="panel" id="dzPendBox" aria-labelledby="dzPendH" hidden>
+      <h2 id="dzPendH" class="pc-orange" data-e="⏳">מחכה לאישור</h2>
+      <div class="dzlist" id="dzPend"></div>
+    </section>
+    <section class="panel" aria-labelledby="dzColH">
+      <h2 id="dzColH" class="pc-pink" data-e="🎨"><span class="h2t">צבעים <span id="dzModeName">(מצב בהיר)</span></span></h2>
+      <p class="hint">לוחצים על עיגול ובוחרים צבע. ↺ מחזיר את הצבע המקורי.</p>
+      <div class="dzcolors" id="dzColors"></div>
+    </section>
+    <section class="panel" aria-labelledby="dzBrandH">
+      <h2 id="dzBrandH" class="pc-violet" data-e="🌈">צבעי המותג</h2>
+      <p class="hint">אותם צבעים במצב בהיר ובכהה.</p>
+      <div class="dzcolors" id="dzBrand"></div>
+    </section>
+    <section class="panel" aria-labelledby="dzFontH">
+      <h2 id="dzFontH" class="pc-blue" data-e="🔤">גופנים</h2>
+      <b class="dzsub">גופן הטקסט</b>
+      <div class="dzfonts" id="dzFont"></div>
+      <b class="dzsub">גופן הכותרות והמספרים הגדולים</b>
+      <div class="dzfonts" id="dzFontD"></div>
+    </section>
+    <section class="panel" aria-labelledby="dzShapeH">
+      <h2 id="dzShapeH" class="pc-mint" data-e="📐">גדלים, ריווח, פינות וצל</h2>
+      <div class="dzranges" id="dzRanges"></div>
+    </section>
+    <section class="panel" aria-labelledby="dzSendH">
+      <h2 id="dzSendH" class="pc-yellow" data-e="🚀"><span class="h2t" id="dzSendT">פרסום</span></h2>
+      <p class="hint" id="dzSendHint"></p>
+      <label for="dzNote" id="dzNoteL">הערה (לא חובה)<input type="text" id="dzNote" maxlength="300" placeholder="למשל: צבעים רכים יותר לסתיו 🍂"></label>
+      <div class="actions dzact"><button class="btn primary" type="button" id="dzSend"></button><button class="btn" type="button" id="dzDrop">↺ ביטול הטיוטה</button><button class="btn" type="button" id="dzOrig">התחלה מהעיצוב המקורי</button></div>
+      <p class="hint" id="dzState" role="status"></p>
+    </section>
+    <section class="panel" aria-labelledby="dzHistH">
+      <h2 id="dzHistH" class="pc-gray" data-e="🕘">גרסאות קודמות</h2>
+      <p class="hint" id="dzHistHint"></p>
+      <div class="dzlist" id="dzHist"></div>
     </section>
   </div>
 
@@ -2157,6 +2361,7 @@ html.hugetext .season3 svg { width: 70px; height: 21px; }
   </form>
 </dialog>
 
+<button class="dzpill" type="button" id="dzPill" hidden>🖌️ זו טיוטת עיצוב · לעורך</button>
 <dialog class="sheet alarm" id="pmSheet" aria-labelledby="pmH">
   <form method="dialog">
     <div class="signs" aria-hidden="true">🛑⛔⚠️🚫</div>
@@ -7335,20 +7540,24 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   // ---- Pages ----
   let view = "main";
   function setView(v, fromHash) {
-    view = ["shifts", "calendar", "friends", "settings", "look", "admin", "guide"].includes(v) ? v : "main";
+    const was = view;
+    view = ["shifts", "calendar", "friends", "settings", "look", "admin", "guide", "design"].includes(v) ? v : "main";
     if (view === "shifts" && isSalaried()) view = "main";
+    try { if (view === "design" && !isDesigner()) view = "settings"; } catch (e) { if (view === "design") view = "settings"; }
     if (view !== "main" && layEditing) exitLayEdit(false);
     $("viewMain").hidden = view !== "main";
     $("viewSettings").hidden = view !== "settings";
     $("viewLook").hidden = view !== "look";
     $("viewAdmin").hidden = view !== "admin";
     $("viewGuide").hidden = view !== "guide";
+    $("viewDesign").hidden = view !== "design";
+    try { if (was === "design" && view !== "design") dzLeave(); if (view === "design") dzOpen(); else designSync(); } catch (e) {}
     if (view === "admin") renderAdmin();
     if (view === "guide") renderGuide();
     $("bcast").hidden = view !== "main" || !bcastShown;
     if (view === "look") { renderPalettes(); renderAccents(); }
-    $("gearBtn").setAttribute("aria-pressed", String(["settings", "look", "admin", "guide"].includes(view)));
-    document.body.classList.toggle("onsettings", ["settings", "look", "admin", "guide"].includes(view));
+    $("gearBtn").setAttribute("aria-pressed", String(["settings", "look", "admin", "guide", "design"].includes(view)));
+    document.body.classList.toggle("onsettings", ["settings", "look", "admin", "guide", "design"].includes(view));
     if (view === "settings") { renderLayList(); guideSync(); }
     $("viewShifts").hidden = view !== "shifts";
     $("viewCal").hidden = view !== "calendar";
@@ -7366,7 +7575,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   // ---- Settings screen (the gear at the top) ----
   let viewBeforeSettings = "main";
   $("gearBtn").addEventListener("click", () => {
-    if (["settings", "look", "admin", "guide"].includes(view)) { setView(viewBeforeSettings); return; }
+    if (["settings", "look", "admin", "guide", "design"].includes(view)) { setView(viewBeforeSettings); return; }
     viewBeforeSettings = view; setView("settings");
   });
   $("setBack").addEventListener("click", () => setView(viewBeforeSettings));
@@ -7528,7 +7737,16 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       "הודעה לכל המשתמשים, גם כהתראה בטלפון.",
       "משתמשים: מתי כל אחד היה פעיל ונכנס, איזו גרסה מותקנת, בלי סכומים.",
       "השבוע באפליקציה, שימוש בעוזר, תקלות שקרו אצל משתמשים, מי חבר של מי, ומשובים עם סיכום לנושאים."
-    ], go: ["admin", "🛠️ ללוח המנהל"] }
+    ], go: ["admin", "🛠️ ללוח המנהל"] },
+    { id: "design", e: "🖌️", t: "עורך העיצוב", d: "2026-10-18", w: "dzn", body: [
+      "בהגדרות ← *🖌️ עורך העיצוב*. פתוח רק לשמואל ולשני.",
+      "משנים צבעים (לבהיר ולכהה בנפרד), צבעי מותג, גופנים, גודל כותרות, ריווח, פינות וצל. כל שינוי מופיע מיד בכל האפליקציה, רק בטלפון הזה, עד שמפרסמים.",
+      "בזמן העריכה הצבעים האישיים מ״עיצוב וצבעים״ מושהים, כדי לראות את העיצוב עצמו. כשיוצאים בלי שינוי הם חוזרים.",
+      "*📨 שליחה לשמואל לאישור*: העיצוב של שני עולה לכולם רק אחרי ששמואל מאשר. שמואל מקבל הודעה, ושני מקבלת הודעה כשהוא מחליט.",
+      "*🚀 פרסום לכולם* (שמואל): עולה מיד. מי שבחר לעצמו צבע רקע או מבטא ממשיך לראות את הבחירה שלו.",
+      "טקסט שלא ייקרא על הרקע חוסם את הפרסום, ככה שאי אפשר לשבור את האפליקציה.",
+      "*🕘 גרסאות קודמות*: 👀 מציג גרסה אצלך בלבד, ו־״↩ להחזיר לכולם״ מחזיר אותה. ״התחלה מהעיצוב המקורי״ מתחיל מאפס."
+    ], go: ["design", "🖌️ לעורך העיצוב"] }
   ];
   function guideWho(w) {
     const app = !!window.BudgetApp, pt = payType();
@@ -7541,6 +7759,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     if (w === "sal") return pt === "salary" || pt === "both";
     if (w === "both") return pt === "both";
     if (w === "adm") return isAdmin();
+    if (w === "dzn") return isDesigner();
     return true;
   }
   const guideNew = (d) => { const t = todayStr(); return !!d && t >= d && t < dateAdd(d, GUIDE_NEW_DAYS); };
@@ -7559,7 +7778,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   }
   function guideGo(where) {
     if (where === "admin" && !isAdmin()) return;
-    if (where === "settings" || where === "look" || where === "admin") { setView(where); return; }
+    if (where === "settings" || where === "look" || where === "admin" || where === "design") { setView(where); return; }
     viewBeforeSettings = where; setView(where);
   }
   function guideSync() {
@@ -7886,6 +8105,267 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   const VIP_IDS = []; // Shani removed from VIP by the owner, 2026-10-15
   function isVip() { return !!(user && VIP_IDS.includes(user.id)); }
   const isEarly = () => isAdmin() || isVip();
+
+  // ---- Design editor (⚙️ ← 🖌️ עורך העיצוב): only the owner and Shani. Changes show at once on this phone only (a draft);
+  // the owner publishes to everyone, Shani's design waits for his approval (table app_designs, rpc design_submit/decide/restore).
+  const SHANI_ID = "51ee3304-84e8-4ee2-ac0c-c9ac75ed5b6d";
+  const DESIGNERS = [OWNER_ID, SHANI_ID];
+  const DZ_NAMES = { [OWNER_ID]: "שמואל", [SHANI_ID]: "שני" };
+  const isDesigner = () => !!(user && DESIGNERS.includes(user.id));
+  const dzKey = (v) => JSON.stringify(DS.clean(v));
+  function dzSaveDraft(v) { try { localStorage.setItem("budget-design-draft", JSON.stringify({ v: DS.clean(v) })); } catch (e) {} }
+  function dzDropDraft() { try { localStorage.removeItem("budget-design-draft"); } catch (e) {} }
+  function dzRepaint() { DS.apply(DS.current()); BP.apply(); BP.applyAccent(); }
+  function designSync() {
+    $("openDesign").hidden = !isDesigner();
+    $("dzPill").hidden = !isDesigner() || !DS.draft() || view === "design";
+  }
+  $("dzPill").addEventListener("click", () => setView("design"));
+  async function loadLiveDesign() {
+    if (!sb) return;
+    try {
+      const { data, error } = await sb.from("app_designs").select("id, vars").eq("status", "live").order("id", { ascending: false }).limit(1);
+      if (error) return;
+      const v = DS.clean(data && data[0] ? data[0].vars : {});
+      try { localStorage.setItem("budget-design", JSON.stringify(v)); } catch (e) {}
+      if (!DS.draft()) dzRepaint();
+    } catch (e) {}
+  }
+
+  const DZ_COLORS = [
+    ["bg", "רקע המסך", ""], ["surface", "רקע הכרטיסים", ""], ["surface2", "רקע משני", "שדות, תגיות ומספרים בכותרות"],
+    ["fg", "צבע הטקסט", ""], ["muted", "טקסט משני", "הסברים קטנים"], ["line", "קווים ומסגרות", ""],
+    ["accent", "ירוק של חיסכון", "כסף שנשאר והכנסות"], ["spend", "כתום של הוצאות", ""], ["must", "סגול של חובה", "חיובים קבועים"], ["danger", "אדום של אזהרה", "חריגה ומחיקה"]
+  ];
+  const DZ_BRAND = [
+    ["brand1", "צבע מותג 1", "תחילת הפס הצבעוני של הכפתורים והלוגו"], ["brand2", "צבע מותג 2", "אמצע הפס, וגם מה שמסומן"], ["brand3", "צבע מותג 3", "סוף הפס"],
+    ["good1", "״מותר לך היום״ 1", "הכרטיס הגדול כשהכול בסדר"], ["good2", "״מותר לך היום״ 2", ""], ["good3", "״מותר לך היום״ 3", ""]
+  ];
+  const DZ_RANGES = [
+    ["title", "גודל כותרות הכרטיסים", "px"], ["radius", "פינות הכרטיסים", "px"], ["btnr", "פינות הכפתורים", "px"],
+    ["pad", "ריווח בתוך הכרטיסים", "px"], ["gapIn", "רווח בין שורות בכרטיס", "px"], ["shadow", "עוצמת הצל", "%"]
+  ];
+  const DZ_SWATCH = ["#ffffff", "#fff6ee", "#fdf3ea", "#fff1f5", "#f3f0ff", "#eefaf5", "#f1f5f9", "#2b2238", "#17121f", "#000000",
+    "#ef5a33", "#f97316", "#f59e0b", "#eab308", "#84cc16", "#10b981", "#14b8a6", "#0ea5b7", "#3b82f6", "#6366f1",
+    "#7a46de", "#a855f7", "#d946ef", "#ec4899", "#db3577", "#e11d48", "#d02c4c", "#8b5e3c", "#6e6481", "#94a3b8"];
+  let dz = null, dzThemeWas = null, dzRows = [];
+
+  const dzHsl = (hex) => {
+    const n = parseInt(hex.slice(1), 16), r = (n >> 16) / 255, g = ((n >> 8) & 255) / 255, b = (n & 255) / 255;
+    const mx = Math.max(r, g, b), mn = Math.min(r, g, b), l = (mx + mn) / 2, d = mx - mn;
+    let h = 0, s = 0;
+    if (d) { s = d / (1 - Math.abs(2 * l - 1)); h = mx === r ? ((g - b) / d) % 6 : mx === g ? (b - r) / d + 2 : (r - g) / d + 4; h = (h * 60 + 360) % 360; }
+    return [Math.round(h), Math.round(s * 100), Math.round(l * 100)];
+  };
+  const dzHex = (h, s, l) => {
+    s /= 100; l /= 100;
+    const k = (n) => (n + h / 30) % 12, a = s * Math.min(l, 1 - l);
+    const f = (n) => Math.round((l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)))) * 255).toString(16).padStart(2, "0");
+    return "#" + f(0) + f(8) + f(4);
+  };
+  const dzLum = (hex) => {
+    const n = parseInt(hex.slice(1), 16);
+    return [n >> 16, (n >> 8) & 255, n & 255].map((c) => { c /= 255; return c <= .03928 ? c / 12.92 : Math.pow((c + .055) / 1.055, 2.4); })
+      .reduce((s, c, i) => s + c * [.2126, .7152, .0722][i], 0);
+  };
+  const dzRatio = (a, b) => { const x = dzLum(a), y = dzLum(b); return (Math.max(x, y) + .05) / (Math.min(x, y) + .05); };
+  // Problems that would make the app hard to read; "block" ones stop publishing
+  function dzCheck(v) {
+    const out = [];
+    ["L", "D"].forEach((m) => {
+      const g = (k) => DS.get(v, k, m), nm = m === "L" ? "במצב בהיר" : "במצב כהה";
+      if (dzRatio(g("fg"), g("bg")) < 3 || dzRatio(g("fg"), g("surface")) < 3) out.push({ block: true, t: "⛔ הטקסט כמעט לא נקרא על הרקע " + nm + ". צריך טקסט כהה יותר או רקע בהיר יותר (או להפך)." });
+      else if (dzRatio(g("muted"), g("surface")) < 2.2) out.push({ t: "⚠️ הטקסט המשני חלש מדי " + nm + "." });
+    });
+    if (dzRatio("#ffffff", DS.get(v, "brand2")) < 2) out.push({ t: "⚠️ טקסט לבן על הכפתורים הראשיים כמעט לא בולט. כדאי צבע מותג כהה יותר." });
+    return out;
+  }
+
+  function dzChanged() {
+    dzSaveDraft(dz.v); dzRepaint(); dzPaint();
+  }
+  function dzSet(k, val, m) {
+    if (m) { dz.v[m] = Object.assign({}, dz.v[m]); if (val == null) delete dz.v[m][k]; else dz.v[m][k] = val; }
+    else if (val == null) delete dz.v[k]; else dz.v[k] = val;
+    dz.v = DS.clean(dz.v); dzChanged();
+  }
+  function dzMode(m) {
+    dz.mode = m;
+    document.documentElement.setAttribute("data-theme", m === "D" ? "dark" : "light");
+    dzRepaint(); dzBuild();
+  }
+  function dzColorRow(box, k, label, sub, m) {
+    const row = document.createElement("div"); row.className = "dzc";
+    const sw = document.createElement("button"); sw.type = "button"; sw.className = "dzsw1"; sw.setAttribute("aria-label", "לבחור " + label);
+    const txt = document.createElement("span"); const b = document.createElement("b"); b.textContent = label; txt.append(b);
+    if (sub) { const s = document.createElement("small"); s.textContent = sub; txt.append(s); }
+    const re = document.createElement("button"); re.type = "button"; re.className = "dzre"; re.textContent = "↺"; re.setAttribute("aria-label", "להחזיר את הצבע המקורי");
+    row.append(sw, txt, re); box.append(row);
+    row.dzPaint = () => {
+      const c = DS.get(dz.v, k, m), changed = c !== (m ? DS.DEF[m][k] : DS.DEF[k]);
+      sw.style.background = c; re.hidden = !changed;
+    };
+    re.addEventListener("click", () => { dzSet(k, null, m); const p = row.nextElementSibling; if (p && p.classList.contains("dzpick")) dzPicker(row, k, m, true); });
+    sw.addEventListener("click", () => dzPicker(row, k, m));
+    b.addEventListener("click", () => dzPicker(row, k, m));
+  }
+  // A small picker under the row: ready colors, then hue / strength / light sliders
+  function dzPicker(row, k, m, refresh) {
+    const open = row.nextElementSibling && row.nextElementSibling.classList.contains("dzpick") ? row.nextElementSibling : null;
+    document.querySelectorAll(".dzpick").forEach((p) => { if (p !== open || !refresh) p.remove(); });
+    if (open && !refresh) return;
+    if (open && refresh) open.remove();
+    const p = document.createElement("div"); p.className = "dzpick";
+    const grid = document.createElement("div"); grid.className = "dzswatches";
+    DZ_SWATCH.forEach((c) => { const b = document.createElement("button"); b.type = "button"; b.style.background = c; b.setAttribute("aria-label", c); b.addEventListener("click", () => pick(c, true)); grid.append(b); });
+    p.append(grid);
+    const sl = {};
+    [["h", "גוון", 360], ["s", "עוצמה", 100], ["l", "בהירות", 100]].forEach(([id, nm, max]) => {
+      const lb = document.createElement("label"); lb.className = "dzhsl"; lb.textContent = nm;
+      const r = document.createElement("input"); r.type = "range"; r.min = "0"; r.max = String(max); r.step = "1";
+      r.addEventListener("input", () => pick(dzHex(+sl.h.value, +sl.s.value, +sl.l.value), false));
+      lb.append(r); p.append(lb); sl[id] = r;
+    });
+    const hx = document.createElement("input"); hx.type = "text"; hx.className = "dzhex"; hx.maxLength = 7; hx.dir = "ltr"; hx.setAttribute("aria-label", "קוד צבע");
+    hx.addEventListener("change", () => { const c = hx.value.trim().replace(/^([0-9a-f]{6})$/i, "#$1"); if (/^#[0-9a-f]{6}$/i.test(c)) pick(c.toLowerCase(), true); else hx.value = cur(); });
+    const done = document.createElement("button"); done.type = "button"; done.className = "btn"; done.textContent = "✓ סגירה"; done.addEventListener("click", () => p.remove());
+    const foot = document.createElement("div"); foot.className = "dzpickfoot"; foot.append(hx, done); p.append(foot);
+    const cur = () => DS.get(dz.v, k, m);
+    const sync = (all) => { const c = cur(); hx.value = c; if (all) { const [h, s, l] = dzHsl(c); sl.h.value = h; sl.s.value = s; sl.l.value = l; } };
+    function pick(c, all) { dzSet(k, c, m); sync(all); }
+    sync(true); row.after(p);
+  }
+  function dzFonts(box, key, list) {
+    box.textContent = "";
+    list.forEach((f) => {
+      const b = document.createElement("button"); b.type = "button"; b.dataset.font = f;
+      b.style.fontFamily = '"' + f + '", Rubik, sans-serif';
+      b.textContent = "אבג 123"; const s = document.createElement("small"); s.textContent = f === "Rubik" ? "Rubik (המקורי)" : f; b.append(s);
+      b.addEventListener("click", () => dzSet(key, f === DS.DEF[key] ? null : f));
+      box.append(b);
+    });
+  }
+  function dzBuild() {
+    $("dzModeName").textContent = dz.mode === "D" ? "(מצב כהה)" : "(מצב בהיר)";
+    document.querySelectorAll("[data-dzmode]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.dzmode === dz.mode)));
+    const c = $("dzColors"); c.textContent = ""; DZ_COLORS.forEach(([k, l, s]) => dzColorRow(c, k, l, s, dz.mode));
+    const br = $("dzBrand"); br.textContent = ""; DZ_BRAND.forEach(([k, l, s]) => dzColorRow(br, k, l, s, null));
+    const all = Object.keys(DS.FONTS);
+    dzFonts($("dzFont"), "font", all.filter((f) => !DS.TITLE_ONLY.includes(f)));
+    dzFonts($("dzFontD"), "fontD", all);
+    const rg = $("dzRanges"); rg.textContent = "";
+    DZ_RANGES.forEach(([k, label, unit]) => {
+      const w = document.createElement("div"); w.className = "dzr";
+      const lb = document.createElement("label"); lb.htmlFor = "dzr-" + k; lb.textContent = label; const o = document.createElement("output"); lb.append(o);
+      const r = document.createElement("input"); r.type = "range"; r.id = "dzr-" + k; r.min = String(DS.NUM[k][0]); r.max = String(DS.NUM[k][1]); r.step = "1";
+      const re = document.createElement("button"); re.type = "button"; re.className = "dzre"; re.textContent = "↺"; re.setAttribute("aria-label", "להחזיר למקורי");
+      w.append(lb, re, r); rg.append(w);
+      w.dzPaint = () => { const v = DS.get(dz.v, k); r.value = String(v); o.textContent = k === "btnr" && v >= 31 ? "עגול" : v + unit; re.hidden = v === DS.DEF[k]; };
+      r.addEventListener("input", () => dzSet(k, +r.value === DS.DEF[k] ? null : +r.value));
+      re.addEventListener("click", () => dzSet(k, null));
+    });
+    dzPaint();
+  }
+  function dzPaint() {
+    document.querySelectorAll("#viewDesign .dzc, #viewDesign .dzr").forEach((r) => r.dzPaint && r.dzPaint());
+    $("dzFont").querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.font === DS.get(dz.v, "font"))));
+    $("dzFontD").querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.font === DS.get(dz.v, "fontD"))));
+    const probs = dzCheck(dz.v);
+    $("dzWarn").hidden = !probs.length; $("dzWarn").textContent = probs.map((p) => p.t).join(" ");
+    const same = dzKey(dz.v) === dzKey(DS.read("budget-design") || {});
+    $("dzSend").disabled = same || probs.some((p) => p.block);
+    $("dzDrop").disabled = same;
+    $("dzSub").textContent = same ? "עכשיו מוצג העיצוב שכולם רואים." : "עכשיו מוצגת הטיוטה שלך. אחרים רואים אותה רק אחרי פרסום.";
+  }
+  function dzOpen() {
+    if (!dz) {
+      const d = DS.draft();
+      dz = { v: DS.clean(d ? d.v : DS.read("budget-design") || {}), mode: BP.isDark() ? "D" : "L" };
+      dzThemeWas = document.documentElement.getAttribute("data-theme");
+    }
+    if (!$("dzAllFonts")) { const ln = document.createElement("link"); ln.id = "dzAllFonts"; ln.rel = "stylesheet"; ln.href = DS.fontsUrl(Object.keys(DS.FONTS)); document.head.append(ln); }
+    dzSaveDraft(dz.v);
+    document.documentElement.setAttribute("data-theme", dz.mode === "D" ? "dark" : "light");
+    dzRepaint();
+    const own = isAdmin();
+    $("dzSendT").textContent = own ? "פרסום לכולם" : "שליחה לאישור";
+    $("dzSend").textContent = own ? "🚀 פרסום לכולם" : "📨 שליחה לשמואל לאישור";
+    $("dzSendHint").textContent = own ? "העיצוב עולה מיד לכל המשתמשים. מי שבחר לעצמו צבע רקע או מבטא ב״עיצוב וצבעים״ ימשיך לראות את הבחירה שלו. תמיד אפשר לחזור לגרסה קודמת למטה."
+      : "שמואל יקבל הודעה, והעיצוב יעלה לכולם רק אחרי שיאשר. עד אז רק את רואה אותו.";
+    $("dzHistHint").textContent = own ? "👀 מציג גרסה כטיוטה אצלך בלבד. ״↩ להחזיר לכולם״ מעלה אותה שוב לכולם." : "👀 מציג גרסה כטיוטה, ואפשר להמשיך לערוך ממנה.";
+    $("dzState").textContent = "";
+    dzBuild(); dzLoadRows(); designSync();
+  }
+  // leaving the editor: an unchanged draft is dropped, and the phone's own light/dark comes back
+  function dzLeave() {
+    if (!dz) return;
+    if (dzKey(dz.v) === dzKey(DS.read("budget-design") || {})) dzDropDraft();
+    if (dzThemeWas) document.documentElement.setAttribute("data-theme", dzThemeWas); else document.documentElement.removeAttribute("data-theme");
+    dz = null; document.querySelectorAll(".dzpick").forEach((p) => p.remove());
+    dzRepaint(); designSync();
+  }
+  function dzLoadInto(v, msg) {
+    dz.v = DS.clean(v); dzChanged(); $("dzState").textContent = msg || "";
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+  const dzWhen = (iso) => { const d = new Date(iso); return d.toLocaleDateString("he-IL", { day: "numeric", month: "numeric", timeZone: "Asia/Jerusalem" }) + " " + d.toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Jerusalem" }); };
+  function dzItem(r, btns) {
+    const it = document.createElement("div"); it.className = "dzitem";
+    const head = document.createElement("b"); head.textContent = (DZ_NAMES[r.author] || "") + " · " + dzWhen(r.created_at) + (r.status === "live" ? " · ✅ עכשיו אצל כולם" : r.status === "rejected" ? " · לא אושר" : "");
+    const sw = document.createElement("span"); sw.className = "dzsw";
+    ["bg", "surface", "fg", "accent"].forEach((k) => { const i = document.createElement("i"); i.style.background = DS.get(r.vars || {}, k, "L"); sw.append(i); });
+    ["brand1", "brand2", "brand3"].forEach((k) => { const i = document.createElement("i"); i.style.background = DS.get(r.vars || {}, k); sw.append(i); });
+    it.append(head, sw);
+    if (r.note) { const n = document.createElement("small"); n.textContent = "💬 " + r.note; it.append(n); }
+    if (!Object.keys(DS.clean(r.vars)).length) { const n = document.createElement("small"); n.textContent = "העיצוב המקורי"; it.append(n); }
+    const a = document.createElement("div"); a.className = "actions";
+    btns.forEach(([t, fn, cls]) => { const b = document.createElement("button"); b.type = "button"; b.className = "btn" + (cls ? " " + cls : ""); b.textContent = t; b.addEventListener("click", () => fn(b)); a.append(b); });
+    it.append(a); return it;
+  }
+  async function dzRpc(name, args, btn) {
+    if (btn) btn.disabled = true;
+    try { const { data, error } = await sb.rpc(name, args); if (error) throw error; return data || "ok"; }
+    catch (e) { $("dzState").textContent = "😕 לא הצליח, אולי אין אינטרנט. אפשר לנסות שוב."; return null; }
+    finally { if (btn) btn.disabled = false; }
+  }
+  async function dzAfterLive(msg) { await loadLiveDesign(); dzDropDraft(); if (dz) { dz.v = DS.clean(DS.read("budget-design") || {}); dzSaveDraft(dz.v); dzRepaint(); dzBuild(); } $("dzState").textContent = msg; dzLoadRows(); }
+  async function dzLoadRows() {
+    try {
+      const { data } = await sb.from("app_designs").select("id, author, vars, note, status, created_at").in("status", ["pending", "live", "old", "rejected"]).order("id", { ascending: false }).limit(30);
+      dzRows = data || [];
+    } catch (e) { dzRows = []; }
+    if (!dz) return;
+    const own = isAdmin(), pend = dzRows.filter((r) => r.status === "pending" && (own || r.author === user.id));
+    $("dzPendBox").hidden = !pend.length; $("dzPend").textContent = "";
+    pend.forEach((r) => $("dzPend").append(dzItem(r, own ? [
+      ["👀 תצוגה", () => dzLoadInto(r.vars, "👀 מוצג העיצוב של " + (DZ_NAMES[r.author] || "") + ". עדיין לא עלה לאף אחד.")],
+      ["✓ לאשר ולפרסם", async (b) => { if (await dzRpc("design_decide", { p_id: r.id, p_ok: true }, b)) dzAfterLive("🎉 העיצוב אושר ועלה לכולם."); }, "primary"],
+      ["✕ לא עכשיו", async (b) => { if (await dzRpc("design_decide", { p_id: r.id, p_ok: false }, b)) { $("dzState").textContent = "העיצוב לא פורסם. " + (DZ_NAMES[r.author] || "") + " תקבל הודעה."; dzLoadRows(); } }]
+    ] : [["👀 תצוגה", () => dzLoadInto(r.vars, "👀 זה העיצוב ששלחת. מחכה לאישור של שמואל.")]])));
+    const hist = dzRows.filter((r) => r.status === "live" || r.status === "old" || (r.status === "rejected" && r.author === user.id)).slice(0, 12);
+    $("dzHist").textContent = "";
+    if (!hist.length) { const p = document.createElement("p"); p.className = "hint"; p.textContent = "עוד לא פורסם עיצוב. עכשיו כולם רואים את העיצוב המקורי."; $("dzHist").append(p); }
+    hist.forEach((r) => {
+      const b = [["👀 תצוגה", () => dzLoadInto(r.vars, "👀 מוצגת גרסה קודמת, רק אצלך.")]];
+      if (own && r.status !== "live" && r.status !== "rejected") b.push(["↩ להחזיר לכולם", async (x) => { if (await dzRpc("design_restore", { p_id: r.id }, x)) dzAfterLive("↩ הגרסה הזו חזרה לכולם."); }]);
+      $("dzHist").append(dzItem(r, b));
+    });
+  }
+  document.querySelectorAll("[data-dzmode]").forEach((b) => b.addEventListener("click", () => dzMode(b.dataset.dzmode)));
+  $("dzBack").addEventListener("click", () => setView("settings"));
+  $("openDesign").addEventListener("click", () => setView("design"));
+  $("dzDrop").addEventListener("click", () => dzLoadInto(DS.read("budget-design") || {}, "↺ חזרנו לעיצוב שכולם רואים."));
+  $("dzOrig").addEventListener("click", () => dzLoadInto({}, "מוצג העיצוב המקורי של האפליקציה. אפשר לערוך ממנו."));
+  $("dzSend").addEventListener("click", async () => {
+    if (!dz || dzCheck(dz.v).some((p) => p.block)) return;
+    const own = isAdmin();
+    if (own && !confirm("לפרסם את העיצוב הזה לכל המשתמשים?")) return;
+    const res = await dzRpc("design_submit", { p_vars: DS.clean(dz.v), p_note: $("dzNote").value.trim() }, $("dzSend"));
+    if (!res) return;
+    $("dzNote").value = "";
+    if (res === "live") dzAfterLive("🚀 העיצוב עלה לכולם.");
+    else { $("dzState").textContent = "📨 נשלח! שמואל יקבל הודעה, והעיצוב יעלה לכולם אחרי שיאשר. 💅"; dzLoadRows(); }
+  });
   function vipSync() {
     $("vipCrown").hidden = !isVip();
     // gold is VIP-only: someone who lost VIP moves to the closest regular palette
@@ -7951,22 +8431,24 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     } catch (e) {}
   }
   // Each style: the decorations above and below the text
-  const PM_STYLES = { alarm: ["🛑⛔⚠️🚫", "🚧🚨🚧"], dimsum: ["🏮🥟🥢🥟🏮", "🧧 🥡 🍵 🥡 🧧"] };
+  const PM_STYLES = { alarm: ["🛑⛔⚠️🚫", "🚧🚨🚧"], dimsum: ["🏮🥟🥢🥟🏮", "🧧 🥡 🍵 🥡 🧧"], star: ["✨🎨💅✨", "💖 🌟 💖"] };
   function showPersonal(m) {
     const st = PM_STYLES[m.style] ? m.style : "alarm", deco = $("pmSheet").querySelectorAll(".signs");
     $("pmSheet").classList.toggle("dimsum", st === "dimsum");
+    $("pmSheet").classList.toggle("star", st === "star");
     deco[0].textContent = PM_STYLES[st][0]; deco[1].textContent = PM_STYLES[st][1];
     if (m.title) $("pmH").textContent = m.title;
     $("pmBody").textContent = m.body;
     const shift = /^shift:(\d{4}-\d{2}-\d{2})$/.exec(m.action || "");
-    $("pmAct").hidden = !shift; $("pmAct").textContent = "✍️ להכניס עכשיו";
+    const toDesign = m.action === "design" && isDesigner();
+    $("pmAct").hidden = !shift && !toDesign; $("pmAct").textContent = toDesign ? "🖌️ לעורך העיצוב" : "✍️ להכניס עכשיו";
     const done = async (then) => {
       closeDlg("pmSheet");
       if (m.id) try { await sb.from("personal_msgs").update({ seen_at: new Date().toISOString() }).eq("id", m.id); } catch (e) {}
       if (then) then(); else if (m.id) loadPersonal();
     };
     $("pmOk").onclick = () => done();
-    $("pmAct").onclick = () => done(() => window.openShiftFromApp(shift[1]));
+    $("pmAct").onclick = () => done(toDesign ? () => setView("design") : () => window.openShiftFromApp(shift[1]));
     document.querySelectorAll("dialog[open]").forEach((d) => { if (d.id !== "pmSheet") closeDlg(d.id); });
     openDlg("pmSheet"); buzz();
   }
@@ -9353,7 +9835,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     if (isNewUser()) { openWizard(); try { localStorage.setItem("budget-news", NEWS_ID); } catch (e) {} }
     else if (store.onboarded && !settings().gender) setTimeout(() => { if (!settings().gender) openDlg("genderSheet"); }, 800);
     else nextIntro();
-    $("openAdmin").hidden = !isAdmin(); vipSync();
+    $("openAdmin").hidden = !isAdmin(); vipSync(); designSync(); loadLiveDesign();
     aiFabSync();
     recordSeen(); loadBroadcast(); setTimeout(loadPersonal, 2500); showDonate(); loadFriends();
     payCheck(); pushKeySync(); layHintCount(); autoFold(); weeklyWin();
@@ -9418,6 +9900,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   if (/[?&](access_token|error_description)=/.test(location.search) && !location.hash)
     history.replaceState(null, "", location.pathname + "#" + location.search.slice(1));
   sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  loadLiveDesign();
   const here = () => location.origin + location.pathname;
   // Google's answer for the app lands on this page in the phone's browser, and a tap there opens the app
   const APP_RETURN = location.origin + location.pathname.replace(/[^/]*$/, "") + "app-return.html";
