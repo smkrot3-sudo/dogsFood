@@ -58,6 +58,10 @@ public class PayListener extends NotificationListenerService {
         "(?:יתרת?|היתרה|balance)[^0-9₪$\\n]{0,25}(?:₪|ש\"ח|ש״ח)?\\s?-?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s?(?:₪|ש\"ח|ש״ח|ILS)?", Pattern.CASE_INSENSITIVE);
     // A "merchant" that is only card digits ("כרטיס המסתיים ב-1234") is no merchant at all
     private static final Pattern CARD_BITS = Pattern.compile("^[0-9*xX•\\s-]+$|כרטיס|המסתיים|ספרות|אשראי");
+    // Google Wallet and some card apps put the shop's name in the title; a bank or card company name there is not a shop
+    private static final Pattern ISSUER = Pattern.compile(
+        "בנק|פועלים|לאומי|דיסקונט|מזרחי|הבינלאומי|ישראכרט|מקס|כאל|אמריקן|ביט|פייבוקס|התראה|חיוב|עסקה|כרטיס|תשלום|"
+        + "bank|max|cal|amex|isracard|leumi|hapoalim|discount|wallet|google|pay|bit|alert|[0-9₪$]", Pattern.CASE_INSENSITIVE);
     private static final Pattern MERCHANT = Pattern.compile(
         "(?:בבית העסק|בבית עסק|אצל|ב־|ב-|at )\\s*([^,.\\n:;]{2,40}?)(?=\\s*(?:בסך|בסכום|בתאריך|ביום|על סך|,|\\.|$|\\n|₪|[0-9]))");
 
@@ -128,6 +132,7 @@ public class PayListener extends NotificationListenerService {
             String cand = mm.group(1).trim();
             if (!CARD_BITS.matcher(cand).find()) { merchant = cand; break; }
         }
+        if (merchant.isEmpty() && title.length() >= 2 && title.length() <= 40 && !ISSUER.matcher(title).find()) merchant = title;
 
         long now = System.currentTimeMillis();
         // The same charge often comes twice (bank + card app, or an updated notification): one entry per amount per 15 minutes
