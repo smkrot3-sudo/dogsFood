@@ -3560,7 +3560,9 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       // No expense logged for 3+ days: the big number is probably too high, so it turns gray and says so
       let lastAct = "";
       allTx().forEach((r) => { const a = String(r.created_at || r.spent_on || "").slice(0, 10); if (a > lastAct && a <= today) lastAct = a; });
-      const quiet = lastAct ? daysBetween(lastAct, today) : 0;
+      // Nothing in this month or the last one (both are loaded): quiet at least since last month began, if the account is older
+      const older = Object.keys(store.months).some((k) => k < prevMonth(month));
+      const quiet = lastAct ? daysBetween(lastAct, today) : older && tx[prevMonth(month)] ? daysBetween(periodStart(prevMonth(month)), today) : 0;
       $("todayVal").classList.toggle("stale", quiet >= 3);
       $("todayStale").hidden = !(quiet >= 3);
       $("todayStale").textContent = quiet >= 3 ? "😶 לא רשמת הוצאות " + quiet + " ימים, המספר כנראה גבוה מדי." : "";
@@ -3583,6 +3585,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       else if (spent > spend) setV("bad", say("חרגת מהכסף החופשי ב־" + X(spent - spend) + ". עד סוף החודש: אפס בזבוזים.", "עברת את הכסף החופשי ב־" + X(spent - spend) + ". עדיף לעצור הוצאות עד סוף החודש.", "עברת את הכסף החופשי ב־" + X(spent - spend) + ". זה קורה. מעכשיו ננסה להוציא רק מה שחייבים 🙏"));
       else if (left < 0) setV("bad", say("חרגת היום ב־" + X(-left) + ". זה יורד מהתקציב של מחר.", "היום הוצאת " + X(-left) + " מעבר. זה יקטין קצת את התקציב של הימים הבאים.", "היום יצא קצת יותר (" + X(-left) + "). לא נורא, מחר מתחילים מחדש 🙂"));
       else if (runOut < days) { const dd = shortDate(dateAdd(periodStart(month), runOut - 1)); setV("warn", say("בקצב הזה הכסף נגמר ב־" + dd + ". תאט עכשיו, לא מחר.", "בקצב הזה הכסף ייגמר ב־" + dd + ". כדאי להאט.", "בקצב הזה הכסף ייגמר ב־" + dd + ". אם נאט קצת, נגיע לסוף החודש בשקט.")); }
+      else if (fc < 0 && dayNum >= 3 && $("todayFc").hidden === false) setV("warn", say("בקצב הזה תסיים את החודש במינוס. תאט קצת עכשיו.", "בקצב הזה החודש ייגמר קצת במינוס. כדאי להאט.", "בקצב הזה החודש ייגמר קצת במינוס. אם נאט קצת, נסיים בשקט 🙂"));
       else if (false && overCat) setV("warn", say(overCat.name + " בחריגה של " + X(overCat.over) + ". הכסף הזה יוצא מקטגוריה אחרת, אז מעכשיו " + overCat.name + " סגורה עד סוף החודש.", overCat.name + " עברה את התקציב שלה ב־" + X(overCat.over) + ". כדאי לא להוציא עליה יותר החודש.", overCat.name + " עברה קצת את התקציב (" + X(overCat.over) + "). ננסה לוותר עליה עד סוף החודש."));
       else if (!list.length) setV("warn", say("עוד לא רשמת אף הוצאה החודש. כל שקל שיוצא נרשם כאן, גם הקפה.", "עוד לא רשמת הוצאות החודש. כדאי לרשום כל הוצאה, גם קטנה.", "עוד לא רשמת הוצאות החודש. כל הוצאה שתרשום תעזור לראות את התמונה 🙂"));
       else setV("good", say("אתה בתוך התקציב. זו לא סיבה להתפנק.", "אתה בתוך התקציב. ככה ממשיכים.", "כל הכבוד, אתה בתוך התקציב! 🎉"));
@@ -8526,6 +8529,8 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   }
   function dblDone(msg) { store.dblAsked = true; persist(); closeDlg("dblSheet"); render(); renderPay(); sendAppPlans(); if (msg) snack(msg); }
   $("dblNo").addEventListener("click", () => dblDone(""));
+  // Closed without an answer: don't ask again on every open
+  $("dblSheet").addEventListener("close", () => { if (!store.dblAsked) { store.dblAsked = true; persist(); } });
   $("dblYes").addEventListener("click", () => { $("dblStep1").hidden = true; $("dblStep2").hidden = false; });
   $("dblKeepShifts").addEventListener("click", () => { commit(); const l = dblLine(); if (l) l.amount = 0; dblDone("מעכשיו נספרות רק המשמרות. אפשר לשנות ב״התוכנית של החודש״."); });
   $("dblKeepSal").addEventListener("click", () => { store.settings = { ...settings(), shiftIncome: "off" }; dblDone("מעכשיו נספרת רק המשכורת שרשמת. אפשר לשנות בהגדרות."); });
