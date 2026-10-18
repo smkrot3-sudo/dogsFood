@@ -1,6 +1,6 @@
 {
-  "updatedAt": "16.10.2026, 12:26",
-  "date": "2026-10-16",
+  "updatedAt": "17.10.2026, 11:58",
+  "date": "2026-10-17",
   "stats": {
     "withBarcode": 2361,
     "withoutBarcode": 0,
@@ -5226,7 +5226,7 @@
       "variant": "",
       "price": "19.90",
       "compareAtPrice": null,
-      "available": true,
+      "available": false,
       "vendor": "PetEx",
       "handle": "באדי-סנאק-חטיפי-ברווז-מיובשים-80-גרם",
       "url": "https://www.anipet.co.il/products/באדי-סנאק-חטיפי-ברווז-מיובשים-80-גרם",
@@ -56188,7 +56188,7 @@
       "variant": "",
       "price": "19.90",
       "compareAtPrice": null,
-      "available": true,
+      "available": false,
       "vendor": "PetEx",
       "handle": "באדי-סנאק-חטיפי-ברווז-מיובשים-80-גרם",
       "url": "https://www.anipet.co.il/products/באדי-סנאק-חטיפי-ברווז-מיובשים-80-גרם",
