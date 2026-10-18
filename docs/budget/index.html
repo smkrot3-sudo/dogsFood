@@ -3316,7 +3316,10 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     renderPay();
   }
 
-  function addTx(row) {
+  // When an expense was last typed in (even one dated in an older month), for the gray "nothing logged" number
+  const lastLogKey = () => "budget-lastlog-" + (user ? user.id : "local");
+  function addTx(row, auto) {
+    if (!auto) try { localStorage.setItem(lastLogKey(), todayStr()); } catch (e) {}
     const m = periodOf(row.spent_on);
     if (!sb || !user) {
       store.tx = store.tx || [];
@@ -3559,7 +3562,10 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       $("todayAside").textContent = aside > 0 ? "🐷 עוד " + fmt(aside) + " נשארו בצד עד סוף החודש. תעביר אותם לחיסכון." : "";
       // No expense logged for 3+ days: the big number is probably too high, so it turns gray and says so
       let lastAct = "";
-      allTx().forEach((r) => { const a = String(r.created_at || r.spent_on || "").slice(0, 10); if (a > lastAct && a <= today) lastAct = a; });
+      // charges the app adds by itself (monthly recurring, a friend's shared expense) don't count as logging
+      const autoIds = new Set((store.recurring || []).flatMap((r) => [month, prevMonth(month)].map((m) => stableId(r.id + "|" + m))));
+      allTx().forEach((r) => { if (autoIds.has(r.id) || (r.tags && r.tags.shared)) return; const a = String(r.created_at || r.spent_on || "").slice(0, 10); if (a > lastAct && a <= today) lastAct = a; });
+      try { const ll = localStorage.getItem(lastLogKey()) || ""; if (ll > lastAct && ll <= today) lastAct = ll; } catch (e) {}
       // Nothing in this month or the last one (both are loaded): quiet at least since last month began, if the account is older
       const older = Object.keys(store.months).some((k) => k < prevMonth(month));
       const quiet = lastAct ? daysBetween(lastAct, today) : older && tx[prevMonth(month)] ? daysBetween(periodStart(prevMonth(month)), today) : 0;
@@ -4121,7 +4127,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
         if (+s.slice(8) === Math.min(r.day, new Date(y, mo, 0).getDate())) { date = s; break; }
       }
       if (!date || date > today) return;
-      addTx({ id: stableId(r.id + "|" + cur), spent_on: date, amount: r.amount, category: r.category, note: r.note, created_at: new Date().toISOString() });
+      addTx({ id: stableId(r.id + "|" + cur), spent_on: date, amount: r.amount, category: r.category, note: r.note, created_at: new Date().toISOString() }, true);
       r.last = cur;
       changed = true;
     });
@@ -7169,7 +7175,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
         if (!p.tx_id) {
           const row = { id: uid(), spent_on: e.spent_on, amount: m2(p.share), category: frCat(p.cat), note, tags: { shared: e.id }, created_at: new Date().toISOString() };
           if (periodOf(row.spent_on) === month) commit();
-          addTx(row); p.tx_id = row.id; changed = true;
+          addTx(row, true); p.tx_id = row.id; changed = true;
           await sb.from("shared_parts").update({ tx_id: row.id }).eq("id", p.id);
         } else if (r && (Math.abs(r.amount - p.share) > 0.004 || r.spent_on !== e.spent_on || r.note !== note)) {
           updateTx(r, { ...r, amount: m2(p.share), spent_on: e.spent_on, note }); changed = true;
@@ -9582,12 +9588,13 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   function backCard(spend, spent, daysLeft, allowance, runOutDay) {
     const box = $("backCard");
     let hid = ""; try { hid = localStorage.getItem("budget-backhide") || ""; } catch (e) {}
-    const over = spend > 0 && spent > spend;
-    if (hid === month || !(over || runOutDay)) { box.hidden = true; return; }
+    const over = spend > 0 && spent > spend, empty = !over && Math.round(allowance) < 1;
+    if (hid === month || !(over || runOutDay || (empty && spend > 0))) { box.hidden = true; return; }
     $("backLead").textContent = over
       ? gx("החודש כבר עברת את הכסף החופשי. זה קורה, ולא סוף העולם. המטרה עכשיו היא רק לעצור את המינוס.")
+      : empty ? gx("הכסף החופשי של החודש כבר יצא. עד סוף החודש רק מה שחייבים, ככה לא נכנסים למינוס.")
       : gx("בקצב הזה הכסף ייגמר ב־" + runOutDay + ". אם תוציא עד " + fmt(allowance) + " ביום, תגיע לסוף החודש בשקט.");
-    const steps = over
+    const steps = over || empty
       ? ["עד סוף החודש רק מה שחייבים: אוכל בבית, נסיעות, חשבונות.", "כל ״רוצה״ נכנס לרשימת ״אולי אקנה״ ומחכה לחודש הבא.", "בוחרים 2 ימים בשבוע בלי שום הוצאה."]
       : ["השבוע: רק " + fmt(allowance) + " ביום, ולא יותר.", "כל ״רוצה״ נכנס קודם לרשימת ״אולי אקנה״ ל־48 שעות.", "בוחרים יום אחד השבוע בלי שום הוצאה."];
     const ol = $("backSteps"); ol.innerHTML = ""; steps.forEach((t) => { const li = document.createElement("li"); li.textContent = gx(t); ol.append(li); });
