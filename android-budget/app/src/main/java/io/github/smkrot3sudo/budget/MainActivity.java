@@ -383,6 +383,10 @@ public class MainActivity extends Activity {
         @JavascriptInterface
         public boolean payEnabled() { return PayListener.enabled(MainActivity.this); }
 
+        /** Whether the notification reader is really receiving, and what happened to the last notification (no content). */
+        @JavascriptInterface
+        public String payStatus() { return PayListener.status(MainActivity.this); }
+
         /** Opens the Android screen where the user allows the app to read notifications. */
         @JavascriptInterface
         public void payOpenSettings() { runOnUiThread(() -> PayListener.openSettings(MainActivity.this)); }
@@ -496,6 +500,7 @@ public class MainActivity extends Activity {
         // Coming back to the app counts as opening it: the page decides whether a Hilan sync is due
         if (web != null) web.evaluateJavascript("window.hilanOnResume&&window.hilanOnResume();window.appResumed&&window.appResumed()", null);
         BudgetWidget.refresh(this);
+        if (!BuildConfigVersion.STORE) PayListener.rebind(this);
     }
 
     private long updateId = -1;

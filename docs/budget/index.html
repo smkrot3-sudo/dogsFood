@@ -7842,6 +7842,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       { t: "*📲 ווידג׳ט*: לחיצה ארוכה על מסך הבית של הטלפון ← ווידג׳טים ← ״התקציב שלי״. רואים כמה מותר היום, ו־+ פותח הוצאה.", w: "a" },
       { t: "*💳 זיהוי תשלומים*: כשמגיעה התראת חיוב מהבנק או מהאשראי, האפליקציה מכינה הוצאה ונשאר רק לאשר. מפעילים בהגדרות ← כללי. ההתראות נקראות רק בטלפון שלך.", w: "apk" },
       { t: "מגרסה 2.3 הזיהוי מדלג על קודי אימות, חיוב צפוי, ביטולים ועדכוני יתרה, וחיוב בדולרים מוצג גם בשקלים (בערך, אפשר לתקן).", w: "apk", d: "2026-10-18" },
+      { t: "מגרסה 2.4: ליד ״זיהוי תשלומים״ בהגדרות כתוב מתי נקראה ההתראה האחרונה, שם החנות נלקח גם מ־Google Wallet, וההודעה על תשלום שזוהה מגיעה עם צליל.", w: "apk", d: "2026-10-18" },
       { t: "התראות מגיעות גם כשהאפליקציה סגורה: הודעות אישיות, בקשות חברות, הוצאות משותפות, סיכום שבועי במוצאי שבת.", w: "a" },
       { t: "בשבת ובחג הטלפון לא מצלצל: ההתראות מחכות למוצאי שבת.", w: "a" },
       "בתחתית כל עמוד כתובה הגרסה של האפליקציה."
@@ -9804,7 +9805,12 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     $("payRow").hidden = !a;
     if (!a) return;
     let on = false; try { on = a.payEnabled(); } catch (e) {}
-    $("payState").textContent = on ? "· פועל ✓" : "· כבוי";
+    // From app 2.4: is the reader really receiving notifications? (Android can drop it after an update or by a battery saver)
+    let st = null; try { st = a.payStatus ? JSON.parse(a.payStatus()) : null; } catch (e) {}
+    const agoTxt = (t) => { const m = Math.round((Date.now() - t) / 60000); return m < 1 ? "עכשיו" : m < 60 ? "לפני " + m + " דק׳" : m < 1440 ? "לפני " + Math.round(m / 60) + " שעות" : "לפני " + Math.round(m / 1440) + " ימים"; };
+    $("payState").textContent = !on ? "· כבוי" : !st ? "· פועל ✓"
+      : st.seenAt ? "· פועל ✓ · התראה אחרונה נקראה " + agoTxt(st.seenAt) + (st.lastResult === "taken" ? " (זוהה תשלום)" : "")
+      : "· מופעל, אבל עוד לא נקראה אף התראה. אם זה נמשך, כבו והדליקו שוב בהגדרות הטלפון.";
     $("payOn").textContent = on ? "לכבות בהגדרות הטלפון" : "להפעלה בהגדרות הטלפון";
     const n = payItems().length;
     $("payBar").hidden = !n;

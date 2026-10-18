@@ -30,7 +30,8 @@ import java.util.regex.Pattern;
  * the phone: the list lives in this app's private storage and the page reads it through the bridge.
  */
 public class PayListener extends NotificationListenerService {
-    private static final String CHANNEL = "budget-pay";
+    // A new channel id: the old one was silent (low importance), and a channel's importance can't change once made
+    private static final String CHANNEL = "budget-pay2";
     private static final long DAY = 24L * 3600 * 1000;
 
     // Chat and text-message apps are skipped: the owner chose notifications from payment apps only, not SMS
@@ -103,15 +104,44 @@ public class PayListener extends NotificationListenerService {
     }
 
     @Override
-    public void onNotificationPosted(StatusBarNotification sbn) {
-        try { take(sbn); } catch (Exception e) { /* a notification we can't read is simply skipped */ }
+    public void onListenerConnected() { prefs(this).edit().putLong("connectedAt", System.currentTimeMillis()).apply(); }
+
+    @Override
+    public void onListenerDisconnected() {
+        // Android (or the phone maker's battery saver) dropped the connection: ask to be connected again
+        if (Build.VERSION.SDK_INT >= 24) try { requestRebind(new ComponentName(this, PayListener.class)); } catch (Exception e) { /* try on next app open */ }
     }
 
-    private void take(StatusBarNotification sbn) throws Exception {
+    /** Ask Android to reconnect the listener (after an update or a battery saver drops it). Called when the app opens. */
+    static void rebind(Context c) {
+        if (Build.VERSION.SDK_INT >= 24 && enabled(c)) try { requestRebind(new ComponentName(c, PayListener.class)); } catch (Exception e) { /* nothing to do */ }
+    }
+
+    /** For the settings screen: is the listener really receiving notifications, and what happened to the last one (no content). */
+    static String status(Context c) {
+        SharedPreferences p = prefs(c);
+        try {
+            return new JSONObject().put("connectedAt", p.getLong("connectedAt", 0)).put("seenAt", p.getLong("seenAt", 0)).put("seen", p.getInt("seen", 0))
+                .put("lastApp", p.getString("lastApp", "")).put("lastResult", p.getString("lastResult", "")).toString();
+        } catch (Exception e) { return "{}"; }
+    }
+
+    @Override
+    public void onNotificationPosted(StatusBarNotification sbn) {
+        String pkg = sbn.getPackageName(), result;
+        if (pkg.equals(getPackageName())) return;
+        try { result = take(sbn); } catch (Exception e) { result = "error"; /* a notification we can't read is simply skipped */ }
+        String app = pkg;
+        try { app = getPackageManager().getApplicationLabel(getPackageManager().getApplicationInfo(pkg, 0)).toString(); } catch (Exception e) { /* keep the package name */ }
+        SharedPreferences p = prefs(this);
+        p.edit().putLong("seenAt", System.currentTimeMillis()).putInt("seen", p.getInt("seen", 0) + 1).putString("lastApp", app).putString("lastResult", result).apply();
+    }
+
+    private String take(StatusBarNotification sbn) throws Exception {
         String pkg = sbn.getPackageName();
-        if (pkg.equals(getPackageName()) || SKIP.contains(pkg)) return;
+        if (SKIP.contains(pkg)) return "chat";
         Notification n = sbn.getNotification();
-        if ((n.flags & Notification.FLAG_GROUP_SUMMARY) != 0 || (n.flags & Notification.FLAG_ONGOING_EVENT) != 0) return;
+        if ((n.flags & Notification.FLAG_GROUP_SUMMARY) != 0 || (n.flags & Notification.FLAG_ONGOING_EVENT) != 0) return "summary";
         Bundle x = n.extras;
         String title = str(x.getCharSequence(Notification.EXTRA_TITLE));
         String body = str(x.getCharSequence(Notification.EXTRA_BIG_TEXT));
@@ -119,12 +149,14 @@ public class PayListener extends NotificationListenerService {
         String all = (title + "\n" + body).trim();
         if (all.length() > 600) all = all.substring(0, 600);
         all = BALANCE.matcher(all).replaceAll(" ").trim();
-        if (!PAID.matcher(all).find() || INCOMING.matcher(all).find() || NOT_PAY.matcher(all).find()) return;
+        if (!PAID.matcher(all).find()) return "not a payment";
+        if (INCOMING.matcher(all).find()) return "incoming";
+        if (NOT_PAY.matcher(all).find()) return "not a charge";
         Matcher m = AMOUNT.matcher(all);
         String cur = "ILS";
-        if (!m.find()) { m = USD.matcher(all); if (!m.find()) return; cur = "USD"; }
+        if (!m.find()) { m = USD.matcher(all); if (!m.find()) return "no amount"; cur = "USD"; }
         double amount = Double.parseDouble((m.group(1) != null ? m.group(1) : m.group(2)).replace(",", ""));
-        if (!(amount > 0) || amount > 100000) return;
+        if (!(amount > 0) || amount > 100000) return "amount out of range";
 
         String merchant = "";
         Matcher mm = MERCHANT.matcher(body.isEmpty() ? all : body);
@@ -138,7 +170,7 @@ public class PayListener extends NotificationListenerService {
         // The same charge often comes twice (bank + card app, or an updated notification): one entry per amount per 15 minutes
         String key = String.format(java.util.Locale.US, "%s%.2f/%d", cur, amount, now / (15 * 60 * 1000));
         SharedPreferences p = prefs(this);
-        if (key.equals(p.getString("lastKey", ""))) return;
+        if (key.equals(p.getString("lastKey", ""))) return "duplicate";
 
         String app = pkg;
         try { app = getPackageManager().getApplicationLabel(getPackageManager().getApplicationInfo(pkg, 0)).toString(); } catch (Exception e) { /* keep the package name */ }
@@ -153,6 +185,7 @@ public class PayListener extends NotificationListenerService {
         }
         BudgetWidget.refresh(this);
         notifyFound(this, id, amount, cur, merchant);
+        return "taken";
     }
 
     private static String str(CharSequence s) { return s == null ? "" : s.toString().trim(); }
@@ -160,7 +193,7 @@ public class PayListener extends NotificationListenerService {
     private static void notifyFound(Context c, String id, double amount, String cur, String merchant) {
         NotificationManager nm = (NotificationManager) c.getSystemService(Context.NOTIFICATION_SERVICE);
         if (Build.VERSION.SDK_INT >= 26 && nm.getNotificationChannel(CHANNEL) == null)
-            nm.createNotificationChannel(new NotificationChannel(CHANNEL, "תשלומים שזוהו", NotificationManager.IMPORTANCE_LOW));
+            nm.createNotificationChannel(new NotificationChannel(CHANNEL, "תשלומים שזוהו", NotificationManager.IMPORTANCE_DEFAULT));
         String amt = ("USD".equals(cur) ? "$" : "₪") + (amount == Math.floor(amount) ? String.valueOf((long) amount) : String.format(java.util.Locale.US, "%.2f", amount));
         Intent open = new Intent(c, MainActivity.class).putExtra(MainActivity.EXTRA_OPEN, "pay:" + id)
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);
