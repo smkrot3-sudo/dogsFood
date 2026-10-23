@@ -1117,7 +1117,6 @@ dialog.alarm.dimsum { background: radial-gradient(circle at 50% 0%, #ffcf5c 0, t
 .dzitem small { color: var(--muted); }
 .dzitem .actions { display: flex; flex-wrap: wrap; gap: 6px; } .dzitem .btn { padding: 6px 12px; font-size: 14px; }
 .dzact { display: flex; flex-wrap: wrap; gap: 8px; }
-.dzpill { position: fixed; z-index: 30; inset-inline-start: 12px; bottom: calc(112px + env(safe-area-inset-bottom)); border: 0; border-radius: 999px; padding: 9px 14px; background: var(--brand); color: #fff; font: inherit; font-weight: 700; box-shadow: var(--shadow); }
 dialog.alarm.star { background: radial-gradient(circle at 20% 0%, rgba(255, 255, 255, .35) 0, transparent 40%), linear-gradient(160deg, #ff7aa8, #c84bd6 55%, #6c4cf0); }
 .star .signs { animation: steam 2.4s ease-in-out infinite; }
 .star p { border: 3px solid rgba(255, 255, 255, .75); background: rgba(255, 255, 255, .14); font-weight: 700; }
@@ -1320,12 +1319,15 @@ body.nosave .split { grid-template-columns: 1fr; }
 .stmsum b { color: var(--fg); font-variant-numeric: tabular-nums; }
 .stm { display: grid; }
 .stm .sday { display: flex; justify-content: space-between; padding: 10px 2px 4px; font-size: 13px; font-weight: 700; color: var(--muted); border-bottom: 1px solid var(--line); font-variant-numeric: tabular-nums; }
-.stm .srow { display: grid; grid-template-columns: 38px minmax(0, 1fr) auto; gap: 10px; align-items: center; width: 100%; padding: 10px 2px; border: 0; border-bottom: 1px solid var(--line); background: none; color: var(--fg); font: inherit; text-align: start; cursor: pointer; border-radius: 0; box-shadow: none; min-height: 0; }
-.stm .srow:hover, .stm .srow[aria-expanded="true"] { background: var(--surface-2); }
+.stm .srow { display: grid; grid-template-columns: 38px minmax(0, 1fr) auto auto; gap: 10px; align-items: center; width: 100%; padding: 10px 2px; border-bottom: 1px solid var(--line); color: var(--fg); text-align: start; }
+.stm .srow.open { background: var(--surface-2); }
+.stm .srow .sedbtn { width: 36px; height: 36px; min-height: 0; padding: 0; border: 1px solid var(--line); border-radius: 50%; background: var(--surface-2); color: var(--fg); font-size: 15px; box-shadow: none; cursor: pointer; display: grid; place-items: center; }
+.stm .srow .sedbtn[aria-expanded="true"] { background: var(--brand); color: #fff; border-color: transparent; }
 .stm .srow .ic { width: 38px; height: 38px; border-radius: 50%; background: var(--surface-2); display: grid; place-items: center; font-size: 19px; }
-.stm .srow .tt { min-width: 0; display: grid; }
-.stm .srow .tt b { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.stm .srow .tt small { color: var(--muted); font-size: 12.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.stm .srow .tt { min-width: 0; display: flex; flex-direction: column; }
+.stm .srow .tt b { font-weight: 600; overflow: hidden; white-space: nowrap; }
+.stm .srow .tt small { color: var(--muted); font-size: 12.5px; overflow: hidden; white-space: nowrap; }
+.stm .srow .tt .fitwrap { white-space: normal; overflow-wrap: break-word; }
 .stm .srow .tt small .subc { font-size: 11px; opacity: .85; }
 .stm .srow .am { font-weight: 700; font-variant-numeric: tabular-nums; direction: ltr; unicode-bidi: isolate; }
 .stm .srow.pending { opacity: .6; }
@@ -2376,7 +2378,6 @@ html.hugetext .season3 svg { width: 70px; height: 21px; }
   </form>
 </dialog>
 
-<button class="dzpill" type="button" id="dzPill" hidden>🖌️ זו טיוטת עיצוב · לעורך</button>
 <dialog class="sheet alarm" id="pmSheet" aria-labelledby="pmH">
   <form method="dialog">
     <div class="signs" aria-hidden="true">🛑⛔⚠️🚫</div>
@@ -3777,7 +3778,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
         h.append(a, b); box.append(h);
       }
       if (r._inc) { box.append(stmIncome(r._inc)); return; }
-      const row = document.createElement("button"); row.type = "button"; row.className = "srow" + (r.pending ? " pending" : "");
+      const row = document.createElement("div"); row.className = "srow" + (r.pending ? " pending" : "") + (stmOpen === r.id ? " open" : "");
       const ic = document.createElement("span"); ic.className = "ic"; ic.textContent = names[r.category] ? emojiOf(r.category, names[r.category]) : "💸";
       const tt = document.createElement("span"); tt.className = "tt";
       const b = document.createElement("b"); b.textContent = r.note || names[r.category] || "הוצאה";
@@ -3788,25 +3789,41 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       if (tagMark(r.tags)) { const tg = document.createElement("span"); tg.className = "tg"; tg.textContent = tagMark(r.tags); sm.append(tg); }
       tt.append(b, sm);
       const am = document.createElement("span"); am.className = "am"; am.textContent = "\u2066−" + fmt(r.amount) + "\u2069";
-      row.append(ic, tt, am);
-      row.setAttribute("aria-expanded", String(stmOpen === r.id));
-      row.setAttribute("aria-label", b.textContent + ", " + fmt(r.amount) + ". לחצו לעריכה");
-      row.addEventListener("click", () => { stmOpen = stmOpen === r.id ? null : r.id; renderStatement(); });
+      // Editing opens only from the ✏️ button, so a stray tap on the row changes nothing
+      const ed = document.createElement("button"); ed.type = "button"; ed.className = "sedbtn"; ed.textContent = "✏️";
+      ed.setAttribute("aria-expanded", String(stmOpen === r.id));
+      ed.setAttribute("aria-label", "עריכת " + b.textContent + ", " + fmt(r.amount));
+      ed.addEventListener("click", () => { stmOpen = stmOpen === r.id ? null : r.id; renderStatement(); });
+      row.append(ic, tt, am, ed);
       box.append(row);
       if (stmOpen === r.id) box.append(stmEditor(r));
     });
+    stmFit();
   }
+  // Long names shrink until they fit on one line; if even the smallest size is too wide, they wrap so nothing is cut
+  function stmFit() {
+    requestAnimationFrame(() => $("stmList").querySelectorAll(".srow .tt b, .srow .tt small").forEach((el) => {
+      if (!el.clientWidth) return;
+      el.classList.remove("fitwrap"); el.style.fontSize = "";
+      const min = el.tagName === "B" ? 12 : 10.5;
+      let size = parseFloat(getComputedStyle(el).fontSize);
+      while (el.scrollWidth > el.clientWidth + 1 && size > min) { size = Math.max(min, size - 0.5); el.style.fontSize = size + "px"; }
+      if (el.scrollWidth > el.clientWidth + 1) el.classList.add("fitwrap");
+    }));
+  }
+  if (window.ResizeObserver) { let fitW = 0; new ResizeObserver((e) => { const w = Math.round(e[0].contentRect.width); if (w && w !== fitW) { fitW = w; stmFit(); } }).observe($("stmList")); }
   function stmIncome(r) {
-    const row = document.createElement("button"); row.type = "button"; row.className = "srow" + (r.pending ? " pending" : "");
+    const row = document.createElement("div"); row.className = "srow" + (r.pending ? " pending" : "");
     const ic = document.createElement("span"); ic.className = "ic"; ic.textContent = "💰";
     const tt = document.createElement("span"); tt.className = "tt";
     const b = document.createElement("b"); b.textContent = r.note || r.kind || "הכנסה";
     const sm = document.createElement("small"); sm.textContent = "הכנסה · " + (r.kind || "אחר") + (r.pending ? " · ממתין לחיבור" : "");
     tt.append(b, sm);
     const am = document.createElement("span"); am.className = "am pos"; am.textContent = "\u2066+" + fmt(r.amount) + "\u2069";
-    row.append(ic, tt, am);
-    row.setAttribute("aria-label", "הכנסה " + b.textContent + ", " + fmt(r.amount) + ". לחצו לעריכה");
-    row.addEventListener("click", () => openIncome(r));
+    const ed = document.createElement("button"); ed.type = "button"; ed.className = "sedbtn"; ed.textContent = "✏️";
+    ed.setAttribute("aria-label", "עריכת הכנסה " + b.textContent + ", " + fmt(r.amount));
+    ed.addEventListener("click", () => openIncome(r));
+    row.append(ic, tt, am, ed);
     return row;
   }
   function stmEditor(r) {
@@ -6181,7 +6198,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     const tagged = list.some((r) => r.tags);
     if (!tagged) {
       const p = document.createElement("p"); p.className = "hint";
-      p.textContent = "כשרושמים הוצאה אפשר לסמן ״🧰 צריך״ או ״🎁 רוצה״ ולמה קנית. אחר כך, בלחיצה על הוצאה ברשימה, אפשר לסמן ״😣 התחרטתי״. כאן תראה לאן הכסף שלך באמת הולך.";
+      p.textContent = "כשרושמים הוצאה אפשר לסמן ״🧰 צריך״ או ״🎁 רוצה״ ולמה קנית. אחר כך, בכפתור ✏️ ליד הוצאה ברשימה, אפשר לסמן ״😣 התחרטתי״. כאן תראה לאן הכסף שלך באמת הולך.";
       box.append(p); return;
     }
     const other = Math.max(all - need - want, 0);
@@ -6800,7 +6817,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     todayLbl: "זה הסכום שאפשר להוציא היום בלי לפגוע בשאר החודש: הכסף החופשי שנשאר, חלקי הימים שנשארו. הוצאת פחות היום? מחר יהיה לך יותר. הפס מראה כמה מהכסף החופשי כבר יצא, והקו מראה כמה מהחודש עבר.",
     payH: "כמה הרווחת מהמשמרות החודש, לפי השכר לשעה ולפי החוק (שעות נוספות, לילה, שבת וחג). זו הערכה של הברוטו, לפני מס וניכויים.",
     catsH: "כל קטגוריה מראה כמה הוצאת עליה מתוך התקציב שקבעת לה. ✓ בסדר, ⚠️ מהר מדי לעומת החודש, ⛔ עברת את התקציב. לחיצה על קטגוריה פותחת הוצאה חדשה בה.",
-    stmH: "כל ההוצאות וההכנסות החד־פעמיות של החודש, לפי ימים, כמו בדף חשבון. לחיצה על הוצאה פותחת תיקון מהיר של סכום, תאריך, קטגוריה ופירוט. בשורת החיפוש אפשר לחפש לפי מילה או קטגוריה, גם בחודשים קודמים.",
+    stmH: "כל ההוצאות וההכנסות החד־פעמיות של החודש, לפי ימים, כמו בדף חשבון. כפתור ✏️ ליד הוצאה פותח תיקון מהיר של סכום, תאריך, קטגוריה ופירוט. בשורת החיפוש אפשר לחפש לפי מילה או קטגוריה, גם בחודשים קודמים.",
     wishH: "בא לך לקנות משהו לא מתוכנן? במקום לקנות מיד, שמים אותו כאן ומחכים 48 שעות. ברוב המקרים החשק עובר והכסף נשאר אצלך.",
     histH: "כל עמודה היא כמה הוצאת מהכסף החופשי בחודש אחד, והקו הוא מה שתכננת. עמודה אדומה עם ⚠️ היא חודש עם חריגה.",
     incH: "כמה כסף נכנס לך בחודש אחרי מס (נטו): משכורת, קצבה, עזרה מההורים. מכאן מתחיל כל החישוב.",
@@ -6812,7 +6829,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     sumH: "תמונה של חודש שנגמר: כמה יצא, כמה נשאר, איפה חרגת, ומה כדאי לעשות בחודש הבא. מופיע ב־5 הימים הראשונים של חודש חדש, ותמיד כשמסתכלים על חודש שעבר.",
     goalsH: "חוסכים בשביל משהו? פותחים יעד עם סכום, ובכל פעם שמעבירים כסף לחיסכון לוחצים ״הפקדתי״. רואים כמה חסר ובעוד כמה חודשים תגיע לפי החיסכון החודשי שתכננת.",
     cmpH: "משווים את החודש עד היום לאותם ימים בחודש שעבר, ואת השבוע הזה לשבוע שעבר. ▲ אדום: הוצאת יותר. ▼ ירוק: הוצאת פחות.",
-    habitsH: "כמה מההוצאות היו ״צריך״ וכמה ״רוצה״, על מה התחרטת, ומה גרם לך לקנות. מסמנים את זה בטופס ההוצאה או בלחיצה על הוצאה ברשימה.",
+    habitsH: "כמה מההוצאות היו ״צריך״ וכמה ״רוצה״, על מה התחרטת, ומה גרם לך לקנות. מסמנים את זה בטופס ההוצאה או בכפתור ✏️ ליד הוצאה ברשימה.",
     chalH: "אתגר אחד לחודש, כדי שיהיה מעניין לחסוך: ימים בלי הוצאה, ויתור על קטגוריה, תקרה לקטגוריה או שבוע בלי ״רוצה״. מצליחים? מקבלים הישג.",
     badgeH: "הישגים קטנים שנפתחים כשמתמידים: רצף ימים בתוך התקציב, ויתור על קנייה, הגעה ליעד. האפורים עוד לא נפתחו, ומתחתם כתוב איך פותחים אותם.",
     setH: "מתי החודש שלך מתחיל, איך ההודעות נשמעות, גודל הטקסט וייצוא לאקסל.",
@@ -7795,7 +7812,8 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     ] },
     { id: "list", e: "🏦", t: "כל ההוצאות של החודש", d: "", body: [
       "כל ההוצאות וההכנסות החד־פעמיות של החודש, לפי ימים, כמו בדף חשבון.",
-      "לחיצה על הוצאה פותחת תיקון מהיר: סכום, תאריך, קטגוריה ופירוט.",
+      { t: "כפתור ✏️ ליד כל הוצאה פותח תיקון מהיר: סכום, תאריך, קטגוריה ופירוט. לחיצה על השורה עצמה לא עושה כלום, כדי שלא ייפתח בטעות.", d: "2026-10-23" },
+      { t: "שם ארוך של הוצאה מוקטן עד שהוא נכנס כולו, בלי שלוש נקודות.", d: "2026-10-23" },
       { t: "הוצאה בתת־קטגוריה מראה את הקטגוריה הראשית, ולידה בקטן את התת־קטגוריה בסוגריים. למשל: כלבים (רפואי).", d: "2026-10-23" },
       "העיגולים של הקטגוריות מסננים את הרשימה. שורת החיפוש מוצאת הוצאות גם בחודשים קודמים.",
       "💳 ״ייבוא מכרטיס אשראי״: מורידים מהאתר של חברת האשראי (מקס, ישראכרט, כאל, אמריקן אקספרס) את פירוט החיובים לאקסל, מעלים, בודקים ומוסיפים."
@@ -7929,6 +7947,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       "בהגדרות ← *🖌️ עורך העיצוב*. פתוח רק לשמואל ולשני.",
       "משנים צבעים (לבהיר ולכהה בנפרד), צבעי מותג, גופנים, גודל כותרות, ריווח, פינות וצל. כל שינוי מופיע מיד בכל האפליקציה, רק בטלפון הזה, עד שמפרסמים.",
       "בזמן העריכה הצבעים האישיים מ״עיצוב וצבעים״ מושהים, כדי לראות את העיצוב עצמו. כשיוצאים בלי שינוי הם חוזרים.",
+      { t: "טיוטה שלא פורסמה נשמרת בעורך עצמו, בלי כפתור צף על המסך.", d: "2026-10-23" },
       "*📨 שליחה לשמואל לאישור*: העיצוב של שני עולה לכולם רק אחרי ששמואל מאשר. שמואל מקבל הודעה, ושני מקבלת הודעה כשהוא מחליט.",
       "*🚀 פרסום לכולם* (שמואל): עולה מיד. מי שבחר לעצמו צבע רקע או מבטא ממשיך לראות את הבחירה שלו.",
       "טקסט שלא ייקרא על הרקע חוסם את הפרסום, ככה שאי אפשר לשבור את האפליקציה.",
@@ -8305,9 +8324,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   function dzRepaint() { DS.apply(DS.current()); BP.apply(); BP.applyAccent(); }
   function designSync() {
     $("openDesign").hidden = !isDesigner();
-    $("dzPill").hidden = !isDesigner() || !DS.draft() || view === "design";
   }
-  $("dzPill").addEventListener("click", () => setView("design"));
   async function loadLiveDesign() {
     if (!sb) return;
     try {
