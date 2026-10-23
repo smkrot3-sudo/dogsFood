@@ -1057,6 +1057,9 @@ button.frrow { cursor: pointer; }
 .shname { font-weight: 700; overflow-wrap: anywhere; }
 .shsum { display: flex; flex-wrap: wrap; gap: 6px 14px; margin: 0; font-size: 14px; font-weight: 700; }
 .shsum .ok { color: var(--accent); } .shsum .off { color: var(--danger); }
+.shrow.one { grid-template-columns: minmax(0, 1fr) minmax(0, 110px); }
+.shq { margin: 4px 0 0; font-weight: 700; }
+.shnote { margin: 0; font-size: 14px; color: var(--muted); }
 #frSheet .foot { flex-wrap: wrap; }
 .donbar.slim { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 12px; text-align: start; }
 .donbar.slim > p, .donbar.slim .hide { display: none; }
@@ -2453,19 +2456,18 @@ html.hugetext .season3 svg { width: 70px; height: 21px; }
     <div class="foot" id="frFoot"></div>
   </form>
 </dialog>
-<dialog class="sheet" id="shSheet" aria-labelledby="shH">
-  <form method="dialog" id="shForm" novalidate>
-    <h2 id="shH" data-e="🍔">הוצאה משותפת</h2>
-    <label for="shTitle">על מה?<input type="text" id="shTitle" maxlength="120" placeholder="למשל: ארוחת צהריים" autocomplete="off"></label>
-    <label for="shTotal">כמה עלה בסך הכול?<input type="number" id="shTotal" class="amount-in" inputmode="decimal" min="0" step="0.01" placeholder="₪0"></label>
-    <label for="shDate">מתי?<input type="date" id="shDate"></label>
-    <fieldset class="chips" id="shWho"><legend>עם מי?</legend></fieldset>
-    <p class="hint">לכל אחד: כמה שילם בפועל, וכמה מזה החלק שלו.</p>
-    <div class="frlist" id="shRows"></div>
-    <p class="shsum" id="shSum" role="status"></p>
-    <fieldset class="chips" id="shCats"><legend>באיזו קטגוריה אצלי?</legend></fieldset>
-    <p class="err" id="shErr" hidden></p>
-    <div class="foot"><button class="btn primary" type="submit" id="shSave">שמירה</button><button class="btn" type="button" id="shCancel">ביטול</button></div>
+<dialog class="sheet" id="sxSheet" aria-labelledby="sxH">
+  <form method="dialog" id="sxForm" novalidate>
+    <h2 id="sxH" data-e="🍔">הוצאה משותפת</h2>
+    <label for="sxTitle">על מה?<input type="text" id="sxTitle" maxlength="120" placeholder="למשל: ארוחת צהריים" autocomplete="off"></label>
+    <label for="sxTotal">כמה עלה בסך הכול?<input type="number" id="sxTotal" class="amount-in" inputmode="decimal" min="0" step="0.01" placeholder="₪0"></label>
+    <label for="sxDate">מתי?<input type="date" id="sxDate"></label>
+    <fieldset class="chips" id="sxWho"><legend>עם מי?</legend></fieldset>
+        <div class="frlist" id="sxRows"></div>
+    <p class="shsum" id="sxSum" role="status"></p>
+    <fieldset class="chips" id="sxCats"><legend>באיזו קטגוריה אצלי?</legend></fieldset>
+    <p class="err" id="sxErr" hidden></p>
+    <div class="foot"><button class="btn primary" type="submit" id="sxSave">שמירה</button><button class="btn" type="button" id="sxCancel">ביטול</button></div>
   </form>
 </dialog>
 <dialog class="sheet" id="yearSheet" aria-labelledby="yearH">
@@ -7519,33 +7521,34 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     if (!sb || !user) { snack("צריך להיות מחובר כדי לחלק הוצאות עם חברים."); return; }
     if (!frFriendIds().length && !frContacts().length && !e) { snack("קודם מוסיפים חבר 🙂"); setView("friends"); frOpenAdd(); return; }
     frEdit = e || null;
-    $("shH").textContent = e ? "עריכת הוצאה משותפת" : "הוצאה משותפת";
-    $("shTitle").value = e ? e.title : (pre && pre.title) || "";
-    $("shTotal").value = e ? m2(e.total) : (pre && pre.total) || "";
-    $("shDate").value = e ? e.spent_on : (pre && pre.date) || todayStr();
-    $("shErr").hidden = true;
+    $("sxH").textContent = e ? "עריכת הוצאה משותפת" : "הוצאה משותפת";
+    $("sxTitle").value = e ? e.title : (pre && pre.title) || "";
+    $("sxTotal").value = e ? m2(e.total) : (pre && pre.total) || "";
+    $("sxDate").value = e ? e.spent_on : (pre && pre.date) || todayStr();
+    $("sxErr").hidden = true;
     const parts = e ? frParts(e) : [];
     frWho = e ? parts.map((p) => ({ key: frKey(p), paid: p.paid, share: p.share, id: p.id }))
       : [{ key: user.id, paid: "", share: "" }].concat(withKey ? [{ key: withKey, paid: "", share: "" }] : []);
     if (pre && pre.who) frWho = pre.who;
+    frModes();
     frPaintWho(); frPaintRows();
-    $("shCats").hidden = !!e;
+    $("sxCats").hidden = !!e;
     if (!e) {
-      const box = $("shCats"); box.querySelectorAll(".chip").forEach((n) => n.remove());
+      const box = $("sxCats"); box.querySelectorAll(".chip").forEach((n) => n.remove());
       const want = pre && pre.cat ? frCat(pre.cat) : frCat(null);
       catTree(data().cats).forEach(({ c, i, depth }) => {
-        const lab = frEl("label", "chip"); const inp = document.createElement("input"); inp.type = "radio"; inp.name = "shCat"; inp.value = c.id; inp.id = "shCat-" + i; inp.checked = c.id === want;
+        const lab = frEl("label", "chip"); const inp = document.createElement("input"); inp.type = "radio"; inp.name = "sxCat"; inp.value = c.id; inp.id = "sxCat-" + i; inp.checked = c.id === want;
         lab.append(inp, frEl("span", "", (depth ? "↳ " : "") + catIcon(c) + " " + (c.name || "בלי שם"))); box.append(lab);
       });
     }
-    openDlg("shSheet");
+    openDlg("sxSheet");
   }
   function frPaintWho() {
-    const box = $("shWho"); box.querySelectorAll(".chip").forEach((n) => n.remove());
+    const box = $("sxWho"); box.querySelectorAll(".chip").forEach((n) => n.remove());
     const keys = frFriendIds().concat(frContacts().map((c) => "c:" + c.id));
     frWho.forEach((w) => { if (w.key !== user.id && !keys.includes(w.key)) keys.push(w.key); });
     keys.forEach((k, i) => {
-      const lab = frEl("label", "chip"); const inp = document.createElement("input"); inp.type = "checkbox"; inp.id = "shWho-" + i; inp.checked = frWho.some((w) => w.key === k);
+      const lab = frEl("label", "chip"); const inp = document.createElement("input"); inp.type = "checkbox"; inp.id = "sxWho-" + i; inp.checked = frWho.some((w) => w.key === k);
       // a friend who isn't a friend of mine any more can stay on an expense but not be added again
       inp.disabled = !inp.checked && !frFriendIds().includes(k) && !k.startsWith("c:");
       inp.addEventListener("change", () => {
@@ -7555,43 +7558,90 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       lab.append(inp, frEl("span", "", frName(k, frEdit).replace(/ \(.*\)$/, ""))); box.append(lab);
     });
   }
-  function frPaintRows() {
-    const box = $("shRows"); box.innerHTML = "";
-    const head = frEl("div", "shrow shhead"); head.append(frEl("span", "", ""), frEl("span", "", "שולם"), frEl("span", "", "החלק")); box.append(head);
-    frWho.forEach((w, i) => {
-      const row = frEl("div", "shrow");
-      row.append(frEl("span", "shname", frName(w.key, frEdit).replace(/ \(.*\)$/, "")));
-      ["paid", "share"].forEach((f) => {
-        const inp = document.createElement("input"); inp.type = "number"; inp.inputMode = "decimal"; inp.min = "0"; inp.step = "0.01"; inp.placeholder = "₪0";
-        inp.id = "sh-" + f + "-" + i; inp.value = w[f] === "" || w[f] == null ? "" : m2(w[f]);
-        inp.setAttribute("aria-label", (f === "paid" ? "כמה שילם " : "החלק של ") + frName(w.key, frEdit));
-        inp.addEventListener("input", () => { w[f] = inp.value; frPaintSum(); });
-        row.append(inp);
-      });
-      box.append(row);
+  // Simple by default: one person paid it all and it is split evenly ("חצי חצי"). "כמה אנשים שילמו" and "סכומים אחרים" open the boxes per person.
+  let frPayer = null, frEven = true;
+  function frModes() {
+    const t = m2($("sxTotal").value), keys = frWho.map((w) => w.key);
+    const filled = frWho.some((w) => +w.paid || +w.share);
+    if (!filled) { frPayer = user.id; frEven = true; return; }
+    const payers = frWho.filter((w) => +w.paid > 0);
+    frPayer = payers.length === 1 && Math.abs(+payers[0].paid - t) < 0.01 ? payers[0].key : (payers.length ? "multi" : user.id);
+    const ev = frEvenShares(t, frWho.length);
+    frEven = frWho.every((w, i) => Math.abs((+w.share || 0) - ev[i]) < 0.011);
+    if (!keys.includes(frPayer) && frPayer !== "multi") frPayer = user.id;
+  }
+  function frEvenShares(t, n) {
+    if (!n) return [];
+    const base = Math.floor(t * 100 / n) / 100, out = Array(n).fill(base);
+    out[0] = m2(t - base * (n - 1));
+    return out;
+  }
+  // fills paid/share from the simple choices
+  function frApplyModes() {
+    const t = m2($("sxTotal").value);
+    if (frPayer !== "multi") { if (!frWho.some((w) => w.key === frPayer)) frPayer = user.id; frWho.forEach((w) => { w.paid = w.key === frPayer ? t : 0; }); }
+    if (frEven) { const ev = frEvenShares(t, frWho.length); frWho.forEach((w, i) => { w.share = ev[i]; }); }
+  }
+  function frChoice(name, opts, cur, onPick) {
+    const box = frEl("div", "chips");
+    opts.forEach(([v, label], i) => {
+      const lab = frEl("label", "chip"); const inp = document.createElement("input"); inp.type = "radio"; inp.name = name; inp.id = name + "-" + i; inp.checked = v === cur;
+      inp.addEventListener("change", () => onPick(v));
+      lab.append(inp, frEl("span", "", label)); box.append(lab);
     });
+    return box;
+  }
+  function frInputs(f) {
+    const box = frEl("div", "frlist");
+    frWho.forEach((w, i) => {
+      const row = frEl("div", "shrow one");
+      row.append(frEl("span", "shname", frName(w.key, frEdit).replace(/ \(.*\)$/, "")));
+      const inp = document.createElement("input"); inp.type = "number"; inp.inputMode = "decimal"; inp.min = "0"; inp.step = "0.01"; inp.placeholder = "₪0";
+      inp.id = "sx-" + f + "-" + i; inp.value = w[f] === "" || w[f] == null ? "" : m2(w[f]);
+      inp.setAttribute("aria-label", (f === "paid" ? "כמה שילם " : "החלק של ") + frName(w.key, frEdit));
+      inp.addEventListener("input", () => { w[f] = inp.value; frPaintSum(); });
+      row.append(inp); box.append(row);
+    });
+    return box;
+  }
+  function frPaintRows() {
+    const box = $("sxRows"); box.innerHTML = "";
+    const nm = (k) => k === user.id ? "אני" : frName(k, frEdit).replace(/ \(.*\)$/, "");
+    box.append(frEl("p", "shq", "מי שילם?"));
+    box.append(frChoice("sxPayer", frWho.map((w) => [w.key, nm(w.key)]).concat([["multi", "כמה אנשים"]]), frPayer, (v) => {
+      if (v === "multi") frWho.forEach((w) => { w.paid = ""; });
+      frPayer = v; frPaintRows();
+    }));
+    if (frPayer === "multi") { box.append(frEl("p", "shnote", "כמה כל אחד שילם בקופה:")); box.append(frInputs("paid")); }
+    box.append(frEl("p", "shq", "איך מתחלקים?"));
+    box.append(frChoice("sxSplit", [[true, frWho.length > 2 ? "½ שווה בשווה" : "½ חצי חצי"], [false, "✏️ סכומים אחרים"]], frEven, (v) => {
+      frEven = v; if (!v) frWho.forEach((w) => { if (w.share === "" || w.share == null) w.share = ""; }); frPaintRows();
+    }));
+    if (!frEven) { box.append(frEl("p", "shnote", "כמה מזה שייך לכל אחד:")); box.append(frInputs("share")); }
     frPaintSum();
   }
   function frPaintSum() {
-    const total = m2($("shTotal").value), paid = m2(frWho.reduce((s, w) => s + (+w.paid || 0), 0)), share = m2(frWho.reduce((s, w) => s + (+w.share || 0), 0));
-    const el = $("shSum"); el.innerHTML = "";
-    const a = frEl("span", Math.abs(paid - total) < 0.01 ? "ok" : "off", "שולם " + fm(paid) + " מתוך " + fm(total));
-    const b = frEl("span", Math.abs(share - total) < 0.01 ? "ok" : "off", "חולק " + fm(share) + " מתוך " + fm(total));
-    el.append(a, b);
+    frApplyModes();
+    const total = m2($("sxTotal").value), paid = m2(frWho.reduce((s, w) => s + (+w.paid || 0), 0)), share = m2(frWho.reduce((s, w) => s + (+w.share || 0), 0));
+    const el = $("sxSum"); el.innerHTML = "";
+    if (frEven && total > 0) el.append(frEl("span", "ok", "כל אחד: " + fm(frWho.length ? total / frWho.length : 0)));
+    if (frPayer === "multi") el.append(frEl("span", Math.abs(paid - total) < 0.01 ? "ok" : "off", "שולם " + fm(paid) + " מתוך " + fm(total)));
+    if (!frEven) el.append(frEl("span", Math.abs(share - total) < 0.01 ? "ok" : "off", "חולק " + fm(share) + " מתוך " + fm(total)));
   }
-  $("shTotal").addEventListener("input", frPaintSum);
-  $("shCancel").addEventListener("click", () => closeDlg("shSheet"));
+  $("sxTotal").addEventListener("input", frPaintSum);
+  $("sxCancel").addEventListener("click", () => closeDlg("sxSheet"));
   $("frNewExp").addEventListener("click", () => frOpenForm(null));
-  $("shForm").addEventListener("submit", async (ev) => {
+  $("sxForm").addEventListener("submit", async (ev) => {
     ev.preventDefault();
-    const err = (t) => { $("shErr").textContent = t; $("shErr").hidden = false; };
-    const title = $("shTitle").value.trim().slice(0, 120), total = m2($("shTotal").value), date = $("shDate").value || todayStr();
+    const err = (t) => { $("sxErr").textContent = t; $("sxErr").hidden = false; };
+    const title = $("sxTitle").value.trim().slice(0, 120), total = m2($("sxTotal").value), date = $("sxDate").value || todayStr();
     if (!(total > 0)) return err("כמה עלה בסך הכול?");
     if (frWho.length < 2) return err("צריך לבחור לפחות חבר אחד.");
+    frApplyModes();
     const paid = m2(frWho.reduce((s, w) => s + (+w.paid || 0), 0)), share = m2(frWho.reduce((s, w) => s + (+w.share || 0), 0));
     if (Math.abs(paid - total) >= 0.01) return err("מה שכולם שילמו (" + fm(paid) + ") צריך להיות שווה לסך הכול (" + fm(total) + ").");
     if (Math.abs(share - total) >= 0.01) return err("החלקים של כולם (" + fm(share) + ") צריכים להיות שווים לסך הכול (" + fm(total) + ").");
-    $("shSave").disabled = true;
+    $("sxSave").disabled = true;
     try {
       let e = frEdit;
       if (!e) {
@@ -7601,7 +7651,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
         const { error } = await sb.from("shared_expenses").update({ title, total, spent_on: date }).eq("id", e.id);
         if (error) throw error; Object.assign(e, { title, total, spent_on: date, updated_by: user.id });
       }
-      const myCat = (document.querySelector('input[name="shCat"]:checked') || {}).value || null;
+      const myCat = (document.querySelector('input[name="sxCat"]:checked') || {}).value || null;
       const old = frParts(e);
       // removed people
       for (const p of old) if (!frWho.some((w) => w.key === frKey(p))) { await sb.from("shared_parts").delete().eq("id", p.id); fr.parts = fr.parts.filter((x) => x !== p); }
@@ -7615,12 +7665,12 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
         const { data: np, error } = await sb.from("shared_parts").insert(row).select().single();
         if (error) throw error; fr.parts.push({ ...np, share: +np.share, paid: +np.paid });
       }
-      closeDlg("shSheet");
+      closeDlg("sxSheet");
       await frSyncBudget(); renderFriends(); buzz();
       const mine = frParts(e).find((p) => p.user_id === user.id);
       snack(frEdit ? "ההוצאה המשותפת עודכנה" : "✓ נשמר. " + (mine && mine.share > 0 ? fm(mine.share) + " נכנסו לתקציב שלי" : "") + (frParts(e).some((p) => p.status === "pending") ? ", והחברים יקבלו בקשה לאשר" : ""));
     } catch (x) { err("לא הצלחתי לשמור. בדוק את החיבור ונסה שוב."); }
-    $("shSave").disabled = false;
+    $("sxSave").disabled = false;
   });
 
   // For the ✨ assistant: friends' names and the shared expenses (only what the user already sees in the friends tab)
@@ -7810,7 +7860,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     ], go: ["calendar", "📅 ללוח השנה"] },
     { id: "friends", e: "👥", t: "חברים והוצאות משותפות", d: "", body: [
       "בלשונית *👥 חברים* מוסיפים חבר לפי מייל או שם, או שולחים לו לינק הזמנה בווצאפ.",
-      "*🍔 הוצאה משותפת*: רושמים מי שילם כמה ומה החלק של כל אחד. בתקציב שלך נכנס רק החלק שלך.",
+      { t: "*🍔 הוצאה משותפת*: כותבים כמה עלה, בוחרים מי שילם ולוחצים *½ חצי חצי* (או ״שווה בשווה״ כשיש יותר משניים). אם כל אחד שילם חלק או שהחלוקה לא שווה, בוחרים ״כמה אנשים״ או ״✏️ סכומים אחרים״. בתקציב שלך נכנס רק החלק שלך.", d: "2026-10-23" },
       "החבר מאשר את ההוצאה ובוחר לה קטגוריה אצלו.",
       "רואים מי חייב למי, ומסמנים כשהחזירו. אם שמרת קישור ביט, חברים יכולים להחזיר בלחיצה.",
       "חברים רואים רק את השם, התמונה וההוצאות המשותפות. אף פעם לא את התקציב שלך."
@@ -8733,7 +8783,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     plan: ["📝 לתוכנית החודש", () => aiGoBlock("plan")],
     friends: ["👥 לחברים", () => setView("friends")]
   };
-  const AI_GUIDE = "מבנה האפליקציה: למעלה לוגו, גלגל שיניים ⚙ של הגדרות ליד תמונת הפרופיל, ובורר חודש. שלוש לשוניות למעלה: ראשי / משמרות / לוח שנה. בדף הראשי יש אריחים שאפשר לסדר (לחיצה ארוכה על אריח פותחת מצב עריכה: גוררים ⠿, 👁 מסתיר, ✓ שומר; או בהגדרות > פריסת דף הבית). כפתור 💸 הוצאה למטה פותח טופס הוצאה (סכום, קטגוריה, פירוט, תאריך, צריך/רוצה, למה קניתי, ⭐ שמירה ככפתור, חיוב קבוע כל חודש, ״אולי אקנה״ ל־48 שעות). בלשונית משמרות: כפתור ⏰ משמרת, ייבוא משמרות (הדבקה מחילן, כמה ימים ביחד, צילום דוח), הגדרות שכר, יעד הכנסה לחודש. הגדרות > כללי: מתי מתחיל החודש, טון ההודעות, מתי לספור את הכסף מהמשמרות, תזכורת ערב. הגדרות > עיצוב וצבעים: בהיר/כהה, צבע רקע, צבע מבטא, גודל טקסט, רטט וקונפטי. ✨ הוא העוזר עצמו. לשונית 👥 חברים: מוסיפים חבר לפי מייל או שם, או לינק הזמנה בווצאפ, או חבר בלי האפליקציה; כפתור 🍔 הוצאה משותפת: סך הכול, עם מי, כמה כל אחד שילם וכמה החלק של כל אחד; החבר מאשר לפני שזה נכנס לתקציב שלו; בתקציב נכנס רק החלק של המשתמש; ״החזרתי״/״קיבלתי״ מסמנים החזר (גם חלקי); בביט אם החבר שמר קישור. חבר רואה רק שם ואת מה שחילקו ביחד.\n" +
+  const AI_GUIDE = "מבנה האפליקציה: למעלה לוגו, גלגל שיניים ⚙ של הגדרות ליד תמונת הפרופיל, ובורר חודש. שלוש לשוניות למעלה: ראשי / משמרות / לוח שנה. בדף הראשי יש אריחים שאפשר לסדר (לחיצה ארוכה על אריח פותחת מצב עריכה: גוררים ⠿, 👁 מסתיר, ✓ שומר; או בהגדרות > פריסת דף הבית). כפתור 💸 הוצאה למטה פותח טופס הוצאה (סכום, קטגוריה, פירוט, תאריך, צריך/רוצה, למה קניתי, ⭐ שמירה ככפתור, חיוב קבוע כל חודש, ״אולי אקנה״ ל־48 שעות). בלשונית משמרות: כפתור ⏰ משמרת, ייבוא משמרות (הדבקה מחילן, כמה ימים ביחד, צילום דוח), הגדרות שכר, יעד הכנסה לחודש. הגדרות > כללי: מתי מתחיל החודש, טון ההודעות, מתי לספור את הכסף מהמשמרות, תזכורת ערב. הגדרות > עיצוב וצבעים: בהיר/כהה, צבע רקע, צבע מבטא, גודל טקסט, רטט וקונפטי. ✨ הוא העוזר עצמו. לשונית 👥 חברים: מוסיפים חבר לפי מייל או שם, או לינק הזמנה בווצאפ, או חבר בלי האפליקציה; כפתור 🍔 הוצאה משותפת: סך הכול, עם מי, מי שילם (או ״כמה אנשים״), ואיך מתחלקים: ½ חצי חצי או ״סכומים אחרים״; החבר מאשר לפני שזה נכנס לתקציב שלו; בתקציב נכנס רק החלק של המשתמש; ״החזרתי״/״קיבלתי״ מסמנים החזר (גם חלקי); בביט אם החבר שמר קישור. חבר רואה רק שם ואת מה שחילקו ביחד.\n" +
     "החזר מס (כשהמשתמש שואל): שכיר בישראל יכול לבקש החזר מס על 6 השנים האחרונות, בטופס 135 באזור האישי באתר רשות המסים (gov.il) או דרך מייצג. סיבות נפוצות אצל צעירים: עבד רק חלק מהשנה, החליף מקום עבודה באמצע שנה או עבד בשני מקומות, נקודות זיכוי שלא נוצלו (חייל משוחרר או בת שירות לאומי, סיום תואר או לימודי מקצוע, תושב ישוב מזכה), תרומות עם קבלה. צריך טופסי 106 מכל מעסיק. שואלים 2 או 3 שאלות, נותנים צעדים, לא מבטיחים סכום ולא ממציאים מספרים.\n"
     + "הסברים על כל אריח:\n" + Object.values(HELP).map((t) => "- " + t).join("\n")
     + "\nיעדים לכפתור [[go:...]]: " + Object.keys(AI_GO).map((k) => k + "=" + AI_GO[k][0]).join(", ");
