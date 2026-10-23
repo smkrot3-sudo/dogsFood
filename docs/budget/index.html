@@ -1323,6 +1323,7 @@ body.nosave .split { grid-template-columns: 1fr; }
 .stm .srow .tt { min-width: 0; display: grid; }
 .stm .srow .tt b { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .stm .srow .tt small { color: var(--muted); font-size: 12.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.stm .srow .tt small .subc { font-size: 11px; opacity: .85; }
 .stm .srow .am { font-weight: 700; font-variant-numeric: tabular-nums; direction: ltr; unicode-bidi: isolate; }
 .stm .srow.pending { opacity: .6; }
 .stm .sedit { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 10px 2px 14px; border-bottom: 1px solid var(--line); background: var(--surface-2); }
@@ -3691,6 +3692,13 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     data().cats.forEach((c) => { names[c.id] = c.name || "בלי שם"; });
     return names;
   }
+  // A subcategory's main category name (any month), so lists can show "main (sub)"
+  function parentName(id, names) {
+    let c = data().cats.find((x) => x.id === id);
+    if (!c) for (const m of Object.keys(store.months).sort().reverse()) { c = (store.months[m].cats || []).find((x) => x.id === id); if (c) break; }
+    return c && c.parent && names[c.parent] && c.parent !== id ? names[c.parent] : "";
+  }
+  const catLabel = (id, names) => { const p = parentName(id, names); return p ? p + " (" + names[id] + ")" : names[id]; };
 
   // ---- Work hours ----
   function wage() {
@@ -3771,7 +3779,10 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       const ic = document.createElement("span"); ic.className = "ic"; ic.textContent = names[r.category] ? emojiOf(r.category, names[r.category]) : "💸";
       const tt = document.createElement("span"); tt.className = "tt";
       const b = document.createElement("b"); b.textContent = r.note || names[r.category] || "הוצאה";
-      const sm = document.createElement("small"); sm.textContent = (names[r.category] || "קטגוריה שנמחקה") + (r.pending ? " · ממתין לחיבור" : "");
+      const sm = document.createElement("small"), pn = names[r.category] && parentName(r.category, names);
+      if (pn) { const sc = document.createElement("span"); sc.className = "subc"; sc.textContent = " (" + names[r.category] + ")"; sm.append(pn, sc); }
+      else sm.append(names[r.category] || "קטגוריה שנמחקה");
+      if (r.pending) sm.append(" · ממתין לחיבור");
       if (tagMark(r.tags)) { const tg = document.createElement("span"); tg.className = "tg"; tg.textContent = tagMark(r.tags); sm.append(tg); }
       tt.append(b, sm);
       const am = document.createElement("span"); am.className = "am"; am.textContent = "\u2066−" + fmt(r.amount) + "\u2069";
@@ -5821,7 +5832,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       const what = document.createElement("button"); what.type = "button"; what.className = "what";
       what.dataset.e = names[r.category] ? emojiOf(r.category, names[r.category]) : "💸";
       const t = document.createElement("b"); t.textContent = r.note || names[r.category] || "הוצאה";
-      const c = document.createElement("span"); c.textContent = dayLabel(r.spent_on) + " · " + (names[r.category] || "קטגוריה שנמחקה");
+      const c = document.createElement("span"); c.textContent = dayLabel(r.spent_on) + " · " + (catLabel(r.category, names) || "קטגוריה שנמחקה");
       what.append(t, c);
       what.addEventListener("click", () => openSheet(null, r));
       const amt = document.createElement("span"); amt.className = "amt"; amt.textContent = fmt(r.amount);
@@ -7735,6 +7746,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     { id: "list", e: "🏦", t: "כל ההוצאות של החודש", d: "", body: [
       "כל ההוצאות וההכנסות החד־פעמיות של החודש, לפי ימים, כמו בדף חשבון.",
       "לחיצה על הוצאה פותחת תיקון מהיר: סכום, תאריך, קטגוריה ופירוט.",
+      { t: "הוצאה בתת־קטגוריה מראה את הקטגוריה הראשית, ולידה בקטן את התת־קטגוריה בסוגריים. למשל: כלבים (רפואי).", d: "2026-10-23" },
       "העיגולים של הקטגוריות מסננים את הרשימה. שורת החיפוש מוצאת הוצאות גם בחודשים קודמים.",
       "💳 ״ייבוא מכרטיס אשראי״: מורידים מהאתר של חברת האשראי (מקס, ישראכרט, כאל, אמריקן אקספרס) את פירוט החיובים לאקסל, מעלים, בודקים ומוסיפים."
     ] },
