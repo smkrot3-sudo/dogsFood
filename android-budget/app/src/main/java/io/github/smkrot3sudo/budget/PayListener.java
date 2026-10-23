@@ -34,38 +34,6 @@ public class PayListener extends NotificationListenerService {
     private static final String CHANNEL = "budget-pay2";
     private static final long DAY = 24L * 3600 * 1000;
 
-    // Chat and text-message apps are skipped: the owner chose notifications from payment apps only, not SMS
-    private static final Set<String> SKIP = new HashSet<>(Arrays.asList(
-        "com.whatsapp", "com.whatsapp.w4b", "org.telegram.messenger", "com.facebook.orca", "com.google.android.gm",
-        "com.google.android.apps.messaging", "com.samsung.android.messaging", "com.android.mms", "com.android.messaging",
-        "com.microsoft.office.outlook", "com.instagram.android"));
-
-    private static final Pattern AMOUNT = Pattern.compile(
-        "(?:₪|ש\"ח|ש״ח|ILS|NIS)\\s?([0-9][0-9,]*(?:\\.[0-9]{1,2})?)|([0-9][0-9,]*(?:\\.[0-9]{1,2})?)\\s?(?:₪|ש\"ח|ש״ח|ILS|NIS|שקל)");
-    private static final Pattern PAID = Pattern.compile(
-        "חיוב|חויב|עסק[הת]|רכישה|רכשת|שולם|שילמת|תשלום|אושר|בוצע|העברת|charged|payment|purchase|paid|spent|transaction", Pattern.CASE_INSENSITIVE);
-    private static final Pattern INCOMING = Pattern.compile(
-        "זיכוי|זוכה|החזר|קיבלת|הועבר[וה]? אליך|העביר לך|העבירה לך|refund|received|credited", Pattern.CASE_INSENSITIVE);
-    // Dollar charges (online shops, subscriptions): kept in dollars, the page turns them into shekels for the user to check
-    private static final Pattern USD = Pattern.compile(
-        "(?:\\$|USD)\\s?([0-9][0-9,]*(?:\\.[0-9]{1,2})?)|([0-9][0-9,]*(?:\\.[0-9]{1,2})?)\\s?(?:\\$|USD|דולר)");
-    // Not a charge: an upcoming statement total, a one-time code, a cancelled or declined charge, a balance update
-    private static final Pattern NOT_PAY = Pattern.compile(
-        "חיוב צפוי|צפוי לחיוב|סך החיובים|סה\"כ חיובים|סה״כ חיובים|חיוב החודשי|דף החשבון|פירוט החיובים|"
-        + "קוד אימות|קוד חד|קוד הזדהות|סיסמה חד|סיסמא חד|קוד כניסה|OTP|verification code|one.time|"
-        + "בוטל|ביטול|מבוטל|נדחה|נדחתה|סורב|סירוב|לא אושר|לא אושרה|cancel|declined|reversed", Pattern.CASE_INSENSITIVE);
-    // "יתרה: ₪3,000" next to a charge is the account balance, not the charge; it's cut out before looking for the amount
-    private static final Pattern BALANCE = Pattern.compile(
-        "(?:יתרת?|היתרה|balance)[^0-9₪$\\n]{0,25}(?:₪|ש\"ח|ש״ח)?\\s?-?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s?(?:₪|ש\"ח|ש״ח|ILS)?", Pattern.CASE_INSENSITIVE);
-    // A "merchant" that is only card digits ("כרטיס המסתיים ב-1234") is no merchant at all
-    private static final Pattern CARD_BITS = Pattern.compile("^[0-9*xX•\\s-]+$|כרטיס|המסתיים|ספרות|אשראי");
-    // Google Wallet and some card apps put the shop's name in the title; a bank or card company name there is not a shop
-    private static final Pattern ISSUER = Pattern.compile(
-        "בנק|פועלים|לאומי|דיסקונט|מזרחי|הבינלאומי|ישראכרט|מקס|כאל|אמריקן|ביט|פייבוקס|התראה|חיוב|עסקה|כרטיס|תשלום|"
-        + "bank|max|cal|amex|isracard|leumi|hapoalim|discount|wallet|google|pay|bit|alert|[0-9₪$]", Pattern.CASE_INSENSITIVE);
-    private static final Pattern MERCHANT = Pattern.compile(
-        "(?:בבית העסק|בבית עסק|אצל|ב־|ב-|at )\\s*([^,.\\n:;]{2,40}?)(?=\\s*(?:בסך|בסכום|בתאריך|ביום|על סך|,|\\.|$|\\n|₪|[0-9]))");
-
     static boolean enabled(Context c) {
         String on = Settings.Secure.getString(c.getContentResolver(), "enabled_notification_listeners");
         return on != null && on.contains(new ComponentName(c, PayListener.class).flattenToString());
@@ -139,32 +107,16 @@ public class PayListener extends NotificationListenerService {
 
     private String take(StatusBarNotification sbn) throws Exception {
         String pkg = sbn.getPackageName();
-        if (SKIP.contains(pkg)) return "chat";
         Notification n = sbn.getNotification();
         if ((n.flags & Notification.FLAG_GROUP_SUMMARY) != 0 || (n.flags & Notification.FLAG_ONGOING_EVENT) != 0) return "summary";
         Bundle x = n.extras;
         String title = str(x.getCharSequence(Notification.EXTRA_TITLE));
         String body = str(x.getCharSequence(Notification.EXTRA_BIG_TEXT));
         if (body.isEmpty()) body = str(x.getCharSequence(Notification.EXTRA_TEXT));
-        String all = (title + "\n" + body).trim();
-        if (all.length() > 600) all = all.substring(0, 600);
-        all = BALANCE.matcher(all).replaceAll(" ").trim();
-        if (!PAID.matcher(all).find()) return "not a payment";
-        if (INCOMING.matcher(all).find()) return "incoming";
-        if (NOT_PAY.matcher(all).find()) return "not a charge";
-        Matcher m = AMOUNT.matcher(all);
-        String cur = "ILS";
-        if (!m.find()) { m = USD.matcher(all); if (!m.find()) return "no amount"; cur = "USD"; }
-        double amount = Double.parseDouble((m.group(1) != null ? m.group(1) : m.group(2)).replace(",", ""));
-        if (!(amount > 0) || amount > 100000) return "amount out of range";
-
-        String merchant = "";
-        Matcher mm = MERCHANT.matcher(body.isEmpty() ? all : body);
-        while (mm.find()) {
-            String cand = mm.group(1).trim();
-            if (!CARD_BITS.matcher(cand).find()) { merchant = cand; break; }
-        }
-        if (merchant.isEmpty() && title.length() >= 2 && title.length() <= 40 && !ISSUER.matcher(title).find()) merchant = title;
+        PayParse r = PayParse.parse(pkg, title, body);
+        if (!"ok".equals(r.result)) return r.result;
+        double amount = r.amount;
+        String cur = r.cur, merchant = r.merchant, all = r.text;
 
         long now = System.currentTimeMillis();
         // The same charge often comes twice (bank + card app, or an updated notification): one entry per amount per 15 minutes
