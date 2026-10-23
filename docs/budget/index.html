@@ -7808,6 +7808,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       "כלים מוכנים: כמה הוצאות במשפט אחד, צילום קבלה, דוח נוכחות למשמרות, מכתב החודש, ההרגלים שלי, מנויים ששכחת, תכנון שבוע ובדיקת החזר מס.",
       "העוזר לא משנה כלום בלי שתאשר, והשיחה לא נשמרת בשרת.",
       "עד 20 שאלות ביום. 👍👎 על כל תשובה עוזרים לשפר.",
+      { t: "אפשר לבקש מהעוזר קטגוריה חדשה או תת־קטגוריה, למשל ״תפתח קטגוריה רכב עם תתי־קטגוריות דלק וטיפולים״. הוא מראה כרטיס, ושומרים ב״✓ שמור״.", d: "2026-10-23" },
       { t: "*🚩 דיווח*: מתחת לכל תשובה. אם תשובה פוגענית, שגויה או לא מתאימה, בוחרים סיבה והיא נשלחת לבדיקה.", d: "2026-10-18" },
       "Enter יורד שורה. שולחים בכפתור ״שלח״."
     ] },
@@ -8823,6 +8824,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     L.push("חיובים קבועים: " + (p.d.expenses.map((x) => x.name + " " + x.amount).join(", ") || "אין") + " · סה״כ " + p.exp + " · כסף חופשי להוצאות היומיום: " + p.spend);
     L.push("יעדים לקטגוריות (לא חובה, רק למעקב): " + p.d.cats.map((c) => catLabel(c.id) + " " + (+c.budget || 0)).join(", "));
     L.push("מזהי קטגוריות לפעולות (id: שם): " + p.d.cats.map((c) => c.id + ": " + catLabel(c.id)).join(", "));
+    L.push('פעולה נוספת ל־[[act]]: כשהמשתמש מבקש קטגוריה חדשה או תת־קטגוריה: {"t":"cat_add","name":"שם קצר","parent":"id של קטגוריה ראשית, או ריק לקטגוריה ראשית","emoji":"אימוג׳י אחד מתאים","budget":0}. תת־קטגוריה רק בתוך קטגוריה ראשית (לא בתוך תת־קטגוריה). קטגוריה ראשית חדשה עם תתי־קטגוריות: קודם הראשית, ואחריה התתים עם parent = שם הראשית. לא להציע קטגוריה שכבר קיימת. budget רק אם ביקשו יעד.');
     const today = ["todayLbl", "todayVal", "todayFc", "todayLine"].map((id) => $(id) && $(id).textContent.trim()).filter(Boolean).join(" · ");
     L.push("כרטיס ״מותר לך היום״: " + today + " · " + $("todayMore").textContent.replace(/\s+/g, " ").trim());
     const extra = {};
@@ -8928,7 +8930,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     const [y, mo, d] = day.split("-").map(Number);
     return new Date(y, mo - 1, d, Math.floor(min / 60), min % 60).getTime();
   }
-  function aiActPlan(a) {
+  function aiActPlan(a, ai, list) {
     const t = todayStr(), names = catNames(), cur = thisMonth();
     const curD = () => (month === cur ? data() : store.months[cur] || data());
     const toCur = () => { if (month !== cur) goMonth(cur); };
@@ -8967,6 +8969,33 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
         if (!x) return bad("✖️ הסרת חיוב קבוע: " + name, "אין חיוב קבוע בשם הזה");
         return { ok: true, txt: "✖️ הסרת חיוב קבוע: " + x.name + " " + fmt(+x.amount || 0), sub: "מהחודש הזה והלאה",
           run: () => { toCur(); commit(); const d = data(), y = find(d); if (y) { d.expenses.splice(d.expenses.indexOf(y), 1); touch(); render(); } return x.name + " הוסר"; } };
+      }
+      case "cat_add": {
+        // A new category, or a sub-category under a main one (which may be created earlier on the same card)
+        const name = String(a.name || "").trim().slice(0, 40), ref = String(a.parent || "").trim(), budget = Math.max(0, amt(a.budget));
+        const emoji = /^\S{1,4}$/u.test(String(a.emoji || "").trim()) && !/[\w\u0590-\u05ff]/.test(a.emoji) ? String(a.emoji).trim() : "";
+        if (!name) return bad("🗂️ קטגוריה חדשה", "חסר שם");
+        const same = (x, y) => String(x || "").trim().replace(/^ה(?=\S{3,})/, "") === String(y || "").trim().replace(/^ה(?=\S{3,})/, "");
+        const mains = () => curD().cats.filter((c) => !isSub(c, curD().cats));
+        const findMain = () => mains().find((c) => c.id === ref) || mains().find((c) => same(c.name, ref));
+        const early = ref && !findMain() && (list || []).slice(0, ai).some((x) => x && x.t === "cat_add" && !x.parent && same(x.name, ref));
+        if (ref && !findMain() && !early) return bad("🗂️ תת־קטגוריה: " + name, "לא מצאתי קטגוריה ראשית בשם " + ref);
+        const pName = ref ? (findMain() ? findMain().name : ref) : "";
+        const dup = curD().cats.find((c) => same(c.name, name) && (ref ? findMain() && c.parent === findMain().id : !isSub(c, curD().cats)));
+        if (dup) return bad("🗂️ " + name, "כבר יש קטגוריה כזו");
+        return { ok: true, txt: (emoji || "🗂️") + " " + (ref ? "תת־קטגוריה: " + name + " (בתוך " + pName + ")" : "קטגוריה חדשה: " + name), sub: (budget ? "יעד " + fmt(budget) + " בחודש · " : "") + "מהחודש הזה והלאה",
+          run: () => {
+            toCur(); commit();
+            const d = data(), c = { id: catId(), name, budget, ...(emoji ? { emoji } : {}) };
+            if (ref) {
+              const par = d.cats.filter((x) => !isSub(x, d.cats)).find((x) => x.id === ref || same(x.name, ref));
+              if (!par) return name + " לא נוצרה (אין קטגוריה ראשית)";
+              c.parent = par.id;
+              d.cats.splice(d.cats.indexOf(par) + 1 + d.cats.filter((x) => x.parent === par.id).length, 0, c);
+            } else d.cats.push(c);
+            touch(); render();
+            return (ref ? "תת־קטגוריה " : "קטגוריה ") + name;
+          } };
       }
       case "target": {
         const amount = Math.max(0, amt(a.amount));
