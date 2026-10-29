@@ -753,6 +753,8 @@ dialog.sheet::backdrop { background: rgba(40, 20, 50, .45); -webkit-backdrop-fil
 .shift .what .range { font-size: 17px; font-weight: 800; font-variant-numeric: tabular-nums; }
 .shift .what span { font-size: 12.5px; color: var(--muted); }
 .shift .what .snote { color: var(--fg); }
+.shift .what .ssame { color: var(--fg); font-weight: 700; }
+.shift.same { box-shadow: inset 4px 0 0 var(--brand3); }
 .shift .amt { font-size: 16px; font-weight: 800; }
 .shift .del { width: 32px; height: 32px; font-size: 18px; }
 #shiftList > .dh { display: flex; justify-content: space-between; gap: 12px; margin-top: 8px; font-size: 16px; font-weight: 800; color: var(--fg); padding: 10px 16px; border-radius: 999px; background: var(--surface-2); font-variant-numeric: tabular-nums; }
@@ -2163,7 +2165,7 @@ html.hugetext .season3 svg { width: 70px; height: 21px; }
               <label class="field" for="remindAt">בשעה<input type="text" class="timein" inputmode="numeric" autocomplete="off" maxlength="5" placeholder="22:30" id="remindAt" value="22:30"></label>
               <p class="hint">ההתראה לא תגיע ביום שכבר הוזנה בו משמרת או שסימנת בו ״לא עבדתי״.</p>
             </div>
-            <p class="hint">החישוב לפי חוק שעות עבודה ומנוחה: שעתיים נוספות ראשונות ב־125% ואחריהן 150%. במשמרת עם שעתיים לפחות בין 22:00 ל־06:00 השעות הנוספות מתחילות אחרי 7 שעות. שבת וחגים ב־150%, ושעות נוספות בהם ב־175% וב־200%. השבת והחג מתחילים 18 דקות לפני השקיעה ונגמרים 40 דקות אחריה, לפי שעון תל אביב.</p>
+            <p class="hint">החישוב לפי חוק שעות עבודה ומנוחה: שעתיים נוספות ראשונות ב־125% ואחריהן 150%. במשמרת עם שעתיים לפחות בין 22:00 ל־06:00 השעות הנוספות מתחילות אחרי 7 שעות. כמה משמרות באותו יום נספרות יחד. שבת וחגים ב־150%, ושעות נוספות בהם ב־175% וב־200%. השבת והחג מתחילים 18 דקות לפני השקיעה ונגמרים 40 דקות אחריה, לפי שעון תל אביב.</p>
           </div>
         
     </section>
@@ -3077,8 +3079,17 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   }
   const toMin = (t) => { const [h, m] = t.split(":").map(Number); return h * 60 + m; };
 
-  function shiftPay(r, settings) {
+  // Two shifts on the same day are one work day for overtime: a later shift continues from the hours of the earlier ones
+  // (ordered by start time, then id). Returns the earlier same-day shifts of r.
+  const sameDayKey = (x) => x.start_time + "|" + String(x.id || "\uffff");
+  function sameDayBefore(r) {
+    const k = sameDayKey(r);
+    return (shifts[periodOf(String(r.work_date))] || []).filter((x) => x !== r && !(r.id && x.id === r.id) && x.work_date === r.work_date && sameDayKey(x) < k);
+  }
+  function sameDayCount(r) { return (shifts[periodOf(String(r.work_date))] || []).filter((x) => x.work_date === r.work_date && !(r.id && x.id === r.id) && x !== r).length + 1; }
+  function shiftPay(r, settings, alone) {
     const st = settings || {};
+    const before = alone ? 0 : sameDayBefore(r).reduce((a, x) => a + shiftPay(x, st, true).paidMin, 0);
     const s = toMin(r.start_time);
     let len = toMin(r.end_time) - s;
     if (len <= 0) len += 1440;                     // ends after midnight
@@ -3101,7 +3112,8 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     }
     const base = st.otAfter > 0 ? +st.otAfter : 8.6;
     const dayLen = (night >= 120 ? Math.min(7, base) : base) * 60;
-    minutes.forEach((isRest, i) => {
+    minutes.forEach((isRest, j) => {
+      const i = j + before;
       const tier = i < dayLen ? 0 : i < dayLen + 120 ? 1 : 2;
       const legal = (isRest ? [150, 175, 200] : [100, 125, 150])[tier];
       const rate = Math.max(legal, +r.kind_rate || 100);  // a shift type (e.g. Motzash 150%) sets a minimum
@@ -3109,7 +3121,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     });
     const wage = +r.wage || 0;
     const gross = Object.entries(mins).reduce((sum, [rate, n]) => sum + (wage / 60) * n * rate / 100, 0);
-    return { paidMin: minutes.length, mins, gross, night: night >= 120, rest };
+    return { paidMin: minutes.length, mins, gross, night: night >= 120, rest, before };
   }
 
   function shiftMonth(m, by) {
@@ -4675,6 +4687,8 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       const tl = typeLabel(r);
       c.textContent = hrs(p.paidMin) + " שעות" + (tl ? " · " + tl : "") + " · " + payParts(p) + (r.work_date > todayStr() ? " · מתוכנן" : "") + (r.pending ? " · ממתין לחיבור" : "");
       what.append(t, c);
+      const nDay = sameDayCount(r);
+      if (nDay > 1) { const sd = document.createElement("span"); sd.className = "ssame"; sd.textContent = "🔗 " + nDay + " משמרות באותו יום · שעות נוספות לפי סך היום"; what.append(sd); row.classList.add("same"); }
       if (r.note) { const n = document.createElement("span"); n.className = "snote"; n.textContent = "📝 " + r.note; what.append(n); }
       what.setAttribute("aria-label", "עריכת המשמרת של " + dayLabel(r.work_date));
       what.addEventListener("click", () => openShift(r));
@@ -7859,6 +7873,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     { id: "shifts", e: "⏰", t: "משמרות ושכר לפי שעות", d: "", w: "hr", body: [
       "בלשונית *⏰ משמרות* רושמים כל משמרת: תאריך, כניסה, יציאה והפסקה שלא משולמת. אפשר להקליד שעה כמו 918 והיא תהפוך ל־09:18.",
       "השכר מחושב לפי החוק: שעות נוספות, לילה, שבת וחגים. זו הערכה של הברוטו, לפני מס.",
+      { t: "שתי משמרות או יותר באותו יום נחשבות כיום עבודה אחד: השעות הנוספות מתחילות לפי סך השעות של היום. המשמרות האלה מסומנות ב־🔗 ובפס צבעוני בצד. זה חל גם על משמרות שכבר נרשמו.", d: "2026-10-29" },
       "*🎨 סוגי משמרות*: אחוז קבוע לכל שעה, למשל מוצ״ש ב־150%. אם החוק נותן יותר, מקבלים את הגבוה.",
       "*📥 ייבוא מהיר*: מדביקים את דוח הנוכחות מחילן, מעלים קובץ, מצלמים את הדוח (העוזר קורא אותו), או מסמנים כמה ימים באותן שעות.",
       "*📝 ימים שלא הוזנו*: ימים שעברו בלי משמרת. ״לא עבדתי״ מוריד אותם מהרשימה.",
@@ -8980,7 +8995,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     const curS = shs.filter((r) => periodOf(r.work_date) === cur);
     if (shs.length) {
       let g = 0, min = 0, ot = 0;
-      curS.forEach((r) => { const p = shiftPay(r, st); g += p.gross; min += p.paidMin; ot += Math.max(0, p.paidMin - (+st.otAfter || 8.6) * 60); });
+      curS.forEach((r) => { const p = shiftPay(r, st); g += p.gross; min += p.paidMin; ot += Math.max(0, p.before + p.paidMin - Math.max(p.before, (+st.otAfter || 8.6) * 60)); });
       L.push("משמרות החודש: " + curS.length + " משמרות, " + (min / 60).toFixed(1) + " שעות לתשלום, " + r0(g) + " ברוטו" + (curS.length ? " (ממוצע " + r0(g / curS.length) + " למשמרת)" : "") + ". שעות מעבר ל־" + (+st.otAfter || 8.6) + " ביום (שעות נוספות בערך): " + (ot / 60).toFixed(1) + ".");
       if (+st.payGoal) L.push("יעד הכנסה חודשי ברוטו: " + +st.payGoal + ". הושג החודש: " + r0(g) + ". חסר: " + Math.max(0, r0(+st.payGoal - g)) + (curS.length && g < +st.payGoal ? " (בערך " + Math.ceil((+st.payGoal - g) / (g / curS.length)) + " משמרות כמו הממוצע שלך)" : "") + ".");
       const kind = {}; shs.filter((r) => r.work_date > dateAdd(t, -120)).forEach((r) => { const p = shiftPay(r, st), k = WD[wdOf(r.work_date)]; const o = (kind[k] = kind[k] || { n: 0, g: 0, m: 0 }); o.n++; o.g += p.gross; o.m += p.paidMin; });

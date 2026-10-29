@@ -86,12 +86,12 @@ async function runUser(b, u) {
     await p.clock.runFor(1500);
     for (let k = 0; k < 4; k++) await p.keyboard.press('Escape');
     await grab('today');
-    // shift pay, every logged shift, against the labor-law calculation
-    const pays = await p.evaluate(() => { const st = window.__T.settings(); return (window.__T.store.shifts || []).map((r) => [r.id, window.__T.shiftPay(r, st).gross]); });
+    // shift pay, every loaded shift, against the labor-law calculation (same-day shifts share one day's overtime)
+    const pays = await p.evaluate(() => { const st = window.__T.settings(); return [].concat(...Object.values(window.__T.shifts)).map((r) => [r.id, window.__T.shiftPay(r, st).gross]); });
     const sh = Object.fromEntries(u.store.shifts.map((x) => [x.id, x]));
     pays.forEach(([id, g]) => {
       const x = sh[id]; if (!x) return;
-      const o = O.pay(x, u.store.settings).gross;
+      const o = O.pay(x, u.store.settings, u.store.shifts).gross;
       if (Math.abs(o - g) > Math.max(3, o * 0.01)) errs.push(`shift ${x.work_date} ${x.start_time}-${x.end_time}: pay ₪${Math.round(g)}, should be ₪${Math.round(o)}`);
     });
     // a few past months

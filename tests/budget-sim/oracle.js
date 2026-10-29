@@ -41,7 +41,11 @@ function restAt(day, min) {
 const toMin = (t) => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
 // Israel's UTC offset at a wall-clock minute: the clocks move at 02:00 (spring Friday, autumn Sunday)
 const offAt = (day, min) => (min < 120 && israelOffset(add(day, -1)) !== israelOffset(day) ? israelOffset(add(day, -1)) : israelOffset(day));
-function pay(r, st) {
+// Shifts on the same day are one work day for overtime: count the paid minutes of the day's earlier shifts first
+// (earlier = earlier start, or the same start and a smaller id). Pass the user's shifts as `all`.
+function pay(r, st, all) {
+  const key = (x) => x.start_time + '|' + x.id;
+  const before = all ? all.filter((x) => x.work_date === r.work_date && x.id !== r.id && key(x) < key(r)).reduce((a, x) => a + pay(x, st).paidMin, 0) : 0;
   const s = toMin(r.start_time); let len = toMin(r.end_time) - s; if (len <= 0) len += 1440;
   // a shift through the night the clocks move is an hour longer (autumn) or shorter (spring)
   const endAbs = s + len, dst = offAt(r.work_date, s) - offAt(add(r.work_date, Math.floor(endAbs / 1440)), endAbs % 1440);
@@ -57,8 +61,8 @@ function pay(r, st) {
   const base = (st && st.otAfter > 0 ? +st.otAfter : 8.6);
   const dayLen = (night >= 120 ? Math.min(7, base) : base) * 60;
   let g = 0;
-  paid.forEach((rest, i) => {
-    const tier = i < dayLen ? 0 : i < dayLen + 120 ? 1 : 2;
+  paid.forEach((rest, j) => {
+    const i = j + before, tier = i < dayLen ? 0 : i < dayLen + 120 ? 1 : 2;
     const rate = Math.max((rest ? [150, 175, 200] : [100, 125, 150])[tier], +r.kind_rate || 100);
     g += (+r.wage || 0) / 60 * rate / 100;
   });
@@ -76,7 +80,7 @@ function model(store, month, today) {
   const earlier = Object.keys(store.months).filter((k) => k < month && !store.months[k].example).sort();
   const plan = store.months[month] || store.months[earlier[earlier.length - 1]] || { income: [], expenses: [] };
   const isCur = pOf(today) === month, days = between(pStart(month), pEnd(month)) + 1;
-  const payOf = (list) => list.reduce((s, r) => s + pay(r, st).gross, 0);
+  const payOf = (list) => list.reduce((s, r) => s + pay(r, st, store.shifts).gross, 0);
   const salaried = st.payType === 'salary';
   const mode = ['same', 'prev', 'off'].includes(st.shiftIncome) ? st.shiftIncome : 'same';
   let shiftInc = 0;
