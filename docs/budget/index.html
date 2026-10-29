@@ -451,6 +451,11 @@ dialog.sheet::backdrop { background: rgba(10, 20, 15, .45); }
 .sheet h2 { font-family: var(--font-display); font-weight: 700; font-size: 22px; margin: 0; }
 .sheet label { display: grid; gap: 4px; font-weight: 600; font-size: 15px; }
 .amount-in { font-family: var(--font-display) !important; font-size: 36px !important; font-weight: 700; padding: 6px 12px !important; }
+.currow { display: flex; gap: 6px; align-items: center; margin: -4px 0 6px; flex-wrap: wrap; }
+.curb { min-width: 40px; border: 1.5px solid var(--line); background: var(--surface-2, var(--bg)); color: inherit; border-radius: 999px; padding: 4px 10px; font-weight: 700; font-size: 15px; cursor: pointer; }
+.curb[aria-pressed="true"] { background: var(--brand, var(--accent)); color: #fff; border-color: transparent; }
+.curmore { width: auto !important; border-radius: 999px !important; padding: 4px 10px !important; font-size: 14px !important; min-height: 0 !important; }
+.curmore.on { background: var(--brand, var(--accent)) !important; color: #fff !important; }
 .chips { display: flex; flex-wrap: wrap; gap: 8px; border: 0; padding: 0; margin: 0; }
 .chips legend { font-weight: 600; font-size: 15px; margin-bottom: 6px; padding: 0; }
 .chip { position: relative; }
@@ -2267,6 +2272,11 @@ html.hugetext .season3 svg { width: 70px; height: 21px; }
     <button class="btn voice" type="button" id="voiceBtn" hidden>🎤 להגיד במקום להקליד</button>
     <p class="hint" id="voiceHint" hidden></p>
     <label for="txAmount">כמה?<input type="number" id="txAmount" class="amount-in" inputmode="decimal" min="0" step="0.01" placeholder="₪0"></label>
+    <div class="currow" id="txCurRow" role="group" aria-label="מטבע">
+      <button type="button" class="curb" data-c="ILS" aria-pressed="true">₪</button><button type="button" class="curb" data-c="USD" aria-pressed="false">$</button><button type="button" class="curb" data-c="EUR" aria-pressed="false">€</button><button type="button" class="curb" data-c="GBP" aria-pressed="false">£</button>
+      <select id="txCurMore" class="curmore" aria-label="מטבע אחר"><option value="">אחר…</option></select>
+    </div>
+    <p class="hours" id="txFx" aria-live="polite" hidden></p>
     <p class="hours" id="txHours" aria-live="polite"></p>
     <p class="txfuture" id="txFuture" aria-live="polite" hidden></p>
     <fieldset class="chips" id="txCats"><legend>על מה?</legend></fieldset>
@@ -3946,6 +3956,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       lab.append(sp); box.append(lab);
     }
     $("txAmount").value = edit ? edit.amount : ""; $("txNote").value = edit ? edit.note || "" : "";
+    setTxCur("ILS");
     sheetTags = edit && edit.tags ? { ...edit.tags } : {};
     $("txRegret").hidden = !edit;
     paintTags();
@@ -3959,14 +3970,32 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     if (!dlg.open) { if (dlg.showModal) dlg.showModal(); else dlg.setAttribute("open", ""); }
     setTimeout(() => $("txAmount").focus(), 30);
   }
+  // A purchase abroad or online: typed in its own currency, saved in shekels at today's rate (same rates as payment detection)
+  let txCur = "ILS";
+  const txIls = () => { const a = parseFloat($("txAmount").value) || 0; return txCur === "ILS" ? a : Math.round(a * fxRate(txCur) * 100) / 100; };
+  function setTxCur(c) {
+    txCur = c || "ILS";
+    document.querySelectorAll("#txCurRow .curb").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.c === txCur)));
+    const more = $("txCurMore"), other = !FX_SIGN[txCur] && txCur !== "ILS";
+    if (more.options.length < 2) Object.keys(FX_ROUGH).filter((k) => !FX_SIGN[k]).forEach((k) => more.add(new Option(k, k)));
+    more.value = other ? txCur : ""; more.classList.toggle("on", other);
+    $("txAmount").placeholder = (txCur === "ILS" ? "₪" : FX_SIGN[txCur] || txCur + " ") + "0";
+    if (txCur !== "ILS") fxRefresh();
+    showHours();
+  }
+  document.querySelectorAll("#txCurRow .curb").forEach((b) => b.addEventListener("click", () => { setTxCur(b.dataset.c); $("txAmount").focus(); }));
+  $("txCurMore").addEventListener("change", (e) => setTxCur(e.target.value || "ILS"));
   function showHours() {
-    const h = hoursText(parseFloat($("txAmount").value) || 0);
+    const fx = $("txFx"), a = parseFloat($("txAmount").value) || 0;
+    fx.hidden = txCur === "ILS" || sheetMode === "inc";
+    if (!fx.hidden) fx.textContent = a > 0 ? "≈ " + fmt(txIls()) + " · יירשם בשקלים לפי השער של היום" : "הסכום יירשם בשקלים לפי השער של היום";
+    const h = hoursText(txIls());
     $("txHours").textContent = h ? "זה " + h + "." : "";
     showFuture();
   }
   // A big "want": what it does to the nearest savings goal, or how many days of the daily budget it is (display only)
   function showFuture() {
-    const p = $("txFuture"), min = +(settings().futureMin == null ? 150 : settings().futureMin), amt = parseFloat($("txAmount").value) || 0;
+    const p = $("txFuture"), min = +(settings().futureMin == null ? 150 : settings().futureMin), amt = txIls();
     const show = !editing && min > 0 && sheetTags.nw === "want" && amt >= min;
     p.hidden = !show; if (!show) return;
     const g = (store.goals || []).filter((x) => +x.target > +x.saved).sort((a, b) => (a.target - a.saved) - (b.target - b.saved))[0];
@@ -4006,14 +4035,16 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   const moodOf = (k) => MOODS.find((m) => m[0] === k);
   const tagMark = (t) => (t ? (t.regret ? "😣" : "") + (t.nw === "want" ? "🎁" : t.nw === "need" ? "🧰" : "") + (t.mood && moodOf(t.mood) ? moodOf(t.mood)[1] : "") : "");
   function readSheet() {
-    const amount = Math.round((parseFloat($("txAmount").value) || 0) * 100) / 100;
+    const typed = Math.round((parseFloat($("txAmount").value) || 0) * 100) / 100, amount = txIls();
     const picked = document.querySelector('input[name="txCat"]:checked');
     const date = $("txDate").value;
     const err = (t) => { $("txErr").textContent = t; $("txErr").hidden = false; return null; };
     if (!(amount > 0)) { $("txAmount").focus(); return err("כמה זה עלה? רשמו סכום גדול מאפס."); }
     if (!picked) return err("בחרו קטגוריה.");
     if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return err("בחרו תאריך.");
-    return { amount, category: picked.value, spent_on: date, note: $("txNote").value.trim().slice(0, 200), tags: cleanTags(sheetTags) };
+    let note = $("txNote").value.trim();
+    if (txCur !== "ILS") note = (note ? note + " " : "") + "(" + fxTxt({ amount: typed, cur: txCur }) + ")";
+    return { amount, category: picked.value, spent_on: date, note: note.slice(0, 200), tags: cleanTags(sheetTags) };
   }
 
   function showPeriodOf(date) {
@@ -4062,7 +4093,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 
   // ---- "Can I afford it?": the assistant answers from this month's numbers ----
   $("txAfford").addEventListener("click", () => {
-    const amount = parseFloat($("txAmount").value) || 0;
+    const amount = txIls();
     if (!(amount > 0)) { $("txAmount").focus(); $("txErr").textContent = "כמה זה עולה? רשמו סכום קודם."; $("txErr").hidden = false; return; }
     const picked = document.querySelector('input[name="txCat"]:checked'), cat = picked ? catNames()[picked.value] : "";
     const note = $("txNote").value.trim();
@@ -5556,6 +5587,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     $("modeInc").setAttribute("aria-pressed", String(inc));
     $("txCats").hidden = inc; $("incKinds").hidden = !inc;
     $("txHours").hidden = inc;
+    $("txCurRow").hidden = inc; if (inc && txCur !== "ILS") setTxCur("ILS");
     $("repeatRow").hidden = inc || !!editing;
     $("favRow").hidden = inc || !!editing;
     $("voiceBtn").hidden = inc || !(voiceApp() || SR);
@@ -7813,6 +7845,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       { t: "בחודש הראשון אחרי ההרשמה נספר רק החלק של החודש שנשאר, כדי שהסכום ליום לא יצא גבוה מדי.", d: "2026-10-18" }
     ] },
     { id: "add", e: "💸", t: "רישום הוצאה", d: "", body: [
+      { t: "בהוספת הוצאה אפשר לבחור מטבע מתחת לסכום (₪, $, €, £ או אחר). הסכום נרשם בשקלים לפי השער של היום, והסכום המקורי נשמר בפירוט.", d: "2026-10-29" },
       "כפתור *💸 הוצאה* למטה פותח טופס: כמה, על מה (קטגוריה), פירוט ותאריך. רק הסכום חובה.",
       "🧰 צריך או 🎁 רוצה, ולמה קניתי: לא חובה, אבל מזה נבנה כרטיס ״ההרגלים שלי״.",
       "⭐ ״שמור ככפתור רישום בלחיצה״ הופך הוצאה שחוזרת לכפתור. לחיצה אחת עליו רושמת אותה להיום.",
@@ -9992,6 +10025,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     if (month !== thisMonth()) goMonth(thisMonth());
     openSheet();
     payFrom = p.id;
+    setTxCur("ILS");
     $("txAmount").value = Math.round(payIls(p) * 100) / 100;
     $("txNote").value = (p.merchant || "") + (isFx(p) ? (p.merchant ? " " : "") + "(" + fxTxt(p) + ")" : "");
     const d = new Date(p.at); $("txDate").value = d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
