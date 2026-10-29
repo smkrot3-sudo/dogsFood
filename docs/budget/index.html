@@ -4549,11 +4549,15 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   // ---- Shift types (e.g. Motzash at 150%) ----
   const TYPE_COLORS = ["blue", "orange", "violet", "magenta", "yellow", "aqua"];
   const shiftTypes = () => store.shiftTypes || [];
-  const typeOf = (r) => (r.kind ? shiftTypes().find((t) => t.id === r.kind) : null);
+  // 150% and 200% are always there next to "רגילה", besides the types the user makes
+  const FIXED_TYPES = [{ id: "r150", name: "", rate: 150, color: "orange", fixed: true }, { id: "r200", name: "", rate: 200, color: "magenta", fixed: true }];
+  const allTypes = () => FIXED_TYPES.concat(shiftTypes());
+  const typeOf = (r) => (r.kind ? allTypes().find((t) => t.id === r.kind) : null);
+  const chipText = (t) => (t.fixed ? t.rate + "%" : (t.name || "סוג בלי שם") + (t.id ? " " + t.rate + "%" : ""));
   function typeLabel(r) {
     if (!r.kind) return "";
     const t = typeOf(r);
-    return (t ? t.name || "סוג בלי שם" : "סוג שנמחק") + " " + (+r.kind_rate || 100) + "%";
+    return (t && t.fixed ? "משמרת" : t ? t.name || "סוג בלי שם" : "סוג שנמחק") + " " + (+r.kind_rate || 100) + "%";
   }
   function typeColor(r) { const t = typeOf(r); return r.kind ? "c-" + (t ? t.color : "gray") : ""; }
   function renderTypes() {
@@ -4757,7 +4761,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     // Type chips: regular plus every defined type; a deleted type stays selectable while editing its shift
     const box = $("shKinds");
     box.querySelectorAll(".chip").forEach((n) => n.remove());
-    const opts = [{ id: "", name: "רגילה", rate: 100, color: "" }].concat(shiftTypes());
+    const opts = [{ id: "", name: "רגילה", rate: 100, color: "" }].concat(allTypes());
     if (edit && edit.kind && !typeOf(edit)) opts.push({ id: edit.kind, name: "סוג שנמחק", rate: edit.kind_rate, color: "gray" });
     const pick = edit ? edit.kind || "" : "";
     opts.forEach((t, i) => {
@@ -4765,7 +4769,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       const inp = document.createElement("input"); inp.type = "radio"; inp.name = "shKind"; inp.value = t.id; inp.id = "shKind-" + i;
       inp.checked = t.id === pick;
       inp.addEventListener("change", previewShift);
-      const sp = document.createElement("span"); sp.textContent = (t.name || "סוג בלי שם") + (t.id ? " " + t.rate + "%" : "");
+      const sp = document.createElement("span"); sp.textContent = chipText(t); if (!t.id) sp.id = "shKindReg";
       lab.append(inp, sp); box.append(lab);
     });
     $("shErr").hidden = true;
@@ -4777,7 +4781,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     const date = $("shDate").value, a = normTime($("shStart").value), b = normTime($("shEnd").value);
     if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !/^\d\d:\d\d$/.test(a) || !/^\d\d:\d\d$/.test(b)) return null;
     const k = (document.querySelector('input[name="shKind"]:checked') || {}).value || "";
-    const t = shiftTypes().find((x) => x.id === k);
+    const t = allTypes().find((x) => x.id === k);
     const keepOld = editingShift && editingShift.kind === k && !t;
     return {
       work_date: date, start_time: a, end_time: b,
@@ -4792,6 +4796,8 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     const r = readShift();
     if (!r) { $("shPreview").textContent = ""; return; }
     const p = shiftPay(r, settings());
+    // On Shabbat or a holiday the law already pays 150% (more after overtime); the default chip says so
+    const reg = $("shKindReg"); if (reg) reg.textContent = p.rest ? p.rest + " · לפי חוק" : "רגילה";
     $("shPreview").textContent = hrs(p.paidMin) + " שעות · " + fmt(p.gross) + " ברוטו\n" + payParts(p);
   }
   ["shDate", "shStart", "shEnd", "shBreak"].forEach((id) => $(id).addEventListener("input", previewShift));
@@ -4994,7 +5000,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   }
   function impKind() {
     const k = (document.querySelector('input[name="impKind"]:checked') || {}).value || "";
-    const t = shiftTypes().find((x) => x.id === k);
+    const t = allTypes().find((x) => x.id === k);
     return { kind: t ? k : "", kind_rate: t ? +t.rate || 100 : 100 };
   }
   function impCandidates() {
@@ -5090,11 +5096,11 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     if (last) { $("impStart").value = last.start_time; $("impEnd").value = last.end_time; $("impBreak").value = last.break_min || 0; }
     const box = $("impKinds");
     box.querySelectorAll(".chip").forEach((x) => x.remove());
-    [{ id: "", name: "רגילה", color: "" }].concat(shiftTypes()).forEach((t, i) => {
+    [{ id: "", name: "רגילה", color: "" }].concat(allTypes()).forEach((t, i) => {
       const lab = document.createElement("label"); lab.className = "chip" + (t.color ? " c-" + t.color : "");
       const inp = document.createElement("input"); inp.type = "radio"; inp.name = "impKind"; inp.value = t.id; inp.id = "impKind-" + i; inp.checked = !t.id;
       inp.addEventListener("change", renderImport);
-      const sp = document.createElement("span"); sp.textContent = (t.name || "סוג בלי שם") + (t.id ? " " + t.rate + "%" : "");
+      const sp = document.createElement("span"); sp.textContent = chipText(t);
       lab.append(inp, sp); box.append(lab);
     });
     setImpMode("paste");
@@ -7904,6 +7910,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       "משנים את סוג השכר ויום המשכורת בהגדרות ← כללי ← ״איך משלמים לך?״."
     ], go: ["settings", "⚙️ להגדרות"] },
     { id: "shifts", e: "⏰", t: "משמרות ושכר לפי שעות", d: "", w: "hr", body: [
+      { t: "בסוג משמרת יש תמיד ״רגילה״, 150% ו־200%. משמרת בשבת או בחג מסומנת לבד ״שבת · לפי חוק״ והשכר מחושב לפי החוק.", d: "2026-10-29" },
       "בלשונית *⏰ משמרות* רושמים כל משמרת: תאריך, כניסה, יציאה והפסקה שלא משולמת. אפשר להקליד שעה כמו 918 והיא תהפוך ל־09:18.",
       "השכר מחושב לפי החוק: שעות נוספות, לילה, שבת וחגים. זו הערכה של הברוטו, לפני מס.",
       { t: "שתי משמרות או יותר באותו יום נחשבות כיום עבודה אחד: השעות הנוספות מתחילות לפי סך השעות של היום. המשמרות האלה מסומנות ב־🔗 ובפס צבעוני בצד. זה חל גם על משמרות שכבר נרשמו.", d: "2026-10-29" },
@@ -8942,7 +8949,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     const parentOf = {}; Object.values(store.months).forEach((m) => (m.cats || []).forEach((c) => { if (c.parent) parentOf[c.id] = c.parent; }));
     const catLabel = (id) => (parentOf[id] && names[parentOf[id]] ? names[parentOf[id]] + " > " : "") + (names[id] || "לא ידוע");
     const wd = (d) => ["א", "ב", "ג", "ד", "ה", "ו", "ש"][new Date(d + "T12:00").getDay()];
-    const types = {}; shiftTypes().forEach((t) => { types[t.id] = t.name; });
+    const types = {}; allTypes().forEach((t) => { types[t.id] = t.fixed ? t.rate + "%" : t.name; });
     const L = [];
     L.push("העוזר נפתח מהלשונית: " + (AI_TABS[aiFrom] || "ראשי") + ".");
     L.push("היום: " + todayStr() + " (יום " + wd(todayStr()) + "). החודש המוצג באפליקציה: " + month + ". חודש תקציבי מתחיל ב־" + startDay() + " לחודש.");
