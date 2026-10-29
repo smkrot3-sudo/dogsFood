@@ -146,7 +146,8 @@ public class PayListener extends NotificationListenerService {
         NotificationManager nm = (NotificationManager) c.getSystemService(Context.NOTIFICATION_SERVICE);
         if (Build.VERSION.SDK_INT >= 26 && nm.getNotificationChannel(CHANNEL) == null)
             nm.createNotificationChannel(new NotificationChannel(CHANNEL, "תשלומים שזוהו", NotificationManager.IMPORTANCE_DEFAULT));
-        String amt = ("USD".equals(cur) ? "$" : "₪") + (amount == Math.floor(amount) ? String.valueOf((long) amount) : String.format(java.util.Locale.US, "%.2f", amount));
+        String sign = "ILS".equals(cur) ? "₪" : "USD".equals(cur) ? "$" : "EUR".equals(cur) ? "€" : "GBP".equals(cur) ? "£" : cur + " ";
+        String amt = sign + (amount == Math.floor(amount) ? String.valueOf((long) amount) : String.format(java.util.Locale.US, "%.2f", amount));
         Intent open = new Intent(c, MainActivity.class).putExtra(MainActivity.EXTRA_OPEN, "pay:" + id)
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         PendingIntent openPi = PendingIntent.getActivity(c, id.hashCode(), open, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);

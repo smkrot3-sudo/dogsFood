@@ -7938,6 +7938,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       { t: "*📲 ווידג׳ט*: לחיצה ארוכה על מסך הבית של הטלפון ← ווידג׳טים ← ״התקציב שלי״. רואים כמה מותר היום, ו־+ פותח הוצאה.", w: "a" },
       { t: "*💳 זיהוי תשלומים*: כשמגיעה התראת חיוב מהבנק או מהאשראי, האפליקציה מכינה הוצאה ונשאר רק לאשר. מפעילים בהגדרות ← כללי. ההתראות נקראות רק בטלפון שלך.", w: "apk" },
       { t: "מגרסה 2.3 הזיהוי מדלג על קודי אימות, חיוב צפוי, ביטולים ועדכוני יתרה, וחיוב בדולרים מוצג גם בשקלים (בערך, אפשר לתקן).", w: "apk", d: "2026-10-18" },
+      { t: "מגרסה 2.6: תשלום במטבע זר (דולר, יורו, פאונד ועוד) שזוהה מההתראה נרשם בשקלים לפי השער של היום, והסכום המקורי נשאר בתיאור.", w: "apk", d: "2026-10-29" },
       { t: "מגרסה 2.5: זיהוי תשלומים לא נופל יותר על פרסומות מאפליקציות קניות (כמו Temu), ותופס נכון תשלומים ב־Google Wallet.", w: "apk", d: "2026-10-23" },
       { t: "מגרסה 2.4: ליד ״זיהוי תשלומים״ בהגדרות כתוב מתי נקראה ההתראה האחרונה, שם החנות נלקח גם מ־Google Wallet, וההודעה על תשלום שזוהה מגיעה עם צליל.", w: "apk", d: "2026-10-18" },
       { t: "התראות מגיעות גם כשהאפליקציה סגורה: הודעות אישיות, בקשות חברות, הוצאות משותפות, סיכום שבועי במוצאי שבת.", w: "a" },
@@ -9937,6 +9938,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       : "· מופעל, אבל עוד לא נקראה אף התראה. אם זה נמשך, כבו והדליקו שוב בהגדרות הטלפון.";
     $("payOn").textContent = on ? "לכבות בהגדרות הטלפון" : "להפעלה בהגדרות הטלפון";
     const n = payItems().length;
+    if (payItems().some(isFx)) fxRefresh();
     $("payBar").hidden = !n;
     $("payBarText").textContent = n === 1 ? "💳 זיהיתי תשלום אחד שעוד לא נרשם" : "💳 זיהיתי " + n + " תשלומים שעוד לא נרשמו";
     if ($("paySheet").open) payRender();
@@ -9948,7 +9950,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     items.forEach((p) => {
       const li = document.createElement("li");
       const top = document.createElement("div"); top.className = "amt";
-      top.textContent = (p.cur === "USD" ? "$" + (+p.amount).toLocaleString("he-IL", { maximumFractionDigits: 2 }) + " (בערך " + fmt(payIls(p)) + ")" : "₪" + (+p.amount).toLocaleString("he-IL", { maximumFractionDigits: 2 })) + (p.merchant ? " · " + p.merchant : "");
+      top.textContent = (isFx(p) ? fxTxt(p) + " (בערך " + fmt(payIls(p)) + ")" : "₪" + (+p.amount).toLocaleString("he-IL", { maximumFractionDigits: 2 })) + (p.merchant ? " · " + p.merchant : "");
       const when = new Date(p.at);
       const src = document.createElement("div"); src.className = "src";
       src.textContent = when.toLocaleDateString("he-IL", { weekday: "short", day: "numeric", month: "numeric" }) + " " + when.toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" }) + " · " + (p.app || "") + "\n" + (p.text || "");
@@ -9960,16 +9962,38 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       row.append(go, no); li.append(top, src, row); ul.append(li);
     });
   }
-  // A dollar charge becomes shekels at a round rate; the user sees it in the add sheet and can fix it
-  const USD_ILS = 3.7;
-  const payIls = (p) => (p.cur === "USD" ? Math.round(+p.amount * USD_ILS) : +p.amount);
+  // A foreign charge becomes shekels at today's rate (free public rates, kept on the phone for 12 hours; a rough
+  // built-in rate when offline). The user sees it in the add sheet and can fix it; the note keeps the original amount.
+  const FX_KEY = "budget-fx", FX_SIGN = { USD: "$", EUR: "€", GBP: "£" };
+  const FX_ROUGH = { USD: 3.7, EUR: 4, GBP: 4.7, CHF: 4.2, JPY: 0.025, CAD: 2.7, AUD: 2.4, THB: 0.1, TRY: 0.1, CZK: 0.16, HUF: 0.01, PLN: 0.93, RON: 0.8, BGN: 2.05, GEL: 1.37, AED: 1, EGP: 0.075, JOD: 5.2, CNY: 0.51, INR: 0.044, SEK: 0.35, NOK: 0.34, DKK: 0.54, MXN: 0.19, BRL: 0.68, ZAR: 0.2, HKD: 0.47, SGD: 2.8, KRW: 0.0027 };
+  const isFx = (p) => p.cur && p.cur !== "ILS";
+  const fxTxt = (p) => { const n = (+p.amount).toLocaleString("he-IL", { maximumFractionDigits: 2 }); return FX_SIGN[p.cur] ? FX_SIGN[p.cur] + n : n + " " + p.cur; };
+  function fxRates() { try { return JSON.parse(localStorage.getItem(FX_KEY) || "null") || {}; } catch (e) { return {}; } }
+  const fxRate = (cur) => (fxRates().r || {})[cur] || FX_ROUGH[cur] || 0;
+  let fxBusy = false;
+  async function fxRefresh() {
+    if (fxBusy || Date.now() - (fxRates().at || 0) < 12 * 3600e3) return;
+    fxBusy = true;
+    try {
+      let r = null;
+      try { const j = await (await fetch("https://open.er-api.com/v6/latest/ILS")).json(); if (j && j.rates) r = j.rates; } catch (e) {}
+      if (!r) try { const j = await (await fetch("https://api.frankfurter.app/latest?from=ILS")).json(); if (j && j.rates) r = j.rates; } catch (e) {}
+      if (r) {  // rates are "1 shekel = x foreign"; the app needs shekels per one foreign unit
+        const out = {}; Object.keys(r).forEach((k) => { if (+r[k] > 0) out[k] = 1 / +r[k]; });
+        localStorage.setItem(FX_KEY, JSON.stringify({ at: Date.now(), r: out }));
+        if ($("paySheet").open) payRender();
+      }
+    } catch (e) {}
+    fxBusy = false;
+  }
+  const payIls = (p) => (isFx(p) ? Math.round(+p.amount * fxRate(p.cur) * 100) / 100 : +p.amount);
   function payLog(p) {
     closeDlg("paySheet");
     if (month !== thisMonth()) goMonth(thisMonth());
     openSheet();
     payFrom = p.id;
     $("txAmount").value = Math.round(payIls(p) * 100) / 100;
-    $("txNote").value = (p.merchant || "") + (p.cur === "USD" ? (p.merchant ? " " : "") + "($" + p.amount + ")" : "");
+    $("txNote").value = (p.merchant || "") + (isFx(p) ? (p.merchant ? " " : "") + "(" + fxTxt(p) + ")" : "");
     const d = new Date(p.at); $("txDate").value = d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
     showHours();
   }

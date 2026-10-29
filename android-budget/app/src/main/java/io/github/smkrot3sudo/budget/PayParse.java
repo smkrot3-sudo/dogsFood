@@ -36,9 +36,20 @@ final class PayParse {
         + "your card was charged|card charged|transaction of", Pattern.CASE_INSENSITIVE);
     private static final Pattern INCOMING = Pattern.compile(
         "זיכוי|זוכה|החזר|קיבלת|הועבר[וה]? אליך|העביר לך|העבירה לך|refund|received|credited", Pattern.CASE_INSENSITIVE);
-    // Dollar charges (online shops, subscriptions): kept in dollars, the page turns them into shekels for the user to check
-    private static final Pattern USD = Pattern.compile(
-        "(?:\\$|USD)\\s?([0-9][0-9,]*(?:\\.[0-9]{1,2})?)|([0-9][0-9,]*(?:\\.[0-9]{1,2})?)\\s?(?:\\$|USD|דולר)");
+    // Foreign charges (online shops, subscriptions, trips abroad): kept in their currency, the page turns them into shekels
+    private static final String NUM = "([0-9][0-9,]*(?:\\.[0-9]{1,2})?)";
+    private static final String SYM = "\\$|€|£|USD|EUR|GBP|CHF|JPY|CAD|AUD|THB|TRY|CZK|HUF|PLN|RON|BGN|GEL|AED|EGP|JOD|CNY|INR|SEK|NOK|DKK|MXN|BRL|ZAR|HKD|SGD|KRW|דולר|יורו|אירו|ליש\"ט|ליש״ט|פאונד";
+    private static final Pattern FOREIGN = Pattern.compile("(" + SYM + ")\\s?" + NUM + "|" + NUM + "\\s?(" + SYM + ")");
+
+    static String code(String sym) {
+        switch (sym) {
+            case "$": case "דולר": return "USD";
+            case "€": case "יורו": case "אירו": return "EUR";
+            case "£": case "ליש\"ט": case "ליש״ט": case "פאונד": return "GBP";
+            default: return sym;
+        }
+    }
+
     // Not a charge: an upcoming statement total, a one-time code, a cancelled or declined charge, a balance update, an ad
     private static final Pattern NOT_PAY = Pattern.compile(
         "חיוב צפוי|צפוי לחיוב|סך החיובים|סה\"כ חיובים|סה״כ חיובים|חיוב החודשי|דף החשבון|פירוט החיובים|"
@@ -80,8 +91,17 @@ final class PayParse {
         if (INCOMING.matcher(all).find()) { r.result = "incoming"; return r; }
         if (NOT_PAY.matcher(all).find()) { r.result = "not a charge"; return r; }
         Matcher m = AMOUNT.matcher(all);
-        if (!m.find()) { m = USD.matcher(all); if (!m.find()) { r.result = "no amount"; return r; } r.cur = "USD"; }
-        r.amount = Double.parseDouble((m.group(1) != null ? m.group(1) : m.group(2)).replace(",", ""));
+        String num;
+        if (m.find()) num = m.group(1) != null ? m.group(1) : m.group(2);
+        else {
+            m = FOREIGN.matcher(all);
+            if (!m.find()) { r.result = "no amount"; return r; }
+            r.cur = code(m.group(1) != null ? m.group(1) : m.group(4));
+            num = m.group(2) != null ? m.group(2) : m.group(3);
+        }
+        // "8,50 €" in Europe is eight and a half; "1,250" is still one thousand two hundred and fifty
+        if (num.matches("[0-9]+,[0-9]{2}")) num = num.replace(",", ".");
+        r.amount = Double.parseDouble(num.replace(",", ""));
         if (!(r.amount > 0) || r.amount > 100000) { r.result = "amount out of range"; return r; }
         Matcher mm = MERCHANT.matcher(body.isEmpty() ? all : body);
         while (mm.find()) {
