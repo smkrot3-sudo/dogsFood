@@ -6262,7 +6262,8 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     const head = () => { const b = document.createElement("b"); b.textContent = "✨ כמה מילים מהעוזר"; return b; };
     const words = (text) => { box.innerHTML = ""; const w = document.createElement("div"); w.className = "aimsg"; w.style.cssText = "background:none;padding:0;max-width:none"; aiRenderText(w, text); box.append(head(), w); };
     if (cached) words(cached);
-    else if (!mwSteady(m, all) || aiOk !== true) {
+    // The owner and Shani always get the words (owner, 2026-10-30)
+    else if (!(mwSteady(m, all) || [OWNER_ID, SHANI_ID].includes(user && user.id)) || aiOk !== true) {
       box.classList.add("soft");
       box.textContent = aiOk === true ? "✨ מי שרושם באפליקציה לפחות " + MW_DAYS + " ימים בחודש מקבל כאן גם כמה מילים אישיות מהעוזר. בחודש הבא?" : "";
       box.hidden = !box.textContent;
