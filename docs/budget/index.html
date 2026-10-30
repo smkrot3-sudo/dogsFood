@@ -845,6 +845,19 @@ body.salaried .tabs a[data-view="shifts"], body.salaried #shiftIncField, body.sa
 .streak { display: flex; flex-wrap: wrap; gap: 6px; }
 .streak span { background: rgba(255, 255, 255, .2); border-radius: 999px; padding: 4px 12px; font-weight: 600; font-size: 14px; }
 /* Month summary */
+.mwhero { text-align: center; padding: 14px 10px; border-radius: 20px; background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 18%, var(--surface)), color-mix(in srgb, var(--brand2, #db3577) 14%, var(--surface))); margin-bottom: 10px; }
+.mwhero b { display: block; font-size: 34px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.mwhero b.neg { color: var(--danger); } .mwhero b.pos { color: var(--accent); }
+.mwhero span { font-size: 15px; font-weight: 600; }
+.mwcats { display: grid; gap: 6px; margin: 10px 0; }
+.mwcats div { display: grid; grid-template-columns: 1fr auto; gap: 2px 8px; font-size: 14.5px; }
+.mwcats i { grid-column: 1 / -1; height: 8px; border-radius: 99px; background: var(--surface-2); overflow: hidden; }
+.mwcats i::after { content: ""; display: block; height: 100%; width: var(--w); border-radius: 99px; background: var(--accent); }
+.mwsheet .sumlist { margin-top: 8px; }
+.mwai { margin-top: 12px; background: var(--surface-2); border-radius: 18px; padding: 12px 14px; font-size: 15.5px; line-height: 1.6; }
+.mwai > b { display: block; margin-bottom: 4px; }
+.mwai p { margin: 0 0 6px; } .mwai p:last-child { margin: 0; }
+.mwai.soft { color: var(--muted); font-size: 14px; }
 .sumgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; }
 .sumgrid div { background: var(--surface-2); border-radius: 16px; padding: 10px 12px; display: grid; gap: 2px; }
 .sumgrid span { font-size: 13px; color: var(--muted); font-weight: 600; }
@@ -1671,7 +1684,7 @@ html.hugetext .season3 svg { width: 70px; height: 21px; }
         <h2 id="sumH" class="pc-mint" data-e="📋"><span class="h2t" id="sumTitle">סיכום החודש</span></h2>
         <div class="sumgrid" id="sumGrid"></div>
         <ul class="sumlist" id="sumList"></ul>
-        <div class="actions"><button class="btn" type="button" id="sumOk" hidden>הבנתי, תסתיר</button></div>
+        <div class="actions"><button class="btn" type="button" id="sumFull">🎁 הסיכום המלא</button><button class="btn" type="button" id="sumOk" hidden>הבנתי, תסתיר</button></div>
       </section>
 
       <section data-block="quick" class="panel" aria-labelledby="quickH">
@@ -2529,6 +2542,19 @@ html.hugetext .season3 svg { width: 70px; height: 21px; }
     <p class="hint" id="newsLead">הכל כדי שרישום הוצאה ייקח שנייה.</p>
     <ul id="newsList"></ul>
     <div class="foot"><button class="btn primary" type="button" id="newsGo">💳 להפעלת זיהוי תשלומים</button><button class="btn" type="button" id="newsOk">הבנתי</button></div>
+  </form>
+</dialog>
+
+<dialog class="sheet newsheet mwsheet" id="mwSheet" aria-labelledby="mwH">
+  <form method="dialog">
+    <h2 id="mwH" data-e="🎁">הסיכום של החודש</h2>
+    <p class="hint" id="mwSub"></p>
+    <div class="mwhero" id="mwHero"></div>
+    <div class="sumgrid" id="mwGrid"></div>
+    <div class="mwcats" id="mwCats"></div>
+    <ul class="sumlist" id="mwList"></ul>
+    <div class="mwai" id="mwAi" hidden></div>
+    <div class="foot"><button class="btn primary" type="button" id="mwOk">סגירה</button></div>
   </form>
 </dialog>
 
@@ -5532,6 +5558,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
         const st = settings(), notes = [];
         pmNotes.forEach((n) => notes.push(n));
         if (st.weekly !== false) notes.push({ id: "weekly", at: weeklyAt(), every: 7, title: "📆 הסיכום השבועי שלך מוכן", text: "כמה הוצאת השבוע לעומת השבוע שעבר? היכנס וראה." });
+        try { const at = mwAt(); if (at) notes.push({ id: "monthwrap", at, title: "🎁 הסיכום של " + monthName(periodOf(new Date(at).toLocaleDateString("en-CA"))) + " מוכן", text: "כמה הוצאת, כמה נשאר ומה הלך טוב החודש. היכנס וראה." }); } catch (e) {}
         const at = st.payGoalKind === "m" && +st.payGoal > 0 && st.goalNote !== false ? goalNoteAt() : 0;
         if (at) notes.push({ id: "goal", at, every: 7, title: "📅 היום קובעים משמרות לשבוע הבא", text: goalNoteText() });
         const upd = window.appUpdateWaiting;
@@ -6121,6 +6148,135 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     box.hidden = false;
   }
   $("sumOk").addEventListener("click", () => { store.sumSeen = (store.sumSeen || []).concat([prevMonth(thisMonth())]).slice(-12); persist(); renderSummary(); });
+  $("sumFull").addEventListener("click", () => { const m = month < thisMonth() ? month : prevMonth(thisMonth()); mwOpen(m); });
+
+  // ---- The month wrap (owner, 2026-10-30): on the evening of the month's last day everyone gets a summary sheet.
+  // Words from the assistant only for people who used the app steadily that month, to keep the free AI quota. ----
+  const MW_HOUR = 20, MW_DAYS = 12, MW_WEEKS = 3;
+  // When the phone note goes off: the last day of this budget month at 20:00, moved past Shabbat or a holiday for those who keep them
+  function mwAt() {
+    for (let k = 0; k < 2; k++) {
+      let day = periodEnd(shiftMonth(thisMonth(), k)), min = MW_HOUR * 60;
+      for (let i = 0; i < 4 && keepsShabbat() && isRestMinute(day, min); i++) {
+        if (!restName(dateAdd(day, 1))) { min = sunset(day) + 55; break; }
+        day = dateAdd(day, 1); min = MW_HOUR * 60;
+      }
+      const [y, mo, d] = day.split("-").map(Number), at = new Date(y, mo - 1, d, Math.floor(min / 60), min % 60).getTime();
+      if (at > Date.now() + 60000) return at;
+    }
+    return 0;
+  }
+  // Which month to show by itself now: this one from 19:00 on its last day, the one that ended during the first 5 days of a new one
+  function mwDue() {
+    const cur = thisMonth(), seen = store.mwSeen || [], now = new Date(), t = todayStr();
+    if (t === periodEnd(cur) && now.getHours() >= MW_HOUR - 1 && !seen.includes(cur)) return cur;
+    const pm = prevMonth(cur);
+    if (daysBetween(periodStart(cur), t) < 5 && !seen.includes(pm) && store.months[pm]) return pm;
+    return null;
+  }
+  let mwTries = 0;
+  function mwCheck() {
+    if (!store || !user || $("app").hidden) return;
+    const m = mwDue(); if (!m) return;
+    if (document.querySelector("dialog[open]")) { if (mwTries++ < 6) setTimeout(mwCheck, 5000); return; }
+    mwOpen(m, true);
+  }
+  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") { mwTries = 0; setTimeout(mwCheck, 1500); } });
+  // Steady use: something logged on at least 12 different days, in at least 3 different weeks of the month
+  function mwSteady(m, rows) {
+    const days = new Set();
+    rows.forEach((r) => { [r.d, r.c ? new Date(r.c).toLocaleDateString("en-CA") : ""].forEach((x) => { if (x && periodOf(x) === m) days.add(x); }); });
+    const weeks = new Set([...days].map((x) => Math.floor(daysBetween(periodStart(m), x) / 7)));
+    return days.size >= MW_DAYS && weeks.size >= MW_WEEKS;
+  }
+  async function mwOpen(m, auto) {
+    if (!store || !store.months[m]) { snack("אין עדיין נתונים לחודש הזה."); return; }
+    $("mwH").textContent = "הסיכום של " + monthName(m);
+    $("mwSub").textContent = "מ־" + shortDate(periodStart(m)) + " עד " + shortDate(periodEnd(m)) + (m === thisMonth() ? " · החודש נגמר היום" : "");
+    ["mwHero", "mwGrid", "mwCats", "mwList"].forEach((id) => { $(id).innerHTML = ""; });
+    $("mwHero").textContent = "טוען…"; $("mwAi").hidden = true;
+    openDlg("mwSheet");
+    if (auto) { store.mwSeen = (store.mwSeen || []).concat([m]).slice(-12); persist(); }
+    const pm = prevMonth(m), from = periodStart(pm), to = periodEnd(m);
+    let ex = [], sh = [], inc = [];
+    try {
+      const [a, b, c] = await Promise.all([
+        sb.from("expenses").select("spent_on, amount, category, note, tags, created_at").gte("spent_on", from).lte("spent_on", to),
+        sb.from("shifts").select("work_date, start_time, end_time, break_min, wage, kind, kind_rate, note, created_at").gte("work_date", from).lte("work_date", to),
+        sb.from("incomes").select("received_on, amount, kind, note, created_at").gte("received_on", from).lte("received_on", to)
+      ]);
+      ex = (a.data || []).map((r) => ({ ...r, amount: +r.amount })); sh = b.data || []; inc = (c.data || []).map((r) => ({ ...r, amount: +r.amount }));
+    } catch (e) {}
+    await Promise.all([m, pm, prevMonth(pm)].map((k) => (shifts[k] ? 0 : loadShifts(k).catch(() => { shifts[k] = shifts[k] || []; }))));
+    const inM = (d) => periodOf(d) === m, inP = (d) => periodOf(d) === pm;
+    const list = ex.filter((r) => inM(r.spent_on)), before = ex.filter((r) => inP(r.spent_on));
+    const sum = (l) => l.reduce((x, r) => x + r.amount, 0);
+    const spent = sum(list), spentP = sum(before);
+    // The month's spending money, worked out the same way as the home page does for that month
+    let money = null;
+    const keep = month;
+    try { month = m; const p = plan(); money = Math.max(p.spend + sum(inc.filter((r) => inM(r.received_on))) + Math.min(p.free, 0), 0); } catch (e) {} finally { month = keep; }
+    const left = money == null ? null : money - spent;
+    const hero = $("mwHero"); hero.innerHTML = "";
+    const hb = document.createElement("b"), hs = document.createElement("span");
+    if (left != null && money > 0) { hb.textContent = fmt(Math.abs(Math.round(left))); hb.className = left >= 0 ? "pos" : "neg"; hs.textContent = left >= 0 ? "נשארו מהכסף החופשי 🎉" : "חריגה מהכסף החופשי"; }
+    else { hb.textContent = fmt(Math.round(spent)); hs.textContent = "יצאו על הוצאות היומיום"; }
+    hero.append(hb, hs);
+    const g = $("mwGrid");
+    const tile = (label, val, cls) => { const t = document.createElement("div"); const a = document.createElement("span"); a.textContent = label; const b = document.createElement("b"); b.textContent = val; if (cls) b.className = cls; t.append(a, b); g.append(t); };
+    tile("הוצאת", fmt(Math.round(spent)));
+    if (money > 0) tile("הכסף החופשי", fmt(Math.round(money)));
+    if (spentP > 0) { const ch = Math.round((spent - spentP) / spentP * 100); tile("לעומת " + monthName(pm), (ch > 0 ? "▲ " : ch < 0 ? "▼ " : "") + Math.abs(ch) + "%", ch > 0 ? "neg" : "pos"); }
+    const days = periodDays(m), byDay = {};
+    list.forEach((r) => { byDay[r.spent_on] = (byDay[r.spent_on] || 0) + r.amount; });
+    let nos = 0, inb = 0;
+    for (let i = 0; i < days; i++) { const ds = dateAdd(periodStart(m), i); if (ds > todayStr()) break; if (!byDay[ds]) nos++; if (money > 0 && (byDay[ds] || 0) <= money / days) inb++; }
+    tile("ימים בלי הוצאה", String(nos));
+    if (money > 0) tile("ימים בתוך התקציב", inb + " מתוך " + days);
+    const mSh = sh.filter((r) => inM(r.work_date));
+    if (mSh.length) { let gr = 0, mn = 0; mSh.forEach((r) => { const pp = shiftPay(r, settings()); gr += pp.gross; mn += pp.paidMin; }); tile("משמרות", (mSh.length === 1 ? "משמרת אחת" : mSh.length + " משמרות") + ", " + hrs(mn) + " שעות"); tile("הרווחת מהמשמרות", fmt(Math.round(gr)) + " ברוטו", "pos"); }
+    // Top categories (main ones), as bars
+    const names = catNames(), d = store.months[m], cats = (d && d.cats) || [];
+    const mainOf = (id) => { const c = cats.find((x) => x.id === id); return c && c.parent && cats.some((p) => p.id === c.parent) ? c.parent : id; };
+    const by = {}; list.forEach((r) => { const k = mainOf(r.category); by[k] = (by[k] || 0) + r.amount; });
+    const top = Object.entries(by).sort((a, b) => b[1] - a[1]).slice(0, 4), cb = $("mwCats");
+    top.forEach(([id, v]) => {
+      const row = document.createElement("div"); const n = document.createElement("span"); n.textContent = emojiOf(id, names[id] || "") + " " + (names[id] || "קטגוריה שנמחקה");
+      const a = document.createElement("b"); a.textContent = fmt(Math.round(v)); const bar = document.createElement("i"); bar.style.setProperty("--w", Math.round(v / (top[0][1] || 1) * 100) + "%");
+      row.append(n, a, bar); cb.append(row);
+    });
+    const ul = $("mwList"); const li = (t) => { const x = document.createElement("li"); x.textContent = t; ul.append(x); };
+    const big = list.slice().sort((a, b) => b.amount - a.amount)[0];
+    if (big) li("💸 ההוצאה הכי גדולה: " + fmt(Math.round(big.amount)) + " על " + (big.note || names[big.category] || "משהו") + " (" + shortDate(big.spent_on) + ").");
+    const nw = { need: 0, want: 0 }; list.forEach((r) => { const k = r.tags && r.tags.nw; if (nw[k] != null) nw[k] += r.amount; });
+    if (nw.want > 0) li("🎁 על ״רוצה״ יצאו " + fmt(Math.round(nw.want)) + (nw.need > 0 ? ", ועל ״צריך״ " + fmt(Math.round(nw.need)) : "") + ".");
+    const reg = list.filter((r) => r.tags && r.tags.regret); if (reg.length) li("😣 התחרטת על " + reg.length + " קניות בשווי " + fmt(Math.round(sum(reg))) + ".");
+    const oneOff = inc.filter((r) => inM(r.received_on)); if (oneOff.length) li("💰 הכנסות חד־פעמיות: " + fmt(Math.round(sum(oneOff))) + ".");
+    const ch = store.challenge && store.challenge.month === m ? store.challenge : (store.chalHist || []).find((x) => x && x.month === m);
+    if (ch) { let st = ""; try { st = chalState(ch).st; } catch (e) {} if (ch.won || st === "won") li("🏅 עמדת באתגר החודש!"); else if (st === "lost") li("🏅 האתגר החודש לא הצליח הפעם. בחודש הבא שוב."); }
+    if (left != null && money > 0) li(left > 0 ? "💡 כדאי להעביר עכשיו את ה־" + fmt(Math.round(left)) + " שנשארו לחיסכון או ליעד." : left < 0 ? "💡 לחודש הבא: לבדוק איזו קטגוריה ברחה ולתת לה יעד מציאותי." : "💡 יצא בדיוק. ממשיכים ככה.");
+    // Words from the assistant: once per month, only after steady use
+    const box = $("mwAi"); box.innerHTML = ""; box.className = "mwai"; box.hidden = false;
+    const all = ex.map((r) => ({ d: r.spent_on, c: r.created_at })).concat(sh.map((r) => ({ d: r.work_date, c: r.created_at })), inc.map((r) => ({ d: r.received_on, c: r.created_at })));
+    const cached = (store.mwAi || {})[m];
+    const head = () => { const b = document.createElement("b"); b.textContent = "✨ כמה מילים מהעוזר"; return b; };
+    const words = (text) => { box.innerHTML = ""; const w = document.createElement("div"); w.className = "aimsg"; w.style.cssText = "background:none;padding:0;max-width:none"; aiRenderText(w, text); box.append(head(), w); };
+    if (cached) words(cached);
+    else if (!mwSteady(m, all) || aiOk !== true) {
+      box.classList.add("soft");
+      box.textContent = aiOk === true ? "✨ מי שרושם באפליקציה לפחות " + MW_DAYS + " ימים בחודש מקבל כאן גם כמה מילים אישיות מהעוזר. בחודש הבא?" : "";
+      box.hidden = !box.textContent;
+    } else {
+      box.append(head(), document.createTextNode("✨ העוזר כותב…"));
+      try {
+        const j = await aiCall({ tool: "letter", context: await aiContext(), input: "החודש: " + m + " (" + monthName(m) + "). זה סיכום סוף החודש שנשלח לכל משתמש. כתוב קצר: עד 90 מילים, בלי כותרת." });
+        if (j && j.text) { store.mwAi = { ...(store.mwAi || {}), [m]: j.text }; const ks = Object.keys(store.mwAi).sort(); while (ks.length > 6) delete store.mwAi[ks.shift()]; persist(); words(j.text); }
+        else box.hidden = true;
+      } catch (e) { box.innerHTML = ""; box.classList.add("soft"); box.textContent = "✨ העוזר לא הצליח לכתוב עכשיו. אפשר לפתוח שוב את הסיכום מאוחר יותר (״🎁 הסיכום המלא״ באריח סיכום החודש)."; }
+    }
+    if (auto && left > 0) confetti();
+  }
+  $("mwOk").addEventListener("click", () => closeDlg("mwSheet"));
 
   // ---- Savings goals ----
   const goals = () => (store.goals = store.goals || []);
@@ -7891,7 +8047,8 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       "*📈 לעומת קודם*: החודש מול אותם ימים בחודש שעבר, והשבוע מול שבוע שעבר.",
       "*📊 לאורך החודשים*: כמה נכנס וכמה יצא בכל אחד מ־6 החודשים האחרונים. 📸 משתף את החודש כתמונה.",
       "*🏆 הישגים*: נפתחים כשמתמידים.",
-      "*📋 סיכום החודש*: מופיע ב־5 הימים הראשונים של חודש חדש."
+      "*📋 סיכום החודש*: מופיע ב־5 הימים הראשונים של חודש חדש.",
+      { t: "*🎁 הסיכום של החודש*: בערב היום האחרון של החודש (20:00, ואחרי שבת וחג למי ששומר) נפתח סיכום עם המספרים של החודש. מי שרשם באפליקציה לפחות 12 ימים בחודש, ב־3 שבועות שונים, מקבל בו גם כמה מילים אישיות מהעוזר ✨. אפשר לפתוח אותו שוב ב״🎁 הסיכום המלא״ באריח סיכום החודש.", d: "2026-10-30" }
     ] },
     { id: "layout", e: "✏️", t: "לסדר את דף הבית", d: "", body: [
       "לכל כרטיס יש *?* עם הסבר קצר, ו־*▾* שמקפל אותו.",
@@ -10188,6 +10345,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     aiFabSync();
     recordSeen(); loadBroadcast(); setTimeout(loadPersonal, 2500); showDonate(); loadFriends();
     payCheck(); pushKeySync(); layHintCount(); autoFold(); weeklyWin();
+    mwTries = 0; setTimeout(mwCheck, 4000);
     $("futureMin").value = String(settings().futureMin == null ? 150 : settings().futureMin);
     const fromApp = new URLSearchParams(location.search).get("app");
     if (fromApp) { history.replaceState(null, "", location.pathname + location.hash); setTimeout(() => window.openFromApp(fromApp), 400); }
