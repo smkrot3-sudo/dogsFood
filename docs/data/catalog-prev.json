@@ -1,10 +1,10 @@
 {
-  "updatedAt": "29.10.2026, 13:14",
-  "date": "2026-10-29",
+  "updatedAt": "30.10.2026, 13:08",
+  "date": "2026-10-30",
   "stats": {
-    "withBarcode": 2360,
+    "withBarcode": 2361,
     "withoutBarcode": 0,
-    "total": 2360
+    "total": 2361
   },
   "byBarcode": {
     "174": {
@@ -1075,11 +1075,11 @@
     },
     "1858": {
       "barcode": "1858",
-      "title": "הילס מזון לכלב בוגר כבש ואורז 14 ק\"ג",
-      "variant": "",
+      "title": "הילס מזון לכלב בוגר בינוני כבש ואורז",
+      "variant": "14 ק\"ג",
       "price": "369.00",
       "compareAtPrice": null,
-      "available": true,
+      "available": false,
       "vendor": "הילס",
       "handle": "הילס-מזון-לכלב-בוגר-כבש-ואורז-14-קילו",
       "url": "https://www.anipet.co.il/products/הילס-מזון-לכלב-בוגר-כבש-ואורז-14-קילו",
@@ -13182,7 +13182,7 @@
       "variant": "1 ק\"ג",
       "price": "20.90",
       "compareAtPrice": null,
-      "available": true,
+      "available": false,
       "vendor": "ריבוס",
       "handle": "תערובת-תוכי-גדול-1-קג-ribos",
       "url": "https://www.anipet.co.il/products/תערובת-תוכי-גדול-1-קג-ribos",
@@ -14235,7 +14235,7 @@
       "variant": "",
       "price": "37.90",
       "compareAtPrice": null,
-      "available": true,
+      "available": false,
       "vendor": "ויטה קראפט",
       "handle": "ויטקרפט-מזון-פרימיום-לקוקוטיל-1-קג",
       "url": "https://www.anipet.co.il/products/ויטקרפט-מזון-פרימיום-לקוקוטיל-1-קג",
@@ -21151,7 +21151,7 @@
       "variant": "4 ק\"ג",
       "price": "135.00",
       "compareAtPrice": null,
-      "available": true,
+      "available": false,
       "vendor": "אוונט",
       "handle": "אוונט-קלאסיק-חלבון-יחיד-כלב-סלמון",
       "url": "https://www.anipet.co.il/products/אוונט-קלאסיק-חלבון-יחיד-כלב-סלמון",
@@ -29347,6 +29347,19 @@
       "url": "https://www.anipet.co.il/products/רויאל-קנין-כלב-בוגר-מדיום-15-קילו",
       "productId": 9787319976176,
       "variantId": 50453390000368
+    },
+    "52742025223": {
+      "barcode": "52742025223",
+      "title": "הילס מזון לכלב בוגר בינוני כבש ואורז",
+      "variant": "2.5 ק\"ג",
+      "price": "139.00",
+      "compareAtPrice": null,
+      "available": true,
+      "vendor": "הילס",
+      "handle": "הילס-מזון-לכלב-בוגר-כבש-ואורז-14-קילו",
+      "url": "https://www.anipet.co.il/products/הילס-מזון-לכלב-בוגר-כבש-ואורז-14-קילו",
+      "productId": 9787312865520,
+      "variantId": 67268479648115
     },
     "4001967014068": {
       "barcode": "4001967014068",
@@ -38937,7 +38950,7 @@
       "variant": "1 ק\"ג",
       "price": "20.90",
       "compareAtPrice": null,
-      "available": true,
+      "available": false,
       "vendor": "ריבוס",
       "handle": "תערובת-תוכי-גדול-1-קג-ribos",
       "url": "https://www.anipet.co.il/products/תערובת-תוכי-גדול-1-קג-ribos",
@@ -40211,7 +40224,7 @@
       "variant": "",
       "price": "37.90",
       "compareAtPrice": null,
-      "available": true,
+      "available": false,
       "vendor": "ויטה קראפט",
       "handle": "ויטקרפט-מזון-פרימיום-לקוקוטיל-1-קג",
       "url": "https://www.anipet.co.il/products/ויטקרפט-מזון-פרימיום-לקוקוטיל-1-קג",
@@ -48960,7 +48973,7 @@
       "variant": "4 ק\"ג",
       "price": "135.00",
       "compareAtPrice": null,
-      "available": true,
+      "available": false,
       "vendor": "אוונט",
       "handle": "אוונט-קלאסיק-חלבון-יחיד-כלב-סלמון",
       "url": "https://www.anipet.co.il/products/אוונט-קלאסיק-חלבון-יחיד-כלב-סלמון",
@@ -58654,16 +58667,29 @@
     },
     {
       "barcode": "1858",
-      "title": "הילס מזון לכלב בוגר כבש ואורז 14 ק\"ג",
-      "variant": "",
+      "title": "הילס מזון לכלב בוגר בינוני כבש ואורז",
+      "variant": "14 ק\"ג",
       "price": "369.00",
+      "compareAtPrice": null,
+      "available": false,
+      "vendor": "הילס",
+      "handle": "הילס-מזון-לכלב-בוגר-כבש-ואורז-14-קילו",
+      "url": "https://www.anipet.co.il/products/הילס-מזון-לכלב-בוגר-כבש-ואורז-14-קילו",
+      "productId": 9787312865520,
+      "variantId": 48622426783984
+    },
+    {
+      "barcode": "52742025223",
+      "title": "הילס מזון לכלב בוגר בינוני כבש ואורז",
+      "variant": "2.5 ק\"ג",
+      "price": "139.00",
       "compareAtPrice": null,
       "available": true,
       "vendor": "הילס",
       "handle": "הילס-מזון-לכלב-בוגר-כבש-ואורז-14-קילו",
       "url": "https://www.anipet.co.il/products/הילס-מזון-לכלב-בוגר-כבש-ואורז-14-קילו",
       "productId": 9787312865520,
-      "variantId": 48622426783984
+      "variantId": 67268479648115
     },
     {
       "barcode": "1854",
