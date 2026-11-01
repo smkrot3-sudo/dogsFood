@@ -1,6 +1,6 @@
 {
-  "updatedAt": "30.10.2026, 13:08",
-  "date": "2026-10-30",
+  "updatedAt": "31.10.2026, 12:41",
+  "date": "2026-10-31",
   "stats": {
     "withBarcode": 2361,
     "withoutBarcode": 0,
@@ -19305,7 +19305,7 @@
       "variant": "",
       "price": "17.50",
       "compareAtPrice": null,
-      "available": true,
+      "available": false,
       "vendor": "ריבוס",
       "handle": "עצם-דחוסה-25-סמ",
       "url": "https://www.anipet.co.il/products/עצם-דחוסה-25-סמ",
@@ -46659,7 +46659,7 @@
       "variant": "",
       "price": "17.50",
       "compareAtPrice": null,
-      "available": true,
+      "available": false,
       "vendor": "ריבוס",
       "handle": "עצם-דחוסה-25-סמ",
       "url": "https://www.anipet.co.il/products/עצם-דחוסה-25-סמ",
