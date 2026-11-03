@@ -1023,6 +1023,19 @@ body.salaried .tabs a[data-view="shifts"], body.salaried #shiftIncField, body.sa
 .accgrid button[aria-pressed="true"] { border-color: var(--fg); }
 .accgrid i { width: 40px; height: 40px; border-radius: 50%; box-shadow: 0 3px 8px rgba(0,0,0,.18); display: grid; place-items: center; font-style: normal; color: #fff; font-size: 18px; }
 .confetti { position: fixed; inset: 0; pointer-events: none; z-index: 100; }
+/* "Money in": coins drop into a bag and the amount pops, after adding a shift or an income */
+.moneyfx { position: fixed; inset: 0; pointer-events: none; z-index: 100; overflow: hidden; }
+.moneyfx .bag { position: absolute; left: 50%; top: 46%; font-size: 76px; line-height: 1; transform: translate(-50%, -50%) scale(0); animation: mfxBag 1.9s cubic-bezier(.2, .9, .3, 1.3) forwards; filter: drop-shadow(0 8px 18px rgba(0, 0, 0, .25)); }
+.moneyfx .coin { position: absolute; top: -60px; font-size: 34px; line-height: 1; animation: mfxCoin .62s cubic-bezier(.5, 0, .9, .6) forwards; }
+.moneyfx .amt { position: absolute; left: 50%; top: calc(46% - 92px); transform: translate(-50%, 0); padding: 8px 18px; border-radius: 999px; background: #12b886; color: #fff; font-weight: 900; font-size: 26px; white-space: nowrap; direction: ltr; unicode-bidi: isolate; opacity: 0; box-shadow: 0 10px 24px rgba(18, 184, 134, .35); animation: mfxAmt 1.9s ease-out .45s forwards; }
+.moneyfx .spark { position: absolute; left: 50%; top: 46%; font-size: 22px; opacity: 0; animation: mfxSpark .8s ease-out forwards; }
+@keyframes mfxBag { 0% { transform: translate(-50%, -50%) scale(0); } 14% { transform: translate(-50%, -50%) scale(1.08); } 22% { transform: translate(-50%, -50%) scale(1); }
+  40% { transform: translate(-50%, -50%) scale(1.12, .9); } 48% { transform: translate(-50%, -50%) scale(1); } 85% { transform: translate(-50%, -50%) scale(1); opacity: 1; } 100% { transform: translate(-50%, -50%) scale(.6); opacity: 0; } }
+@keyframes mfxCoin { 0% { transform: translate(0, 0) rotate(0); opacity: 1; } 92% { opacity: 1; } 100% { transform: translate(var(--dx), var(--dy)) rotate(var(--rot)) scale(.5); opacity: 0; } }
+@keyframes mfxAmt { 0% { opacity: 0; transform: translate(-50%, 20px) scale(.6); } 18% { opacity: 1; transform: translate(-50%, 0) scale(1.1); } 28% { transform: translate(-50%, 0) scale(1); } 78% { opacity: 1; transform: translate(-50%, -14px); } 100% { opacity: 0; transform: translate(-50%, -40px); } }
+@keyframes mfxSpark { 0% { opacity: 1; transform: translate(-50%, -50%) scale(.4); } 100% { opacity: 0; transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(1.1); } }
+@media (prefers-reduced-motion: reduce) { .moneyfx .bag, .moneyfx .coin, .moneyfx .spark { display: none; } .moneyfx .amt { animation: mfxFade 1.6s ease-out forwards; transform: translate(-50%, 0); } }
+@keyframes mfxFade { 0% { opacity: 0; } 15%, 75% { opacity: 1; } 100% { opacity: 0; } }
 .newsheet ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 10px; }
 /* A personal reminder from the owner: loud red, with road signs */
 dialog.alarm { background: linear-gradient(160deg, #e5383b, #b5121b); color: #fff; border: 0; text-align: center; }
@@ -2029,6 +2042,7 @@ html.hugetext .season3 svg { width: 70px; height: 21px; }
     <section class="panel" aria-labelledby="feelH">
       <h2 id="feelH" class="pc-mint" data-e="✨">תחושה</h2>
       <label class="check" for="hapticOn"><input type="checkbox" id="hapticOn"> 📳 רטט קצר כשרושמים הוצאה או משמרת</label>
+      <label class="check" for="moneyfxOn"><input type="checkbox" id="moneyfxOn"> 💰 אנימציה של כסף נכנס כשמוסיפים משמרת או הכנסה</label>
       <label class="check" for="confettiOn"><input type="checkbox" id="confettiOn"> 🎉 קונפטי כשמשהו טוב קורה (הישג, יעד, אתגר)</label>
       <p class="hint">נשמר במכשיר הזה.</p>
     </section>
@@ -2935,6 +2949,39 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       if (k < 1) requestAnimationFrame(frame); else c.remove();
     })(t0);
     buzz();
+  }
+
+  // Money coming in (a new shift or income): coins drop into a bag, the amount pops up, and the phone gives
+  // a little "ka-ching" of short vibrations as the coins land. Never blocks a tap; about 2 seconds.
+  function moneyIn(amount) {
+    if (feelOn("moneyfx")) {
+      document.querySelectorAll(".moneyfx").forEach((n) => n.remove());
+      const box = document.createElement("div"); box.className = "moneyfx"; box.setAttribute("aria-hidden", "true");
+      const bag = document.createElement("span"); bag.className = "bag"; bag.textContent = "💰"; box.append(bag);
+      const W = innerWidth, H = innerHeight, cx = W / 2, cy = H * .46;
+      for (let i = 0; i < 9; i++) {
+        const c = document.createElement("span"); c.className = "coin"; c.textContent = i % 3 === 1 ? "💵" : "🪙";
+        const x = Math.random() * (W - 40);
+        c.style.left = x + "px"; c.style.animationDelay = (.12 + i * .07) + "s";
+        c.style.setProperty("--dx", (cx - 17 - x) + "px"); c.style.setProperty("--dy", (cy + 40) + "px"); c.style.setProperty("--rot", (Math.random() * 540 - 270) + "deg");
+        box.append(c);
+      }
+      ["✨", "⭐", "✨", "⭐", "✨", "⭐"].forEach((e, i) => {
+        const sp = document.createElement("span"); sp.className = "spark"; sp.textContent = e; sp.style.animationDelay = ".95s";
+        const a = i / 6 * Math.PI * 2; sp.style.setProperty("--dx", Math.cos(a) * 90 + "px"); sp.style.setProperty("--dy", Math.sin(a) * 90 + "px");
+        box.append(sp);
+      });
+      if (amount > 0) { const t = document.createElement("span"); t.className = "amt"; t.textContent = "+" + fmt(amount); box.append(t); }
+      document.body.append(box);
+      setTimeout(() => box.remove(), 2600);
+    }
+    if (!feelOn("haptic")) return;
+    // short taps as the coins land, then a slightly longer one when the amount shows
+    [180, 330, 480, 640].forEach((t, i) => setTimeout(() => {
+      const ms = i === 3 ? 45 : 15;
+      try { if (window.BudgetApp && BudgetApp.vibrate) { BudgetApp.vibrate(ms); return; } } catch (e) {}
+      try { if (navigator.vibrate) navigator.vibrate(ms); } catch (e) {}
+    }, t));
   }
 
   function lsGet(k) { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } }
@@ -4843,7 +4890,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     const m = periodOf(row.work_date);
     if (m !== month) goMonth(m); else { renderPay(); renderCal(); }
     const p = shiftPay(row, settings());
-    if (!before) buzz();
+    if (!before) moneyIn(p.gross);
     snack((before ? "המשמרת עודכנה: " : "נרשמה משמרת של ") + hrs(p.paidMin) + " שעות. היא שווה " + fmt(p.gross) + " ברוטו" + (p.gross > 0 && +settings().wage > 0 ? " (" + fmt(Math.round(p.gross / (p.paidMin / 60 || 1))) + " לשעה בממוצע)" : ""),
       () => { if (before) saveShift(before); else delShift(row.id); renderPay(); renderCal(); });
   });
@@ -5682,6 +5729,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     closeSheet();
     showPeriodOf(row.received_on);
     renderPay(); renderCal();
+    if (!before) moneyIn(amount);
     snack(before ? "ההכנסה עודכנה"
       : "נרשמה הכנסה של " + fmt(amount) + (kind === "מתנה" ? ". " + say("מתנה זה לא תקציב, תעביר אותה לחיסכון.", "כדאי להעביר מתנה לחיסכון.", "אולי כדאי לשים אותה בחיסכון 💛") : ". היא נוספה לכסף החופשי של החודש."),
       () => { if (before) INC.save(before); else INC.del(row.id); renderTracking(); renderPay(); renderCal(); });
@@ -8127,7 +8175,8 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       "צבע רקע וצבע מבטא (הכפתורים והכותרות). לוחצים, רואים מיד, ושומרים או מבטלים.",
       "גודל טקסט: רגיל, גדול או גדול מאוד.",
       { t: "בגודל ״גדול מאוד״ החלק העליון של המסך קטן יותר, ובכל פתיחה מופיעה רק הודעה אחת.", d: "2026-10-18" },
-      "רטט קצר כשרושמים וקונפטי בהצלחות. אפשר לכבות."
+      "רטט קצר כשרושמים וקונפטי בהצלחות. אפשר לכבות.",
+      { t: "כשמוסיפים משמרת או הכנסה: מטבעות נופלים לשק כסף 💰, הסכום קופץ, והטלפון רוטט קצת כמו קופה. אפשר לכבות ב״תחושה״.", d: "2026-11-03" }
     ], go: ["look", "🎨 לעיצוב"] },
     { id: "phone", e: "📱", t: "האפליקציה בטלפון", d: "", body: [
       { t: "באנדרואיד מורידים את האפליקציה מתפריט החשבון (העיגול עם התמונה שלך למעלה) ← ״📱 הורדת האפליקציה לאנדרואיד״.", w: "ab" },
@@ -8277,11 +8326,13 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     document.querySelectorAll("#sizePick button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.size === sz)));
     $("hapticOn").checked = feelOn("haptic");
     $("confettiOn").checked = feelOn("confetti");
+    $("moneyfxOn").checked = feelOn("moneyfx");
   }
   document.querySelectorAll("#sizePick button").forEach((b) => b.addEventListener("click", () => {
     try { localStorage.setItem("budget-textsize", b.dataset.size); localStorage.removeItem("budget-bigtext"); } catch (e) {}
     BP.textSize(); renderAccents();
   }));
+  $("moneyfxOn").addEventListener("change", () => { try { localStorage.setItem("budget-moneyfx", $("moneyfxOn").checked ? "1" : "0"); } catch (e) {} if ($("moneyfxOn").checked) moneyIn(0); });
   $("hapticOn").addEventListener("change", () => { try { localStorage.setItem("budget-haptic", $("hapticOn").checked ? "1" : "0"); } catch (e) {} if ($("hapticOn").checked) buzz(); });
   $("confettiOn").addEventListener("change", () => { try { localStorage.setItem("budget-confetti", $("confettiOn").checked ? "1" : "0"); } catch (e) {} if ($("confettiOn").checked) confetti(); });
   // Trying colors: the first tap remembers the colors before it; ✓ keeps the new ones, ✕ (or leaving the screen) brings the old ones back
@@ -9303,14 +9354,14 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
         const row = { id: uid(), work_date: date, start_time: st, end_time: en, break_min: Math.max(0, Math.min(600, Math.round(+a.break || 0))), wage: +settings().wage, kind: "", kind_rate: 100, note: "", created_at: new Date().toISOString() };
         const p = shiftPay(row, settings());
         return { ok: true, txt: "⏰ משמרת " + shortDate(date) + " · " + st + " עד " + en + (row.break_min ? " (הפסקה " + row.break_min + " דק׳)" : ""), sub: hrs(p.paidMin) + " שעות · " + fmt(p.gross) + " ברוטו",
-          run: () => { saveShift(row); renderPay(); renderCal(); return "משמרת של " + hrs(p.paidMin) + " שעות"; } };
+          run: () => { saveShift(row); renderPay(); renderCal(); moneyIn(p.gross); return "משמרת של " + hrs(p.paidMin) + " שעות"; } };
       }
       case "income_add": {
         const amount = amt(a.amount), date = day(a.date);
         if (!(amount > 0)) return bad("💰 הכנסה", "חסר סכום");
         const kind = INC_KINDS.includes(a.kind) ? a.kind : "אחר", note = String(a.note || "").trim().slice(0, 200);
         return { ok: true, txt: "💰 הכנסה " + fmt(amount) + (note ? " · " + note : ""), sub: kind + " · " + shortDate(date),
-          run: () => { INC.save({ id: uid(), received_on: date, amount, kind, note, created_at: new Date().toISOString() }); renderPay(); renderCal(); renderTracking(); return "הכנסה של " + fmt(amount); } };
+          run: () => { INC.save({ id: uid(), received_on: date, amount, kind, note, created_at: new Date().toISOString() }); renderPay(); renderCal(); renderTracking(); moneyIn(amount); return "הכנסה של " + fmt(amount); } };
       }
       case "note_add": {
         const text = String(a.text || "").trim().slice(0, 200);
