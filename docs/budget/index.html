@@ -2043,6 +2043,7 @@ html.hugetext .season3 svg { width: 70px; height: 21px; }
       <h2 id="feelH" class="pc-mint" data-e="✨">תחושה</h2>
       <label class="check" for="hapticOn"><input type="checkbox" id="hapticOn"> 📳 רטט קצר כשרושמים הוצאה או משמרת</label>
       <label class="check" for="moneyfxOn"><input type="checkbox" id="moneyfxOn"> 💰 אנימציה של כסף נכנס כשמוסיפים משמרת או הכנסה</label>
+      <label class="check" for="cashsoundOn"><input type="checkbox" id="cashsoundOn"> 🔊 צליל של כסף כשמוסיפים משמרת או הכנסה</label>
       <label class="check" for="confettiOn"><input type="checkbox" id="confettiOn"> 🎉 קונפטי כשמשהו טוב קורה (הישג, יעד, אתגר)</label>
       <p class="hint">נשמר במכשיר הזה.</p>
     </section>
@@ -2975,6 +2976,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       document.body.append(box);
       setTimeout(() => box.remove(), 2600);
     }
+    if (feelOn("cashsound")) cashSound();
     if (!feelOn("haptic")) return;
     // short taps as the coins land, then a slightly longer one when the amount shows
     [180, 330, 480, 640].forEach((t, i) => setTimeout(() => {
@@ -2982,6 +2984,37 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       try { if (window.BudgetApp && BudgetApp.vibrate) { BudgetApp.vibrate(ms); return; } } catch (e) {}
       try { if (navigator.vibrate) navigator.vibrate(ms); } catch (e) {}
     }, t));
+  }
+
+  // The sound for money coming in, made in the browser (no file): coins clinking as they land, then a cash-register "ka-ching".
+  // Plays at the phone's media volume (the browser can't see the ring/silent switch), so it has its own off switch.
+  let audioCtx = null;
+  function cashSound() {
+    try {
+      const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
+      audioCtx = audioCtx || new AC(); const ac = audioCtx;
+      if (ac.state === "suspended") ac.resume();
+      const out = ac.createGain(); out.gain.value = .5; out.connect(ac.destination);
+      // one metallic ping: a few inharmonic partials with a fast decay
+      const ping = (at, f, vol, len) => {
+        [1, 2.76, 5.4, 8.93].forEach((m, i) => {
+          const o = ac.createOscillator(), g = ac.createGain();
+          o.type = "sine"; o.frequency.value = f * m;
+          g.gain.setValueAtTime(0, at); g.gain.linearRampToValueAtTime(vol / (i + 1), at + .004);
+          g.gain.exponentialRampToValueAtTime(.0001, at + len / (1 + i * .6));
+          o.connect(g); g.connect(out); o.start(at); o.stop(at + len + .05);
+        });
+      };
+      const t = ac.currentTime;
+      [.18, .33, .48].forEach((d, i) => ping(t + d, 2100 + i * 260 + Math.random() * 120, .22, .18));
+      // "ka": a short noise click, then "ching": two bright bells
+      const n = ac.createBuffer(1, Math.floor(ac.sampleRate * .05), ac.sampleRate), ch = n.getChannelData(0);
+      for (let i = 0; i < ch.length; i++) ch[i] = (Math.random() * 2 - 1) * (1 - i / ch.length);
+      const src = ac.createBufferSource(), hp = ac.createBiquadFilter(), ng = ac.createGain();
+      src.buffer = n; hp.type = "highpass"; hp.frequency.value = 2500; ng.gain.value = .25;
+      src.connect(hp); hp.connect(ng); ng.connect(out); src.start(t + .6);
+      ping(t + .64, 1568, .35, .9); ping(t + .7, 2093, .3, 1.1);
+    } catch (e) {}
   }
 
   function lsGet(k) { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } }
@@ -8176,7 +8209,8 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       "גודל טקסט: רגיל, גדול או גדול מאוד.",
       { t: "בגודל ״גדול מאוד״ החלק העליון של המסך קטן יותר, ובכל פתיחה מופיעה רק הודעה אחת.", d: "2026-10-18" },
       "רטט קצר כשרושמים וקונפטי בהצלחות. אפשר לכבות.",
-      { t: "כשמוסיפים משמרת או הכנסה: מטבעות נופלים לשק כסף 💰, הסכום קופץ, והטלפון רוטט קצת כמו קופה. אפשר לכבות ב״תחושה״.", d: "2026-11-03" }
+      { t: "כשמוסיפים משמרת או הכנסה: מטבעות נופלים לשק כסף 💰, הסכום קופץ, והטלפון רוטט קצת כמו קופה. אפשר לכבות ב״תחושה״.", d: "2026-11-03" },
+      { t: "ויש גם צליל קצר של מטבעות וקופה (״קה־צ׳ינג״). הוא בעוצמת המדיה של הטלפון. אפשר לכבות ב״תחושה״ ← 🔊.", d: "2026-11-03" }
     ], go: ["look", "🎨 לעיצוב"] },
     { id: "phone", e: "📱", t: "האפליקציה בטלפון", d: "", body: [
       { t: "באנדרואיד מורידים את האפליקציה מתפריט החשבון (העיגול עם התמונה שלך למעלה) ← ״📱 הורדת האפליקציה לאנדרואיד״.", w: "ab" },
@@ -8327,12 +8361,14 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     $("hapticOn").checked = feelOn("haptic");
     $("confettiOn").checked = feelOn("confetti");
     $("moneyfxOn").checked = feelOn("moneyfx");
+    $("cashsoundOn").checked = feelOn("cashsound");
   }
   document.querySelectorAll("#sizePick button").forEach((b) => b.addEventListener("click", () => {
     try { localStorage.setItem("budget-textsize", b.dataset.size); localStorage.removeItem("budget-bigtext"); } catch (e) {}
     BP.textSize(); renderAccents();
   }));
   $("moneyfxOn").addEventListener("change", () => { try { localStorage.setItem("budget-moneyfx", $("moneyfxOn").checked ? "1" : "0"); } catch (e) {} if ($("moneyfxOn").checked) moneyIn(0); });
+  $("cashsoundOn").addEventListener("change", () => { try { localStorage.setItem("budget-cashsound", $("cashsoundOn").checked ? "1" : "0"); } catch (e) {} if ($("cashsoundOn").checked) cashSound(); });
   $("hapticOn").addEventListener("change", () => { try { localStorage.setItem("budget-haptic", $("hapticOn").checked ? "1" : "0"); } catch (e) {} if ($("hapticOn").checked) buzz(); });
   $("confettiOn").addEventListener("change", () => { try { localStorage.setItem("budget-confetti", $("confettiOn").checked ? "1" : "0"); } catch (e) {} if ($("confettiOn").checked) confetti(); });
   // Trying colors: the first tap remembers the colors before it; ✓ keeps the new ones, ✕ (or leaving the screen) brings the old ones back
