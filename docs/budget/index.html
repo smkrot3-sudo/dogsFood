@@ -2043,7 +2043,9 @@ html.hugetext .season3 svg { width: 70px; height: 21px; }
       <h2 id="feelH" class="pc-mint" data-e="✨">תחושה</h2>
       <label class="check" for="hapticOn"><input type="checkbox" id="hapticOn"> 📳 רטט קצר כשרושמים הוצאה או משמרת</label>
       <label class="check" for="moneyfxOn"><input type="checkbox" id="moneyfxOn"> 💰 אנימציה של כסף נכנס כשמוסיפים משמרת או הכנסה</label>
-      <label class="check" for="cashsoundOn"><input type="checkbox" id="cashsoundOn"> 🔊 צליל של כסף כשמוסיפים משמרת או הכנסה</label>
+      <label class="check" for="cashsoundOn"><input type="checkbox" id="cashsoundOn"> 🔊 צלילים קטנים (כסף נכנס, הוצאה, יעד ועוד)</label>
+      <div class="modepick" id="sndVolPick" role="group" aria-label="עוצמת הצלילים"><button type="button" data-vol="soft">🔉 שקט</button><button type="button" data-vol="normal">🔊 רגיל</button></div>
+      <p class="hint">בלילה (23:00–07:00) אין צלילים בכלל.</p>
       <label class="check" for="confettiOn"><input type="checkbox" id="confettiOn"> 🎉 קונפטי כשמשהו טוב קורה (הישג, יעד, אתגר)</label>
       <p class="hint">נשמר במכשיר הזה.</p>
     </section>
@@ -2932,8 +2934,9 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     try { if (window.BudgetApp && BudgetApp.vibrate) { BudgetApp.vibrate(18); return; } } catch (e) {}
     try { if (navigator.vibrate) navigator.vibrate(18); } catch (e) {}
   }
-  function confetti() {
+  function confetti(quiet) {
     if (!feelOn("confetti") || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (!quiet) sfx("fanfare");
     const c = document.createElement("canvas"); c.className = "confetti"; c.setAttribute("aria-hidden", "true");
     const W = (c.width = innerWidth * 2), H = (c.height = innerHeight * 2), g = c.getContext("2d");
     document.body.append(c);
@@ -2986,35 +2989,71 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     }, t));
   }
 
-  // The sound for money coming in, made in the browser (no file): coins clinking as they land, then a cash-register "ka-ching".
-  // Plays at the phone's media volume (the browser can't see the ring/silent switch), so it has its own off switch.
+  // ---- Sounds, made in the browser (no files). One switch (budget-cashsound) and a volume (budget-sndvol) for all of them.
+  // Plays at the phone's media volume (the browser can't see the ring/silent switch). Never at night (23:00-07:00).
   let audioCtx = null;
-  function cashSound() {
-    try {
-      const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
-      audioCtx = audioCtx || new AC(); const ac = audioCtx;
-      if (ac.state === "suspended") ac.resume();
-      const out = ac.createGain(); out.gain.value = .5; out.connect(ac.destination);
-      // one metallic ping: a few inharmonic partials with a fast decay
-      const ping = (at, f, vol, len) => {
-        [1, 2.76, 5.4, 8.93].forEach((m, i) => {
-          const o = ac.createOscillator(), g = ac.createGain();
-          o.type = "sine"; o.frequency.value = f * m;
-          g.gain.setValueAtTime(0, at); g.gain.linearRampToValueAtTime(vol / (i + 1), at + .004);
-          g.gain.exponentialRampToValueAtTime(.0001, at + len / (1 + i * .6));
-          o.connect(g); g.connect(out); o.start(at); o.stop(at + len + .05);
-        });
-      };
-      const t = ac.currentTime;
-      [.18, .33, .48].forEach((d, i) => ping(t + d, 2100 + i * 260 + Math.random() * 120, .22, .18));
-      // "ka": a short noise click, then "ching": two bright bells
-      const n = ac.createBuffer(1, Math.floor(ac.sampleRate * .05), ac.sampleRate), ch = n.getChannelData(0);
+  function sndCtx() {
+    const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return null;
+    audioCtx = audioCtx || new AC(); if (audioCtx.state === "suspended") audioCtx.resume();
+    return audioCtx;
+  }
+  // Phones only let sound start after a tap: wake the sound up on the first tap, so later sounds (a payment note, a new month) can play
+  document.addEventListener("pointerdown", function wake() { document.removeEventListener("pointerdown", wake, true); if (feelOn("cashsound")) try { sndCtx(); } catch (e) {} }, true);
+  function sndVol() { try { return localStorage.getItem("budget-sndvol") === "soft" ? .22 : .5; } catch (e) { return .5; } }
+  function sndNight() { const h = new Date().getHours(); return h >= 23 || h < 7; }
+  const SND = (() => {
+    // one metallic ping: a few inharmonic partials with a fast decay
+    const ping = (ac, out, at, f, vol, len) => [1, 2.76, 5.4, 8.93].forEach((m, i) => {
+      const o = ac.createOscillator(), g = ac.createGain(); o.type = "sine"; o.frequency.value = f * m;
+      g.gain.setValueAtTime(0, at); g.gain.linearRampToValueAtTime(vol / (i + 1), at + .004); g.gain.exponentialRampToValueAtTime(.0001, at + len / (1 + i * .6));
+      o.connect(g); g.connect(out); o.start(at); o.stop(at + len + .05);
+    });
+    const tone = (ac, out, at, f, vol, len, type, f2) => {
+      const o = ac.createOscillator(), g = ac.createGain(); o.type = type || "sine"; o.frequency.setValueAtTime(f, at); if (f2) o.frequency.exponentialRampToValueAtTime(f2, at + len * .8);
+      g.gain.setValueAtTime(0, at); g.gain.linearRampToValueAtTime(vol, at + .012); g.gain.exponentialRampToValueAtTime(.0001, at + len);
+      o.connect(g); g.connect(out); o.start(at); o.stop(at + len + .05);
+    };
+    const noise = (ac, out, at, len, vol, ftype, ff) => {
+      const n = ac.createBuffer(1, Math.floor(ac.sampleRate * len), ac.sampleRate), ch = n.getChannelData(0);
       for (let i = 0; i < ch.length; i++) ch[i] = (Math.random() * 2 - 1) * (1 - i / ch.length);
-      const src = ac.createBufferSource(), hp = ac.createBiquadFilter(), ng = ac.createGain();
-      src.buffer = n; hp.type = "highpass"; hp.frequency.value = 2500; ng.gain.value = .25;
-      src.connect(hp); hp.connect(ng); ng.connect(out); src.start(t + .6);
-      ping(t + .64, 1568, .35, .9); ping(t + .7, 2093, .3, 1.1);
+      const src = ac.createBufferSource(), f = ac.createBiquadFilter(), g = ac.createGain(); src.buffer = n; f.type = ftype || "highpass"; f.frequency.value = ff || 2500; g.gain.value = vol;
+      src.connect(f); f.connect(g); g.connect(out); src.start(at);
+    };
+    return {
+      // money in: coins clinking as they land, then a cash-register "ka-ching"
+      cash(a, o, t) { [.18, .33, .48].forEach((d, i) => ping(a, o, t + d, 2100 + i * 260 + Math.random() * 120, .22, .18)); noise(a, o, t + .6, .05, .25); ping(a, o, t + .64, 1568, .35, .9); ping(a, o, t + .7, 2093, .3, 1.1); },
+      expense(a, o, t) { ping(a, o, t, 1250, .18, .14); tone(a, o, t, 180, .12, .08, "sine", 90); },                       // a soft "tok"
+      fanfare(a, o, t) { [1047, 1319, 1568, 2093].forEach((f, i) => ping(a, o, t + i * .08, f, .2, .5)); },                 // confetti
+      goal(a, o, t) { [0, .09, .17, .24, .3].forEach((d, i) => ping(a, o, t + d, 2400 - i * 180, .15, .15)); ping(a, o, t + .45, 784, .35, 1.3); },
+      wrap(a, o, t) { [784, 1047, 1319].forEach((f, i) => ping(a, o, t + i * .16, f, .24, .8)); },                        // month summary
+      drawer(a, o, t) { noise(a, o, t, .18, .12, "lowpass", 900); tone(a, o, t + .02, 120, .15, .15, "sine", 70); noise(a, o, t + .22, .04, .2); ping(a, o, t + .25, 1568, .3, .8); ping(a, o, t + .31, 2093, .26, 1); },
+      small(a, o, t) { noise(a, o, t, .035, .14); ping(a, o, t + .03, 1760, .2, .6); ping(a, o, t + .08, 2349, .16, .7); },  // friend paid back
+      hmm(a, o, t) { tone(a, o, t, 440, .18, .28, "triangle"); tone(a, o, t + .22, 349, .18, .45, "triangle"); },          // big "want"
+      low(a, o, t) { tone(a, o, t, 330, .2, .6, "triangle"); },                                                           // past today's money
+      beep(a, o, t) { [0, .12].forEach((d) => tone(a, o, t + d, 1760, .07, .08, "square")); },                            // payment noticed
+      bubble(a, o, t) { tone(a, o, t, 320, .25, .16, "sine", 950); },                                                     // ✨ answered
+      chime(a, o, t) { ping(a, o, t, 1047, .22, .9); ping(a, o, t + .14, 1319, .2, 1.1); }                                // personal message
+    };
+  })();
+  // force: the settings preview plays even at night
+  function sfx(name, delay, force) {
+    if (!feelOn("cashsound") || (!force && sndNight()) || !SND[name]) return;
+    try {
+      const ac = sndCtx(); if (!ac) return;
+      const out = ac.createGain(); out.gain.value = sndVol(); out.connect(ac.destination);
+      SND[name](ac, out, ac.currentTime + .02 + (delay || 0));
     } catch (e) {}
+  }
+  const cashSound = () => sfx("cash");
+  // Once a day at most (per device), e.g. "past today's money"
+  function sfxOncePerDay(name, key) {
+    try { if (localStorage.getItem("budget-snd-" + key) === todayStr()) return; localStorage.setItem("budget-snd-" + key, todayStr()); } catch (e) {}
+    sfx(name);
+  }
+  // First open in a new budget month (payday): a cash drawer opening. Not on the very first visit, and not over the month summary.
+  function newMonthSound() {
+    let was = null; try { was = localStorage.getItem("budget-snd-period"); localStorage.setItem("budget-snd-period", thisMonth()); } catch (e) { return; }
+    if (was && was !== thisMonth() && !$("mwSheet").open) sfx("drawer");
   }
 
   function lsGet(k) { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } }
@@ -4099,16 +4138,19 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     $("txHours").textContent = h ? "זה " + h + "." : "";
     showFuture();
   }
+  let futureSndAt = 0;
   // A big "want": what it does to the nearest savings goal, or how many days of the daily budget it is (display only)
   function showFuture() {
     const p = $("txFuture"), min = +(settings().futureMin == null ? 150 : settings().futureMin), amt = txIls();
     const show = !editing && min > 0 && sheetTags.nw === "want" && amt >= min;
+    const wasHidden = p.hidden;
     p.hidden = !show; if (!show) return;
     const g = (store.goals || []).filter((x) => +x.target > +x.saved).sort((a, b) => (a.target - a.saved) - (b.target - b.saved))[0];
     const daily = todayWhy && todayWhy.allowance > 0 ? todayWhy.allowance : 0;
     if (g) { const pct = Math.round(amt / (g.target - g.saved) * 100); p.textContent = "🎯 " + fmt(amt) + " זה " + (pct >= 100 ? "יותר מכל מה שחסר" : pct + "% ממה שחסר") + " ליעד ״" + g.name + "״."; }
     else if (daily) { const d = Math.round(amt / daily * 10) / 10; p.textContent = "🎯 זה כמו " + (d <= 1 ? "יום שלם" : d + " ימים") + " של התקציב היומי שלך."; }
     else p.hidden = true;
+    if (!p.hidden && wasHidden && Date.now() - futureSndAt > 20000) { futureSndAt = Date.now(); sfx("hmm"); }
   }
   $("txAmount").addEventListener("input", showHours);
   function closeSheet() { const dlg = $("sheet"); if (dlg.close) dlg.close(); else dlg.removeAttribute("open"); editing = null; editingInc = null; payFrom = null; }
@@ -5960,6 +6002,9 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     const spentCat = monthTx().filter((r) => ids.includes(r.category)).reduce((s, r) => s + r.amount, 0);
     const budget = c ? +c.budget || 0 : 0, before = spentCat - row.amount;
     let msg = "נרשם: " + fmt(row.amount) + (ownName ? " על " + ownName : "");
+    // Sound: a soft "tok"; if this one took today's money below zero, a low gentle note too (once a day)
+    sfx("expense");
+    if (row.spent_on === todayStr() && month === thisMonth() && todayWhy && todayWhy.left < 0 && todayWhy.left + row.amount >= 0) setTimeout(() => sfxOncePerDay("low", "over"), 350);
     // Categories only show where the money went: no overspend warnings here (the category's bar turns red)
     snack(msg, () => { delTx(row.id); renderTracking(); });
   }
@@ -6276,7 +6321,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     $("mwSub").textContent = "מ־" + shortDate(periodStart(m)) + " עד " + shortDate(periodEnd(m)) + (m === thisMonth() ? " · החודש נגמר היום" : "");
     ["mwHero", "mwGrid", "mwCats", "mwList"].forEach((id) => { $(id).innerHTML = ""; });
     $("mwHero").textContent = "טוען…"; $("mwAi").hidden = true;
-    openDlg("mwSheet");
+    openDlg("mwSheet"); sfx("wrap");
     if (auto) { store.mwSeen = (store.mwSeen || []).concat([m]).slice(-12); persist(); }
     const pm = prevMonth(m), from = periodStart(pm), to = periodEnd(m);
     let ex = [], sh = [], inc = [];
@@ -6356,7 +6401,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
         else box.hidden = true;
       } catch (e) { box.innerHTML = ""; box.classList.add("soft"); box.textContent = "✨ העוזר לא הצליח לכתוב עכשיו. אפשר לפתוח שוב את הסיכום מאוחר יותר (״🎁 הסיכום המלא״ באריח סיכום החודש)."; }
     }
-    if (auto && left > 0) confetti();
+    if (auto && left > 0) confetti(true);
   }
   $("mwOk").addEventListener("click", () => closeDlg("mwSheet"));
 
@@ -6390,6 +6435,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
         const v = Math.round((parseFloat(amt.value) || 0) * 100) / 100; if (!(v > 0)) { amt.focus(); return; }
         const wasDone = gl.saved >= gl.target;
         gl.saved = Math.round((gl.saved + v) * 100) / 100; persist(); renderGoals(); renderBadges();
+        sfx(!wasDone && gl.saved >= gl.target ? "goal" : "expense");
         snack(!wasDone && gl.saved >= gl.target ? "🎉 הגעת ליעד ״" + gl.name + "״!" : "נוספו " + fmt(v) + " ל״" + gl.name + "״. עוד " + fmt(Math.max(gl.target - gl.saved, 0)) + ".",
           () => { gl.saved = Math.round((gl.saved - v) * 100) / 100; persist(); renderGoals(); });
       });
@@ -7438,6 +7484,13 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       fr.links = links.data || []; fr.profs = Object.fromEntries((profs.data || []).map((p) => [p.user_id, p]));
       fr.exps = exps.data || []; fr.parts = (parts.data || []).map((p) => ({ ...p, share: +p.share, paid: +p.paid })); fr.pays = pays.data || [];
       fr.loaded = true;
+      // A friend marked that they paid me back since the last time: a small "ka-ching"
+      try {
+        const k = "budget-snd-pays-" + user.id, last = localStorage.getItem(k), mine = fr.pays.filter((b) => b.to_key === user.id && b.marked_by !== user.id);
+        const top = mine.reduce((a, b) => (b.created_at > a ? b.created_at : a), "");
+        if (top) { localStorage.setItem(k, top); if (last && top > last) sfx("small"); }
+        else if (!last) localStorage.setItem(k, "0");
+      } catch (e) {}
     } catch (e) { return; }
     await frAcceptInvite();
     await frSyncBudget();
@@ -7783,7 +7836,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       ok.disabled = true;
       const { data: b, error } = await sb.from("shared_paybacks").insert({ expense_id: e.id, from_key: d.from, to_key: d.to, amount: Math.min(amount, d.left), marked_by: user.id }).select().single();
       if (error) { ok.disabled = false; snack("לא נשמר. נסה שוב."); return; }
-      fr.pays.push(b); buzz(); renderFriends(); frOpenExp(e);
+      fr.pays.push(b); buzz(); sfx("small"); renderFriends(); frOpenExp(e);
     });
     f.append(frEl("span", "", "כמה?"), inp, ok); row.after(f); inp.focus(); inp.select();
   }
@@ -8210,7 +8263,9 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       { t: "בגודל ״גדול מאוד״ החלק העליון של המסך קטן יותר, ובכל פתיחה מופיעה רק הודעה אחת.", d: "2026-10-18" },
       "רטט קצר כשרושמים וקונפטי בהצלחות. אפשר לכבות.",
       { t: "כשמוסיפים משמרת או הכנסה: מטבעות נופלים לשק כסף 💰, הסכום קופץ, והטלפון רוטט קצת כמו קופה. אפשר לכבות ב״תחושה״.", d: "2026-11-03" },
-      { t: "ויש גם צליל קצר של מטבעות וקופה (״קה־צ׳ינג״). הוא בעוצמת המדיה של הטלפון. אפשר לכבות ב״תחושה״ ← 🔊.", d: "2026-11-03" }
+      { t: "ויש גם צליל קצר של מטבעות וקופה (״קה־צ׳ינג״). הוא בעוצמת המדיה של הטלפון.", d: "2026-11-03" },
+      { t: "צלילים קטנים גם כשרושמים הוצאה, עם הקונפטי, כשמגיעים ליעד חיסכון, בסיכום החודש, בפתיחה ראשונה של חודש חדש, כשחבר החזיר כסף, לפני קנייה גדולה, כשעוברים את ״מותר לך היום״ (פעם ביום), כשזוהה תשלום, כשהעוזר ✨ עונה ובהודעה אישית.", d: "2026-11-03" },
+      { t: "ב״תחושה״ ← 🔊 מתג אחד לכל הצלילים, ועוצמה: שקט או רגיל. בלילה (23:00–07:00) אין צלילים בכלל.", d: "2026-11-03" }
     ], go: ["look", "🎨 לעיצוב"] },
     { id: "phone", e: "📱", t: "האפליקציה בטלפון", d: "", body: [
       { t: "באנדרואיד מורידים את האפליקציה מתפריט החשבון (העיגול עם התמונה שלך למעלה) ← ״📱 הורדת האפליקציה לאנדרואיד״.", w: "ab" },
@@ -8362,13 +8417,23 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     $("confettiOn").checked = feelOn("confetti");
     $("moneyfxOn").checked = feelOn("moneyfx");
     $("cashsoundOn").checked = feelOn("cashsound");
+    paintSndVol();
   }
+  function paintSndVol() {
+    let v = "normal"; try { v = localStorage.getItem("budget-sndvol") || "normal"; } catch (e) {}
+    $("sndVolPick").hidden = !feelOn("cashsound");
+    document.querySelectorAll("#sndVolPick button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.vol === v)));
+  }
+  document.querySelectorAll("#sndVolPick button").forEach((b) => b.addEventListener("click", () => {
+    try { localStorage.setItem("budget-sndvol", b.dataset.vol); } catch (e) {}
+    paintSndVol(); sfx("cash", 0, true);
+  }));
   document.querySelectorAll("#sizePick button").forEach((b) => b.addEventListener("click", () => {
     try { localStorage.setItem("budget-textsize", b.dataset.size); localStorage.removeItem("budget-bigtext"); } catch (e) {}
     BP.textSize(); renderAccents();
   }));
   $("moneyfxOn").addEventListener("change", () => { try { localStorage.setItem("budget-moneyfx", $("moneyfxOn").checked ? "1" : "0"); } catch (e) {} if ($("moneyfxOn").checked) moneyIn(0); });
-  $("cashsoundOn").addEventListener("change", () => { try { localStorage.setItem("budget-cashsound", $("cashsoundOn").checked ? "1" : "0"); } catch (e) {} if ($("cashsoundOn").checked) cashSound(); });
+  $("cashsoundOn").addEventListener("change", () => { try { localStorage.setItem("budget-cashsound", $("cashsoundOn").checked ? "1" : "0"); } catch (e) {} paintSndVol(); if ($("cashsoundOn").checked) sfx("cash", 0, true); });
   $("hapticOn").addEventListener("change", () => { try { localStorage.setItem("budget-haptic", $("hapticOn").checked ? "1" : "0"); } catch (e) {} if ($("hapticOn").checked) buzz(); });
   $("confettiOn").addEventListener("change", () => { try { localStorage.setItem("budget-confetti", $("confettiOn").checked ? "1" : "0"); } catch (e) {} if ($("confettiOn").checked) confetti(); });
   // Trying colors: the first tap remembers the colors before it; ✓ keeps the new ones, ✕ (or leaving the screen) brings the old ones back
@@ -8982,7 +9047,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     $("pmOk").onclick = () => done();
     $("pmAct").onclick = () => done(toDesign ? () => setView("design") : () => window.openShiftFromApp(shift[1]));
     document.querySelectorAll("dialog[open]").forEach((d) => { if (d.id !== "pmSheet") closeDlg(d.id); });
-    popUsed = true; openDlg("pmSheet"); buzz();
+    popUsed = true; openDlg("pmSheet"); buzz(); sfx("chime");
   }
   window.previewPersonal = showPersonal;
   const ago = (iso) => { if (!iso) return "אף פעם"; const d = (Date.now() - new Date(iso)) / 864e5; return d < 1 / 24 ? "עכשיו" : d < 1 ? "היום" : d < 2 ? "אתמול" : "לפני " + Math.floor(d) + " ימים"; };
@@ -9571,6 +9636,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       }
       aiBusy = false; aiWait = "";
       if (live) aiActParse(live); else onOk(j);
+      sfx("bubble");
     } catch (e) {
       aiBusy = false; aiWait = ""; drop();
       aiPush("err", aiErrText(e));
@@ -10210,6 +10276,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   let payFrom = null;
   const payApp = () => window.BudgetApp && BudgetApp.payPending && !isStore() ? BudgetApp : null;
   function payItems() { const a = payApp(); if (!a) return []; try { return JSON.parse(a.payPending()) || []; } catch (e) { return []; } }
+  let paySndN = 0;
   function payCheck() {
     const a = payApp();
     $("payRow").hidden = !a;
@@ -10224,6 +10291,8 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     $("payOn").textContent = on ? "לכבות בהגדרות הטלפון" : "להפעלה בהגדרות הטלפון";
     const n = payItems().length;
     if (payItems().some(isFx)) fxRefresh();
+    if (n > paySndN) sfx("beep");
+    paySndN = n;
     $("payBar").hidden = !n;
     $("payBarText").textContent = n === 1 ? "💳 זיהיתי תשלום אחד שעוד לא נרשם" : "💳 זיהיתי " + n + " תשלומים שעוד לא נרשמו";
     if ($("paySheet").open) payRender();
@@ -10433,7 +10502,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     aiFabSync();
     recordSeen(); loadBroadcast(); setTimeout(loadPersonal, 2500); showDonate(); loadFriends();
     payCheck(); pushKeySync(); layHintCount(); autoFold(); weeklyWin();
-    mwTries = 0; setTimeout(mwCheck, 4000);
+    mwTries = 0; setTimeout(mwCheck, 4000); setTimeout(newMonthSound, 5500);
     $("futureMin").value = String(settings().futureMin == null ? 150 : settings().futureMin);
     const fromApp = new URLSearchParams(location.search).get("app");
     if (fromApp) { history.replaceState(null, "", location.pathname + location.hash); setTimeout(() => window.openFromApp(fromApp), 400); }
