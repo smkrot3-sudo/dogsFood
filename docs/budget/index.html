@@ -4748,7 +4748,8 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   const settings = () => store.settings || {};
   // Pay is shown gross only (the user's choice): no estimated deductions or travel refunds
   const deductRate = () => 0;
-  const hrs = (min) => (Math.round(min / 6) / 10).toLocaleString("he-IL");
+  // Shift lengths as exact hours:minutes (7:24), not a decimal
+  const hrs = (min) => { const m = Math.round(min); return "\u2066" + Math.floor(m / 60) + ":" + String(m % 60).padStart(2, "0") + "\u2069"; };
   const netOf = (p) => p.gross;
   function payParts(p) {
     const out = [];
@@ -8205,6 +8206,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       { t: "בסוג משמרת יש תמיד ״רגילה״, 150% ו־200%. משמרת בשבת או בחג מסומנת לבד ״שבת · לפי חוק״ והשכר מחושב לפי החוק.", d: "2026-10-29" },
       "בלשונית *⏰ משמרות* רושמים כל משמרת: תאריך, כניסה, יציאה והפסקה שלא משולמת. אפשר להקליד שעה כמו 918 והיא תהפוך ל־09:18.",
       "השכר מחושב לפי החוק: שעות נוספות, לילה, שבת וחגים. זו הערכה של הברוטו, לפני מס.",
+      { t: "אורך כל משמרת מוצג בשעות ודקות מדויקות, למשל 7:24, ולא כמספר עשרוני.", d: "2026-11-05" },
       { t: "שתי משמרות או יותר באותו יום נחשבות כיום עבודה אחד: השעות הנוספות מתחילות לפי סך השעות של היום. המשמרות האלה מסומנות ב־🔗 ובפס צבעוני בצד. זה חל גם על משמרות שכבר נרשמו.", d: "2026-10-29" },
       "*🎨 סוגי משמרות*: אחוז קבוע לכל שעה, למשל מוצ״ש ב־150%. אם החוק נותן יותר, מקבלים את הגבוה.",
       "*📥 ייבוא מהיר*: מדביקים את דוח הנוכחות מחילן, מעלים קובץ, מצלמים את הדוח (העוזר קורא אותו), או מסמנים כמה ימים באותן שעות.",
