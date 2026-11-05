@@ -42,7 +42,8 @@ window.BP = (function () {
   function apply() {
     var r = document.documentElement.style, v = editing() ? null : vars(get(), isDark());
     KEYS.forEach(function (k) { if (v) r.setProperty(k, v[k]); else r.removeProperty(k); });
-    return v ? v["--bg"] : (isDark() ? "#17121f" : "#fff6ee");
+    var ring = document.documentElement.classList.contains("look-ring");
+    return v ? v["--bg"] : (isDark() ? (ring ? "#0f1220" : "#17121f") : (ring ? "#ffffff" : "#fff6ee"));
   }
   var A = [
     ["orig", "המקורי", "#ef5a33", "#db3577", "#7a46de"], ["sunset", "שקיעה", "#f59e0b", "#ef5a33", "#d6336c"],
@@ -66,6 +67,9 @@ window.BP = (function () {
   }
   return { list: L, vars: vars, get: get, apply: apply, isDark: isDark, accents: A, accent: accent, applyAccent: applyAccent, textSize: textSize };
 })();
+// The app's look. "ring" = the white design with the big ring (from 2026-11-05). "" = the design before it (all its CSS is still here).
+var LOOK = "ring";
+if (LOOK) document.documentElement.classList.add("look-" + LOOK);
 try { var t = localStorage.getItem("budget-theme"); if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t); BP.textSize(); BP.applyAccent(); BP.apply(); } catch (e) {}</script>
 <script>
 // ---- The shared app design (table app_designs): the owner and Shani edit it in ⚙️ ← 🎨 עורך העיצוב.
@@ -1518,6 +1522,94 @@ header.topbar .brand { flex: 1 1 auto; } header.topbar .brandtext { min-width: 0
 .season3 .se, .season3 .st { white-space: nowrap; }
 html.hugetext .season3 svg { width: 70px; height: 21px; }
 .season3 .se { font-size: 24px; line-height: 1; }
+
+/* ===== Look "ring" (2026-11-05): white and calm, one big ring around today's number.
+   Everything here starts with html.look-ring, so setting LOOK = "" at the top brings back the design before it. ===== */
+html.look-ring {
+  --bg: #ffffff; --surface: #ffffff; --surface-2: #f2f4f9; --fg: #151a2e; --muted: #737a93; --line: #e9ecf3;
+  --accent: #0e8a66; --accent-soft: #dcf4ea;
+  --brand1: #10a37a; --brand2: #3d7fd0; --brand3: #5a62e0;
+  --brand: linear-gradient(135deg, #10a37a, #5a62e0);
+  --ink: #151a2e; --on-ink: #ffffff;
+  --card-shadow: none; --shadow: 0 8px 22px rgba(70, 80, 200, .28);
+  --blob1: transparent; --blob2: transparent; --blob3: transparent;
+}
+@media (prefers-color-scheme: dark) {
+  html.look-ring:not([data-theme="light"]) {
+    --bg: #0f1220; --surface: #171b2c; --surface-2: #222739; --fg: #eef0fa; --muted: #9aa1ba; --line: #262b40;
+    --accent: #3fd0a0; --accent-soft: #15362d; --ink: #eef0fa; --on-ink: #11142a;
+    --shadow: 0 8px 22px rgba(0, 0, 0, .5);
+  }
+}
+html.look-ring[data-theme="dark"] {
+  --bg: #0f1220; --surface: #171b2c; --surface-2: #222739; --fg: #eef0fa; --muted: #9aa1ba; --line: #262b40;
+  --accent: #3fd0a0; --accent-soft: #15362d; --ink: #eef0fa; --on-ink: #11142a;
+  --shadow: 0 8px 22px rgba(0, 0, 0, .5);
+}
+html.look-ring body { background: var(--bg); }
+/* Top bar and month */
+html.look-ring h1 .gt { background: none; color: var(--fg); -webkit-text-fill-color: currentColor; }
+html.look-ring h1 .logo { background: var(--surface-2); box-shadow: none; }
+html.look-ring .gearbtn { box-shadow: none; }
+html.look-ring .monthbar .month .step, html.look-ring .monthbar input[type="month"] { background: var(--surface-2); box-shadow: none; }
+/* Tabs: separate pills, the open one dark */
+html.look-ring .tabs { background: var(--bg); box-shadow: none; gap: 6px; padding: 4px 0; border-radius: 0; -webkit-backdrop-filter: none; backdrop-filter: none; }
+html.look-ring .tabs a { background: var(--surface-2); border-radius: 999px; }
+html.look-ring .tabs a[aria-current="true"] { background: var(--ink); color: var(--on-ink); box-shadow: none; }
+/* Cards become flat sections with a thin line between them */
+html.look-ring #app .panel { background: transparent; box-shadow: none; border: 0; border-top: 1px solid var(--line); border-radius: 0; padding-inline: 4px; }
+html.look-ring #app .panel.half { border-radius: 0; }
+html.look-ring .panel h2[data-e]::before { background: var(--surface-2); border-radius: 50%; }
+html.look-ring .panel h2 .sum { background: var(--surface-2); }
+html.look-ring .btn { border-color: transparent; background: var(--surface-2); }
+html.look-ring .btn:hover { border-color: transparent; color: var(--fg); }
+html.look-ring .btn.primary { background: var(--brand); color: #fff; box-shadow: none; }
+html.look-ring .catchips button[aria-pressed="true"] { background: var(--ink); color: var(--on-ink); border-color: transparent; }
+html.look-ring input:not([type="checkbox"]):not([type="radio"]):not([type="range"]), html.look-ring select, html.look-ring textarea { background: var(--surface-2); border-color: transparent; }
+html.look-ring .stm .sday { border-bottom: 0; font-weight: 600; }
+html.look-ring .stm .srow { border-bottom-color: var(--line); }
+html.look-ring .stm .srow .ic { border-radius: 12px; }
+html.look-ring .stm .srow .sedbtn { background: transparent; border-color: transparent; opacity: .6; }
+html.look-ring .sheet, html.look-ring dialog { box-shadow: 0 -6px 30px rgba(20, 25, 60, .18); }
+/* Today: white, the number inside a big ring */
+html.look-ring #app .panel.today { --rs: 250px; background: transparent; color: var(--fg); border-top: 0; text-align: center; justify-items: center; overflow: visible; padding-top: 18px; }
+html.look-ring #app .panel.today:has(> .ring3:not([style*="none"])) { padding-top: calc(var(--rs) / 2 - 30px); }
+html.look-ring .panel.today::before { display: none; }
+html.look-ring .panel.today::after { font-size: 26px; top: 6px; inset-inline-end: auto; inset-inline-start: 4px; filter: none; }
+html.look-ring .today .ring3 { inset-inline-end: auto; left: 50%; top: 8px; width: var(--rs); height: var(--rs); transform: translateX(-50%) scaleX(-1); }
+html.look-ring .today .ring3 circle { stroke-width: 5; }
+html.look-ring .today .ring3 .tr { stroke: var(--surface-2); }
+html.look-ring .today .ring3 .fl { stroke: url(#ring3g); }
+html.look-ring .panel.today:has(.verdict.warn) .ring3 .fl { stroke: var(--spend); }
+html.look-ring .panel.today:has(.verdict.bad) .ring3 .fl, html.look-ring .panel.today:has(.big.neg) .ring3 .fl { stroke: var(--danger); }
+html.look-ring .today .lbl, html.look-ring .today .line { color: var(--muted); }
+html.look-ring .today .lbl { font-size: 15px; position: relative; }
+html.look-ring .today .big, html.look-ring .today .big.neg { color: var(--fg) !important; text-shadow: none; font-size: clamp(40px, 12vw, 54px); position: relative; max-width: calc(var(--rs) - 44px); }
+html.look-ring .today .big.neg { color: var(--danger) !important; }
+html.look-ring #app .panel.today:has(> .ring3:not([style*="none"])) .big { margin-bottom: calc(var(--rs) / 2 - 46px); }
+html.look-ring .today .fcline { color: var(--muted); }
+html.look-ring .today .helpbtn { top: 6px; inset-inline-end: 4px; background: var(--surface-2); color: var(--fg); }
+html.look-ring .today .todaymore { justify-self: center; background: var(--surface-2); color: var(--fg); }
+html.look-ring .today .todaybox { width: 100%; text-align: start; }
+html.look-ring .today .pace .track { background: var(--surface-2); }
+html.look-ring .today .pace .fill { background: var(--brand); }
+html.look-ring .today .pace .mark { background: var(--fg); }
+html.look-ring .today .pace .cap { color: var(--muted); }
+html.look-ring .today .verdict.good { background: var(--accent-soft); color: var(--accent); }
+html.look-ring .today .verdict.warn { background: var(--spend-soft); color: var(--spend); }
+html.look-ring .today .verdict.bad { background: var(--danger-soft); color: var(--danger); }
+html.look-ring .today .helptext { background: var(--surface-2); color: var(--fg); }
+html.look-ring .today .spark3 .ln { stroke: var(--brand3); }
+html.look-ring .today .spark3 .ar { fill: color-mix(in srgb, var(--brand3) 12%, transparent); }
+html.look-ring .today .spark3 .pl { stroke: var(--muted); }
+html.look-ring.bigtext #app .panel.today { --rs: 270px; }
+html.look-ring.hugetext #app .panel.today { --rs: 290px; }
+html.look-ring.hugetext .today > * { order: 0; }
+html.look-ring.hugetext .today > .lbl { padding-inline-end: 0; }
+html.look-ring.hugetext .today > .helpbtn { position: absolute; }
+/* Add button: a round + */
+html.look-ring .fab, html.look-ring .fab.mini { width: 62px; height: 62px; padding: 0; font-size: 0; border-radius: 50%; display: grid; place-items: center; background: var(--brand); color: #fff; box-shadow: var(--shadow); }
+html.look-ring .fab::before { content: "+"; font-size: 36px; font-weight: 400; line-height: 1; }
 </style>
 </head>
 <body>
@@ -7290,6 +7382,9 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     let ring = panel.querySelector(".ring3");
     if (!ring) {
       ring = l3el("svg", { class: "ring3", viewBox: "0 0 64 64", "aria-hidden": "true" });
+      const gr = l3el("linearGradient", { id: "ring3g", x1: 0, y1: 0, x2: 1, y2: 1 });
+      gr.append(l3el("stop", { offset: 0, "stop-color": "#10a37a" }), l3el("stop", { offset: 1, "stop-color": "#5a62e0" }));
+      const df = l3el("defs", {}); df.append(gr); ring.append(df);
       ring.append(l3el("circle", { class: "tr", cx: 32, cy: 32, r: 28 }), l3el("circle", { class: "fl", cx: 32, cy: 32, r: 28, transform: "rotate(-90 32 32)" }));
       panel.append(ring);
     }
@@ -8136,6 +8231,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     ] },
     { id: "today", e: "🏠", t: "המספר הגדול: מותר לך להוציא היום", d: "", body: [
       "הסכום שאפשר להוציא היום בלי לפגוע בשאר החודש. הוצאת פחות היום? מחר יהיה יותר.",
+      { t: "הטבעת מסביב למספר מתרוקנת ככל שמוציאים היום. ירוקה כשהכל בסדר, כתומה כשמתקרבים לגבול, אדומה כשעוברים אותו.", d: "2026-11-05" },
       "״פרטים ▾״ מראה כמה כבר יצא, כמה מהחודש עבר, רצף ימים בתוך התקציב ו־״❓ למה המספר הזה?״.",
       "כשהחודש בורח מופיע כרטיס ״🧭 איך חוזרים למסלול״ עם תוכנית רגועה. ״הבנתי״ מסתיר אותו עד סוף החודש.",
       { t: "בשלושת הימים האחרונים של החודש מותר סכום של יום רגיל. מה שנשאר מעבר לזה מופיע בשורה ״🐷 נשארו בצד״, וכדאי להעביר אותו לחיסכון.", d: "2026-10-18" },
@@ -8259,6 +8355,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     ], go: ["settings", "⚙️ להגדרות"] },
     { id: "look", e: "🎨", t: "עיצוב וצבעים", d: "", body: [
       "בהגדרות ← *🎨 עיצוב וצבעים*.",
+      { t: "עיצוב חדש לכל האפליקציה: לבן ונקי, בלי קופסאות, והמספר של היום בתוך טבעת גדולה. הוצאה מוסיפים בכפתור ה־+ העגול למטה.", d: "2026-11-05" },
       "מצב בהיר, כהה, או לפי הטלפון.",
       "צבע רקע וצבע מבטא (הכפתורים והכותרות). לוחצים, רואים מיד, ושומרים או מבטלים.",
       "גודל טקסט: רגיל, גדול או גדול מאוד.",
