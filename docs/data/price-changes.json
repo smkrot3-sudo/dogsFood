@@ -1,6 +1,17 @@
 {
-  "date": "2026-11-10",
-  "updatedAt": "10.11.2026, 15:11",
-  "count": 0,
-  "changes": []
+  "date": "2026-11-11",
+  "updatedAt": "11.11.2026, 14:21",
+  "count": 1,
+  "changes": [
+    {
+      "barcode": "7290000479057",
+      "title": "פטקס סופר פד לגורים 80 יחידות",
+      "variant": "",
+      "oldPrice": "99.00",
+      "newPrice": "125.00",
+      "diff": "26.00",
+      "direction": "up",
+      "url": "https://www.anipet.co.il/products/פטקס-סופר-פד-לגורים-80-יחידות"
+    }
+  ]
 }
