@@ -1,17 +1,17 @@
 {
-  "date": "2026-11-11",
-  "updatedAt": "11.11.2026, 14:21",
+  "date": "2026-11-12",
+  "updatedAt": "12.11.2026, 15:29",
   "count": 1,
   "changes": [
     {
-      "barcode": "7290000479057",
-      "title": "פטקס סופר פד לגורים 80 יחידות",
-      "variant": "",
-      "oldPrice": "99.00",
-      "newPrice": "125.00",
-      "diff": "26.00",
+      "barcode": "52742867601",
+      "title": "הילס Z/D רפואי לכלב",
+      "variant": "10 ק\"ג",
+      "oldPrice": "569.00",
+      "newPrice": "589.00",
+      "diff": "20.00",
       "direction": "up",
-      "url": "https://www.anipet.co.il/products/פטקס-סופר-פד-לגורים-80-יחידות"
+      "url": "https://www.anipet.co.il/products/הילס-z-d-רפואי-לכלב-3-קילו"
     }
   ]
 }
