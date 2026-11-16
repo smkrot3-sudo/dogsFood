@@ -1,27 +1,6 @@
 {
-  "date": "2026-11-15",
-  "updatedAt": "15.11.2026, 14:26",
-  "count": 2,
-  "changes": [
-    {
-      "barcode": "113300330",
-      "title": "חטיף לה קט מקלות בשר עם כבש 30 גרם",
-      "variant": "",
-      "oldPrice": "11.90",
-      "newPrice": "18.90",
-      "diff": "7.00",
-      "direction": "up",
-      "url": "https://www.anipet.co.il/products/חטיף-לה-קט-מקלות-בשר-עם-כבש"
-    },
-    {
-      "barcode": "113300347",
-      "title": "חטיף לה קט מקלות בשר עם סלמון 30 גרם",
-      "variant": "",
-      "oldPrice": "11.90",
-      "newPrice": "18.90",
-      "diff": "7.00",
-      "direction": "up",
-      "url": "https://www.anipet.co.il/products/חטיף-לה-קט-מקלות-בשר-עם-סלמון"
-    }
-  ]
+  "date": "2026-11-16",
+  "updatedAt": "16.11.2026, 15:18",
+  "count": 0,
+  "changes": []
 }
