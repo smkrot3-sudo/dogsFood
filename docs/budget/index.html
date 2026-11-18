@@ -762,6 +762,12 @@ dialog.sheet::backdrop { background: rgba(40, 20, 50, .45); -webkit-backdrop-fil
 .shift .what .range { font-size: 17px; font-weight: 800; font-variant-numeric: tabular-nums; }
 .shift .what span { font-size: 12.5px; color: var(--muted); }
 .shift .what .snote { color: var(--fg); }
+.mwage { display: grid; grid-template-columns: minmax(0, 1fr) 110px; gap: 6px 10px; align-items: center; padding: 10px 12px; border-radius: 14px; background: var(--surface-2); }
+.mwage label { font-weight: 700; font-size: 14.5px; }
+.mwage input { width: 100%; min-width: 0; text-align: center; }
+.mwage .btn { grid-column: 1 / -1; justify-self: start; padding: 6px 12px; font-size: 14px; }
+.mwage .hint { grid-column: 1 / -1; margin: 0; }
+.mwage[hidden] { display: none; }
 .shift .what .ssame { color: var(--fg); font-weight: 700; }
 .shift.same { box-shadow: inset 4px 0 0 var(--brand3); }
 .shift .amt { font-size: 16px; font-weight: 800; }
@@ -2242,6 +2248,12 @@ html.look-ring .fab::before { content: "+"; font-size: 36px; font-weight: 400; l
         <span class="big2" id="shNet">₪0</span>
         <span class="line" id="shLine"></span>
         <div class="paygoal" id="shGoal" hidden></div>
+      </div>
+      <div class="mwage" id="mWageRow" hidden>
+        <label for="mWage">💵 שכר לשעה ב<span id="mWageMon"></span></label>
+        <input type="number" id="mWage" min="0" step="0.01" inputmode="decimal">
+        <button class="btn" type="button" id="mWageReset" hidden>לשכר הרגיל</button>
+        <p class="hint" id="mWageHint"></p>
       </div>
       <div class="actions"><button class="btn" type="button" id="importShifts">📥 ייבוא מהיר: מחילן או כמה ימים ביחד</button></div>
       <div class="shifts" id="shiftList"></div>
@@ -4838,6 +4850,10 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 
   // ---- Shifts: pay summary ----
   const settings = () => store.settings || {};
+  // An hourly wage for one month only (settings.monthWage["2025-03"] = 35); other months use the regular wage.
+  // Every shift keeps its own wage, so changing a month's wage rewrites that month's shifts.
+  const monthWageOf = (m) => +((settings().monthWage || {})[m]) || 0;
+  const wageFor = (date) => monthWageOf(periodOf(String(date))) || +settings().wage || 0;
   // Pay is shown gross only (the user's choice): no estimated deductions or travel refunds
   const deductRate = () => 0;
   // Shift lengths as exact hours:minutes (7:24), not a decimal
@@ -4936,6 +4952,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     const pp = periodPay(month);
     const list = shifts[month] || [];
     $("shTitle").textContent = "משמרות " + monthName(month);
+    renderMonthWage();
     $("shNet").textContent = fmt(pp.net);
     $("shLine").textContent = payLine(pp);
     const box = $("shiftList"); box.innerHTML = "";
@@ -5027,7 +5044,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     return {
       work_date: date, start_time: a, end_time: b,
       break_min: Math.max(0, Math.min(600, Math.round(+$("shBreak").value || 0))),
-      wage: editingShift ? editingShift.wage : +settings().wage,
+      wage: editingShift && periodOf(editingShift.work_date) === periodOf(date) ? editingShift.wage : wageFor(date),
       kind: k,
       kind_rate: k ? (keepOld ? +editingShift.kind_rate : t ? +t.rate || 100 : 100) : 100,
       note: $("shNote").value.trim().slice(0, 200)
@@ -5257,7 +5274,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     const prev = new Map(impRows.map((r) => [r.work_date + r.start_time, r.on]));
     impRows = impCandidates().map((c) => {
       const ai = impAi && impAi.get(c.work_date + c.start_time);
-      const row = { ...c, break_min: ai && ai.break_min != null ? ai.break_min : br, wage, ...kind, note: ai ? ai.note : "" };
+      const row = { ...c, break_min: ai && ai.break_min != null ? ai.break_min : br, wage: wageFor(c.work_date) || wage, ...kind, note: ai ? ai.note : "" };
       const dup = known(c), k = c.work_date + c.start_time;
       return { row, dup, on: prev.has(k) ? prev.get(k) : !dup, pay: shiftPay(row, settings()) };
     });
@@ -5821,6 +5838,35 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     renderPay(); renderTx(); renderWish(); renderCal();
   }
   $("wage").addEventListener("input", () => { const w = parseFloat($("wage").value); setSetting("wage", w > 0 ? w : 0); });
+
+  // ---- A different hourly wage for the viewed month ----
+  function renderMonthWage() {
+    const base = +settings().wage || 0, mw = monthWageOf(month);
+    $("mWageRow").hidden = isSalaried() || !(base > 0 || mw > 0);
+    $("mWageMon").textContent = monthName(month) + " " + namedMonth(month).slice(0, 4);
+    if (document.activeElement !== $("mWage")) $("mWage").value = mw || "";
+    $("mWage").placeholder = base ? fmt(base) : "₪";
+    $("mWageReset").hidden = !mw;
+    $("mWageHint").textContent = mw ? "רק בחודש הזה. בשאר החודשים השכר הרגיל: " + fmt(base) + "." : "ריק = השכר הרגיל. אפשר לשים שכר אחר רק לחודש הזה, למשל בחודש ישן.";
+  }
+  function setMonthWage(v) {
+    const m = month, base = +settings().wage || 0;
+    const prevMap = { ...(settings().monthWage || {}) }, map = { ...prevMap };
+    if (v > 0 && v !== base) map[m] = v; else delete map[m];
+    const wage = map[m] || base;
+    const old = (shifts[m] || []).filter((r) => +r.wage !== wage).map((r) => clean(r));
+    store.settings = { ...settings(), monthWage: map };
+    old.forEach((r) => saveShift({ ...r, wage }));
+    persist(); renderPay(); renderCal();
+    if (!old.length && JSON.stringify(prevMap) === JSON.stringify(map)) return;
+    snack((map[m] ? "השכר ב" + monthName(m) + " הוא עכשיו " + fmt(wage) + " לשעה" : "חזרה לשכר הרגיל ב" + monthName(m)) + (old.length ? ". עודכנו " + old.length + " משמרות." : "."), () => {
+      store.settings = { ...settings(), monthWage: prevMap };
+      old.forEach((r) => saveShift(r));
+      persist(); renderPay(); renderCal();
+    });
+  }
+  $("mWage").addEventListener("change", () => { const v = Math.round((parseFloat($("mWage").value) || 0) * 100) / 100; setMonthWage(v); });
+  $("mWageReset").addEventListener("click", () => { $("mWage").value = ""; setMonthWage(0); });
   $("otAfter").addEventListener("change", () => setSetting("otAfter", +$("otAfter").value));
   $("deduct").addEventListener("input", () => { const d = parseFloat($("deduct").value); setSetting("deduct", d >= 0 ? Math.min(d, 90) : 12); });
   $("travel").addEventListener("input", () => { const t = parseFloat($("travel").value); setSetting("travel", t > 0 ? t : 0); });
@@ -8302,6 +8348,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       { t: "בסוג משמרת יש תמיד ״רגילה״, 150% ו־200%. משמרת בשבת או בחג מסומנת לבד ״שבת · לפי חוק״ והשכר מחושב לפי החוק.", d: "2026-10-29" },
       "בלשונית *⏰ משמרות* רושמים כל משמרת: תאריך, כניסה, יציאה והפסקה שלא משולמת. אפשר להקליד שעה כמו 918 והיא תהפוך ל־09:18.",
       "השכר מחושב לפי החוק: שעות נוספות, לילה, שבת וחגים. זו הערכה של הברוטו, לפני מס.",
+      { t: "*💵 שכר לשעה בחודש מסוים*: בלשונית המשמרות, מתחת לסיכום. עוברים לחודש (גם ישן), רושמים שכר אחר, למשל ₪35, וכל המשמרות של אותו חודש מחושבות לפיו. בשאר החודשים נשאר השכר הרגיל. ״לשכר הרגיל״ מחזיר.", d: "2026-11-18" },
       { t: "אורך כל משמרת מוצג בשעות ודקות מדויקות, למשל 7:24, ולא כמספר עשרוני. גם בהגדרות שכר, ״שעות נוספות אחרי״ מוצג כ־8:36, 8:30 או 8:00.", d: "2026-11-05" },
       { t: "שתי משמרות או יותר באותו יום נחשבות כיום עבודה אחד: השעות הנוספות מתחילות לפי סך השעות של היום. המשמרות האלה מסומנות ב־🔗 ובפס צבעוני בצד. זה חל גם על משמרות שכבר נרשמו.", d: "2026-10-29" },
       "*🎨 סוגי משמרות*: אחוז קבוע לכל שעה, למשל מוצ״ש ב־150%. אם החוק נותן יותר, מקבלים את הגבוה.",
@@ -9551,7 +9598,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       case "shift_add": {
         const date = day(a.date), st = normTime(String(a.start || "")), en = normTime(String(a.end || ""));
         if (!/^\d\d:\d\d$/.test(st) || !/^\d\d:\d\d$/.test(en) || st === en) return bad("⏰ משמרת", "חסרות שעת כניסה ושעת יציאה");
-        const row = { id: uid(), work_date: date, start_time: st, end_time: en, break_min: Math.max(0, Math.min(600, Math.round(+a.break || 0))), wage: +settings().wage, kind: "", kind_rate: 100, note: "", created_at: new Date().toISOString() };
+        const row = { id: uid(), work_date: date, start_time: st, end_time: en, break_min: Math.max(0, Math.min(600, Math.round(+a.break || 0))), wage: wageFor(date), kind: "", kind_rate: 100, note: "", created_at: new Date().toISOString() };
         const p = shiftPay(row, settings());
         return { ok: true, txt: "⏰ משמרת " + shortDate(date) + " · " + st + " עד " + en + (row.break_min ? " (הפסקה " + row.break_min + " דק׳)" : ""), sub: hrs(p.paidMin) + " שעות · " + fmt(p.gross) + " ברוטו",
           run: () => { saveShift(row); renderPay(); renderCal(); moneyIn(p.gross); return "משמרת של " + hrs(p.paidMin) + " שעות"; } };
