@@ -1,6 +1,6 @@
 {
-  "updatedAt": "19.11.2026, 16:03",
-  "date": "2026-11-19",
+  "updatedAt": "20.11.2026, 15:47",
+  "date": "2026-11-20",
   "stats": {
     "withBarcode": 2418,
     "withoutBarcode": 0,
@@ -8021,7 +8021,7 @@
       "variant": "פסים שחור-לבן / L",
       "price": "339.00",
       "compareAtPrice": null,
-      "available": true,
+      "available": false,
       "vendor": "מיטות ומזרונים",
       "handle": "מיטה-דרים-זיפר",
       "url": "https://www.anipet.co.il/products/מיטה-דרים-זיפר",
@@ -33425,7 +33425,7 @@
       "variant": "פסים שחור-לבן / L",
       "price": "339.00",
       "compareAtPrice": null,
-      "available": true,
+      "available": false,
       "vendor": "מיטות ומזרונים",
       "handle": "מיטה-דרים-זיפר",
       "url": "https://www.anipet.co.il/products/מיטה-דרים-זיפר",
