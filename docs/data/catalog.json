@@ -1,10 +1,10 @@
 {
-  "updatedAt": "22.11.2026, 15:00",
-  "date": "2026-11-22",
+  "updatedAt": "23.11.2026, 17:37",
+  "date": "2026-11-23",
   "stats": {
-    "withBarcode": 2418,
+    "withBarcode": 2422,
     "withoutBarcode": 0,
-    "total": 2418
+    "total": 2422
   },
   "byBarcode": {
     "174": {
@@ -87,7 +87,7 @@
     },
     "600": {
       "barcode": "600",
-      "title": "רויאל קנין כלב מדיום פאפי 12 ק\"ג",
+      "title": "רויאל קנין כלב מדיום פאפי",
       "variant": "15 ק\"ג",
       "price": "360.00",
       "compareAtPrice": null,
@@ -585,7 +585,7 @@
       "variant": "",
       "price": "18.90",
       "compareAtPrice": null,
-      "available": true,
+      "available": false,
       "vendor": "צ'אנקיז",
       "handle": "צאנקיז-נגיסי-סלמון-80-גרם",
       "url": "https://www.anipet.co.il/products/צאנקיז-נגיסי-סלמון-80-גרם",
@@ -932,7 +932,7 @@
     },
     "1690": {
       "barcode": "1690",
-      "title": "אקאנה מזון לכלב קלאסיק ווילד קוסט דגים 2 ק\"ג",
+      "title": "אקאנה מזון לכלב קלאסיק ווילד קוסט דגים",
       "variant": "2 ק\"ג",
       "price": "135.00",
       "compareAtPrice": null,
@@ -2197,7 +2197,7 @@
       "variant": "",
       "price": "139.00",
       "compareAtPrice": null,
-      "available": false,
+      "available": true,
       "vendor": "PetEx",
       "handle": "פטקס-עצם-רול-5-אינץ-ברווז-עוף-וכבד-1-קג",
       "url": "https://www.anipet.co.il/products/פטקס-עצם-רול-5-אינץ-ברווז-עוף-וכבד-1-קג",
@@ -2297,8 +2297,8 @@
     },
     "2903": {
       "barcode": "2903",
-      "title": "נוטריאנס חתול אורגינל אינדור 2.5 קילו",
-      "variant": "",
+      "title": "נוטריאנס חתול אוריג'ינל",
+      "variant": "2.5 ק\"ג",
       "price": "139.00",
       "compareAtPrice": null,
       "available": true,
@@ -2310,16 +2310,16 @@
     },
     "2904": {
       "barcode": "2904",
-      "title": "נוטריאנס חתול אורגינל אינדור 5 קילו",
-      "variant": "",
+      "title": "נוטריאנס חתול אוריג'ינל",
+      "variant": "5 ק\"ג",
       "price": "229.00",
       "compareAtPrice": null,
       "available": true,
       "vendor": "נוטריאנס",
-      "handle": "נוטריאנס-חתול-אורגינל-אינדור-5-קילו",
-      "url": "https://www.anipet.co.il/products/נוטריאנס-חתול-אורגינל-אינדור-5-קילו",
-      "productId": 9787319320816,
-      "variantId": 48622433304816
+      "handle": "נוטריאנס-חתול-אורגינל-אינדור-2-5-קילו",
+      "url": "https://www.anipet.co.il/products/נוטריאנס-חתול-אורגינל-אינדור-2-5-קילו",
+      "productId": 9787319288048,
+      "variantId": 67520567148915
     },
     "2906": {
       "barcode": "2906",
@@ -4446,7 +4446,7 @@
       "variant": "2.5 ק\"ג",
       "price": "130.00",
       "compareAtPrice": null,
-      "available": false,
+      "available": true,
       "vendor": "אורבן צ'ויס",
       "handle": "אורבן-צויס-כלב-גור-גזע-קטן-ומדיום",
       "url": "https://www.anipet.co.il/products/אורבן-צויס-כלב-גור-גזע-קטן-ומדיום",
@@ -4498,7 +4498,7 @@
       "variant": "11 ק\"ג",
       "price": "320.00",
       "compareAtPrice": null,
-      "available": false,
+      "available": true,
       "vendor": "אורבן צ'ויס",
       "handle": "אורבן-צויס-כלב-בוגר-מדיום",
       "url": "https://www.anipet.co.il/products/אורבן-צויס-כלב-בוגר-מדיום",
@@ -4563,7 +4563,7 @@
       "variant": "11 ק\"ג",
       "price": "330.00",
       "compareAtPrice": null,
-      "available": false,
+      "available": true,
       "vendor": "אורבן צ'ויס",
       "handle": "אורבן-צויס-כלב-לייט-דגים",
       "url": "https://www.anipet.co.il/products/אורבן-צויס-כלב-לייט-דגים",
@@ -4615,7 +4615,7 @@
       "variant": "11 ק\"ג",
       "price": "330.00",
       "compareAtPrice": null,
-      "available": false,
+      "available": true,
       "vendor": "אורבן צ'ויס",
       "handle": "אורבן-צויס-כלב-רגיש-דגי-אוקינוס",
       "url": "https://www.anipet.co.il/products/אורבן-צויס-כלב-רגיש-דגי-אוקינוס",
@@ -4634,6 +4634,19 @@
       "url": "https://www.anipet.co.il/products/חול-מתגבש-יורו-קיטי-קרבון-18-ליטר-ירוק",
       "productId": 9787300446448,
       "variantId": 48622414201072
+    },
+    "113302259": {
+      "barcode": "113302259",
+      "title": "חטיף בונזו נאגטס בקר ודג 80 גרם",
+      "variant": "",
+      "price": "16.90",
+      "compareAtPrice": null,
+      "available": true,
+      "vendor": "בונזו Bonzo",
+      "handle": "חטיף-בונזו-נאגטס-בקר-ודג-80-גרם",
+      "url": "https://www.anipet.co.il/products/חטיף-בונזו-נאגטס-בקר-ודג-80-גרם",
+      "productId": 9787300544752,
+      "variantId": 48622414299376
     },
     "113302266": {
       "barcode": "113302266",
@@ -5278,7 +5291,7 @@
       "variant": "",
       "price": "19.90",
       "compareAtPrice": null,
-      "available": false,
+      "available": true,
       "vendor": "PetEx",
       "handle": "באדי-סנאק-חטיפי-ברווז-מיובשים-80-גרם",
       "url": "https://www.anipet.co.il/products/באדי-סנאק-חטיפי-ברווז-מיובשים-80-גרם",
@@ -6194,6 +6207,32 @@
       "url": "https://www.anipet.co.il/products/מונג-פרש-לכלב-פטה-עם-נתחי-כבש-100-גרם",
       "productId": 9787421622512,
       "variantId": 48622546649328
+    },
+    "815260007597": {
+      "barcode": "815260007597",
+      "title": "נאו כלב מגזע קטן גוד גרייבי עוף test",
+      "variant": "1.6 ק\"ג",
+      "price": "89.00",
+      "compareAtPrice": null,
+      "available": true,
+      "vendor": "NOW",
+      "handle": "נאו-כלב-מגזע-קטן-גוד-גרייבי-עוף-copy",
+      "url": "https://www.anipet.co.il/products/נאו-כלב-מגזע-קטן-גוד-גרייבי-עוף-copy",
+      "productId": 10189287653616,
+      "variantId": 50198721069296
+    },
+    "815260007610": {
+      "barcode": "815260007610",
+      "title": "נאו כלב מגזע קטן גוד גרייבי עוף test",
+      "variant": "5.4 ק\"ג",
+      "price": "198.90",
+      "compareAtPrice": null,
+      "available": true,
+      "vendor": "NOW",
+      "handle": "נאו-כלב-מגזע-קטן-גוד-גרייבי-עוף-copy",
+      "url": "https://www.anipet.co.il/products/נאו-כלב-מגזע-קטן-גוד-גרייבי-עוף-copy",
+      "productId": 10189287653616,
+      "variantId": 50198721102064
     },
     "7290115120035": {
       "barcode": "7290115120035",
@@ -7846,19 +7885,6 @@
       "productId": 9787349565680,
       "variantId": 48622465876208
     },
-    "15561529082": {
-      "barcode": "15561529082",
-      "title": "נוטריאנס SZ חתול בקר ביזון חזיר בר ודגי ים 4.5 קילו",
-      "variant": "",
-      "price": "279.00",
-      "compareAtPrice": null,
-      "available": true,
-      "vendor": "נוטריאנס",
-      "handle": "נוטריאנס-sz-חתול-בקר-ביזון-חזיר-בר-ודגי-ים-4-5-קילו",
-      "url": "https://www.anipet.co.il/products/נוטריאנס-sz-חתול-בקר-ביזון-חזיר-בר-ודגי-ים-4-5-קילו",
-      "productId": 10066495373552,
-      "variantId": 49864197406960
-    },
     "2020406775317": {
       "barcode": "2020406775317",
       "title": "פדים לכלב בסט סלושן 100 יח' 60X60",
@@ -7871,32 +7897,6 @@
       "url": "https://www.anipet.co.il/products/פדים-לכלב-בסט-סלושן-100-יח-60x60",
       "productId": 10128833183984,
       "variantId": 50105721553136
-    },
-    "815260007597": {
-      "barcode": "815260007597",
-      "title": "נאו כלב מגזע קטן גוד גרייבי עוף test",
-      "variant": "1.6 ק\"ג",
-      "price": "89.00",
-      "compareAtPrice": null,
-      "available": true,
-      "vendor": "NOW",
-      "handle": "נאו-כלב-מגזע-קטן-גוד-גרייבי-עוף-copy",
-      "url": "https://www.anipet.co.il/products/נאו-כלב-מגזע-קטן-גוד-גרייבי-עוף-copy",
-      "productId": 10189287653616,
-      "variantId": 50198721069296
-    },
-    "815260007610": {
-      "barcode": "815260007610",
-      "title": "נאו כלב מגזע קטן גוד גרייבי עוף test",
-      "variant": "5.4 ק\"ג",
-      "price": "198.90",
-      "compareAtPrice": null,
-      "available": false,
-      "vendor": "NOW",
-      "handle": "נאו-כלב-מגזע-קטן-גוד-גרייבי-עוף-copy",
-      "url": "https://www.anipet.co.il/products/נאו-כלב-מגזע-קטן-גוד-גרייבי-עוף-copy",
-      "productId": 10189287653616,
-      "variantId": 50198721102064
     },
     "3182550768641": {
       "barcode": "3182550768641",
@@ -9607,7 +9607,7 @@
       "variant": "",
       "price": "132.90",
       "compareAtPrice": null,
-      "available": false,
+      "available": true,
       "vendor": "ריבוס",
       "handle": "מארז-ריבוס-עצמות-לכלב-מקלוני-ספירלה-ברווז-לבן-1-קג",
       "url": "https://www.anipet.co.il/products/מארז-ריבוס-עצמות-לכלב-מקלוני-ספירלה-ברווז-לבן-1-קג",
@@ -9733,7 +9733,7 @@
     },
     "8445292017428": {
       "barcode": "8445292017428",
-      "title": "פריסקיז באלאנס מזון לכלב עוף בקר וירקות",
+      "title": "פריסקיז באלנס מזון לכלב עוף בקר וירקות",
       "variant": "3 ק\"ג",
       "price": "59.00",
       "compareAtPrice": null,
@@ -9746,7 +9746,7 @@
     },
     "7613031394869": {
       "barcode": "7613031394869",
-      "title": "פריסקיז באלאנס מזון לכלב עוף בקר וירקות",
+      "title": "פריסקיז באלנס מזון לכלב עוף בקר וירקות",
       "variant": "15 ק\"ג",
       "price": "179.00",
       "compareAtPrice": null,
@@ -9802,7 +9802,7 @@
       "variant": "",
       "price": "61.90",
       "compareAtPrice": null,
-      "available": false,
+      "available": true,
       "vendor": "סופרים ביופט",
       "handle": "סופרים-גרקי-ברווז-300-גרם",
       "url": "https://www.anipet.co.il/products/סופרים-גרקי-ברווז-300-גרם",
@@ -9824,7 +9824,7 @@
     },
     "7290119700318": {
       "barcode": "7290119700318",
-      "title": "אליזקט מזון לחתול דגים 3 קילו",
+      "title": "אליזקט מזון לחתול דגים",
       "variant": "3 ק\"ג",
       "price": "59.00",
       "compareAtPrice": null,
@@ -9837,7 +9837,7 @@
     },
     "7290119700332": {
       "barcode": "7290119700332",
-      "title": "אליזקט מזון לחתול דגים 3 קילו",
+      "title": "אליזקט מזון לחתול דגים",
       "variant": "15 ק\"ג",
       "price": "225.00",
       "compareAtPrice": null,
@@ -11332,8 +11332,8 @@
     },
     "815260007504": {
       "barcode": "815260007504",
-      "title": "נאו לחתול בוגר דגים 3.7 ק\"ג",
-      "variant": "",
+      "title": "נאו לחתול בוגר דגים",
+      "variant": "3.7 ק\"ג",
       "price": "225.00",
       "compareAtPrice": null,
       "available": true,
@@ -11342,6 +11342,19 @@
       "url": "https://www.anipet.co.il/products/נאו-לחתול-בוגר-דגים-3-7-קילו",
       "productId": 9787428372720,
       "variantId": 48622555234544
+    },
+    "815260007511": {
+      "barcode": "815260007511",
+      "title": "נאו לחתול בוגר דגים",
+      "variant": "7.26 ק\"ג",
+      "price": "329.00",
+      "compareAtPrice": null,
+      "available": true,
+      "vendor": "NOW",
+      "handle": "נאו-לחתול-בוגר-דגים-3-7-קילו",
+      "url": "https://www.anipet.co.il/products/נאו-לחתול-בוגר-דגים-3-7-קילו",
+      "productId": 9787428372720,
+      "variantId": 67520584057203
     },
     "8429037016242": {
       "barcode": "8429037016242",
@@ -12242,7 +12255,7 @@
     },
     "8010276040954": {
       "barcode": "8010276040954",
-      "title": "וט לייף כלב היפואלרגני חזיר ותפו\"א 2 ק\"ג",
+      "title": "וט לייף לכלב היפואלרגני חזיר ותפו\"א",
       "variant": "2 ק\"ג",
       "price": "155.00",
       "compareAtPrice": null,
@@ -12255,7 +12268,7 @@
     },
     "8010276040961": {
       "barcode": "8010276040961",
-      "title": "וט לייף כלב היפואלרגני חזיר ותפו\"א 2 ק\"ג",
+      "title": "וט לייף לכלב היפואלרגני חזיר ותפו\"א",
       "variant": "12 ק\"ג",
       "price": "449.00",
       "compareAtPrice": null,
@@ -12281,8 +12294,8 @@
     },
     "64992714727": {
       "barcode": "64992714727",
-      "title": "אקאנה מזון חתול גראסלנד 4.54 ק\"ג",
-      "variant": "",
+      "title": "אקאנה מזון לחתול גראסלנד",
+      "variant": "4.5 ק\"ג",
       "price": "270.00",
       "compareAtPrice": null,
       "available": true,
@@ -12291,6 +12304,19 @@
       "url": "https://www.anipet.co.il/products/אקאנה-מזון-חתול-גראסלנד-4-54-קילו",
       "productId": 9787357266160,
       "variantId": 48622473773296
+    },
+    "64992714710": {
+      "barcode": "64992714710",
+      "title": "אקאנה מזון לחתול גראסלנד",
+      "variant": "1.8 ק\"ג",
+      "price": "145.00",
+      "compareAtPrice": null,
+      "available": true,
+      "vendor": "אקאנה",
+      "handle": "אקאנה-מזון-חתול-גראסלנד-4-54-קילו",
+      "url": "https://www.anipet.co.il/products/אקאנה-מזון-חתול-גראסלנד-4-54-קילו",
+      "productId": 9787357266160,
+      "variantId": 67520571212147
     },
     "6934930195458": {
       "barcode": "6934930195458",
@@ -12779,7 +12805,7 @@
       "variant": "",
       "price": "12.90",
       "compareAtPrice": null,
-      "available": false,
+      "available": true,
       "vendor": "הילס",
       "handle": "הילס-שימורי-כלב-גור-ואמהות-מניקות-עוף-200-גרם",
       "url": "https://www.anipet.co.il/products/הילס-שימורי-כלב-גור-ואמהות-מניקות-עוף-200-גרם",
@@ -14118,7 +14144,7 @@
       "variant": "",
       "price": "139.00",
       "compareAtPrice": null,
-      "available": false,
+      "available": true,
       "vendor": "פרו פלאן",
       "handle": "פרו-פלאן-חתול-longevis-סטרילייזד-סניור-7-3-קילו",
       "url": "https://www.anipet.co.il/products/פרו-פלאן-חתול-longevis-סטרילייזד-סניור-7-3-קילו",
@@ -14270,7 +14296,7 @@
     },
     "7290113307759": {
       "barcode": "7290113307759",
-      "title": "בובו מיטה פלאפי חום בהיר 58",
+      "title": "בובו מיטה פלאפי חום בהיר",
       "variant": "S",
       "price": "99.00",
       "compareAtPrice": null,
@@ -14283,7 +14309,7 @@
     },
     "7290113307766": {
       "barcode": "7290113307766",
-      "title": "בובו מיטה פלאפי חום בהיר 58",
+      "title": "בובו מיטה פלאפי חום בהיר",
       "variant": "M",
       "price": "119.00",
       "compareAtPrice": null,
@@ -15964,7 +15990,7 @@
       "variant": "11.4 ק\"ג",
       "price": "360.00",
       "compareAtPrice": null,
-      "available": true,
+      "available": false,
       "vendor": "אקאנה",
       "handle": "אקאנה-מזון-לכלב-גור",
       "url": "https://www.anipet.co.il/products/אקאנה-מזון-לכלב-גור",
@@ -17091,7 +17117,7 @@
     },
     "8010690059198": {
       "barcode": "8010690059198",
-      "title": "מלונה קני בינונית 03",
+      "title": "מלונה לכלב קני",
       "variant": "מידה 3",
       "price": "399.00",
       "compareAtPrice": null,
@@ -17104,7 +17130,7 @@
     },
     "8010690059204": {
       "barcode": "8010690059204",
-      "title": "מלונה קני בינונית 03",
+      "title": "מלונה לכלב קני",
       "variant": "מידה 5",
       "price": "589.00",
       "compareAtPrice": null,
@@ -17117,7 +17143,7 @@
     },
     "8010690059211": {
       "barcode": "8010690059211",
-      "title": "מלונה קני בינונית 03",
+      "title": "מלונה לכלב קני",
       "variant": "מידה 7",
       "price": "699.00",
       "compareAtPrice": null,
@@ -17130,7 +17156,7 @@
     },
     "8010690061443": {
       "barcode": "8010690061443",
-      "title": "מלונה קני בינונית 03",
+      "title": "מלונה לכלב קני",
       "variant": "מידה 1",
       "price": "329.00",
       "compareAtPrice": null,
@@ -17143,7 +17169,7 @@
     },
     "8010690076546": {
       "barcode": "8010690076546",
-      "title": "מלונה קני בינונית 03",
+      "title": "מלונה לכלב קני",
       "variant": "מיה מיני",
       "price": "239.00",
       "compareAtPrice": null,
@@ -19227,7 +19253,7 @@
       "variant": "7 ק\"ג",
       "price": "295.00",
       "compareAtPrice": null,
-      "available": true,
+      "available": false,
       "vendor": "ND",
       "handle": "nd-כלב-גור-מיני-אושן-קוד-דלעת-מלון",
       "url": "https://www.anipet.co.il/products/nd-כלב-גור-מיני-אושן-קוד-דלעת-מלון",
@@ -20001,19 +20027,6 @@
       "productId": 9846298312944,
       "variantId": 48818687901936
     },
-    "6953182761914": {
-      "barcode": "6953182761914",
-      "title": "חטיף לחתול קראנצ'י 60 גרם בטעם בקר",
-      "variant": "",
-      "price": "15.00",
-      "compareAtPrice": null,
-      "available": true,
-      "vendor": "CRUNCHY BITES",
-      "handle": "חטיף-לחתול-קראנצי-60-גרם-בטעם-בקר",
-      "url": "https://www.anipet.co.il/products/חטיף-לחתול-קראנצי-60-גרם-בטעם-בקר",
-      "productId": 9787450228976,
-      "variantId": 48622591705328
-    },
     "8005852122438": {
       "barcode": "8005852122438",
       "title": "שזיר חתול משלים טונה עם בקלה בג'לי 70 גרם",
@@ -20445,7 +20458,7 @@
     },
     "64992561123": {
       "barcode": "64992561123",
-      "title": "אקאנה מזון לכלב קלאסיק ווילד קוסט דגים 2 ק\"ג",
+      "title": "אקאנה מזון לכלב קלאסיק ווילד קוסט דגים",
       "variant": "9.7 ק\"ג",
       "price": "330.00",
       "compareAtPrice": null,
@@ -20458,7 +20471,7 @@
     },
     "64992562175": {
       "barcode": "64992562175",
-      "title": "אקאנה מזון לכלב קלאסיק ווילד קוסט דגים 2 ק\"ג",
+      "title": "אקאנה מזון לכלב קלאסיק ווילד קוסט דגים",
       "variant": "14.5 ק\"ג",
       "price": "405.00",
       "compareAtPrice": null,
@@ -20696,7 +20709,7 @@
       "variant": "2 ק\"ג",
       "price": "155.00",
       "compareAtPrice": null,
-      "available": false,
+      "available": true,
       "vendor": "וט לייף",
       "handle": "וט-לייף-כלב-אוביסיטי-דגים-2-קילו",
       "url": "https://www.anipet.co.il/products/וט-לייף-כלב-אוביסיטי-דגים-2-קילו",
@@ -20939,7 +20952,7 @@
     },
     "64992502201": {
       "barcode": "64992502201",
-      "title": "אקאנה מזון לכלב גור גזע קטן 6 ק\"ג",
+      "title": "אקאנה מזון לכלב גור גזע קטן",
       "variant": "2 ק\"ג",
       "price": "125.00",
       "compareAtPrice": null,
@@ -20952,7 +20965,7 @@
     },
     "64992502607": {
       "barcode": "64992502607",
-      "title": "אקאנה מזון לכלב גור גזע קטן 6 ק\"ג",
+      "title": "אקאנה מזון לכלב גור גזע קטן",
       "variant": "6 ק\"ג",
       "price": "250.00",
       "compareAtPrice": null,
@@ -21394,7 +21407,7 @@
     },
     "64992182205": {
       "barcode": "64992182205",
-      "title": "אוריג'ן מזון לכלב אוריג'ינל 11.4 ק\"ג",
+      "title": "אוריג'ן מזון לכלב אוריג'ינל",
       "variant": "2 ק\"ג",
       "price": "160.00",
       "compareAtPrice": null,
@@ -21407,7 +21420,7 @@
     },
     "64992182120": {
       "barcode": "64992182120",
-      "title": "אוריג'ן מזון לכלב אוריג'ינל 11.4 ק\"ג",
+      "title": "אוריג'ן מזון לכלב אוריג'ינל",
       "variant": "11.4 ק\"ג",
       "price": "450.00",
       "compareAtPrice": null,
@@ -21485,8 +21498,8 @@
     },
     "815260007245": {
       "barcode": "815260007245",
-      "title": "נאו לכלב גור מגזע קטן 2.7 ק\"ג",
-      "variant": "",
+      "title": "נאו לכלב גור מגזע קטן",
+      "variant": "2.7 ק\"ג",
       "price": "165.00",
       "compareAtPrice": null,
       "available": true,
@@ -21495,6 +21508,19 @@
       "url": "https://www.anipet.co.il/products/נאו-לכלב-גור-מגזע-קטן-2-7-קילו",
       "productId": 9787440988400,
       "variantId": 48622571749616
+    },
+    "815260007269": {
+      "barcode": "815260007269",
+      "title": "נאו לכלב גור מגזע קטן",
+      "variant": "9.98 ק\"ג",
+      "price": "370.00",
+      "compareAtPrice": null,
+      "available": true,
+      "vendor": "NOW",
+      "handle": "נאו-לכלב-גור-מגזע-קטן-2-7-קילו",
+      "url": "https://www.anipet.co.il/products/נאו-לכלב-גור-מגזע-קטן-2-7-קילו",
+      "productId": 9787440988400,
+      "variantId": 67520583795059
     },
     "84015598001799": {
       "barcode": "84015598001799",
@@ -22395,7 +22421,7 @@
     },
     "9414580931035": {
       "barcode": "9414580931035",
-      "title": "ריבוס כלי אוכל נירוסטה עם גומי 12 ס\"מ",
+      "title": "ריבוס כלי אוכל נירוסטה עם גומי",
       "variant": "12 ס\"מ",
       "price": "15.00",
       "compareAtPrice": null,
@@ -22408,7 +22434,7 @@
     },
     "9414580931042": {
       "barcode": "9414580931042",
-      "title": "ריבוס כלי אוכל נירוסטה עם גומי 12 ס\"מ",
+      "title": "ריבוס כלי אוכל נירוסטה עם גומי",
       "variant": "15.5 ס\"מ",
       "price": "19.00",
       "compareAtPrice": null,
@@ -22421,7 +22447,7 @@
     },
     "9414580931059": {
       "barcode": "9414580931059",
-      "title": "ריבוס כלי אוכל נירוסטה עם גומי 12 ס\"מ",
+      "title": "ריבוס כלי אוכל נירוסטה עם גומי",
       "variant": "17 ס\"מ",
       "price": "29.00",
       "compareAtPrice": null,
@@ -22434,7 +22460,7 @@
     },
     "9414580931066": {
       "barcode": "9414580931066",
-      "title": "ריבוס כלי אוכל נירוסטה עם גומי 12 ס\"מ",
+      "title": "ריבוס כלי אוכל נירוסטה עם גומי",
       "variant": "18 ס\"מ",
       "price": "35.00",
       "compareAtPrice": null,
@@ -22900,22 +22926,9 @@
       "productId": 9787419885808,
       "variantId": 48622544748784
     },
-    "8003507703148": {
-      "barcode": "8003507703148",
-      "title": "@ דלי ספידי 8 ליטר / 4 קילו למזון חום",
-      "variant": "",
-      "price": "49.00",
-      "compareAtPrice": null,
-      "available": true,
-      "vendor": "דליי אחסון Stefanplast",
-      "handle": "דלי-ספידי-8-ליטר-4-קילו-למזון-חום",
-      "url": "https://www.anipet.co.il/products/דלי-ספידי-8-ליטר-4-קילו-למזון-חום",
-      "productId": 9787403337968,
-      "variantId": 48622522859760
-    },
     "8003507702509": {
       "barcode": "8003507702509",
-      "title": "@ דלי ספידי 8 ליטר / 4 ק\"ג למזון אפור",
+      "title": "דלי לאחסון ספידי",
       "variant": "אפור / 4 ק\"ג",
       "price": "49.00",
       "compareAtPrice": null,
@@ -22925,6 +22938,19 @@
       "url": "https://www.anipet.co.il/products/דלי-ספידי-8-ליטר-4-קילו-למזון-אפור",
       "productId": 9787403272432,
       "variantId": 48622522794224
+    },
+    "8003507703148": {
+      "barcode": "8003507703148",
+      "title": "דלי לאחסון ספידי",
+      "variant": "חום / 4 ק\"ג",
+      "price": "49.00",
+      "compareAtPrice": null,
+      "available": true,
+      "vendor": "דליי אחסון Stefanplast",
+      "handle": "דלי-ספידי-8-ליטר-4-קילו-למזון-אפור",
+      "url": "https://www.anipet.co.il/products/דלי-ספידי-8-ליטר-4-קילו-למזון-אפור",
+      "productId": 9787403272432,
+      "variantId": 67520578126195
     },
     "6953182767237": {
       "barcode": "6953182767237",
@@ -23019,8 +23045,8 @@
     },
     "6953182761969": {
       "barcode": "6953182761969",
-      "title": "חטיף לחתול קראנצ'י 60 גרם בטעם טונה",
-      "variant": "",
+      "title": "חטיף לחתול קראנצ'י בטעם טונה",
+      "variant": "60 גרם",
       "price": "15.00",
       "compareAtPrice": null,
       "available": true,
@@ -23062,7 +23088,7 @@
       "variant": "",
       "price": "29.90",
       "compareAtPrice": null,
-      "available": true,
+      "available": false,
       "vendor": "קירה",
       "handle": "ציופי-בסקוויטים-לכלב-ביסקו-500-גרם",
       "url": "https://www.anipet.co.il/products/ציופי-בסקוויטים-לכלב-ביסקו-500-גרם",
@@ -23081,19 +23107,6 @@
       "url": "https://www.anipet.co.il/products/d-a-אבקת-קרן-אייל-100-גרם",
       "productId": 9787402911984,
       "variantId": 48622522433776
-    },
-    "6953182761952": {
-      "barcode": "6953182761952",
-      "title": "חטיף לחתול קראנצ'י 60 גרם בטעם פירות ים",
-      "variant": "",
-      "price": "15.00",
-      "compareAtPrice": null,
-      "available": true,
-      "vendor": "CRUNCHY BITES",
-      "handle": "חטיף-לחתול-קראנצי-60-גרם-בטעם-פירות-ים",
-      "url": "https://www.anipet.co.il/products/חטיף-לחתול-קראנצי-60-גרם-בטעם-פירות-ים",
-      "productId": 9787371323632,
-      "variantId": 48622489305328
     },
     "857276007475": {
       "barcode": "857276007475",
@@ -23159,19 +23172,6 @@
       "url": "https://www.anipet.co.il/products/חטיף-לחתול-קראנצי-60-גרם-בטעם-גבינה",
       "productId": 9787371258096,
       "variantId": 48622489239792
-    },
-    "6953182761921": {
-      "barcode": "6953182761921",
-      "title": "חטיף לחתול קראנצ'י 60 גרם בטעם עוף",
-      "variant": "",
-      "price": "15.00",
-      "compareAtPrice": null,
-      "available": true,
-      "vendor": "CRUNCHY BITES",
-      "handle": "חטיף-לחתול-קראנצי-60-גרם-בטעם-עוף",
-      "url": "https://www.anipet.co.il/products/חטיף-לחתול-קראנצי-60-גרם-בטעם-עוף",
-      "productId": 9787371225328,
-      "variantId": 48622489207024
     },
     "8886432311653": {
       "barcode": "8886432311653",
@@ -23264,23 +23264,10 @@
       "productId": 9787402486000,
       "variantId": 48622521909488
     },
-    "6953182761907": {
-      "barcode": "6953182761907",
-      "title": "חטיף לחתול קראנצ'י 60 גרם בטעם סלמון",
-      "variant": "",
-      "price": "15.00",
-      "compareAtPrice": null,
-      "available": true,
-      "vendor": "CRUNCHY BITES",
-      "handle": "חטיף-לחתול-קראנצי-60-גרם-בטעם-סלמון",
-      "url": "https://www.anipet.co.il/products/חטיף-לחתול-קראנצי-60-גרם-בטעם-סלמון",
-      "productId": 9787371192560,
-      "variantId": 48622489174256
-    },
     "6953182761044": {
       "barcode": "6953182761044",
-      "title": "חטיף לחתול קראנצ'י 180 גרם בטעם פירות ים",
-      "variant": "",
+      "title": "חטיף לחתול קראנצ'י בטעם פירות ים",
+      "variant": "180 גרם",
       "price": "29.00",
       "compareAtPrice": null,
       "available": true,
@@ -23289,6 +23276,19 @@
       "url": "https://www.anipet.co.il/products/חטיף-לחתול-קראנצי-180-גרם-בטעם-פירות-ים",
       "productId": 9787371127024,
       "variantId": 48622489108720
+    },
+    "6953182761952": {
+      "barcode": "6953182761952",
+      "title": "חטיף לחתול קראנצ'י בטעם פירות ים",
+      "variant": "60 גרם",
+      "price": "15.00",
+      "compareAtPrice": null,
+      "available": true,
+      "vendor": "CRUNCHY BITES",
+      "handle": "חטיף-לחתול-קראנצי-180-גרם-בטעם-פירות-ים",
+      "url": "https://www.anipet.co.il/products/חטיף-לחתול-קראנצי-180-גרם-בטעם-פירות-ים",
+      "productId": 9787371127024,
+      "variantId": 67520573931891
     },
     "8606014102178": {
       "barcode": "8606014102178",
@@ -23370,8 +23370,8 @@
     },
     "6953182761013": {
       "barcode": "6953182761013",
-      "title": "חטיף לחתול קראנצ'י 180 גרם בטעם עוף",
-      "variant": "",
+      "title": "חטיף לחתול קראנצ'י בטעם עוף",
+      "variant": "180 גרם",
       "price": "29.00",
       "compareAtPrice": null,
       "available": true,
@@ -23381,10 +23381,23 @@
       "productId": 9787371094256,
       "variantId": 48622489075952
     },
+    "6953182761921": {
+      "barcode": "6953182761921",
+      "title": "חטיף לחתול קראנצ'י בטעם עוף",
+      "variant": "60 גרם",
+      "price": "15.00",
+      "compareAtPrice": null,
+      "available": true,
+      "vendor": "CRUNCHY BITES",
+      "handle": "חטיף-לחתול-קראנצי-180-גרם-בטעם-עוף",
+      "url": "https://www.anipet.co.il/products/חטיף-לחתול-קראנצי-180-גרם-בטעם-עוף",
+      "productId": 9787371094256,
+      "variantId": 67520573473139
+    },
     "6953182761006": {
       "barcode": "6953182761006",
-      "title": "חטיף לחתול קראנצ'י 180 גרם בטעם בקר",
-      "variant": "",
+      "title": "חטיף לחתול קארנצ'י בטעם בקר",
+      "variant": "180 גרם",
       "price": "29.00",
       "compareAtPrice": null,
       "available": true,
@@ -23393,6 +23406,19 @@
       "url": "https://www.anipet.co.il/products/חטיף-לחתול-קראנצי-180-גרם-בטעם-בקר",
       "productId": 9787371061488,
       "variantId": 48622489043184
+    },
+    "6953182761914": {
+      "barcode": "6953182761914",
+      "title": "חטיף לחתול קארנצ'י בטעם בקר",
+      "variant": "60 גרם",
+      "price": "15.00",
+      "compareAtPrice": null,
+      "available": true,
+      "vendor": "CRUNCHY BITES",
+      "handle": "חטיף-לחתול-קראנצי-180-גרם-בטעם-בקר",
+      "url": "https://www.anipet.co.il/products/חטיף-לחתול-קראנצי-180-גרם-בטעם-בקר",
+      "productId": 9787371061488,
+      "variantId": 67520572293491
     },
     "8606014102130": {
       "barcode": "8606014102130",
@@ -23513,8 +23539,8 @@
     },
     "6953182760993": {
       "barcode": "6953182760993",
-      "title": "חטיף לחתול קראנצ'י 180 גרם בטעם סלמון",
-      "variant": "",
+      "title": "חטיף לחתול קראנצ'י בטעם סלמון",
+      "variant": "180 גרם",
       "price": "29.00",
       "compareAtPrice": null,
       "available": true,
@@ -23523,6 +23549,19 @@
       "url": "https://www.anipet.co.il/products/חטיף-לחתול-קראנצי-180-גרם-בטעם-סלמון",
       "productId": 9787371028720,
       "variantId": 48622489010416
+    },
+    "6953182761907": {
+      "barcode": "6953182761907",
+      "title": "חטיף לחתול קראנצ'י בטעם סלמון",
+      "variant": "60 גרם",
+      "price": "15.00",
+      "compareAtPrice": null,
+      "available": true,
+      "vendor": "CRUNCHY BITES",
+      "handle": "חטיף-לחתול-קראנצי-180-גרם-בטעם-סלמון",
+      "url": "https://www.anipet.co.il/products/חטיף-לחתול-קראנצי-180-גרם-בטעם-סלמון",
+      "productId": 9787371028720,
+      "variantId": 67520571834739
     },
     "8009470009539": {
       "barcode": "8009470009539",
@@ -24904,7 +24943,7 @@
     },
     "8009470011549": {
       "barcode": "8009470011549",
-      "title": "מונג' מזון לכלב בוגר מיני כבש אורז ותפו\"א 2.5 ק\"ג",
+      "title": "מונג' מזון לכלב בוגר מיני כבש אורז ותפו\"א",
       "variant": "2.5 ק\"ג",
       "price": "115.00",
       "compareAtPrice": null,
@@ -24917,7 +24956,7 @@
     },
     "8009470011556": {
       "barcode": "8009470011556",
-      "title": "מונג' מזון לכלב בוגר מיני כבש אורז ותפו\"א 2.5 ק\"ג",
+      "title": "מונג' מזון לכלב בוגר מיני כבש אורז ותפו\"א",
       "variant": "7.5 ק\"ג",
       "price": "220.00",
       "compareAtPrice": null,
@@ -25047,8 +25086,8 @@
     },
     "8010276033642": {
       "barcode": "8010276033642",
-      "title": "ND כלב בוגר מיני דלעת כבש ואוכמניות 7 ק\"ג",
-      "variant": "",
+      "title": "ND כלב בוגר מיני דלעת כבש ואוכמניות",
+      "variant": "7 ק\"ג",
       "price": "265.00",
       "compareAtPrice": null,
       "available": true,
@@ -25057,6 +25096,19 @@
       "url": "https://www.anipet.co.il/products/nd-דלעת-כבש-אוכמניות-כלב-מיני-7-קילו",
       "productId": 9787407007984,
       "variantId": 48622526857456
+    },
+    "8010276033277": {
+      "barcode": "8010276033277",
+      "title": "ND כלב בוגר מיני דלעת כבש ואוכמניות",
+      "variant": "2.5 ק\"ג",
+      "price": "149.00",
+      "compareAtPrice": null,
+      "available": true,
+      "vendor": "ND",
+      "handle": "nd-דלעת-כבש-אוכמניות-כלב-מיני-7-קילו",
+      "url": "https://www.anipet.co.il/products/nd-דלעת-כבש-אוכמניות-כלב-מיני-7-קילו",
+      "productId": 9787407007984,
+      "variantId": 67520580845939
     },
     "8010276033352": {
       "barcode": "8010276033352",
@@ -25346,8 +25398,8 @@
     },
     "7613035114890": {
       "barcode": "7613035114890",
-      "title": "פרו פלאן כלב בוגר גזע קטן סלמון 3 ק\"ג",
-      "variant": "",
+      "title": "פרו פלאן כלב בוגר גזע קטן סלמון",
+      "variant": "3 ק\"ג",
       "price": "139.00",
       "compareAtPrice": null,
       "available": true,
@@ -25356,6 +25408,19 @@
       "url": "https://www.anipet.co.il/products/פרו-פלאן-כלב-בוגר-גזע-קטן-סלמון-3-קילו",
       "productId": 9787428307184,
       "variantId": 48622555169008
+    },
+    "7613035123441": {
+      "barcode": "7613035123441",
+      "title": "פרו פלאן כלב בוגר גזע קטן סלמון",
+      "variant": "7 ק\"ג",
+      "price": "229.00",
+      "compareAtPrice": null,
+      "available": true,
+      "vendor": "פרו פלאן",
+      "handle": "פרו-פלאן-כלב-בוגר-גזע-קטן-סלמון-3-קילו",
+      "url": "https://www.anipet.co.il/products/פרו-פלאן-כלב-בוגר-גזע-קטן-סלמון-3-קילו",
+      "productId": 9787428307184,
+      "variantId": 67520576782707
     },
     "8429037016150": {
       "barcode": "8429037016150",
@@ -26091,7 +26156,7 @@
       "variant": "",
       "price": "260.00",
       "compareAtPrice": null,
-      "available": true,
+      "available": false,
       "vendor": "אדוונס",
       "handle": "אדוונס-לכלב-מדיום-לייט-12-קילו",
       "url": "https://www.anipet.co.il/products/אדוונס-לכלב-מדיום-לייט-12-קילו",
@@ -26282,7 +26347,7 @@
     },
     "3182551065336": {
       "barcode": "3182551065336",
-      "title": "רויאל קנין כלב מדיום פאפי 12 ק\"ג",
+      "title": "רויאל קנין כלב מדיום פאפי",
       "variant": "12 ק\"ג",
       "price": "329.00",
       "compareAtPrice": null,
@@ -26715,7 +26780,7 @@
       "variant": "7 ק\"ג",
       "price": "195.00",
       "compareAtPrice": null,
-      "available": false,
+      "available": true,
       "vendor": "פרו פלאן",
       "handle": "פרו-פלאן-כלב-בוגר-גזע-קטן-עוף-3-קילו",
       "url": "https://www.anipet.co.il/products/פרו-פלאן-כלב-בוגר-גזע-קטן-עוף-3-קילו",
@@ -29042,7 +29107,7 @@
       "variant": "",
       "price": "17.90",
       "compareAtPrice": null,
-      "available": true,
+      "available": false,
       "vendor": "christopherus",
       "handle": "כריסטופרוס-חטיף-רך-לכלב-בטעם-ברווז-125-גרם",
       "url": "https://www.anipet.co.il/products/כריסטופרוס-חטיף-רך-לכלב-בטעם-ברווז-125-גרם",
@@ -29458,7 +29523,7 @@
       "variant": "2 ק\"ג",
       "price": "105.50",
       "compareAtPrice": null,
-      "available": true,
+      "available": false,
       "vendor": "רויאל קנין",
       "handle": "רויאל-קנין-כלב-מיני-אדולט-8-קילו",
       "url": "https://www.anipet.co.il/products/רויאל-קנין-כלב-מיני-אדולט-8-קילו",
@@ -30156,7 +30221,7 @@
     },
     "4001942452731": {
       "barcode": "4001942452731",
-      "title": "@ סרה מזון לדגים ויפאן טרופיקל דפים 100 מ\"ל",
+      "title": "סרה מזון לדגים ויפאן טרופיקל דפים",
       "variant": "100 מ\"ל",
       "price": "25.00",
       "compareAtPrice": null,
@@ -30166,19 +30231,6 @@
       "url": "https://www.anipet.co.il/products/סרה-מזון-לדגים-ויפאן-טרופיקל-דפים-100-מל",
       "productId": 9787330068720,
       "variantId": 48622445232368
-    },
-    "4001942452793": {
-      "barcode": "4001942452793",
-      "title": "@ סרה מזון לדגים ויפאן טרופיקל דפים 100 מ\"ל",
-      "variant": "250 מ\"ל",
-      "price": "40.00",
-      "compareAtPrice": null,
-      "available": true,
-      "vendor": "סרה",
-      "handle": "סרה-מזון-לדגים-ויפאן-טרופיקל-דפים-100-מל",
-      "url": "https://www.anipet.co.il/products/סרה-מזון-לדגים-ויפאן-טרופיקל-דפים-100-מל",
-      "productId": 9787330068720,
-      "variantId": 48834962653424
     },
     "4001942071000": {
       "barcode": "4001942071000",
@@ -30351,7 +30403,7 @@
     },
     "15561525916": {
       "barcode": "15561525916",
-      "title": "נוטריאנס SZ חתול בקר ביזון חזיר בר ודגי ים 2.27 קילו",
+      "title": "נוטריאנס SZ חתול בקר ביזון",
       "variant": "2.27 ק\"ג",
       "price": "179.00",
       "compareAtPrice": null,
@@ -30361,6 +30413,19 @@
       "url": "https://www.anipet.co.il/products/נוטריאנס-sz-חתול-בקר-ביזון-חזיר-בר-ודגי-ים-2-27-קילו",
       "productId": 9787311194352,
       "variantId": 48622425112816
+    },
+    "15561529082": {
+      "barcode": "15561529082",
+      "title": "נוטריאנס SZ חתול בקר ביזון",
+      "variant": "4.5 ק\"ג",
+      "price": "279.00",
+      "compareAtPrice": null,
+      "available": true,
+      "vendor": "נוטריאנס",
+      "handle": "נוטריאנס-sz-חתול-בקר-ביזון-חזיר-בר-ודגי-ים-2-27-קילו",
+      "url": "https://www.anipet.co.il/products/נוטריאנס-sz-חתול-בקר-ביזון-חזיר-בר-ודגי-ים-2-27-קילו",
+      "productId": 9787311194352,
+      "variantId": 50239709872368
     },
     "4000498023105": {
       "barcode": "4000498023105",
@@ -31404,6 +31469,45 @@
     }
   },
   "items": [
+    {
+      "barcode": "815260007597",
+      "title": "נאו כלב מגזע קטן גוד גרייבי עוף test",
+      "variant": "1.6 ק\"ג",
+      "price": "89.00",
+      "compareAtPrice": null,
+      "available": true,
+      "vendor": "NOW",
+      "handle": "נאו-כלב-מגזע-קטן-גוד-גרייבי-עוף-copy",
+      "url": "https://www.anipet.co.il/products/נאו-כלב-מגזע-קטן-גוד-גרייבי-עוף-copy",
+      "productId": 10189287653616,
+      "variantId": 50198721069296
+    },
+    {
+      "barcode": "815260007610",
+      "title": "נאו כלב מגזע קטן גוד גרייבי עוף test",
+      "variant": "5.4 ק\"ג",
+      "price": "198.90",
+      "compareAtPrice": null,
+      "available": true,
+      "vendor": "NOW",
+      "handle": "נאו-כלב-מגזע-קטן-גוד-גרייבי-עוף-copy",
+      "url": "https://www.anipet.co.il/products/נאו-כלב-מגזע-קטן-גוד-גרייבי-עוף-copy",
+      "productId": 10189287653616,
+      "variantId": 50198721102064
+    },
+    {
+      "barcode": "113302259",
+      "title": "חטיף בונזו נאגטס בקר ודג 80 גרם",
+      "variant": "",
+      "price": "16.90",
+      "compareAtPrice": null,
+      "available": true,
+      "vendor": "בונזו Bonzo",
+      "handle": "חטיף-בונזו-נאגטס-בקר-ודג-80-גרם",
+      "url": "https://www.anipet.co.il/products/חטיף-בונזו-נאגטס-בקר-ודג-80-גרם",
+      "productId": 9787300544752,
+      "variantId": 48622414299376
+    },
     {
       "barcode": "7290115120035",
       "title": "פטקס מזרון אורטופדי חום",
@@ -33251,19 +33355,6 @@
       "variantId": 48622465876208
     },
     {
-      "barcode": "15561529082",
-      "title": "נוטריאנס SZ חתול בקר ביזון חזיר בר ודגי ים 4.5 קילו",
-      "variant": "",
-      "price": "279.00",
-      "compareAtPrice": null,
-      "available": true,
-      "vendor": "נוטריאנס",
-      "handle": "נוטריאנס-sz-חתול-בקר-ביזון-חזיר-בר-ודגי-ים-4-5-קילו",
-      "url": "https://www.anipet.co.il/products/נוטריאנס-sz-חתול-בקר-ביזון-חזיר-בר-ודגי-ים-4-5-קילו",
-      "productId": 10066495373552,
-      "variantId": 49864197406960
-    },
-    {
       "barcode": "2020406775317",
       "title": "פדים לכלב בסט סלושן 100 יח' 60X60",
       "variant": "",
@@ -33275,32 +33366,6 @@
       "url": "https://www.anipet.co.il/products/פדים-לכלב-בסט-סלושן-100-יח-60x60",
       "productId": 10128833183984,
       "variantId": 50105721553136
-    },
-    {
-      "barcode": "815260007597",
-      "title": "נאו כלב מגזע קטן גוד גרייבי עוף test",
-      "variant": "1.6 ק\"ג",
-      "price": "89.00",
-      "compareAtPrice": null,
-      "available": true,
-      "vendor": "NOW",
-      "handle": "נאו-כלב-מגזע-קטן-גוד-גרייבי-עוף-copy",
-      "url": "https://www.anipet.co.il/products/נאו-כלב-מגזע-קטן-גוד-גרייבי-עוף-copy",
-      "productId": 10189287653616,
-      "variantId": 50198721069296
-    },
-    {
-      "barcode": "815260007610",
-      "title": "נאו כלב מגזע קטן גוד גרייבי עוף test",
-      "variant": "5.4 ק\"ג",
-      "price": "198.90",
-      "compareAtPrice": null,
-      "available": false,
-      "vendor": "NOW",
-      "handle": "נאו-כלב-מגזע-קטן-גוד-גרייבי-עוף-copy",
-      "url": "https://www.anipet.co.il/products/נאו-כלב-מגזע-קטן-גוד-גרייבי-עוף-copy",
-      "productId": 10189287653616,
-      "variantId": 50198721102064
     },
     {
       "barcode": "3182550768641",
@@ -35076,7 +35141,7 @@
       "variant": "",
       "price": "132.90",
       "compareAtPrice": null,
-      "available": false,
+      "available": true,
       "vendor": "ריבוס",
       "handle": "מארז-ריבוס-עצמות-לכלב-מקלוני-ספירלה-ברווז-לבן-1-קג",
       "url": "https://www.anipet.co.il/products/מארז-ריבוס-עצמות-לכלב-מקלוני-ספירלה-ברווז-לבן-1-קג",
@@ -35206,7 +35271,7 @@
       "variant": "",
       "price": "139.00",
       "compareAtPrice": null,
-      "available": false,
+      "available": true,
       "vendor": "PetEx",
       "handle": "פטקס-עצם-רול-5-אינץ-ברווז-עוף-וכבד-1-קג",
       "url": "https://www.anipet.co.il/products/פטקס-עצם-רול-5-אינץ-ברווז-עוף-וכבד-1-קג",
@@ -35280,7 +35345,7 @@
     },
     {
       "barcode": "8445292017428",
-      "title": "פריסקיז באלאנס מזון לכלב עוף בקר וירקות",
+      "title": "פריסקיז באלנס מזון לכלב עוף בקר וירקות",
       "variant": "3 ק\"ג",
       "price": "59.00",
       "compareAtPrice": null,
@@ -35293,7 +35358,7 @@
     },
     {
       "barcode": "7613031394869",
-      "title": "פריסקיז באלאנס מזון לכלב עוף בקר וירקות",
+      "title": "פריסקיז באלנס מזון לכלב עוף בקר וירקות",
       "variant": "15 ק\"ג",
       "price": "179.00",
       "compareAtPrice": null,
@@ -35349,7 +35414,7 @@
       "variant": "",
       "price": "61.90",
       "compareAtPrice": null,
-      "available": false,
+      "available": true,
       "vendor": "סופרים ביופט",
       "handle": "סופרים-גרקי-ברווז-300-גרם",
       "url": "https://www.anipet.co.il/products/סופרים-גרקי-ברווז-300-גרם",
@@ -35384,7 +35449,7 @@
     },
     {
       "barcode": "7290119700318",
-      "title": "אליזקט מזון לחתול דגים 3 קילו",
+      "title": "אליזקט מזון לחתול דגים",
       "variant": "3 ק\"ג",
       "price": "59.00",
       "compareAtPrice": null,
@@ -35397,7 +35462,7 @@
     },
     {
       "barcode": "7290119700332",
-      "title": "אליזקט מזון לחתול דגים 3 קילו",
+      "title": "אליזקט מזון לחתול דגים",
       "variant": "15 ק\"ג",
       "price": "225.00",
       "compareAtPrice": null,
@@ -35440,7 +35505,7 @@
       "variant": "2.5 ק\"ג",
       "price": "130.00",
       "compareAtPrice": null,
-      "available": false,
+      "available": true,
       "vendor": "אורבן צ'ויס",
       "handle": "אורבן-צויס-כלב-גור-גזע-קטן-ומדיום",
       "url": "https://www.anipet.co.il/products/אורבן-צויס-כלב-גור-גזע-קטן-ומדיום",
@@ -37113,8 +37178,8 @@
     },
     {
       "barcode": "815260007504",
-      "title": "נאו לחתול בוגר דגים 3.7 ק\"ג",
-      "variant": "",
+      "title": "נאו לחתול בוגר דגים",
+      "variant": "3.7 ק\"ג",
       "price": "225.00",
       "compareAtPrice": null,
       "available": true,
@@ -37123,6 +37188,19 @@
       "url": "https://www.anipet.co.il/products/נאו-לחתול-בוגר-דגים-3-7-קילו",
       "productId": 9787428372720,
       "variantId": 48622555234544
+    },
+    {
+      "barcode": "815260007511",
+      "title": "נאו לחתול בוגר דגים",
+      "variant": "7.26 ק\"ג",
+      "price": "329.00",
+      "compareAtPrice": null,
+      "available": true,
+      "vendor": "NOW",
+      "handle": "נאו-לחתול-בוגר-דגים-3-7-קילו",
+      "url": "https://www.anipet.co.il/products/נאו-לחתול-בוגר-דגים-3-7-קילו",
+      "productId": 9787428372720,
+      "variantId": 67520584057203
     },
     {
       "barcode": "8429037016242",
@@ -38283,7 +38361,7 @@
     },
     {
       "barcode": "8010276040954",
-      "title": "וט לייף כלב היפואלרגני חזיר ותפו\"א 2 ק\"ג",
+      "title": "וט לייף לכלב היפואלרגני חזיר ותפו\"א",
       "variant": "2 ק\"ג",
       "price": "155.00",
       "compareAtPrice": null,
@@ -38296,7 +38374,7 @@
     },
     {
       "barcode": "8010276040961",
-      "title": "וט לייף כלב היפואלרגני חזיר ותפו\"א 2 ק\"ג",
+      "title": "וט לייף לכלב היפואלרגני חזיר ותפו\"א",
       "variant": "12 ק\"ג",
       "price": "449.00",
       "compareAtPrice": null,
@@ -38322,8 +38400,8 @@
     },
     {
       "barcode": "64992714727",
-      "title": "אקאנה מזון חתול גראסלנד 4.54 ק\"ג",
-      "variant": "",
+      "title": "אקאנה מזון לחתול גראסלנד",
+      "variant": "4.5 ק\"ג",
       "price": "270.00",
       "compareAtPrice": null,
       "available": true,
@@ -38332,6 +38410,19 @@
       "url": "https://www.anipet.co.il/products/אקאנה-מזון-חתול-גראסלנד-4-54-קילו",
       "productId": 9787357266160,
       "variantId": 48622473773296
+    },
+    {
+      "barcode": "64992714710",
+      "title": "אקאנה מזון לחתול גראסלנד",
+      "variant": "1.8 ק\"ג",
+      "price": "145.00",
+      "compareAtPrice": null,
+      "available": true,
+      "vendor": "אקאנה",
+      "handle": "אקאנה-מזון-חתול-גראסלנד-4-54-קילו",
+      "url": "https://www.anipet.co.il/products/אקאנה-מזון-חתול-גראסלנד-4-54-קילו",
+      "productId": 9787357266160,
+      "variantId": 67520571212147
     },
     {
       "barcode": "1262",
@@ -38937,7 +39028,7 @@
       "variant": "",
       "price": "12.90",
       "compareAtPrice": null,
-      "available": false,
+      "available": true,
       "vendor": "הילס",
       "handle": "הילס-שימורי-כלב-גור-ואמהות-מניקות-עוף-200-גרם",
       "url": "https://www.anipet.co.il/products/הילס-שימורי-כלב-גור-ואמהות-מניקות-עוף-200-גרם",
@@ -40640,7 +40731,7 @@
       "variant": "",
       "price": "139.00",
       "compareAtPrice": null,
-      "available": false,
+      "available": true,
       "vendor": "פרו פלאן",
       "handle": "פרו-פלאן-חתול-longevis-סטרילייזד-סניור-7-3-קילו",
       "url": "https://www.anipet.co.il/products/פרו-פלאן-חתול-longevis-סטרילייזד-סניור-7-3-קילו",
@@ -40818,7 +40909,7 @@
     },
     {
       "barcode": "7290113307759",
-      "title": "בובו מיטה פלאפי חום בהיר 58",
+      "title": "בובו מיטה פלאפי חום בהיר",
       "variant": "S",
       "price": "99.00",
       "compareAtPrice": null,
@@ -40831,7 +40922,7 @@
     },
     {
       "barcode": "7290113307766",
-      "title": "בובו מיטה פלאפי חום בהיר 58",
+      "title": "בובו מיטה פלאפי חום בהיר",
       "variant": "M",
       "price": "119.00",
       "compareAtPrice": null,
@@ -41368,7 +41459,7 @@
       "variant": "11 ק\"ג",
       "price": "330.00",
       "compareAtPrice": null,
-      "available": false,
+      "available": true,
       "vendor": "אורבן צ'ויס",
       "handle": "אורבן-צויס-כלב-לייט-דגים",
       "url": "https://www.anipet.co.il/products/אורבן-צויס-כלב-לייט-דגים",
@@ -41446,7 +41537,7 @@
       "variant": "11 ק\"ג",
       "price": "320.00",
       "compareAtPrice": null,
-      "available": false,
+      "available": true,
       "vendor": "אורבן צ'ויס",
       "handle": "אורבן-צויס-כלב-בוגר-מדיום",
       "url": "https://www.anipet.co.il/products/אורבן-צויס-כלב-בוגר-מדיום",
@@ -43071,7 +43162,7 @@
       "variant": "5.4 ק\"ג",
       "price": "198.90",
       "compareAtPrice": null,
-      "available": false,
+      "available": true,
       "vendor": "NOW",
       "handle": "נאו-כלב-מגזע-קטן-גוד-גרייבי-עוף",
       "url": "https://www.anipet.co.il/products/נאו-כלב-מגזע-קטן-גוד-גרייבי-עוף",
@@ -43214,7 +43305,7 @@
       "variant": "11.4 ק\"ג",
       "price": "360.00",
       "compareAtPrice": null,
-      "available": true,
+      "available": false,
       "vendor": "אקאנה",
       "handle": "אקאנה-מזון-לכלב-גור",
       "url": "https://www.anipet.co.il/products/אקאנה-מזון-לכלב-גור",
@@ -44445,7 +44536,7 @@
     },
     {
       "barcode": "8010690059198",
-      "title": "מלונה קני בינונית 03",
+      "title": "מלונה לכלב קני",
       "variant": "מידה 3",
       "price": "399.00",
       "compareAtPrice": null,
@@ -44458,7 +44549,7 @@
     },
     {
       "barcode": "8010690059204",
-      "title": "מלונה קני בינונית 03",
+      "title": "מלונה לכלב קני",
       "variant": "מידה 5",
       "price": "589.00",
       "compareAtPrice": null,
@@ -44471,7 +44562,7 @@
     },
     {
       "barcode": "8010690059211",
-      "title": "מלונה קני בינונית 03",
+      "title": "מלונה לכלב קני",
       "variant": "מידה 7",
       "price": "699.00",
       "compareAtPrice": null,
@@ -44484,7 +44575,7 @@
     },
     {
       "barcode": "8010690061443",
-      "title": "מלונה קני בינונית 03",
+      "title": "מלונה לכלב קני",
       "variant": "מידה 1",
       "price": "329.00",
       "compareAtPrice": null,
@@ -44497,7 +44588,7 @@
     },
     {
       "barcode": "8010690076546",
-      "title": "מלונה קני בינונית 03",
+      "title": "מלונה לכלב קני",
       "variant": "מיה מיני",
       "price": "239.00",
       "compareAtPrice": null,
@@ -46902,8 +46993,8 @@
     },
     {
       "barcode": "2903",
-      "title": "נוטריאנס חתול אורגינל אינדור 2.5 קילו",
-      "variant": "",
+      "title": "נוטריאנס חתול אוריג'ינל",
+      "variant": "2.5 ק\"ג",
       "price": "139.00",
       "compareAtPrice": null,
       "available": true,
@@ -46915,16 +47006,16 @@
     },
     {
       "barcode": "2904",
-      "title": "נוטריאנס חתול אורגינל אינדור 5 קילו",
-      "variant": "",
+      "title": "נוטריאנס חתול אוריג'ינל",
+      "variant": "5 ק\"ג",
       "price": "229.00",
       "compareAtPrice": null,
       "available": true,
       "vendor": "נוטריאנס",
-      "handle": "נוטריאנס-חתול-אורגינל-אינדור-5-קילו",
-      "url": "https://www.anipet.co.il/products/נוטריאנס-חתול-אורגינל-אינדור-5-קילו",
-      "productId": 9787319320816,
-      "variantId": 48622433304816
+      "handle": "נוטריאנס-חתול-אורגינל-אינדור-2-5-קילו",
+      "url": "https://www.anipet.co.il/products/נוטריאנס-חתול-אורגינל-אינדור-2-5-קילו",
+      "productId": 9787319288048,
+      "variantId": 67520567148915
     },
     {
       "barcode": "2906",
@@ -47023,7 +47114,7 @@
       "variant": "7 ק\"ג",
       "price": "295.00",
       "compareAtPrice": null,
-      "available": true,
+      "available": false,
       "vendor": "ND",
       "handle": "nd-כלב-גור-מיני-אושן-קוד-דלעת-מלון",
       "url": "https://www.anipet.co.il/products/nd-כלב-גור-מיני-אושן-קוד-דלעת-מלון",
@@ -48097,19 +48188,6 @@
       "variantId": 48818687901936
     },
     {
-      "barcode": "6953182761914",
-      "title": "חטיף לחתול קראנצ'י 60 גרם בטעם בקר",
-      "variant": "",
-      "price": "15.00",
-      "compareAtPrice": null,
-      "available": true,
-      "vendor": "CRUNCHY BITES",
-      "handle": "חטיף-לחתול-קראנצי-60-גרם-בטעם-בקר",
-      "url": "https://www.anipet.co.il/products/חטיף-לחתול-קראנצי-60-גרם-בטעם-בקר",
-      "productId": 9787450228976,
-      "variantId": 48622591705328
-    },
-    {
       "barcode": "8005852122438",
       "title": "שזיר חתול משלים טונה עם בקלה בג'לי 70 גרם",
       "variant": "",
@@ -48540,7 +48618,7 @@
     },
     {
       "barcode": "1690",
-      "title": "אקאנה מזון לכלב קלאסיק ווילד קוסט דגים 2 ק\"ג",
+      "title": "אקאנה מזון לכלב קלאסיק ווילד קוסט דגים",
       "variant": "2 ק\"ג",
       "price": "135.00",
       "compareAtPrice": null,
@@ -48553,7 +48631,7 @@
     },
     {
       "barcode": "64992561123",
-      "title": "אקאנה מזון לכלב קלאסיק ווילד קוסט דגים 2 ק\"ג",
+      "title": "אקאנה מזון לכלב קלאסיק ווילד קוסט דגים",
       "variant": "9.7 ק\"ג",
       "price": "330.00",
       "compareAtPrice": null,
@@ -48566,7 +48644,7 @@
     },
     {
       "barcode": "64992562175",
-      "title": "אקאנה מזון לכלב קלאסיק ווילד קוסט דגים 2 ק\"ג",
+      "title": "אקאנה מזון לכלב קלאסיק ווילד קוסט דגים",
       "variant": "14.5 ק\"ג",
       "price": "405.00",
       "compareAtPrice": null,
@@ -48804,7 +48882,7 @@
       "variant": "2 ק\"ג",
       "price": "155.00",
       "compareAtPrice": null,
-      "available": false,
+      "available": true,
       "vendor": "וט לייף",
       "handle": "וט-לייף-כלב-אוביסיטי-דגים-2-קילו",
       "url": "https://www.anipet.co.il/products/וט-לייף-כלב-אוביסיטי-דגים-2-קילו",
@@ -49047,7 +49125,7 @@
     },
     {
       "barcode": "64992502201",
-      "title": "אקאנה מזון לכלב גור גזע קטן 6 ק\"ג",
+      "title": "אקאנה מזון לכלב גור גזע קטן",
       "variant": "2 ק\"ג",
       "price": "125.00",
       "compareAtPrice": null,
@@ -49060,7 +49138,7 @@
     },
     {
       "barcode": "64992502607",
-      "title": "אקאנה מזון לכלב גור גזע קטן 6 ק\"ג",
+      "title": "אקאנה מזון לכלב גור גזע קטן",
       "variant": "6 ק\"ג",
       "price": "250.00",
       "compareAtPrice": null,
@@ -49671,7 +49749,7 @@
     },
     {
       "barcode": "64992182205",
-      "title": "אוריג'ן מזון לכלב אוריג'ינל 11.4 ק\"ג",
+      "title": "אוריג'ן מזון לכלב אוריג'ינל",
       "variant": "2 ק\"ג",
       "price": "160.00",
       "compareAtPrice": null,
@@ -49684,7 +49762,7 @@
     },
     {
       "barcode": "64992182120",
-      "title": "אוריג'ן מזון לכלב אוריג'ינל 11.4 ק\"ג",
+      "title": "אוריג'ן מזון לכלב אוריג'ינל",
       "variant": "11.4 ק\"ג",
       "price": "450.00",
       "compareAtPrice": null,
@@ -49805,7 +49883,7 @@
       "variant": "11 ק\"ג",
       "price": "330.00",
       "compareAtPrice": null,
-      "available": false,
+      "available": true,
       "vendor": "אורבן צ'ויס",
       "handle": "אורבן-צויס-כלב-רגיש-דגי-אוקינוס",
       "url": "https://www.anipet.co.il/products/אורבן-צויס-כלב-רגיש-דגי-אוקינוס",
@@ -49827,8 +49905,8 @@
     },
     {
       "barcode": "815260007245",
-      "title": "נאו לכלב גור מגזע קטן 2.7 ק\"ג",
-      "variant": "",
+      "title": "נאו לכלב גור מגזע קטן",
+      "variant": "2.7 ק\"ג",
       "price": "165.00",
       "compareAtPrice": null,
       "available": true,
@@ -49837,6 +49915,19 @@
       "url": "https://www.anipet.co.il/products/נאו-לכלב-גור-מגזע-קטן-2-7-קילו",
       "productId": 9787440988400,
       "variantId": 48622571749616
+    },
+    {
+      "barcode": "815260007269",
+      "title": "נאו לכלב גור מגזע קטן",
+      "variant": "9.98 ק\"ג",
+      "price": "370.00",
+      "compareAtPrice": null,
+      "available": true,
+      "vendor": "NOW",
+      "handle": "נאו-לכלב-גור-מגזע-קטן-2-7-קילו",
+      "url": "https://www.anipet.co.il/products/נאו-לכלב-גור-מגזע-קטן-2-7-קילו",
+      "productId": 9787440988400,
+      "variantId": 67520583795059
     },
     {
       "barcode": "2154900",
@@ -51036,7 +51127,7 @@
     },
     {
       "barcode": "9414580931035",
-      "title": "ריבוס כלי אוכל נירוסטה עם גומי 12 ס\"מ",
+      "title": "ריבוס כלי אוכל נירוסטה עם גומי",
       "variant": "12 ס\"מ",
       "price": "15.00",
       "compareAtPrice": null,
@@ -51049,7 +51140,7 @@
     },
     {
       "barcode": "9414580931042",
-      "title": "ריבוס כלי אוכל נירוסטה עם גומי 12 ס\"מ",
+      "title": "ריבוס כלי אוכל נירוסטה עם גומי",
       "variant": "15.5 ס\"מ",
       "price": "19.00",
       "compareAtPrice": null,
@@ -51062,7 +51153,7 @@
     },
     {
       "barcode": "9414580931059",
-      "title": "ריבוס כלי אוכל נירוסטה עם גומי 12 ס\"מ",
+      "title": "ריבוס כלי אוכל נירוסטה עם גומי",
       "variant": "17 ס\"מ",
       "price": "29.00",
       "compareAtPrice": null,
@@ -51075,7 +51166,7 @@
     },
     {
       "barcode": "9414580931066",
-      "title": "ריבוס כלי אוכל נירוסטה עם גומי 12 ס\"מ",
+      "title": "ריבוס כלי אוכל נירוסטה עם גומי",
       "variant": "18 ס\"מ",
       "price": "35.00",
       "compareAtPrice": null,
@@ -51568,21 +51659,8 @@
       "variantId": 48622544748784
     },
     {
-      "barcode": "8003507703148",
-      "title": "@ דלי ספידי 8 ליטר / 4 קילו למזון חום",
-      "variant": "",
-      "price": "49.00",
-      "compareAtPrice": null,
-      "available": true,
-      "vendor": "דליי אחסון Stefanplast",
-      "handle": "דלי-ספידי-8-ליטר-4-קילו-למזון-חום",
-      "url": "https://www.anipet.co.il/products/דלי-ספידי-8-ליטר-4-קילו-למזון-חום",
-      "productId": 9787403337968,
-      "variantId": 48622522859760
-    },
-    {
       "barcode": "8003507702509",
-      "title": "@ דלי ספידי 8 ליטר / 4 ק\"ג למזון אפור",
+      "title": "דלי לאחסון ספידי",
       "variant": "אפור / 4 ק\"ג",
       "price": "49.00",
       "compareAtPrice": null,
@@ -51592,6 +51670,19 @@
       "url": "https://www.anipet.co.il/products/דלי-ספידי-8-ליטר-4-קילו-למזון-אפור",
       "productId": 9787403272432,
       "variantId": 48622522794224
+    },
+    {
+      "barcode": "8003507703148",
+      "title": "דלי לאחסון ספידי",
+      "variant": "חום / 4 ק\"ג",
+      "price": "49.00",
+      "compareAtPrice": null,
+      "available": true,
+      "vendor": "דליי אחסון Stefanplast",
+      "handle": "דלי-ספידי-8-ליטר-4-קילו-למזון-אפור",
+      "url": "https://www.anipet.co.il/products/דלי-ספידי-8-ליטר-4-קילו-למזון-אפור",
+      "productId": 9787403272432,
+      "variantId": 67520578126195
     },
     {
       "barcode": "6953182767237",
@@ -51686,8 +51777,8 @@
     },
     {
       "barcode": "6953182761969",
-      "title": "חטיף לחתול קראנצ'י 60 גרם בטעם טונה",
-      "variant": "",
+      "title": "חטיף לחתול קראנצ'י בטעם טונה",
+      "variant": "60 גרם",
       "price": "15.00",
       "compareAtPrice": null,
       "available": true,
@@ -51729,7 +51820,7 @@
       "variant": "",
       "price": "29.90",
       "compareAtPrice": null,
-      "available": true,
+      "available": false,
       "vendor": "קירה",
       "handle": "ציופי-בסקוויטים-לכלב-ביסקו-500-גרם",
       "url": "https://www.anipet.co.il/products/ציופי-בסקוויטים-לכלב-ביסקו-500-גרם",
@@ -51748,19 +51839,6 @@
       "url": "https://www.anipet.co.il/products/d-a-אבקת-קרן-אייל-100-גרם",
       "productId": 9787402911984,
       "variantId": 48622522433776
-    },
-    {
-      "barcode": "6953182761952",
-      "title": "חטיף לחתול קראנצ'י 60 גרם בטעם פירות ים",
-      "variant": "",
-      "price": "15.00",
-      "compareAtPrice": null,
-      "available": true,
-      "vendor": "CRUNCHY BITES",
-      "handle": "חטיף-לחתול-קראנצי-60-גרם-בטעם-פירות-ים",
-      "url": "https://www.anipet.co.il/products/חטיף-לחתול-קראנצי-60-גרם-בטעם-פירות-ים",
-      "productId": 9787371323632,
-      "variantId": 48622489305328
     },
     {
       "barcode": "857276007475",
@@ -51826,19 +51904,6 @@
       "url": "https://www.anipet.co.il/products/חטיף-לחתול-קראנצי-60-גרם-בטעם-גבינה",
       "productId": 9787371258096,
       "variantId": 48622489239792
-    },
-    {
-      "barcode": "6953182761921",
-      "title": "חטיף לחתול קראנצ'י 60 גרם בטעם עוף",
-      "variant": "",
-      "price": "15.00",
-      "compareAtPrice": null,
-      "available": true,
-      "vendor": "CRUNCHY BITES",
-      "handle": "חטיף-לחתול-קראנצי-60-גרם-בטעם-עוף",
-      "url": "https://www.anipet.co.il/products/חטיף-לחתול-קראנצי-60-גרם-בטעם-עוף",
-      "productId": 9787371225328,
-      "variantId": 48622489207024
     },
     {
       "barcode": "8886432311653",
@@ -51932,22 +51997,9 @@
       "variantId": 48622521909488
     },
     {
-      "barcode": "6953182761907",
-      "title": "חטיף לחתול קראנצ'י 60 גרם בטעם סלמון",
-      "variant": "",
-      "price": "15.00",
-      "compareAtPrice": null,
-      "available": true,
-      "vendor": "CRUNCHY BITES",
-      "handle": "חטיף-לחתול-קראנצי-60-גרם-בטעם-סלמון",
-      "url": "https://www.anipet.co.il/products/חטיף-לחתול-קראנצי-60-גרם-בטעם-סלמון",
-      "productId": 9787371192560,
-      "variantId": 48622489174256
-    },
-    {
       "barcode": "6953182761044",
-      "title": "חטיף לחתול קראנצ'י 180 גרם בטעם פירות ים",
-      "variant": "",
+      "title": "חטיף לחתול קראנצ'י בטעם פירות ים",
+      "variant": "180 גרם",
       "price": "29.00",
       "compareAtPrice": null,
       "available": true,
@@ -51956,6 +52008,19 @@
       "url": "https://www.anipet.co.il/products/חטיף-לחתול-קראנצי-180-גרם-בטעם-פירות-ים",
       "productId": 9787371127024,
       "variantId": 48622489108720
+    },
+    {
+      "barcode": "6953182761952",
+      "title": "חטיף לחתול קראנצ'י בטעם פירות ים",
+      "variant": "60 גרם",
+      "price": "15.00",
+      "compareAtPrice": null,
+      "available": true,
+      "vendor": "CRUNCHY BITES",
+      "handle": "חטיף-לחתול-קראנצי-180-גרם-בטעם-פירות-ים",
+      "url": "https://www.anipet.co.il/products/חטיף-לחתול-קראנצי-180-גרם-בטעם-פירות-ים",
+      "productId": 9787371127024,
+      "variantId": 67520573931891
     },
     {
       "barcode": "8606014102178",
@@ -52037,8 +52102,8 @@
     },
     {
       "barcode": "6953182761013",
-      "title": "חטיף לחתול קראנצ'י 180 גרם בטעם עוף",
-      "variant": "",
+      "title": "חטיף לחתול קראנצ'י בטעם עוף",
+      "variant": "180 גרם",
       "price": "29.00",
       "compareAtPrice": null,
       "available": true,
@@ -52049,9 +52114,22 @@
       "variantId": 48622489075952
     },
     {
+      "barcode": "6953182761921",
+      "title": "חטיף לחתול קראנצ'י בטעם עוף",
+      "variant": "60 גרם",
+      "price": "15.00",
+      "compareAtPrice": null,
+      "available": true,
+      "vendor": "CRUNCHY BITES",
+      "handle": "חטיף-לחתול-קראנצי-180-גרם-בטעם-עוף",
+      "url": "https://www.anipet.co.il/products/חטיף-לחתול-קראנצי-180-גרם-בטעם-עוף",
+      "productId": 9787371094256,
+      "variantId": 67520573473139
+    },
+    {
       "barcode": "6953182761006",
-      "title": "חטיף לחתול קראנצ'י 180 גרם בטעם בקר",
-      "variant": "",
+      "title": "חטיף לחתול קארנצ'י בטעם בקר",
+      "variant": "180 גרם",
       "price": "29.00",
       "compareAtPrice": null,
       "available": true,
@@ -52060,6 +52138,19 @@
       "url": "https://www.anipet.co.il/products/חטיף-לחתול-קראנצי-180-גרם-בטעם-בקר",
       "productId": 9787371061488,
       "variantId": 48622489043184
+    },
+    {
+      "barcode": "6953182761914",
+      "title": "חטיף לחתול קארנצ'י בטעם בקר",
+      "variant": "60 גרם",
+      "price": "15.00",
+      "compareAtPrice": null,
+      "available": true,
+      "vendor": "CRUNCHY BITES",
+      "handle": "חטיף-לחתול-קראנצי-180-גרם-בטעם-בקר",
+      "url": "https://www.anipet.co.il/products/חטיף-לחתול-קראנצי-180-גרם-בטעם-בקר",
+      "productId": 9787371061488,
+      "variantId": 67520572293491
     },
     {
       "barcode": "8606014102130",
@@ -52180,8 +52271,8 @@
     },
     {
       "barcode": "6953182760993",
-      "title": "חטיף לחתול קראנצ'י 180 גרם בטעם סלמון",
-      "variant": "",
+      "title": "חטיף לחתול קראנצ'י בטעם סלמון",
+      "variant": "180 גרם",
       "price": "29.00",
       "compareAtPrice": null,
       "available": true,
@@ -52190,6 +52281,19 @@
       "url": "https://www.anipet.co.il/products/חטיף-לחתול-קראנצי-180-גרם-בטעם-סלמון",
       "productId": 9787371028720,
       "variantId": 48622489010416
+    },
+    {
+      "barcode": "6953182761907",
+      "title": "חטיף לחתול קראנצ'י בטעם סלמון",
+      "variant": "60 גרם",
+      "price": "15.00",
+      "compareAtPrice": null,
+      "available": true,
+      "vendor": "CRUNCHY BITES",
+      "handle": "חטיף-לחתול-קראנצי-180-גרם-בטעם-סלמון",
+      "url": "https://www.anipet.co.il/products/חטיף-לחתול-קראנצי-180-גרם-בטעם-סלמון",
+      "productId": 9787371028720,
+      "variantId": 67520571834739
     },
     {
       "barcode": "8009470009539",
@@ -53623,7 +53727,7 @@
     },
     {
       "barcode": "8009470011549",
-      "title": "מונג' מזון לכלב בוגר מיני כבש אורז ותפו\"א 2.5 ק\"ג",
+      "title": "מונג' מזון לכלב בוגר מיני כבש אורז ותפו\"א",
       "variant": "2.5 ק\"ג",
       "price": "115.00",
       "compareAtPrice": null,
@@ -53636,7 +53740,7 @@
     },
     {
       "barcode": "8009470011556",
-      "title": "מונג' מזון לכלב בוגר מיני כבש אורז ותפו\"א 2.5 ק\"ג",
+      "title": "מונג' מזון לכלב בוגר מיני כבש אורז ותפו\"א",
       "variant": "7.5 ק\"ג",
       "price": "220.00",
       "compareAtPrice": null,
@@ -53766,8 +53870,8 @@
     },
     {
       "barcode": "8010276033642",
-      "title": "ND כלב בוגר מיני דלעת כבש ואוכמניות 7 ק\"ג",
-      "variant": "",
+      "title": "ND כלב בוגר מיני דלעת כבש ואוכמניות",
+      "variant": "7 ק\"ג",
       "price": "265.00",
       "compareAtPrice": null,
       "available": true,
@@ -53776,6 +53880,19 @@
       "url": "https://www.anipet.co.il/products/nd-דלעת-כבש-אוכמניות-כלב-מיני-7-קילו",
       "productId": 9787407007984,
       "variantId": 48622526857456
+    },
+    {
+      "barcode": "8010276033277",
+      "title": "ND כלב בוגר מיני דלעת כבש ואוכמניות",
+      "variant": "2.5 ק\"ג",
+      "price": "149.00",
+      "compareAtPrice": null,
+      "available": true,
+      "vendor": "ND",
+      "handle": "nd-דלעת-כבש-אוכמניות-כלב-מיני-7-קילו",
+      "url": "https://www.anipet.co.il/products/nd-דלעת-כבש-אוכמניות-כלב-מיני-7-קילו",
+      "productId": 9787407007984,
+      "variantId": 67520580845939
     },
     {
       "barcode": "8010276033352",
@@ -54078,8 +54195,8 @@
     },
     {
       "barcode": "7613035114890",
-      "title": "פרו פלאן כלב בוגר גזע קטן סלמון 3 ק\"ג",
-      "variant": "",
+      "title": "פרו פלאן כלב בוגר גזע קטן סלמון",
+      "variant": "3 ק\"ג",
       "price": "139.00",
       "compareAtPrice": null,
       "available": true,
@@ -54088,6 +54205,19 @@
       "url": "https://www.anipet.co.il/products/פרו-פלאן-כלב-בוגר-גזע-קטן-סלמון-3-קילו",
       "productId": 9787428307184,
       "variantId": 48622555169008
+    },
+    {
+      "barcode": "7613035123441",
+      "title": "פרו פלאן כלב בוגר גזע קטן סלמון",
+      "variant": "7 ק\"ג",
+      "price": "229.00",
+      "compareAtPrice": null,
+      "available": true,
+      "vendor": "פרו פלאן",
+      "handle": "פרו-פלאן-כלב-בוגר-גזע-קטן-סלמון-3-קילו",
+      "url": "https://www.anipet.co.il/products/פרו-פלאן-כלב-בוגר-גזע-קטן-סלמון-3-קילו",
+      "productId": 9787428307184,
+      "variantId": 67520576782707
     },
     {
       "barcode": "8429037016150",
@@ -54849,7 +54979,7 @@
       "variant": "",
       "price": "260.00",
       "compareAtPrice": null,
-      "available": true,
+      "available": false,
       "vendor": "אדוונס",
       "handle": "אדוונס-לכלב-מדיום-לייט-12-קילו",
       "url": "https://www.anipet.co.il/products/אדוונס-לכלב-מדיום-לייט-12-קילו",
@@ -55040,7 +55170,7 @@
     },
     {
       "barcode": "600",
-      "title": "רויאל קנין כלב מדיום פאפי 12 ק\"ג",
+      "title": "רויאל קנין כלב מדיום פאפי",
       "variant": "15 ק\"ג",
       "price": "360.00",
       "compareAtPrice": null,
@@ -55053,7 +55183,7 @@
     },
     {
       "barcode": "3182551065336",
-      "title": "רויאל קנין כלב מדיום פאפי 12 ק\"ג",
+      "title": "רויאל קנין כלב מדיום פאפי",
       "variant": "12 ק\"ג",
       "price": "329.00",
       "compareAtPrice": null,
@@ -55486,7 +55616,7 @@
       "variant": "7 ק\"ג",
       "price": "195.00",
       "compareAtPrice": null,
-      "available": false,
+      "available": true,
       "vendor": "פרו פלאן",
       "handle": "פרו-פלאן-כלב-בוגר-גזע-קטן-עוף-3-קילו",
       "url": "https://www.anipet.co.il/products/פרו-פלאן-כלב-בוגר-גזע-קטן-עוף-3-קילו",
@@ -57657,7 +57787,7 @@
       "variant": "",
       "price": "19.90",
       "compareAtPrice": null,
-      "available": false,
+      "available": true,
       "vendor": "PetEx",
       "handle": "באדי-סנאק-חטיפי-ברווז-מיובשים-80-גרם",
       "url": "https://www.anipet.co.il/products/באדי-סנאק-חטיפי-ברווז-מיובשים-80-גרם",
@@ -58515,7 +58645,7 @@
       "variant": "",
       "price": "17.90",
       "compareAtPrice": null,
-      "available": true,
+      "available": false,
       "vendor": "christopherus",
       "handle": "כריסטופרוס-חטיף-רך-לכלב-בטעם-ברווז-125-גרם",
       "url": "https://www.anipet.co.il/products/כריסטופרוס-חטיף-רך-לכלב-בטעם-ברווז-125-גרם",
@@ -59061,7 +59191,7 @@
       "variant": "2 ק\"ג",
       "price": "105.50",
       "compareAtPrice": null,
-      "available": true,
+      "available": false,
       "vendor": "רויאל קנין",
       "handle": "רויאל-קנין-כלב-מיני-אדולט-8-קילו",
       "url": "https://www.anipet.co.il/products/רויאל-קנין-כלב-מיני-אדולט-8-קילו",
@@ -60344,7 +60474,7 @@
     },
     {
       "barcode": "4001942452731",
-      "title": "@ סרה מזון לדגים ויפאן טרופיקל דפים 100 מ\"ל",
+      "title": "סרה מזון לדגים ויפאן טרופיקל דפים",
       "variant": "100 מ\"ל",
       "price": "25.00",
       "compareAtPrice": null,
@@ -60354,19 +60484,6 @@
       "url": "https://www.anipet.co.il/products/סרה-מזון-לדגים-ויפאן-טרופיקל-דפים-100-מל",
       "productId": 9787330068720,
       "variantId": 48622445232368
-    },
-    {
-      "barcode": "4001942452793",
-      "title": "@ סרה מזון לדגים ויפאן טרופיקל דפים 100 מ\"ל",
-      "variant": "250 מ\"ל",
-      "price": "40.00",
-      "compareAtPrice": null,
-      "available": true,
-      "vendor": "סרה",
-      "handle": "סרה-מזון-לדגים-ויפאן-טרופיקל-דפים-100-מל",
-      "url": "https://www.anipet.co.il/products/סרה-מזון-לדגים-ויפאן-טרופיקל-דפים-100-מל",
-      "productId": 9787330068720,
-      "variantId": 48834962653424
     },
     {
       "barcode": "4001942071000",
@@ -60864,7 +60981,7 @@
     },
     {
       "barcode": "15561525916",
-      "title": "נוטריאנס SZ חתול בקר ביזון חזיר בר ודגי ים 2.27 קילו",
+      "title": "נוטריאנס SZ חתול בקר ביזון",
       "variant": "2.27 ק\"ג",
       "price": "179.00",
       "compareAtPrice": null,
@@ -60877,7 +60994,7 @@
     },
     {
       "barcode": "15561529082",
-      "title": "נוטריאנס SZ חתול בקר ביזון חזיר בר ודגי ים 2.27 קילו",
+      "title": "נוטריאנס SZ חתול בקר ביזון",
       "variant": "4.5 ק\"ג",
       "price": "279.00",
       "compareAtPrice": null,
@@ -61973,7 +62090,7 @@
       "variant": "",
       "price": "18.90",
       "compareAtPrice": null,
-      "available": true,
+      "available": false,
       "vendor": "צ'אנקיז",
       "handle": "צאנקיז-נגיסי-סלמון-80-גרם",
       "url": "https://www.anipet.co.il/products/צאנקיז-נגיסי-סלמון-80-גרם",
